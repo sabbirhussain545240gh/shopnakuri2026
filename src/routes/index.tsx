@@ -21,9 +21,9 @@ export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
       { title: "সমিতি ম্যানেজমেন্ট সিস্টেম" },
-      { name: "description", content: "সদস্য, সঞ্চয় ও ঋণ ব্যবস্থাপনার জন্য সম্পূর্ণ বাংলা সফটওয়্যার।" },
+      { name: "description", content: "সদস্য, সঞ্চয়/চাদা ও ঋণ ব্যবস্থাপনার জন্য সম্পূর্ণ বাংলা সফটওয়্যার।" },
       { property: "og:title", content: "সমিতি ম্যানেজমেন্ট সিস্টেম" },
-      { property: "og:description", content: "সদস্য, সঞ্চয় ও ঋণ ব্যবস্থাপনার জন্য সম্পূর্ণ বাংলা সফটওয়্যার।" },
+      { property: "og:description", content: "সদস্য, সঞ্চয়/চাদা ও ঋণ ব্যবস্থাপনার জন্য সম্পূর্ণ বাংলা সফটওয়্যার।" },
     ],
   }),
   component: SamitiApp,
@@ -39,7 +39,7 @@ const fmtDate = (s: string) => {
 const navItems = [
   { value: "dashboard", label: "ড্যাশবোর্ড", icon: LayoutDashboard },
   { value: "members", label: "সদস্য", icon: Users },
-  { value: "savings", label: "সঞ্চয়", icon: PiggyBank },
+  { value: "savings", label: "সঞ্চয়/চাদা", icon: PiggyBank },
   { value: "loans", label: "ঋণ", icon: HandCoins },
   { value: "cashbook", label: "আয়-ব্যয়", icon: Wallet },
   { value: "reports", label: "রিপোর্ট", icon: FileText },
@@ -196,7 +196,7 @@ function Dashboard({ totals, memberCount, data }: any) {
     <div className="space-y-6">
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         <StatCard label="মোট সদস্য" value={toBn(memberCount)} accent="bg-chart-4" />
-        <StatCard label="মোট সঞ্চয়" value={formatTk(totals.totalDeposit)} accent="bg-success" />
+        <StatCard label="মোট সঞ্চয়/চাদা" value={formatTk(totals.totalDeposit)} accent="bg-success" />
         <StatCard label="হাতে নগদ" value={formatTk(totals.cashInHand)} accent="bg-primary" />
         <StatCard label="বকেয়া ঋণ" value={formatTk(totals.outstanding)} accent="bg-destructive" />
         <StatCard label="মোট ঋণ প্রদান" value={formatTk(totals.totalLoanGiven)} accent="bg-warning" />
@@ -335,7 +335,7 @@ function MembersTab() {
                 <TableHead>ছবি</TableHead>
                 <TableHead>নাম</TableHead><TableHead>মোবাইল</TableHead>
                 <TableHead>NID/জন্ম সনদ</TableHead><TableHead>যোগদান</TableHead>
-                <TableHead className="text-right">মোট সঞ্চয়</TableHead><TableHead></TableHead>
+                <TableHead className="text-right">মোট সঞ্চয়/চাদা</TableHead><TableHead></TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -502,7 +502,7 @@ function SavingsTab() {
     <Card>
       <CardHeader className="flex flex-row items-center justify-between gap-2">
         <div>
-          <CardTitle>সঞ্চয় / জমা</CardTitle>
+          <CardTitle>সঞ্চয়/চাদা / জমা</CardTitle>
           <CardDescription>মোট {toBn(data.deposits.length)}টি লেনদেন</CardDescription>
         </div>
         <Dialog open={open} onOpenChange={setOpen}>
@@ -960,7 +960,7 @@ function ReportsTab() {
   const exportCsv = () => {
     let csv = "";
     if (reportType === "summary" || reportType === "members") {
-      csv = "সিরিয়াল,নাম,মোবাইল,সঞ্চয়,ঋণ,বকেয়া\n";
+      csv = "সিরিয়াল,নাম,মোবাইল,সঞ্চয়/চাদা,ঋণ,বকেয়া\n";
       memberWise.forEach((r) => {
         csv += `${r.member.serial || 0},"${r.member.name}","${r.member.phone || ""}",${r.deposit},${r.loanAmt},${r.due}\n`;
       });
@@ -1010,7 +1010,7 @@ function ReportsTab() {
                 <SelectContent>
                   <SelectItem value="summary">সারাংশ</SelectItem>
                   <SelectItem value="members">সদস্যভিত্তিক</SelectItem>
-                  <SelectItem value="savings">সঞ্চয় বিস্তারিত</SelectItem>
+                  <SelectItem value="savings">সঞ্চয়/চাদা বিস্তারিত</SelectItem>
                   <SelectItem value="loans">ঋণ বিস্তারিত</SelectItem>
                   <SelectItem value="cashbook">আয়-ব্যয় বিস্তারিত</SelectItem>
                 </SelectContent>
@@ -1027,7 +1027,7 @@ function ReportsTab() {
 
       {(reportType === "summary") && (
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          <StatCard label="মোট সঞ্চয়" value={formatTk(totals.totalDeposit)} accent="bg-success" />
+          <StatCard label="মোট সঞ্চয়/চাদা" value={formatTk(totals.totalDeposit)} accent="bg-success" />
           <StatCard label="ঋণ প্রদান" value={formatTk(totals.totalLoanGiven)} accent="bg-warning" />
           <StatCard label="ঋণ আদায়" value={formatTk(totals.totalRepaid)} accent="bg-chart-2" />
           <StatCard label="বকেয়া ঋণ" value={formatTk(totals.outstanding)} accent="bg-destructive" />
@@ -1051,7 +1051,7 @@ function ReportsTab() {
                     <TableHead className="w-16">সি.নং</TableHead>
                     <TableHead>নাম</TableHead>
                     <TableHead>মোবাইল</TableHead>
-                    <TableHead className="text-right">সঞ্চয়</TableHead>
+                    <TableHead className="text-right">সঞ্চয়/চাদা</TableHead>
                     <TableHead className="text-right">ঋণ</TableHead>
                     <TableHead className="text-right">বকেয়া</TableHead>
                   </TableRow>
@@ -1076,7 +1076,7 @@ function ReportsTab() {
 
       {reportType === "savings" && (
         <Card>
-          <CardHeader><CardTitle>সঞ্চয় বিস্তারিত</CardTitle><CardDescription>মোট: {formatTk(totals.totalDeposit)}</CardDescription></CardHeader>
+          <CardHeader><CardTitle>সঞ্চয়/চাদা বিস্তারিত</CardTitle><CardDescription>মোট: {formatTk(totals.totalDeposit)}</CardDescription></CardHeader>
           <CardContent>
             {filtered.deposits.length === 0 ? <p className="text-sm text-muted-foreground text-center py-8">কোনও তথ্য নেই।</p> : (
               <Table>
@@ -1178,14 +1178,14 @@ function printReport(p: {
   const titleMap: Record<string, string> = {
     summary: "সারাংশ রিপোর্ট",
     members: "সদস্যভিত্তিক রিপোর্ট",
-    savings: "সঞ্চয় রিপোর্ট",
+    savings: "সঞ্চয়/চাদা রিপোর্ট",
     loans: "ঋণ রিপোর্ট",
     cashbook: "আয়-ব্যয় রিপোর্ট",
   };
 
   const summaryHtml = `
     <table style="width:100%;border-collapse:collapse;margin:12px 0;font-size:13px;">
-      <tr><td style="padding:6px 10px;border:1px solid #ccc;background:#f5f5f5;">মোট সঞ্চয়</td><td style="padding:6px 10px;border:1px solid #ccc;text-align:right;">${formatTk(totals.totalDeposit)}</td>
+      <tr><td style="padding:6px 10px;border:1px solid #ccc;background:#f5f5f5;">মোট সঞ্চয়/চাদা</td><td style="padding:6px 10px;border:1px solid #ccc;text-align:right;">${formatTk(totals.totalDeposit)}</td>
           <td style="padding:6px 10px;border:1px solid #ccc;background:#f5f5f5;">ঋণ প্রদান</td><td style="padding:6px 10px;border:1px solid #ccc;text-align:right;">${formatTk(totals.totalLoanGiven)}</td></tr>
       <tr><td style="padding:6px 10px;border:1px solid #ccc;background:#f5f5f5;">ঋণ আদায়</td><td style="padding:6px 10px;border:1px solid #ccc;text-align:right;">${formatTk(totals.totalRepaid)}</td>
           <td style="padding:6px 10px;border:1px solid #ccc;background:#f5f5f5;">বকেয়া ঋণ</td><td style="padding:6px 10px;border:1px solid #ccc;text-align:right;">${formatTk(totals.outstanding)}</td></tr>
@@ -1202,9 +1202,9 @@ function printReport(p: {
   if (reportType === "summary") {
     body += summaryHtml;
     body += `<h3>সদস্যভিত্তিক সারসংক্ষেপ</h3>`;
-    body += `<table style="width:100%;border-collapse:collapse;font-size:12px;">${th(["সি.নং", "নাম", "মোবাইল", "সঞ্চয়", "ঋণ", "বকেয়া"])}${memberWise.map((r: any) => td([toBn(r.member.serial || 0), r.member.name, r.member.phone ? toBn(r.member.phone) : "—", formatTk(r.deposit), formatTk(r.loanAmt), formatTk(r.due)], ["left", "left", "left", "right", "right", "right"])).join("")}</table>`;
+    body += `<table style="width:100%;border-collapse:collapse;font-size:12px;">${th(["সি.নং", "নাম", "মোবাইল", "সঞ্চয়/চাদা", "ঋণ", "বকেয়া"])}${memberWise.map((r: any) => td([toBn(r.member.serial || 0), r.member.name, r.member.phone ? toBn(r.member.phone) : "—", formatTk(r.deposit), formatTk(r.loanAmt), formatTk(r.due)], ["left", "left", "left", "right", "right", "right"])).join("")}</table>`;
   } else if (reportType === "members") {
-    body += `<table style="width:100%;border-collapse:collapse;font-size:12px;">${th(["সি.নং", "নাম", "মোবাইল", "সঞ্চয়", "ঋণ", "বকেয়া"])}${memberWise.map((r: any) => td([toBn(r.member.serial || 0), r.member.name, r.member.phone ? toBn(r.member.phone) : "—", formatTk(r.deposit), formatTk(r.loanAmt), formatTk(r.due)], ["left", "left", "left", "right", "right", "right"])).join("")}</table>`;
+    body += `<table style="width:100%;border-collapse:collapse;font-size:12px;">${th(["সি.নং", "নাম", "মোবাইল", "সঞ্চয়/চাদা", "ঋণ", "বকেয়া"])}${memberWise.map((r: any) => td([toBn(r.member.serial || 0), r.member.name, r.member.phone ? toBn(r.member.phone) : "—", formatTk(r.deposit), formatTk(r.loanAmt), formatTk(r.due)], ["left", "left", "left", "right", "right", "right"])).join("")}</table>`;
   } else if (reportType === "savings") {
     body += `<p><b>মোট:</b> ${formatTk(totals.totalDeposit)}</p>`;
     body += `<table style="width:100%;border-collapse:collapse;font-size:12px;">${th(["তারিখ", "সদস্য", "মন্তব্য", "পরিমাণ"])}${[...filtered.deposits].sort((a: any, b: any) => b.date.localeCompare(a.date)).map((d: any) => { const m = members.find((x) => x.id === d.memberId); return td([fmtDate(d.date), m?.name || "—", d.note || "—", formatTk(d.amount)], ["left", "left", "left", "right"]); }).join("")}</table>`;
