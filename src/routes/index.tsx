@@ -748,7 +748,7 @@ function LoansTab() {
   const { data, addLoan, addPayment, closeLoan, deleteLoan } = useSamiti();
   const [open, setOpen] = useState(false);
   const [payFor, setPayFor] = useState<Loan | null>(null);
-  const [form, setForm] = useState({ memberId: "", amount: "", interestRate: String(data.settings.defaultInterestRate), durationMonths: String(data.settings.defaultDurationMonths), date: today() });
+  const [form, setForm] = useState({ memberId: "", amount: "", interestRate: String(data.settings.defaultInterestRate), durationMonths: String(data.settings.defaultDurationMonths), date: today(), memberGuarantorId: "", familyGuarantor: "" });
   const [payForm, setPayForm] = useState({ amount: "", date: today() });
 
   const submit = () => {
@@ -760,8 +760,10 @@ function LoansTab() {
       interestRate: Number(form.interestRate) || 0,
       durationMonths: Number(form.durationMonths) || 12,
       date: form.date,
+      memberGuarantorId: form.memberGuarantorId || undefined,
+      familyGuarantor: form.familyGuarantor.trim() || undefined,
     });
-    setForm({ memberId: "", amount: "", interestRate: String(data.settings.defaultInterestRate), durationMonths: String(data.settings.defaultDurationMonths), date: today() });
+    setForm({ memberId: "", amount: "", interestRate: String(data.settings.defaultInterestRate), durationMonths: String(data.settings.defaultDurationMonths), date: today(), memberGuarantorId: "", familyGuarantor: "" });
     setOpen(false);
     toast.success("ঋণ প্রদান হয়েছে");
   };
@@ -789,10 +791,10 @@ function LoansTab() {
             <DialogHeader><DialogTitle>নতুন ঋণ প্রদান</DialogTitle></DialogHeader>
             <div className="space-y-3">
               <div>
-                <Label>সদস্য *</Label>
+                <Label>সদস্য (নাম ও মোবাইল) *</Label>
                 <Select value={form.memberId} onValueChange={(v) => setForm({ ...form, memberId: v })}>
                   <SelectTrigger><SelectValue placeholder="সদস্য নির্বাচন করুন" /></SelectTrigger>
-                  <SelectContent>{data.members.map((m) => <SelectItem key={m.id} value={m.id}>{m.name}</SelectItem>)}</SelectContent>
+                  <SelectContent>{data.members.map((m) => <SelectItem key={m.id} value={m.id}>{m.name}{m.phone ? ` — ${toBn(m.phone)}` : ""}</SelectItem>)}</SelectContent>
                 </Select>
               </div>
               <div className="grid grid-cols-2 gap-3">
@@ -801,10 +803,22 @@ function LoansTab() {
                 <div><Label>মেয়াদ (মাস)</Label><Input type="number" value={form.durationMonths} onChange={(e) => setForm({ ...form, durationMonths: e.target.value })} /></div>
                 <div><Label>তারিখ</Label><Input type="date" value={form.date} onChange={(e) => setForm({ ...form, date: e.target.value })} /></div>
               </div>
+              <div>
+                <Label>সদস্য জামিনদার</Label>
+                <Select value={form.memberGuarantorId} onValueChange={(v) => setForm({ ...form, memberGuarantorId: v })}>
+                  <SelectTrigger><SelectValue placeholder="জামিনদার সদস্য নির্বাচন করুন" /></SelectTrigger>
+                  <SelectContent>{data.members.filter((m) => m.id !== form.memberId).map((m) => <SelectItem key={m.id} value={m.id}>{m.name}{m.phone ? ` — ${toBn(m.phone)}` : ""}</SelectItem>)}</SelectContent>
+                </Select>
+              </div>
+              <div>
+                <Label>পারিবারিক জামিনদার</Label>
+                <Input value={form.familyGuarantor} onChange={(e) => setForm({ ...form, familyGuarantor: e.target.value })} placeholder="নাম, সম্পর্ক, মোবাইল" />
+              </div>
             </div>
             <DialogFooter><Button onClick={submit}>ঋণ প্রদান</Button></DialogFooter>
           </DialogContent>
         </Dialog>
+
       </CardHeader>
       <CardContent>
         {data.loans.length === 0 ? (

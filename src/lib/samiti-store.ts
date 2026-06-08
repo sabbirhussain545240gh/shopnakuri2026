@@ -38,6 +38,8 @@ export type Loan = {
   date: string;
   durationMonths: number;
   status: "active" | "closed";
+  memberGuarantorId?: string;
+  familyGuarantor?: string;
 };
 
 export type LoanPayment = {
