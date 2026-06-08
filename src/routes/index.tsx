@@ -125,6 +125,7 @@ function SamitiApp() {
             <h1 className="font-bold text-foreground truncate">{data.samitiName}</h1>
           </div>
           <div className="flex items-center gap-2">
+            <AdminPanel />
             <SignOutButton />
             <Button variant="ghost" size="icon" onClick={() => setMobileOpen((o) => !o)}>
               <Menu className="h-5 w-5" />
