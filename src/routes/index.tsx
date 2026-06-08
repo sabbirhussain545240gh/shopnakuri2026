@@ -881,10 +881,28 @@ function SavingsTab() {
             <TableBody>
               {filteredDeposits.map((d) => {
                 const m = data.members.find((x) => x.id === d.memberId);
+                const q = search.trim().toLowerCase();
+                const nameText = m?.name ?? "—";
+                let highlightedName: React.ReactNode = nameText;
+                if (q && nameText !== "—") {
+                  const lower = nameText.toLowerCase();
+                  const idx = lower.indexOf(q);
+                  if (idx !== -1) {
+                    highlightedName = (
+                      <>
+                        {nameText.slice(0, idx)}
+                        <mark className="bg-yellow-200 dark:bg-yellow-700 rounded px-0.5">
+                          {nameText.slice(idx, idx + q.length)}
+                        </mark>
+                        {nameText.slice(idx + q.length)}
+                      </>
+                    );
+                  }
+                }
                 return (
                   <TableRow key={d.id}>
                     <TableCell>{fmtDate(d.date)}</TableCell>
-                    <TableCell className="font-medium">{toBn(m?.serial || 0)}. {m?.name ?? "—"}</TableCell>
+                    <TableCell className="font-medium">{toBn(m?.serial || 0)}. {highlightedName}</TableCell>
                     <TableCell className="text-muted-foreground">{d.note || "—"}</TableCell>
                     <TableCell className="text-right font-semibold text-success">{formatTk(d.amount)}</TableCell>
                     <TableCell>
