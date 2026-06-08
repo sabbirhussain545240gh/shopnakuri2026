@@ -750,20 +750,38 @@ function LoansTab() {
   const [payFor, setPayFor] = useState<Loan | null>(null);
   const [form, setForm] = useState({ memberId: "", amount: "", interestRate: String(data.settings.defaultInterestRate), durationMonths: String(data.settings.defaultDurationMonths), date: today(), memberGuarantorId: "", familyGuarantor: "" });
   const [payForm, setPayForm] = useState({ amount: "", date: today() });
+  const [errors, setErrors] = useState<Record<string, string>>({});
+
+  const setField = (key: string, value: string) => {
+    setForm((prev) => ({ ...prev, [key]: value }));
+    setErrors((prev) => { const next = { ...prev }; delete next[key]; return next; });
+  };
 
   const submit = () => {
-    if (!form.memberId) { toast.error("সদস্য নির্বাচন করুন"); return; }
+    const nextErrors: Record<string, string> = {};
+    if (!form.memberId.trim()) nextErrors.memberId = "সদস্য নির্বাচন করুন";
     const amt = Number(form.amount);
-    if (!amt || amt <= 0) { toast.error("সঠিক পরিমাণ দিন"); return; }
+    if (!form.amount.trim() || isNaN(amt) || amt <= 0) nextErrors.amount = "সঠিক পরিমাণ দিন";
+    const rate = Number(form.interestRate);
+    if (!form.interestRate.trim() || isNaN(rate) || rate <= 0) nextErrors.interestRate = "সঠিক সুদের হার দিন";
+    if (!form.memberGuarantorId.trim()) nextErrors.memberGuarantorId = "সদস্য জামিনদার নির্বাচন করুন";
+    if (!form.familyGuarantor.trim()) nextErrors.familyGuarantor = "পারিবারিক জামিনদারের তথ্য দিন";
+
+    if (Object.keys(nextErrors).length > 0) {
+      setErrors(nextErrors);
+      return;
+    }
+
     addLoan({
       memberId: form.memberId, amount: amt,
-      interestRate: Number(form.interestRate) || 0,
+      interestRate: rate,
       durationMonths: Number(form.durationMonths) || 12,
       date: form.date,
-      memberGuarantorId: form.memberGuarantorId || undefined,
-      familyGuarantor: form.familyGuarantor.trim() || undefined,
+      memberGuarantorId: form.memberGuarantorId,
+      familyGuarantor: form.familyGuarantor.trim(),
     });
     setForm({ memberId: "", amount: "", interestRate: String(data.settings.defaultInterestRate), durationMonths: String(data.settings.defaultDurationMonths), date: today(), memberGuarantorId: "", familyGuarantor: "" });
+    setErrors({});
     setOpen(false);
     toast.success("ঋণ প্রদান হয়েছে");
   };
@@ -785,34 +803,45 @@ function LoansTab() {
           <CardTitle>ঋণ ব্যবস্থাপনা</CardTitle>
           <CardDescription>মোট {toBn(data.loans.length)}টি ঋণ</CardDescription>
         </div>
-        <Dialog open={open} onOpenChange={setOpen}>
+        <Dialog open={open} onOpenChange={(o) => { setOpen(o); if (!o) setErrors({}); }}>
           <DialogTrigger asChild><Button disabled={data.members.length === 0}><Plus className="h-4 w-4 mr-1" />নতুন ঋণ</Button></DialogTrigger>
           <DialogContent>
             <DialogHeader><DialogTitle>নতুন ঋণ প্রদান</DialogTitle></DialogHeader>
             <div className="space-y-3">
               <div>
                 <Label>সদস্য (নাম ও মোবাইল) *</Label>
-                <Select value={form.memberId} onValueChange={(v) => setForm({ ...form, memberId: v })}>
-                  <SelectTrigger><SelectValue placeholder="সদস্য নির্বাচন করুন" /></SelectTrigger>
+                <Select value={form.memberId} onValueChange={(v) => setField("memberId", v)}>
+                  <SelectTrigger className={errors.memberId ? "border-destructive" : ""}><SelectValue placeholder="সদস্য নির্বাচন করুন" /></SelectTrigger>
                   <SelectContent>{data.members.map((m) => <SelectItem key={m.id} value={m.id}>{m.name}{m.phone ? ` — ${toBn(m.phone)}` : ""}</SelectItem>)}</SelectContent>
                 </Select>
+                {errors.memberId && <p className="text-xs text-destructive mt-1">{errors.memberId}</p>}
               </div>
               <div className="grid grid-cols-2 gap-3">
-                <div><Label>পরিমাণ *</Label><Input type="number" value={form.amount} onChange={(e) => setForm({ ...form, amount: e.target.value })} /></div>
-                <div><Label>সুদের হার (%)</Label><Input type="number" value={form.interestRate} onChange={(e) => setForm({ ...form, interestRate: e.target.value })} /></div>
+                <div>
+                  <Label>পরিমাণ *</Label>
+                  <Input type="number" className={errors.amount ? "border-destructive" : ""} value={form.amount} onChange={(e) => setField("amount", e.target.value)} />
+                  {errors.amount && <p className="text-xs text-destructive mt-1">{errors.amount}</p>}
+                </div>
+                <div>
+                  <Label>সুদের হার (%) *</Label>
+                  <Input type="number" className={errors.interestRate ? "border-destructive" : ""} value={form.interestRate} onChange={(e) => setField("interestRate", e.target.value)} />
+                  {errors.interestRate && <p className="text-xs text-destructive mt-1">{errors.interestRate}</p>}
+                </div>
                 <div><Label>মেয়াদ (মাস)</Label><Input type="number" value={form.durationMonths} onChange={(e) => setForm({ ...form, durationMonths: e.target.value })} /></div>
                 <div><Label>তারিখ</Label><Input type="date" value={form.date} onChange={(e) => setForm({ ...form, date: e.target.value })} /></div>
               </div>
               <div>
-                <Label>সদস্য জামিনদার</Label>
-                <Select value={form.memberGuarantorId} onValueChange={(v) => setForm({ ...form, memberGuarantorId: v })}>
-                  <SelectTrigger><SelectValue placeholder="জামিনদার সদস্য নির্বাচন করুন" /></SelectTrigger>
+                <Label>সদস্য জামিনদার *</Label>
+                <Select value={form.memberGuarantorId} onValueChange={(v) => setField("memberGuarantorId", v)}>
+                  <SelectTrigger className={errors.memberGuarantorId ? "border-destructive" : ""}><SelectValue placeholder="জামিনদার সদস্য নির্বাচন করুন" /></SelectTrigger>
                   <SelectContent>{data.members.filter((m) => m.id !== form.memberId).map((m) => <SelectItem key={m.id} value={m.id}>{m.name}{m.phone ? ` — ${toBn(m.phone)}` : ""}</SelectItem>)}</SelectContent>
                 </Select>
+                {errors.memberGuarantorId && <p className="text-xs text-destructive mt-1">{errors.memberGuarantorId}</p>}
               </div>
               <div>
-                <Label>পারিবারিক জামিনদার</Label>
-                <Input value={form.familyGuarantor} onChange={(e) => setForm({ ...form, familyGuarantor: e.target.value })} placeholder="নাম, সম্পর্ক, মোবাইল" />
+                <Label>পারিবারিক জামিনদার *</Label>
+                <Input className={errors.familyGuarantor ? "border-destructive" : ""} value={form.familyGuarantor} onChange={(e) => setField("familyGuarantor", e.target.value)} placeholder="নাম, সম্পর্ক, মোবাইল" />
+                {errors.familyGuarantor && <p className="text-xs text-destructive mt-1">{errors.familyGuarantor}</p>}
               </div>
             </div>
             <DialogFooter><Button onClick={submit}>ঋণ প্রদান</Button></DialogFooter>
