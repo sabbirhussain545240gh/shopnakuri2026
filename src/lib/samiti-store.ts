@@ -9,6 +9,7 @@ export type Nominee = {
 
 export type Member = {
   id: string;
+  serial: number;
   name: string;
   fatherName: string;
   motherName: string;
