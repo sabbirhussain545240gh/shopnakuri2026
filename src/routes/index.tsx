@@ -454,6 +454,7 @@ function MembersTab() {
             <DialogFooter><Button onClick={submit}>সংরক্ষণ</Button></DialogFooter>
           </DialogContent>
         </Dialog>
+        </div>
       </CardHeader>
       <CardContent>
         {data.members.length === 0 ? (
