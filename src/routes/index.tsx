@@ -342,7 +342,7 @@ function LoansTab() {
       durationMonths: Number(form.durationMonths) || 12,
       date: form.date,
     });
-    setForm({ memberId: "", amount: "", interestRate: "10", durationMonths: "12", date: today() });
+    setForm({ memberId: "", amount: "", interestRate: String(data.settings.defaultInterestRate), durationMonths: String(data.settings.defaultDurationMonths), date: today() });
     setOpen(false);
     toast.success("ঋণ প্রদান হয়েছে");
   };
