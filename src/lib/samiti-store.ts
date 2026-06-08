@@ -1,10 +1,23 @@
 import { useEffect, useState, useCallback } from "react";
 
+export type Nominee = {
+  name: string;
+  relation: string;
+  phone: string;
+  nid: string;
+};
+
 export type Member = {
   id: string;
   name: string;
+  fatherName: string;
+  motherName: string;
   phone: string;
+  birthDate: string;
+  nid: string;
   address: string;
+  photo: string; // data URL
+  nominee: Nominee;
   joinDate: string;
 };
 
