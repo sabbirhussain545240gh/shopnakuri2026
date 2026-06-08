@@ -1062,6 +1062,20 @@ function LoansTab() {
     if (!amt || amt <= 0) { toast.error("সঠিক পরিমাণ দিন"); return; }
     if (!payFor) return;
     addPayment({ loanId: payFor.id, amount: amt, date: payForm.date });
+    const mem = data.members.find((x) => x.id === payFor.memberId);
+    const prevPaid = loanPaid(data.payments, payFor.id);
+    const due = loanTotalDue(payFor);
+    const paidAfter = prevPaid + amt;
+    const remainingAfter = Math.max(0, due - paidAfter);
+    setReceipt({
+      loan: payFor,
+      memberName: mem?.name ?? "—",
+      amount: amt,
+      date: payForm.date,
+      paidAfter,
+      remainingAfter,
+      receiptNo: `R-${Date.now().toString().slice(-6)}`,
+    });
     setPayForm({ amount: "", date: today() });
     setPayFor(null);
     toast.success("কিস্তি যোগ হয়েছে");
