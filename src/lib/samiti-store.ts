@@ -130,8 +130,11 @@ export function useSamiti() {
   const setSamitiName = useCallback((name: string) => setState({ ...getState(), samitiName: name }), []);
 
   const addMember = useCallback((m: Omit<Member, "id">) => {
-    const member: Member = { ...m, id: crypto.randomUUID() };
-    setState({ ...getState(), members: [...getState().members, member] });
+    const members = getState().members;
+    const maxSerial = members.length > 0 ? Math.max(...members.map((x) => x.serial || 0)) : 0;
+    const serial = m.serial && m.serial > 0 ? m.serial : maxSerial + 1;
+    const member: Member = { ...m, id: crypto.randomUUID(), serial };
+    setState({ ...getState(), members: [...members, member] });
   }, []);
   const deleteMember = useCallback((id: string) => {
     const s = getState();
