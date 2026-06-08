@@ -240,12 +240,27 @@ function Dashboard({ totals, memberCount, data }: any) {
 function MembersTab() {
   const { data, addMember, deleteMember } = useSamiti();
   const [open, setOpen] = useState(false);
-  const [form, setForm] = useState({ name: "", phone: "", address: "", joinDate: today() });
+  const emptyForm = {
+    name: "", fatherName: "", motherName: "", phone: "",
+    birthDate: "", nid: "", address: "", photo: "",
+    nominee: { name: "", relation: "", phone: "", nid: "" },
+    joinDate: today(),
+  };
+  const [form, setForm] = useState(emptyForm);
+  const [viewMember, setViewMember] = useState<Member | null>(null);
+
+  const onPhoto = (file?: File) => {
+    if (!file) return;
+    if (file.size > 2 * 1024 * 1024) { toast.error("ছবি ২ MB এর কম হতে হবে"); return; }
+    const reader = new FileReader();
+    reader.onload = () => setForm((f) => ({ ...f, photo: String(reader.result || "") }));
+    reader.readAsDataURL(file);
+  };
 
   const submit = () => {
     if (!form.name.trim()) { toast.error("নাম দিন"); return; }
     addMember(form);
-    setForm({ name: "", phone: "", address: "", joinDate: today() });
+    setForm(emptyForm);
     setOpen(false);
     toast.success("সদস্য যোগ হয়েছে");
   };
@@ -257,15 +272,43 @@ function MembersTab() {
           <CardTitle>সদস্য তালিকা</CardTitle>
           <CardDescription>মোট {toBn(data.members.length)} জন সদস্য</CardDescription>
         </div>
-        <Dialog open={open} onOpenChange={setOpen}>
+        <Dialog open={open} onOpenChange={(o) => { setOpen(o); if (!o) setForm(emptyForm); }}>
           <DialogTrigger asChild><Button><Plus className="h-4 w-4 mr-1" />নতুন সদস্য</Button></DialogTrigger>
-          <DialogContent>
+          <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
             <DialogHeader><DialogTitle>নতুন সদস্য যোগ করুন</DialogTitle></DialogHeader>
-            <div className="space-y-3">
-              <div><Label>নাম *</Label><Input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} /></div>
-              <div><Label>মোবাইল</Label><Input value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} /></div>
+            <div className="space-y-4">
+              {/* Photo */}
+              <div className="flex items-center gap-4">
+                <div className="h-24 w-24 rounded-lg border bg-muted overflow-hidden flex items-center justify-center shrink-0">
+                  {form.photo ? <img src={form.photo} alt="" className="h-full w-full object-cover" /> : <Users className="h-8 w-8 text-muted-foreground" />}
+                </div>
+                <div className="space-y-2">
+                  <Label>সদস্যের ছবি</Label>
+                  <Input type="file" accept="image/*" onChange={(e) => onPhoto(e.target.files?.[0])} />
+                  {form.photo && <Button type="button" variant="ghost" size="sm" onClick={() => setForm({ ...form, photo: "" })}>ছবি সরান</Button>}
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                <div><Label>নাম *</Label><Input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} /></div>
+                <div><Label>মোবাইল নং</Label><Input value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} /></div>
+                <div><Label>পিতার নাম</Label><Input value={form.fatherName} onChange={(e) => setForm({ ...form, fatherName: e.target.value })} /></div>
+                <div><Label>মাতার নাম</Label><Input value={form.motherName} onChange={(e) => setForm({ ...form, motherName: e.target.value })} /></div>
+                <div><Label>জন্ম তারিখ</Label><Input type="date" value={form.birthDate} onChange={(e) => setForm({ ...form, birthDate: e.target.value })} /></div>
+                <div><Label>NID / জন্ম সনদ নং</Label><Input value={form.nid} onChange={(e) => setForm({ ...form, nid: e.target.value })} /></div>
+              </div>
               <div><Label>ঠিকানা</Label><Textarea value={form.address} onChange={(e) => setForm({ ...form, address: e.target.value })} /></div>
               <div><Label>যোগদানের তারিখ</Label><Input type="date" value={form.joinDate} onChange={(e) => setForm({ ...form, joinDate: e.target.value })} /></div>
+
+              <div className="border-t pt-3">
+                <h4 className="font-semibold mb-2 text-foreground">নমিনি তথ্য</h4>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                  <div><Label>নমিনির নাম</Label><Input value={form.nominee.name} onChange={(e) => setForm({ ...form, nominee: { ...form.nominee, name: e.target.value } })} /></div>
+                  <div><Label>সম্পর্ক</Label><Input value={form.nominee.relation} onChange={(e) => setForm({ ...form, nominee: { ...form.nominee, relation: e.target.value } })} /></div>
+                  <div><Label>মোবাইল</Label><Input value={form.nominee.phone} onChange={(e) => setForm({ ...form, nominee: { ...form.nominee, phone: e.target.value } })} /></div>
+                  <div><Label>NID / জন্ম সনদ</Label><Input value={form.nominee.nid} onChange={(e) => setForm({ ...form, nominee: { ...form.nominee, nid: e.target.value } })} /></div>
+                </div>
+              </div>
             </div>
             <DialogFooter><Button onClick={submit}>সংরক্ষণ</Button></DialogFooter>
           </DialogContent>
@@ -278,20 +321,26 @@ function MembersTab() {
           <Table>
             <TableHeader>
               <TableRow>
+                <TableHead>ছবি</TableHead>
                 <TableHead>নাম</TableHead><TableHead>মোবাইল</TableHead>
-                <TableHead>ঠিকানা</TableHead><TableHead>যোগদান</TableHead>
+                <TableHead>NID/জন্ম সনদ</TableHead><TableHead>যোগদান</TableHead>
                 <TableHead className="text-right">মোট সঞ্চয়</TableHead><TableHead></TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {data.members.map((m) => (
-                <TableRow key={m.id}>
+                <TableRow key={m.id} className="cursor-pointer" onClick={() => setViewMember(m)}>
+                  <TableCell>
+                    <div className="h-10 w-10 rounded-full bg-muted overflow-hidden flex items-center justify-center">
+                      {m.photo ? <img src={m.photo} alt={m.name} className="h-full w-full object-cover" /> : <Users className="h-4 w-4 text-muted-foreground" />}
+                    </div>
+                  </TableCell>
                   <TableCell className="font-medium">{m.name}</TableCell>
                   <TableCell>{m.phone ? toBn(m.phone) : "—"}</TableCell>
-                  <TableCell className="text-muted-foreground">{m.address || "—"}</TableCell>
+                  <TableCell>{m.nid ? toBn(m.nid) : "—"}</TableCell>
                   <TableCell>{fmtDate(m.joinDate)}</TableCell>
                   <TableCell className="text-right font-semibold">{formatTk(memberTotalDeposit(data.deposits, m.id))}</TableCell>
-                  <TableCell>
+                  <TableCell onClick={(e) => e.stopPropagation()}>
                     <Button variant="ghost" size="icon" onClick={() => { if (confirm("সদস্য এবং সংশ্লিষ্ট তথ্য মুছবেন?")) { deleteMember(m.id); toast.success("মুছে ফেলা হয়েছে"); } }}>
                       <Trash2 className="h-4 w-4 text-destructive" />
                     </Button>
@@ -302,7 +351,52 @@ function MembersTab() {
           </Table>
         )}
       </CardContent>
+
+      <Dialog open={!!viewMember} onOpenChange={(o) => !o && setViewMember(null)}>
+        <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
+          <DialogHeader><DialogTitle>সদস্যের তথ্য</DialogTitle></DialogHeader>
+          {viewMember && (
+            <div className="space-y-4">
+              <div className="flex items-center gap-4">
+                <div className="h-24 w-24 rounded-lg bg-muted overflow-hidden flex items-center justify-center shrink-0">
+                  {viewMember.photo ? <img src={viewMember.photo} alt={viewMember.name} className="h-full w-full object-cover" /> : <Users className="h-8 w-8 text-muted-foreground" />}
+                </div>
+                <div>
+                  <h3 className="text-xl font-bold">{viewMember.name}</h3>
+                  <p className="text-sm text-muted-foreground">যোগদান: {fmtDate(viewMember.joinDate)}</p>
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-3 text-sm">
+                <Info label="পিতার নাম" value={viewMember.fatherName} />
+                <Info label="মাতার নাম" value={viewMember.motherName} />
+                <Info label="মোবাইল" value={viewMember.phone ? toBn(viewMember.phone) : ""} />
+                <Info label="জন্ম তারিখ" value={viewMember.birthDate ? fmtDate(viewMember.birthDate) : ""} />
+                <Info label="NID / জন্ম সনদ" value={viewMember.nid ? toBn(viewMember.nid) : ""} />
+                <Info label="ঠিকানা" value={viewMember.address} className="col-span-2" />
+              </div>
+              <div className="border-t pt-3">
+                <h4 className="font-semibold mb-2">নমিনি তথ্য</h4>
+                <div className="grid grid-cols-2 gap-3 text-sm">
+                  <Info label="নাম" value={viewMember.nominee?.name} />
+                  <Info label="সম্পর্ক" value={viewMember.nominee?.relation} />
+                  <Info label="মোবাইল" value={viewMember.nominee?.phone ? toBn(viewMember.nominee.phone) : ""} />
+                  <Info label="NID / জন্ম সনদ" value={viewMember.nominee?.nid ? toBn(viewMember.nominee.nid) : ""} />
+                </div>
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </Card>
+  );
+}
+
+function Info({ label, value, className }: { label: string; value?: string; className?: string }) {
+  return (
+    <div className={className}>
+      <p className="text-xs text-muted-foreground">{label}</p>
+      <p className="font-medium text-foreground">{value || "—"}</p>
+    </div>
   );
 }
 
