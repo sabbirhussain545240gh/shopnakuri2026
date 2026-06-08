@@ -147,6 +147,18 @@ export function useSamiti() {
     const member: Member = { ...m, id: crypto.randomUUID(), serial };
     setState({ ...getState(), members: [...members, member] });
   }, []);
+  const addMembers = useCallback((list: Array<Omit<Member, "id">>) => {
+    const s = getState();
+    let maxSerial = s.members.length > 0 ? Math.max(...s.members.map((x) => x.serial || 0)) : 0;
+    const newOnes: Member[] = list.map((m) => {
+      let serial: number;
+      if (m.serial && m.serial > 0) { serial = m.serial; if (serial > maxSerial) maxSerial = serial; }
+      else { serial = ++maxSerial; }
+      return { ...m, id: crypto.randomUUID(), serial };
+    });
+    setState({ ...s, members: [...s.members, ...newOnes] });
+    return newOnes.length;
+  }, []);
   const updateMember = useCallback((id: string, updates: Partial<Omit<Member, "id">>) => {
     setState({
       ...getState(),
