@@ -1334,6 +1334,17 @@ function printReport(p: {
   } else if (reportType === "cashbook") {
     body += `<p><b>আয়:</b> ${formatTk(totals.totalIncome)} | <b>ব্যয়:</b> ${formatTk(totals.totalExpense)} | <b>নীট:</b> ${formatTk(totals.totalIncome - totals.totalExpense)}</p>`;
     body += `<table style="width:100%;border-collapse:collapse;font-size:12px;">${th(["তারিখ", "ধরন", "খাত", "মন্তব্য", "পরিমাণ"])}${[...filtered.transactions].sort((a: any, b: any) => b.date.localeCompare(a.date)).map((t: any) => td([fmtDate(t.date), t.type === "income" ? "আয়" : "ব্যয়", t.category, t.note || "—", formatTk(t.amount)], ["left", "left", "left", "left", "right"])).join("")}</table>`;
+  } else if (reportType === "member-savings" && memberSavingsPivot) {
+    const headerCells = ["সি.নং", "সদস্য", ...memberSavingsPivot.labels, "মোট"];
+    const bodyRows = memberSavingsPivot.rows.map((r: any) =>
+      td(
+        [toBn(r.member.serial || 0), r.member.name, ...memberSavingsPivot.periods.map((pp: string) => (r.cells[pp] ? formatTk(r.cells[pp]) : "—")), formatTk(r.total)],
+        ["left", "left", ...memberSavingsPivot.periods.map(() => "right"), "right"]
+      )
+    ).join("");
+    const totalsRow = `<tr><td colspan="2" style="padding:6px 8px;border:1px solid #999;background:#eee;text-align:right;font-weight:bold;">মোট</td>${memberSavingsPivot.periods.map((pp: string) => `<td style="padding:6px 8px;border:1px solid #999;background:#eee;text-align:right;font-weight:bold;">${formatTk(memberSavingsPivot.colTotals[pp] || 0)}</td>`).join("")}<td style="padding:6px 8px;border:1px solid #999;background:#eee;text-align:right;font-weight:bold;">${formatTk(memberSavingsPivot.grand)}</td></tr>`;
+    body += `<p><b>সর্বমোট:</b> ${formatTk(memberSavingsPivot.grand)}</p>`;
+    body += `<table style="width:100%;border-collapse:collapse;font-size:12px;">${th(headerCells)}${bodyRows}${totalsRow}</table>`;
   }
 
   w.document.write(`
