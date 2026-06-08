@@ -900,6 +900,8 @@ function ReportsTab() {
   const [from, setFrom] = useState("");
   const [to, setTo] = useState("");
   const [reportType, setReportType] = useState("summary");
+  const [memberFilter, setMemberFilter] = useState<string>("all");
+  const [groupBy, setGroupBy] = useState<"month" | "day">("month");
 
   const inRange = (date: string) => {
     if (from && date < from) return false;
@@ -938,6 +940,40 @@ function ReportsTab() {
     }).sort((a, b) => (a.member.serial || 0) - (b.member.serial || 0));
   }, [data, filtered]);
 
+  // ===== member-wise periodic deposits (pivot) =====
+  const memberSavingsPivot = useMemo(() => {
+    const deps = filtered.deposits.filter((d) => memberFilter === "all" || d.memberId === memberFilter);
+    const keyOf = (date: string) => (groupBy === "month" ? date.slice(0, 7) : date);
+    const labelOf = (k: string) => {
+      if (groupBy === "month") {
+        const [y, mo] = k.split("-");
+        const names = ["জানু", "ফেব্রু", "মার্চ", "এপ্রিল", "মে", "জুন", "জুলাই", "আগস্ট", "সেপ্ট", "অক্টো", "নভে", "ডিসে"];
+        return `${names[+mo - 1] || mo} ${toBn(y)}`;
+      }
+      return fmtDate(k);
+    };
+    const periodSet = new Set<string>();
+    deps.forEach((d) => periodSet.add(keyOf(d.date)));
+    const periods = Array.from(periodSet).sort();
+    const members = (memberFilter === "all" ? data.members : data.members.filter((m) => m.id === memberFilter))
+      .slice()
+      .sort((a, b) => (a.serial || 0) - (b.serial || 0));
+    const rows = members.map((m) => {
+      const cells: Record<string, number> = {};
+      periods.forEach((p) => (cells[p] = 0));
+      deps.filter((d) => d.memberId === m.id).forEach((d) => {
+        const k = keyOf(d.date);
+        cells[k] = (cells[k] || 0) + d.amount;
+      });
+      const total = periods.reduce((s, p) => s + (cells[p] || 0), 0);
+      return { member: m, cells, total };
+    });
+    const colTotals: Record<string, number> = {};
+    periods.forEach((p) => (colTotals[p] = rows.reduce((s, r) => s + (r.cells[p] || 0), 0)));
+    const grand = rows.reduce((s, r) => s + r.total, 0);
+    return { periods, labels: periods.map(labelOf), rows, colTotals, grand };
+  }, [data, filtered, memberFilter, groupBy]);
+
   const dateRangeText = () => {
     if (from && to) return `${fmtDate(from)} থেকে ${fmtDate(to)}`;
     if (from) return `${fmtDate(from)} থেকে`;
@@ -954,6 +990,8 @@ function ReportsTab() {
       memberWise,
       filtered,
       members: data.members,
+      memberSavingsPivot,
+      groupBy,
     });
   };
 
