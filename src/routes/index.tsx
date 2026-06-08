@@ -1605,19 +1605,33 @@ function printReport(p: ReportParams) {
 async function renderReportCanvas(p: ReportParams): Promise<HTMLCanvasElement> {
   const { default: html2canvas } = await import("html2canvas");
   const { inner } = buildReportHtml(p);
-  const container = document.createElement("div");
-  container.style.cssText = "position:fixed;left:-10000px;top:0;width:800px;background:#fff;color:#111;padding:24px;font-family:'Segoe UI','Noto Sans Bengali',sans-serif;";
-  container.innerHTML = inner;
-  document.body.appendChild(container);
+  // Render inside an isolated iframe so the page's Tailwind theme (which uses
+  // oklch() and is not supported by html2canvas) does not leak in via inheritance.
+  const iframe = document.createElement("iframe");
+  iframe.style.cssText = "position:fixed;left:-10000px;top:0;width:840px;height:10px;border:0;";
+  document.body.appendChild(iframe);
   try {
-    const imgs = Array.from(container.querySelectorAll("img"));
+    const doc = iframe.contentDocument!;
+    doc.open();
+    doc.write(`<!DOCTYPE html><html><head><meta charset="utf-8"><style>
+      html,body{margin:0;padding:0;background:#ffffff;color:#111111;font-family:"Segoe UI","Noto Sans Bengali",Arial,sans-serif;}
+      *{box-sizing:border-box;}
+      h1,h2,h3,p,td,th,div{color:#111111;}
+      h3{margin:16px 0 6px;font-size:14px;}
+    </style></head><body><div id="r" style="width:800px;padding:20px;background:#fff;">${inner}</div></body></html>`);
+    doc.close();
+    const target = doc.getElementById("r")!;
+    const imgs = Array.from(target.querySelectorAll("img"));
     await Promise.all(imgs.map((img) => img.complete ? Promise.resolve() : new Promise((res) => { img.onload = img.onerror = () => res(null); })));
-    const canvas = await html2canvas(container, { scale: 2, backgroundColor: "#ffffff", useCORS: true, logging: false });
+    // give layout a tick
+    await new Promise((r) => setTimeout(r, 50));
+    const canvas = await html2canvas(target, { scale: 2, backgroundColor: "#ffffff", useCORS: true, logging: false, windowWidth: 840, windowHeight: target.scrollHeight + 40 });
     return canvas;
   } finally {
-    document.body.removeChild(container);
+    document.body.removeChild(iframe);
   }
 }
+
 
 async function exportReportJpeg(p: ReportParams) {
   const canvas = await renderReportCanvas(p);
