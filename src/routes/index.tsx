@@ -4,17 +4,17 @@ import {
   useSamiti, toBn, formatTk, memberTotalDeposit, loanPaid, loanTotalDue,
   type Member, type Loan,
 } from "@/lib/samiti-store";
+import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Textarea } from "@/components/ui/textarea";
-import { Users, PiggyBank, HandCoins, LayoutDashboard, Trash2, Plus, CheckCircle2, Pencil, Settings as SettingsIcon, Wallet, Download, Upload, AlertTriangle, TrendingUp, TrendingDown } from "lucide-react";
+import { Users, PiggyBank, HandCoins, LayoutDashboard, Trash2, Plus, CheckCircle2, Pencil, Settings as SettingsIcon, Wallet, Download, Upload, AlertTriangle, TrendingUp, TrendingDown, Menu } from "lucide-react";
 import { toast, Toaster } from "sonner";
 
 export const Route = createFileRoute("/")({
@@ -36,9 +36,20 @@ const fmtDate = (s: string) => {
   return `${toBn(d)}/${toBn(m)}/${toBn(y)}`;
 };
 
+const navItems = [
+  { value: "dashboard", label: "ড্যাশবোর্ড", icon: LayoutDashboard },
+  { value: "members", label: "সদস্য", icon: Users },
+  { value: "savings", label: "সঞ্চয়", icon: PiggyBank },
+  { value: "loans", label: "ঋণ", icon: HandCoins },
+  { value: "cashbook", label: "আয়-ব্যয়", icon: Wallet },
+  { value: "settings", label: "সেটিংস", icon: SettingsIcon },
+];
+
 function SamitiApp() {
   const s = useSamiti();
   const { data } = s;
+  const [tab, setTab] = useState("dashboard");
+  const [mobileOpen, setMobileOpen] = useState(false);
 
   const totals = useMemo(() => {
     const totalDeposit = data.deposits.reduce((a, d) => a + d.amount, 0);
@@ -55,44 +66,93 @@ function SamitiApp() {
   }, [data]);
 
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen flex">
       <Toaster position="top-center" richColors />
-      <header className="border-b bg-card/70 backdrop-blur sticky top-0 z-10">
-        <div className="container mx-auto px-4 py-4 flex items-center justify-between gap-4">
-          <div className="flex items-center gap-3">
-            <div className="h-11 w-11 rounded-xl bg-primary text-primary-foreground flex items-center justify-center font-display font-bold text-xl shadow-sm">স</div>
-            <div>
-              <h1 className="text-xl md:text-2xl font-bold text-foreground leading-tight">{data.samitiName}</h1>
-              <p className="text-xs text-muted-foreground">সমিতি ম্যানেজমেন্ট সিস্টেম</p>
-            </div>
+
+      {/* Desktop Sidebar */}
+      <aside className="w-64 border-r bg-card hidden md:flex flex-col sticky top-0 h-screen">
+        <div className="p-4 border-b flex items-center gap-3">
+          <div className="h-10 w-10 rounded-xl bg-primary text-primary-foreground flex items-center justify-center font-display font-bold text-xl shadow-sm shrink-0">স</div>
+          <div className="min-w-0">
+            <h1 className="text-base font-bold text-foreground leading-tight truncate">{data.samitiName}</h1>
+            <p className="text-xs text-muted-foreground">সমিতি ম্যানেজমেন্ট</p>
           </div>
-          <EditSamitiName name={data.samitiName} onSave={s.setSamitiName} />
         </div>
-      </header>
+        <nav className="flex-1 p-3 space-y-1 overflow-y-auto">
+          {navItems.map((item) => {
+            const Icon = item.icon;
+            const active = tab === item.value;
+            return (
+              <button
+                key={item.value}
+                onClick={() => setTab(item.value)}
+                className={cn(
+                  "flex items-center w-full gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors cursor-pointer",
+                  active
+                    ? "bg-primary text-primary-foreground"
+                    : "text-muted-foreground hover:bg-muted hover:text-foreground"
+                )}
+              >
+                <Icon className="h-5 w-5 shrink-0" />
+                {item.label}
+              </button>
+            );
+          })}
+        </nav>
+        <div className="p-4 border-t text-xs text-muted-foreground text-center">
+          তথ্য আপনার ব্রাউজারে সংরক্ষিত
+        </div>
+      </aside>
 
-      <main className="container mx-auto px-4 py-6">
-        <Tabs defaultValue="dashboard" className="w-full">
-          <TabsList className="grid grid-cols-3 md:grid-cols-6 w-full mb-6 h-auto">
-            <TabsTrigger value="dashboard" className="py-2.5"><LayoutDashboard className="h-4 w-4 mr-1.5" />ড্যাশবোর্ড</TabsTrigger>
-            <TabsTrigger value="members" className="py-2.5"><Users className="h-4 w-4 mr-1.5" />সদস্য</TabsTrigger>
-            <TabsTrigger value="savings" className="py-2.5"><PiggyBank className="h-4 w-4 mr-1.5" />সঞ্চয়</TabsTrigger>
-            <TabsTrigger value="loans" className="py-2.5"><HandCoins className="h-4 w-4 mr-1.5" />ঋণ</TabsTrigger>
-            <TabsTrigger value="cashbook" className="py-2.5"><Wallet className="h-4 w-4 mr-1.5" />আয়-ব্যয়</TabsTrigger>
-            <TabsTrigger value="settings" className="py-2.5"><SettingsIcon className="h-4 w-4 mr-1.5" />সেটিংস</TabsTrigger>
-          </TabsList>
+      {/* Main area */}
+      <div className="flex-1 flex flex-col min-w-0">
+        {/* Mobile header */}
+        <header className="md:hidden border-b bg-card/70 backdrop-blur sticky top-0 z-20 px-4 py-3 flex items-center justify-between">
+          <div className="flex items-center gap-3 min-w-0">
+            <div className="h-9 w-9 rounded-lg bg-primary text-primary-foreground flex items-center justify-center font-display font-bold text-lg shrink-0">স</div>
+            <h1 className="font-bold text-foreground truncate">{data.samitiName}</h1>
+          </div>
+          <Button variant="ghost" size="icon" onClick={() => setMobileOpen((o) => !o)}>
+            <Menu className="h-5 w-5" />
+          </Button>
+        </header>
+        {mobileOpen && (
+          <div className="md:hidden border-b bg-card p-3 space-y-1">
+            {navItems.map((item) => {
+              const Icon = item.icon;
+              const active = tab === item.value;
+              return (
+                <button
+                  key={item.value}
+                  onClick={() => { setTab(item.value); setMobileOpen(false); }}
+                  className={cn(
+                    "flex items-center w-full gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors",
+                    active
+                      ? "bg-primary text-primary-foreground"
+                      : "text-muted-foreground hover:bg-muted hover:text-foreground"
+                  )}
+                >
+                  <Icon className="h-5 w-5 shrink-0" />
+                  {item.label}
+                </button>
+              );
+            })}
+          </div>
+        )}
 
-          <TabsContent value="dashboard"><Dashboard totals={totals} memberCount={data.members.length} data={data} /></TabsContent>
-          <TabsContent value="members"><MembersTab /></TabsContent>
-          <TabsContent value="savings"><SavingsTab /></TabsContent>
-          <TabsContent value="loans"><LoansTab /></TabsContent>
-          <TabsContent value="cashbook"><CashbookTab /></TabsContent>
-          <TabsContent value="settings"><SettingsTab /></TabsContent>
-        </Tabs>
-      </main>
+        <main className="flex-1 container mx-auto px-4 py-6">
+          {tab === "dashboard" && <Dashboard totals={totals} memberCount={data.members.length} data={data} />}
+          {tab === "members" && <MembersTab />}
+          {tab === "savings" && <SavingsTab />}
+          {tab === "loans" && <LoansTab />}
+          {tab === "cashbook" && <CashbookTab />}
+          {tab === "settings" && <SettingsTab />}
+        </main>
 
-      <footer className="container mx-auto px-4 py-8 text-center text-xs text-muted-foreground">
-        তথ্য আপনার ব্রাউজারে সুরক্ষিতভাবে সংরক্ষিত থাকে।
-      </footer>
+        <footer className="container mx-auto px-4 py-6 text-center text-xs text-muted-foreground">
+          তথ্য আপনার ব্রাউজারে সুরক্ষিতভাবে সংরক্ষিত থাকে।
+        </footer>
+      </div>
     </div>
   );
 }
