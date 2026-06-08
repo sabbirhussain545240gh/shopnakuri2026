@@ -178,6 +178,12 @@ export function useSamiti() {
   const addDeposit = useCallback((d: Omit<Deposit, "id">) => {
     setState({ ...getState(), deposits: [...getState().deposits, { ...d, id: crypto.randomUUID() }] });
   }, []);
+  const updateDeposit = useCallback((id: string, updates: Partial<Omit<Deposit, "id">>) => {
+    setState({
+      ...getState(),
+      deposits: getState().deposits.map((d) => (d.id === id ? { ...d, ...updates } : d)),
+    });
+  }, []);
   const deleteDeposit = useCallback((id: string) => {
     setState({ ...getState(), deposits: getState().deposits.filter((x) => x.id !== id) });
   }, []);
