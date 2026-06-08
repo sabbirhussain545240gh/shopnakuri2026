@@ -801,6 +801,7 @@ function SavingsTab() {
   const { data, addDeposit, deleteDeposit } = useSamiti();
   const [open, setOpen] = useState(false);
   const [form, setForm] = useState({ memberId: "", amount: "", date: today(), note: "" });
+  const [search, setSearch] = useState("");
 
   const submit = () => {
     if (!form.memberId) { toast.error("সদস্য নির্বাচন করুন"); return; }
@@ -812,32 +813,53 @@ function SavingsTab() {
     toast.success("জমা যোগ হয়েছে");
   };
 
+  const filteredDeposits = useMemo(() => {
+    const q = search.trim().toLowerCase();
+    if (!q) return [...data.deposits].sort((a, b) => b.date.localeCompare(a.date));
+    return [...data.deposits].sort((a, b) => b.date.localeCompare(a.date)).filter((d) => {
+      const m = data.members.find((x) => x.id === d.memberId);
+      const text = `${m?.serial || ""} ${m?.name || ""} ${d.note || ""} ${d.date}`.toLowerCase();
+      return text.includes(q);
+    });
+  }, [data.deposits, data.members, search]);
+
   return (
     <Card>
-      <CardHeader className="flex flex-row items-center justify-between gap-2">
+      <CardHeader className="flex flex-row items-center justify-between gap-2 flex-wrap">
         <div>
           <CardTitle>সঞ্চয়/চাদা / জমা</CardTitle>
           <CardDescription>মোট {toBn(data.deposits.length)}টি লেনদেন</CardDescription>
         </div>
-        <Dialog open={open} onOpenChange={setOpen}>
-          <DialogTrigger asChild><Button disabled={data.members.length === 0}><Plus className="h-4 w-4 mr-1" />নতুন জমা</Button></DialogTrigger>
-          <DialogContent>
-            <DialogHeader><DialogTitle>নতুন জমা</DialogTitle></DialogHeader>
-            <div className="space-y-3">
-              <div>
-                <Label>সদস্য *</Label>
-                <Select value={form.memberId} onValueChange={(v) => setForm({ ...form, memberId: v })}>
-                  <SelectTrigger><SelectValue placeholder="সদস্য নির্বাচন করুন" /></SelectTrigger>
-                  <SelectContent>{data.members.map((m) => <SelectItem key={m.id} value={m.id}>{m.name}</SelectItem>)}</SelectContent>
-                </Select>
+        <div className="flex items-center gap-2">
+          <div className="relative">
+            <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <Input
+              placeholder="সার্চ করুন..."
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              className="pl-9 w-48"
+            />
+          </div>
+          <Dialog open={open} onOpenChange={setOpen}>
+            <DialogTrigger asChild><Button disabled={data.members.length === 0}><Plus className="h-4 w-4 mr-1" />নতুন জমা</Button></DialogTrigger>
+            <DialogContent>
+              <DialogHeader><DialogTitle>নতুন জমা</DialogTitle></DialogHeader>
+              <div className="space-y-3">
+                <div>
+                  <Label>সদস্য *</Label>
+                  <Select value={form.memberId} onValueChange={(v) => setForm({ ...form, memberId: v })}>
+                    <SelectTrigger><SelectValue placeholder="সদস্য নির্বাচন করুন" /></SelectTrigger>
+                    <SelectContent>{data.members.map((m) => <SelectItem key={m.id} value={m.id}>{toBn(m.serial || 0)}. {m.name}</SelectItem>)}</SelectContent>
+                  </Select>
+                </div>
+                <div><Label>পরিমাণ (টাকা) *</Label><Input type="number" value={form.amount} onChange={(e) => setForm({ ...form, amount: e.target.value })} /></div>
+                <div><Label>তারিখ</Label><Input type="date" value={form.date} onChange={(e) => setForm({ ...form, date: e.target.value })} /></div>
+                <div><Label>মন্তব্য</Label><Input value={form.note} onChange={(e) => setForm({ ...form, note: e.target.value })} /></div>
               </div>
-              <div><Label>পরিমাণ (টাকা) *</Label><Input type="number" value={form.amount} onChange={(e) => setForm({ ...form, amount: e.target.value })} /></div>
-              <div><Label>তারিখ</Label><Input type="date" value={form.date} onChange={(e) => setForm({ ...form, date: e.target.value })} /></div>
-              <div><Label>মন্তব্য</Label><Input value={form.note} onChange={(e) => setForm({ ...form, note: e.target.value })} /></div>
-            </div>
-            <DialogFooter><Button onClick={submit}>সংরক্ষণ</Button></DialogFooter>
-          </DialogContent>
-        </Dialog>
+              <DialogFooter><Button onClick={submit}>সংরক্ষণ</Button></DialogFooter>
+            </DialogContent>
+          </Dialog>
+        </div>
       </CardHeader>
       <CardContent>
         {data.members.length === 0 ? (
@@ -850,12 +872,12 @@ function SavingsTab() {
               <TableRow><TableHead>তারিখ</TableHead><TableHead>সদস্য</TableHead><TableHead>মন্তব্য</TableHead><TableHead className="text-right">পরিমাণ</TableHead><TableHead></TableHead></TableRow>
             </TableHeader>
             <TableBody>
-              {[...data.deposits].sort((a, b) => b.date.localeCompare(a.date)).map((d) => {
+              {filteredDeposits.map((d) => {
                 const m = data.members.find((x) => x.id === d.memberId);
                 return (
                   <TableRow key={d.id}>
                     <TableCell>{fmtDate(d.date)}</TableCell>
-                    <TableCell className="font-medium">{m?.name ?? "—"}</TableCell>
+                    <TableCell className="font-medium">{toBn(m?.serial || 0)}. {m?.name ?? "—"}</TableCell>
                     <TableCell className="text-muted-foreground">{d.note || "—"}</TableCell>
                     <TableCell className="text-right font-semibold text-success">{formatTk(d.amount)}</TableCell>
                     <TableCell>
