@@ -16,6 +16,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Textarea } from "@/components/ui/textarea";
 import { Users, PiggyBank, HandCoins, LayoutDashboard, Trash2, Plus, CheckCircle2, Pencil, Settings as SettingsIcon, Wallet, Download, Upload, AlertTriangle, TrendingUp, TrendingDown, Menu, Printer, FileText, Receipt } from "lucide-react";
 import { toast, Toaster } from "sonner";
+import { AuthGate, SignOutButton } from "@/components/AuthGate";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -26,8 +27,12 @@ export const Route = createFileRoute("/")({
       { property: "og:description", content: "সদস্য, সঞ্চয়/চাদা ও ঋণ ব্যবস্থাপনার জন্য সম্পূর্ণ বাংলা সফটওয়্যার।" },
     ],
   }),
-  component: SamitiApp,
+  component: SamitiAppGated,
 });
+
+function SamitiAppGated() {
+  return <AuthGate>{() => <SamitiApp />}</AuthGate>;
+}
 
 const today = () => new Date().toISOString().slice(0, 10);
 const fmtDate = (s: string) => {
@@ -101,10 +106,13 @@ function SamitiApp() {
             );
           })}
         </nav>
-        <div className="p-4 border-t text-xs text-muted-foreground text-center">
-          তথ্য আপনার ব্রাউজারে সংরক্ষিত
+        <div className="p-3 border-t space-y-2">
+          <SignOutButton />
+          <p className="text-xs text-muted-foreground text-center">তথ্য আপনার ব্রাউজারে সংরক্ষিত</p>
         </div>
       </aside>
+
+
 
       {/* Main area */}
       <div className="flex-1 flex flex-col min-w-0">
@@ -114,9 +122,12 @@ function SamitiApp() {
             <div className="h-9 w-9 rounded-lg bg-primary text-primary-foreground flex items-center justify-center font-display font-bold text-lg shrink-0">স</div>
             <h1 className="font-bold text-foreground truncate">{data.samitiName}</h1>
           </div>
-          <Button variant="ghost" size="icon" onClick={() => setMobileOpen((o) => !o)}>
-            <Menu className="h-5 w-5" />
-          </Button>
+          <div className="flex items-center gap-2">
+            <SignOutButton />
+            <Button variant="ghost" size="icon" onClick={() => setMobileOpen((o) => !o)}>
+              <Menu className="h-5 w-5" />
+            </Button>
+          </div>
         </header>
         {mobileOpen && (
           <div className="md:hidden border-b bg-card p-3 space-y-1">
