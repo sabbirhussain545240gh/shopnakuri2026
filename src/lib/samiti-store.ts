@@ -136,6 +136,12 @@ export function useSamiti() {
     const member: Member = { ...m, id: crypto.randomUUID(), serial };
     setState({ ...getState(), members: [...members, member] });
   }, []);
+  const updateMember = useCallback((id: string, updates: Partial<Omit<Member, "id">>) => {
+    setState({
+      ...getState(),
+      members: getState().members.map((m) => (m.id === id ? { ...m, ...updates } : m)),
+    });
+  }, []);
   const deleteMember = useCallback((id: string) => {
     const s = getState();
     setState({
