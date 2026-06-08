@@ -32,11 +32,11 @@ export const Route = createFileRoute("/")({
 
 
 const today = () => new Date().toISOString().slice(0, 10);
-const bnMonths = ["জান", "ফেব", "মার", "এপ্র", "মে", "জুন", "জুল", "আগ", "সেপ", "অক্ট", "নভ", "ডিস"];
+const enMonths = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 const fmtDate = (s: string) => {
   if (!s) return "";
   const [y, m, d] = s.split("-");
-  return `${toBn(d)}/${bnMonths[+m - 1] || toBn(m)}/${toBn(y)}`;
+  return `${d} ${enMonths[+m - 1] || m} ${y}`;
 };
 
 const navItems = [
@@ -1428,8 +1428,8 @@ function ReportsTab() {
     const labelOf = (k: string) => {
       if (groupBy === "month") {
         const [y, mo] = k.split("-");
-        const names = ["জান", "ফেব", "মার", "এপ্র", "মে", "জুন", "জুল", "আগ", "সেপ", "অক্ট", "নভ", "ডিস"];
-        return `${names[+mo - 1] || mo} ${toBn(y)}`;
+        const names = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+        return `${names[+mo - 1] || mo} ${y}`;
       }
       return fmtDate(k);
     };
