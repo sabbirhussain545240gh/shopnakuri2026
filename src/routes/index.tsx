@@ -241,6 +241,7 @@ function MembersTab() {
   const { data, addMember, deleteMember } = useSamiti();
   const [open, setOpen] = useState(false);
   const emptyForm = {
+    serial: "",
     name: "", fatherName: "", motherName: "", phone: "",
     birthDate: "", nid: "", address: "", photo: "",
     nominee: { name: "", relation: "", phone: "", nid: "" },
@@ -248,6 +249,11 @@ function MembersTab() {
   };
   const [form, setForm] = useState(emptyForm);
   const [viewMember, setViewMember] = useState<Member | null>(null);
+
+  const nextSerial = data.members.length > 0 ? Math.max(...data.members.map((m) => m.serial || 0)) + 1 : 1;
+  useEffect(() => {
+    if (open) setForm((f) => ({ ...f, serial: String(nextSerial) }));
+  }, [open, nextSerial]);
 
   const onPhoto = (file?: File) => {
     if (!file) return;
