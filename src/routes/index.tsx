@@ -866,6 +866,13 @@ function LoansTab() {
                 </Select>
                 {errors.familyGuarantorRelation && <p className="text-xs text-destructive mt-1">{errors.familyGuarantorRelation}</p>}
               </div>
+              {form.familyGuarantorRelation === "অন্যান্য" && (
+                <div>
+                  <Label>কাস্টম সম্পর্ক *</Label>
+                  <Input className={errors.familyGuarantorCustomRelation ? "border-destructive" : ""} value={form.familyGuarantorCustomRelation} onChange={(e) => setField("familyGuarantorCustomRelation", e.target.value)} placeholder="সম্পর্ক লিখুন" />
+                  {errors.familyGuarantorCustomRelation && <p className="text-xs text-destructive mt-1">{errors.familyGuarantorCustomRelation}</p>}
+                </div>
+              )}
               <div>
                 <Label>পারিবারিক জামিনদার — মোবাইল *</Label>
                 <Input className={errors.familyGuarantorPhone ? "border-destructive" : ""} value={form.familyGuarantorPhone} onChange={(e) => setField("familyGuarantorPhone", e.target.value)} placeholder="মোবাইল নম্বর" />
