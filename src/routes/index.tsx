@@ -1179,8 +1179,54 @@ function ReportsTab() {
     toast.success("ফাইল ডাউনলোড হয়েছে");
   };
 
+  const reportTypeLabel: Record<string, string> = {
+    summary: "সারাংশ রিপোর্ট",
+    members: "সদস্যভিত্তিক রিপোর্ট",
+    "member-savings": "সদস্য তারিখ/মাস অনুযায়ী চাঁদা জমা",
+    savings: "সঞ্চয়/চাদা বিস্তারিত",
+    loans: "ঋণ বিস্তারিত",
+    cashbook: "আয়-ব্যয় বিস্তারিত",
+  };
+
   return (
     <div className="space-y-6">
+      {/* Live Header Preview */}
+      <Card>
+        <CardHeader className="flex flex-row items-center justify-between">
+          <div>
+            <CardTitle>হেডার প্রিভিউ</CardTitle>
+            <CardDescription>প্রিন্ট/এক্সপোর্টে এই হেডারটি ব্যবহার হবে</CardDescription>
+          </div>
+          <Badge variant="outline">লাইভ</Badge>
+        </CardHeader>
+        <CardContent>
+          <div className="bg-white text-black rounded-md border overflow-hidden">
+            <div className="p-4">
+              <div style={{ display: "flex", alignItems: "center", gap: 16, borderBottom: "2px solid #333", paddingBottom: 10 }}>
+                {data.samitiLogo ? (
+                  <img src={data.samitiLogo} style={{ width: 100, height: 100, objectFit: "contain" }} alt="logo" />
+                ) : (
+                  <div style={{ width: 100, height: 100, border: "1px dashed #bbb", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 11, color: "#888", textAlign: "center", padding: 4 }}>
+                    লোগো নেই<br />(সেটিংস থেকে যোগ করুন)
+                  </div>
+                )}
+                <div style={{ flex: 1, textAlign: "center" }}>
+                  <h1 style={{ margin: 0, fontSize: 28, fontWeight: 700 }}>{data.samitiName || "সমিতির নাম"}</h1>
+                  {data.samitiAddress && <div style={{ fontSize: 15, color: "#444", marginTop: 4 }}>{data.samitiAddress}</div>}
+                  {data.establishedDate && <div style={{ fontSize: 14, color: "#666", marginTop: 4 }}>স্থাপিত: {data.establishedDate}</div>}
+                </div>
+                {data.samitiLogo && <div style={{ width: 100 }} />}
+              </div>
+              <h2 style={{ textAlign: "center", margin: "12px 0 4px", fontSize: 20 }}>{reportTypeLabel[reportType] || "রিপোর্ট"}</h2>
+              <div style={{ textAlign: "center", fontSize: 13, color: "#555" }}>সময়সীমা: {dateRangeText()}</div>
+            </div>
+          </div>
+          {(!data.samitiLogo || !data.samitiAddress || !data.establishedDate) && (
+            <p className="text-xs text-muted-foreground mt-2">টিপ: সেটিংস মেনু থেকে লোগো, ঠিকানা ও স্থাপিত তারিখ যোগ/সম্পাদনা করুন।</p>
+          )}
+        </CardContent>
+      </Card>
+
       <Card>
         <CardHeader>
           <CardTitle>রিপোর্ট</CardTitle>
