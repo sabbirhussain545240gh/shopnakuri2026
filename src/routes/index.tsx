@@ -240,7 +240,7 @@ function Dashboard({ totals, memberCount, data }: any) {
 
 // ===== Members =====
 function MembersTab() {
-  const { data, addMember, deleteMember } = useSamiti();
+  const { data, addMember, updateMember, deleteMember } = useSamiti();
   const [open, setOpen] = useState(false);
   const emptyForm = {
     serial: "",
@@ -251,6 +251,7 @@ function MembersTab() {
   };
   const [form, setForm] = useState(emptyForm);
   const [viewMember, setViewMember] = useState<Member | null>(null);
+  const [editMember, setEditMember] = useState<Member | null>(null);
 
   const nextSerial = data.members.length > 0 ? Math.max(...data.members.map((m) => m.serial || 0)) + 1 : 1;
   useEffect(() => {
@@ -366,12 +367,17 @@ function MembersTab() {
 
       <Dialog open={!!viewMember} onOpenChange={(o) => !o && setViewMember(null)}>
         <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
-          <DialogHeader className="flex flex-row items-center justify-between">
+          <DialogHeader className="flex flex-row items-center justify-between gap-2 flex-wrap">
             <DialogTitle>সদস্যের তথ্য</DialogTitle>
             {viewMember && (
-              <Button variant="outline" size="sm" onClick={() => printMemberCard(viewMember)}>
-                <Printer className="h-4 w-4 mr-1" />প্রিন্ট
-              </Button>
+              <div className="flex gap-2">
+                <Button variant="outline" size="sm" onClick={() => setEditMember(viewMember)}>
+                  <Pencil className="h-4 w-4 mr-1" />সম্পাদনা
+                </Button>
+                <Button variant="outline" size="sm" onClick={() => printMemberCard(viewMember)}>
+                  <Printer className="h-4 w-4 mr-1" />প্রিন্ট
+                </Button>
+              </div>
             )}
           </DialogHeader>
           {viewMember && (
@@ -407,7 +413,97 @@ function MembersTab() {
           )}
         </DialogContent>
       </Dialog>
+
+      <Dialog open={!!editMember} onOpenChange={(o) => !o && setEditMember(null)}>
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader><DialogTitle>সদস্য তথ্য সম্পাদনা</DialogTitle></DialogHeader>
+          {editMember && (
+            <EditMemberForm
+              member={editMember}
+              onSave={(updates) => {
+                updateMember(editMember.id, updates);
+                setEditMember(null);
+                setViewMember(null);
+                toast.success("সদস্য তথ্য আপডেট হয়েছে");
+              }}
+              onCancel={() => setEditMember(null)}
+            />
+          )}
+        </DialogContent>
+      </Dialog>
     </Card>
+  );
+}
+
+function EditMemberForm({ member, onSave, onCancel }: { member: Member; onSave: (u: Partial<Omit<Member, "id">>) => void; onCancel: () => void }) {
+  const [form, setForm] = useState({
+    serial: String(member.serial || ""),
+    name: member.name,
+    fatherName: member.fatherName,
+    motherName: member.motherName,
+    phone: member.phone,
+    birthDate: member.birthDate,
+    nid: member.nid,
+    address: member.address,
+    photo: member.photo,
+    nominee: { ...member.nominee },
+    joinDate: member.joinDate,
+  });
+
+  const onPhoto = (file?: File) => {
+    if (!file) return;
+    if (file.size > 2 * 1024 * 1024) { toast.error("ছবি ২ MB এর কম হতে হবে"); return; }
+    const reader = new FileReader();
+    reader.onload = () => setForm((f) => ({ ...f, photo: String(reader.result || "") }));
+    reader.readAsDataURL(file);
+  };
+
+  const submit = () => {
+    if (!form.name.trim()) { toast.error("নাম দিন"); return; }
+    const serialNum = form.serial ? parseInt(form.serial, 10) : 0;
+    onSave({ ...form, serial: serialNum });
+  };
+
+  return (
+    <div className="space-y-4">
+      <div className="flex items-center gap-4">
+        <div className="h-24 w-24 rounded-lg border bg-muted overflow-hidden flex items-center justify-center shrink-0">
+          {form.photo ? <img src={form.photo} alt="" className="h-full w-full object-cover" /> : <Users className="h-8 w-8 text-muted-foreground" />}
+        </div>
+        <div className="space-y-2">
+          <Label>সদস্যের ছবি</Label>
+          <Input type="file" accept="image/*" onChange={(e) => onPhoto(e.target.files?.[0])} />
+          {form.photo && <Button type="button" variant="ghost" size="sm" onClick={() => setForm({ ...form, photo: "" })}>ছবি সরান</Button>}
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+        <div><Label>সিরিয়াল নম্বর</Label><Input type="number" value={form.serial} onChange={(e) => setForm({ ...form, serial: e.target.value })} /></div>
+        <div><Label>নাম *</Label><Input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} /></div>
+        <div><Label>মোবাইল নং</Label><Input value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} /></div>
+        <div><Label>পিতার নাম</Label><Input value={form.fatherName} onChange={(e) => setForm({ ...form, fatherName: e.target.value })} /></div>
+        <div><Label>মাতার নাম</Label><Input value={form.motherName} onChange={(e) => setForm({ ...form, motherName: e.target.value })} /></div>
+        <div><Label>জন্ম তারিখ</Label><Input type="date" value={form.birthDate} onChange={(e) => setForm({ ...form, birthDate: e.target.value })} /></div>
+        <div><Label>NID / জন্ম সনদ নং</Label><Input value={form.nid} onChange={(e) => setForm({ ...form, nid: e.target.value })} /></div>
+      </div>
+      <div><Label>ঠিকানা</Label><Textarea value={form.address} onChange={(e) => setForm({ ...form, address: e.target.value })} /></div>
+      <div><Label>যোগদানের তারিখ</Label><Input type="date" value={form.joinDate} onChange={(e) => setForm({ ...form, joinDate: e.target.value })} /></div>
+
+      <div className="border-t pt-3">
+        <h4 className="font-semibold mb-2 text-foreground">নমিনি তথ্য</h4>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+          <div><Label>নমিনির নাম</Label><Input value={form.nominee.name} onChange={(e) => setForm({ ...form, nominee: { ...form.nominee, name: e.target.value } })} /></div>
+          <div><Label>সম্পর্ক</Label><Input value={form.nominee.relation} onChange={(e) => setForm({ ...form, nominee: { ...form.nominee, relation: e.target.value } })} /></div>
+          <div><Label>মোবাইল</Label><Input value={form.nominee.phone} onChange={(e) => setForm({ ...form, nominee: { ...form.nominee, phone: e.target.value } })} /></div>
+          <div><Label>NID / জন্ম সনদ</Label><Input value={form.nominee.nid} onChange={(e) => setForm({ ...form, nominee: { ...form.nominee, nid: e.target.value } })} /></div>
+        </div>
+      </div>
+
+      <div className="flex gap-2 justify-end pt-2">
+        <Button variant="outline" onClick={onCancel}>বাতিল</Button>
+        <Button onClick={submit}>সংরক্ষণ</Button>
+      </div>
+    </div>
   );
 }
 
