@@ -748,7 +748,7 @@ function LoansTab() {
   const { data, addLoan, addPayment, closeLoan, deleteLoan } = useSamiti();
   const [open, setOpen] = useState(false);
   const [payFor, setPayFor] = useState<Loan | null>(null);
-  const [form, setForm] = useState({ memberId: "", amount: "", interestRate: String(data.settings.defaultInterestRate), durationMonths: String(data.settings.defaultDurationMonths), date: today(), memberGuarantorId: "", familyGuarantor: "" });
+  const [form, setForm] = useState({ memberId: "", amount: "", interestRate: String(data.settings.defaultInterestRate), durationMonths: String(data.settings.defaultDurationMonths), date: today(), memberGuarantorId: "", familyGuarantorName: "", familyGuarantorRelation: "", familyGuarantorPhone: "" });
   const [payForm, setPayForm] = useState({ amount: "", date: today() });
   const [errors, setErrors] = useState<Record<string, string>>({});
 
@@ -765,7 +765,9 @@ function LoansTab() {
     const rate = Number(form.interestRate);
     if (!form.interestRate.trim() || isNaN(rate) || rate <= 0) nextErrors.interestRate = "সঠিক সুদের হার দিন";
     if (!form.memberGuarantorId.trim()) nextErrors.memberGuarantorId = "সদস্য জামিনদার নির্বাচন করুন";
-    if (!form.familyGuarantor.trim()) nextErrors.familyGuarantor = "পারিবারিক জামিনদারের তথ্য দিন";
+    if (!form.familyGuarantorName.trim()) nextErrors.familyGuarantorName = "জামিনদারের নাম দিন";
+    if (!form.familyGuarantorRelation.trim()) nextErrors.familyGuarantorRelation = "সম্পর্ক নির্বাচন করুন";
+    if (!form.familyGuarantorPhone.trim()) nextErrors.familyGuarantorPhone = "মোবাইল নম্বর দিন";
 
     if (Object.keys(nextErrors).length > 0) {
       setErrors(nextErrors);
@@ -778,9 +780,9 @@ function LoansTab() {
       durationMonths: Number(form.durationMonths) || 12,
       date: form.date,
       memberGuarantorId: form.memberGuarantorId,
-      familyGuarantor: form.familyGuarantor.trim(),
+      familyGuarantor: { name: form.familyGuarantorName.trim(), relation: form.familyGuarantorRelation.trim(), phone: form.familyGuarantorPhone.trim() },
     });
-    setForm({ memberId: "", amount: "", interestRate: String(data.settings.defaultInterestRate), durationMonths: String(data.settings.defaultDurationMonths), date: today(), memberGuarantorId: "", familyGuarantor: "" });
+    setForm({ memberId: "", amount: "", interestRate: String(data.settings.defaultInterestRate), durationMonths: String(data.settings.defaultDurationMonths), date: today(), memberGuarantorId: "", familyGuarantorName: "", familyGuarantorRelation: "", familyGuarantorPhone: "" });
     setErrors({});
     setOpen(false);
     toast.success("ঋণ প্রদান হয়েছে");
@@ -839,9 +841,32 @@ function LoansTab() {
                 {errors.memberGuarantorId && <p className="text-xs text-destructive mt-1">{errors.memberGuarantorId}</p>}
               </div>
               <div>
-                <Label>পারিবারিক জামিনদার *</Label>
-                <Input className={errors.familyGuarantor ? "border-destructive" : ""} value={form.familyGuarantor} onChange={(e) => setField("familyGuarantor", e.target.value)} placeholder="নাম, সম্পর্ক, মোবাইল" />
-                {errors.familyGuarantor && <p className="text-xs text-destructive mt-1">{errors.familyGuarantor}</p>}
+                <Label>পারিবারিক জামিনদার — নাম *</Label>
+                <Input className={errors.familyGuarantorName ? "border-destructive" : ""} value={form.familyGuarantorName} onChange={(e) => setField("familyGuarantorName", e.target.value)} placeholder="নাম" />
+                {errors.familyGuarantorName && <p className="text-xs text-destructive mt-1">{errors.familyGuarantorName}</p>}
+              </div>
+              <div>
+                <Label>পারিবারিক জামিনদার — সম্পর্ক *</Label>
+                <Select value={form.familyGuarantorRelation} onValueChange={(v) => setField("familyGuarantorRelation", v)}>
+                  <SelectTrigger className={errors.familyGuarantorRelation ? "border-destructive" : ""}><SelectValue placeholder="সম্পর্ক নির্বাচন করুন" /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="বাবা">বাবা</SelectItem>
+                    <SelectItem value="মা">মা</SelectItem>
+                    <SelectItem value="ভাই">ভাই</SelectItem>
+                    <SelectItem value="বোন">বোন</SelectItem>
+                    <SelectItem value="স্বামী">স্বামী</SelectItem>
+                    <SelectItem value="স্ত্রী">স্ত্রী</SelectItem>
+                    <SelectItem value="পুত্র">পুত্র</SelectItem>
+                    <SelectItem value="কন্যা">কন্যা</SelectItem>
+                    <SelectItem value="অন্যান্য">অন্যান্য</SelectItem>
+                  </SelectContent>
+                </Select>
+                {errors.familyGuarantorRelation && <p className="text-xs text-destructive mt-1">{errors.familyGuarantorRelation}</p>}
+              </div>
+              <div>
+                <Label>পারিবারিক জামিনদার — মোবাইল *</Label>
+                <Input className={errors.familyGuarantorPhone ? "border-destructive" : ""} value={form.familyGuarantorPhone} onChange={(e) => setField("familyGuarantorPhone", e.target.value)} placeholder="মোবাইল নম্বর" />
+                {errors.familyGuarantorPhone && <p className="text-xs text-destructive mt-1">{errors.familyGuarantorPhone}</p>}
               </div>
             </div>
             <DialogFooter><Button onClick={submit}>ঋণ প্রদান</Button></DialogFooter>
