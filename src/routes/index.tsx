@@ -871,7 +871,10 @@ function SavingsTab() {
           <CardTitle>সঞ্চয়/চাদা / জমা</CardTitle>
           <CardDescription>মোট {toBn(data.deposits.length)}টি লেনদেন</CardDescription>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 flex-wrap">
+          <Button variant="outline" disabled={data.members.length < 2} onClick={replicateFromFirst}>
+            ১ নং অনুযায়ী সকলের চাঁদা
+          </Button>
           <Dialog open={open} onOpenChange={setOpen}>
             <DialogTrigger asChild><Button disabled={data.members.length === 0}><Plus className="h-4 w-4 mr-1" />নতুন জমা</Button></DialogTrigger>
             <DialogContent>
