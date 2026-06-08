@@ -1341,45 +1341,62 @@ function LoansTab() {
           <DialogFooter className="gap-2 flex-wrap">
             <Button variant="outline" onClick={() => setReceipt(null)}>বন্ধ</Button>
             <Button variant="secondary" onClick={async () => {
-              const el = document.getElementById("installment-receipt");
-              if (!el || !receipt) return;
-              const canvas = await html2canvas(el, { scale: 2, backgroundColor: "#ffffff" });
-              const url = canvas.toDataURL("image/png");
-              const link = document.createElement("a");
-              link.href = url;
-              link.download = `রিসিপ্ট-${receipt.receiptNo}.png`;
-              link.click();
-              toast.success("রিসিপ্ট ডাউনলোড হয়েছে");
-            }}><ImageDown className="h-4 w-4 mr-1" />ডাউনলোড</Button>
-            <Button variant="secondary" onClick={async () => {
-              const el = document.getElementById("installment-receipt");
-              if (!el || !receipt) return;
-              const canvas = await html2canvas(el, { scale: 2, backgroundColor: "#ffffff" });
-              const blob = await new Promise<Blob | null>((res) => canvas.toBlob(res, "image/png"));
-              const text = `কিস্তি রিসিপ্ট\nসমিতি: ${data.samitiName || "সমিতি"}\nরিসিপ্ট নং: ${receipt.receiptNo}\nতারিখ: ${fmtDate(receipt.date)}\nসদস্য: ${receipt.memberName}\nপ্রাপ্ত কিস্তি: ${formatTk(receipt.amount)}\nমোট পরিশোধিত: ${formatTk(receipt.paidAfter)}\nঅবশিষ্ট বকেয়া: ${formatTk(receipt.remainingAfter)}`;
-              const shareData: any = { title: "কিস্তি রিসিপ্ত", text };
-              if (blob) {
-                const file = new File([blob], `রিসিপ্ট-${receipt.receiptNo}.png`, { type: "image/png" });
-                if (navigator.canShare && navigator.canShare({ files: [file] })) {
-                  shareData.files = [file];
-                }
+              if (!receipt) return;
+              try {
+                toast.loading("ছবি তৈরি হচ্ছে...", { id: "rjpg" });
+                const canvas = await renderReceiptCanvas(receipt, data.samitiName || "সমিতি");
+                const blob = await new Promise<Blob | null>((res) => canvas.toBlob(res, "image/jpeg", 0.95));
+                if (!blob) throw new Error("blob");
+                const url = URL.createObjectURL(blob);
+                const link = document.createElement("a");
+                link.href = url;
+                link.download = `রিসিপ্ট-${receipt.receiptNo}.jpg`;
+                document.body.appendChild(link);
+                link.click();
+                link.remove();
+                setTimeout(() => URL.revokeObjectURL(url), 1000);
+                toast.success("JPEG ডাউনলোড হয়েছে", { id: "rjpg" });
+              } catch (e) {
+                console.error(e);
+                toast.error("ডাউনলোড ব্যর্থ হয়েছে", { id: "rjpg" });
               }
-              if (navigator.share) {
-                try { await navigator.share(shareData); } catch (e) { /* user cancelled */ }
-              } else {
+            }}><ImageDown className="h-4 w-4 mr-1" />JPEG ডাউনলোড</Button>
+            <Button variant="secondary" onClick={async () => {
+              if (!receipt) return;
+              const text = `কিস্তি রিসিপ্ট\nসমিতি: ${data.samitiName || "সমিতি"}\nরিসিপ্ট নং: ${receipt.receiptNo}\nতারিখ: ${fmtDate(receipt.date)}\nসদস্য: ${receipt.memberName}\nপ্রাপ্ত কিস্তি: ${formatTk(receipt.amount)}\nমোট পরিশোধিত: ${formatTk(receipt.paidAfter)}\nঅবশিষ্ট বকেয়া: ${formatTk(receipt.remainingAfter)}`;
+              try {
+                toast.loading("শেয়ার প্রস্তুত হচ্ছে...", { id: "rshare" });
+                const canvas = await renderReceiptCanvas(receipt, data.samitiName || "সমিতি");
+                const blob = await new Promise<Blob | null>((res) => canvas.toBlob(res, "image/jpeg", 0.95));
+                toast.dismiss("rshare");
+                const file = blob ? new File([blob], `রিসিপ্ট-${receipt.receiptNo}.jpg`, { type: "image/jpeg" }) : null;
+                const nav: any = navigator;
+                if (file && nav.canShare && nav.canShare({ files: [file] }) && nav.share) {
+                  try { await nav.share({ title: "কিস্তি রিসিপ্ট", text, files: [file] }); return; } catch (e: any) {
+                    if (e?.name === "AbortError") return;
+                  }
+                }
+                if (nav.share) {
+                  try { await nav.share({ title: "কিস্তি রিসিপ্ট", text }); return; } catch (e: any) {
+                    if (e?.name === "AbortError") return;
+                  }
+                }
                 await navigator.clipboard.writeText(text);
                 toast.success("রিসিপ্টের তথ্য কপি হয়েছে");
+              } catch (e) {
+                console.error(e);
+                try { await navigator.clipboard.writeText(text); toast.success("রিসিপ্টের তথ্য কপি হয়েছে", { id: "rshare" }); }
+                catch { toast.error("শেয়ার ব্যর্থ হয়েছে", { id: "rshare" }); }
               }
             }}><Share className="h-4 w-4 mr-1" />শেয়ার</Button>
             <Button onClick={() => {
-              const el = document.getElementById("installment-receipt");
-              if (!el) return;
-              const w = window.open("", "_blank", "width=600,height=700");
+              if (!receipt) return;
+              const html = buildReceiptHtml(receipt, data.samitiName || "সমিতি");
+              const w = window.open("", "_blank", "width=600,height=750");
               if (!w) return;
-              w.document.write(`<html><head><title>রিসিপ্ট</title><style>body{font-family:system-ui,sans-serif;padding:20px;}div{margin:4px 0;}.grid{display:grid;grid-template-columns:1fr 1fr;gap:6px;}.center{text-align:center;}hr{margin:10px 0;}</style></head><body>${el.innerHTML}</body></html>`);
+              w.document.write(`<!DOCTYPE html><html><head><meta charset="utf-8"><title>রিসিপ্ট</title><style>${receiptCss}</style></head><body>${html}<script>setTimeout(()=>window.print(),300)</script></body></html>`);
               w.document.close();
               w.focus();
-              w.print();
             }}><Printer className="h-4 w-4 mr-1" />প্রিন্ট</Button>
           </DialogFooter>
         </DialogContent>
