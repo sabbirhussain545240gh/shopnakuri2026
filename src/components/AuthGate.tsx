@@ -11,7 +11,6 @@ import { toast } from "sonner";
 export function AuthGate({ children }: { children: (session: Session) => ReactNode }) {
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
-  const [mode, setMode] = useState<"signin" | "signup">("signin");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [submitting, setSubmitting] = useState(false);
@@ -35,22 +34,12 @@ export function AuthGate({ children }: { children: (session: Session) => ReactNo
     }
     setSubmitting(true);
     try {
-      if (mode === "signup") {
-        const { error } = await supabase.auth.signUp({
-          email: email.trim(),
-          password,
-          options: { emailRedirectTo: window.location.origin },
-        });
-        if (error) throw error;
-        toast.success("অ্যাকাউন্ট তৈরি হয়েছে! লগইন হচ্ছে...");
-      } else {
-        const { error } = await supabase.auth.signInWithPassword({
-          email: email.trim(),
-          password,
-        });
-        if (error) throw error;
-        toast.success("সফলভাবে লগইন হয়েছে");
-      }
+      const { error } = await supabase.auth.signInWithPassword({
+        email: email.trim(),
+        password,
+      });
+      if (error) throw error;
+      toast.success("সফলভাবে লগইন হয়েছে");
     } catch (err: any) {
       toast.error(err?.message ?? "ত্রুটি ঘটেছে");
     } finally {
@@ -72,9 +61,7 @@ export function AuthGate({ children }: { children: (session: Session) => ReactNo
         <Card className="w-full max-w-md">
           <CardHeader className="text-center">
             <CardTitle className="text-2xl">সমিতি ম্যানেজমেন্ট</CardTitle>
-            <CardDescription>
-              {mode === "signin" ? "অ্যাকাউন্টে লগইন করুন" : "নতুন অ্যাকাউন্ট তৈরি করুন"}
-            </CardDescription>
+            <CardDescription>অ্যাকাউন্টে লগইন করুন</CardDescription>
           </CardHeader>
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-4">
@@ -95,7 +82,7 @@ export function AuthGate({ children }: { children: (session: Session) => ReactNo
                 <Input
                   id="password"
                   type="password"
-                  autoComplete={mode === "signin" ? "current-password" : "new-password"}
+                  autoComplete="current-password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="••••••••"
@@ -105,34 +92,12 @@ export function AuthGate({ children }: { children: (session: Session) => ReactNo
               </div>
               <Button type="submit" className="w-full" disabled={submitting}>
                 {submitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                {mode === "signin" ? "লগইন" : "সাইন আপ"}
+                লগইন
               </Button>
             </form>
-            <div className="mt-4 text-center text-sm text-muted-foreground">
-              {mode === "signin" ? (
-                <>
-                  অ্যাকাউন্ট নেই?{" "}
-                  <button
-                    type="button"
-                    className="text-primary underline"
-                    onClick={() => setMode("signup")}
-                  >
-                    সাইন আপ করুন
-                  </button>
-                </>
-              ) : (
-                <>
-                  ইতিমধ্যে অ্যাকাউন্ট আছে?{" "}
-                  <button
-                    type="button"
-                    className="text-primary underline"
-                    onClick={() => setMode("signin")}
-                  >
-                    লগইন করুন
-                  </button>
-                </>
-              )}
-            </div>
+            <p className="mt-4 text-center text-sm text-muted-foreground">
+              শুধুমাত্র অনুমোদিত ব্যবহারকারীরাই লগইন করতে পারবেন।
+            </p>
           </CardContent>
         </Card>
       </div>
