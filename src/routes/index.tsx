@@ -582,6 +582,7 @@ function printMemberCard(member: Member, samiti: { samitiName: string; samitiLog
           </div>
         </div>
         ${nomineeRows.length ? `<h3 style="font-size:16px;border-bottom:1px solid #ccc;padding-bottom:6px;margin:16px 0 8px;">নমিনি তথ্য</h3><table style="width:100%;border-collapse:collapse;font-size:14px;">${tableRows(nomineeRows)}</table>` : ""}
+        </div>
       </div>
       <script>setTimeout(()=>window.print(),300)</script>
     </body>
