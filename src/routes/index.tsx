@@ -1251,7 +1251,8 @@ function LoansTab() {
                 );
               })}
             </TableBody>
-          </Table>
+           </Table>
+          </>
         )}
       </CardContent>
 
