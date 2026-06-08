@@ -374,7 +374,7 @@ function MembersTab() {
                 <Button variant="outline" size="sm" onClick={() => setEditMember(viewMember)}>
                   <Pencil className="h-4 w-4 mr-1" />সম্পাদনা
                 </Button>
-                <Button variant="outline" size="sm" onClick={() => printMemberCard(viewMember)}>
+                <Button variant="outline" size="sm" onClick={() => printMemberCard(viewMember, data)}>
                   <Printer className="h-4 w-4 mr-1" />প্রিন্ট
                 </Button>
               </div>
