@@ -68,6 +68,9 @@ export type SamitiData = {
   payments: LoanPayment[];
   transactions: Transaction[];
   samitiName: string;
+  samitiLogo: string;
+  samitiAddress: string;
+  establishedDate: string;
   settings: Settings;
 };
 
@@ -75,6 +78,9 @@ const KEY = "samiti-data-v1";
 
 const empty: SamitiData = {
   samitiName: "আমাদের সমিতি",
+  samitiLogo: "",
+  samitiAddress: "",
+  establishedDate: "",
   members: [],
   deposits: [],
   loans: [],
@@ -128,6 +134,9 @@ export function useSamiti() {
   const data = getState();
 
   const setSamitiName = useCallback((name: string) => setState({ ...getState(), samitiName: name }), []);
+  const updateSamitiInfo = useCallback((info: Partial<Pick<SamitiData, "samitiName" | "samitiLogo" | "samitiAddress" | "establishedDate">>) => {
+    setState({ ...getState(), ...info });
+  }, []);
 
   const addMember = useCallback((m: Omit<Member, "id">) => {
     const members = getState().members;
@@ -198,6 +207,7 @@ export function useSamiti() {
   return {
     data,
     setSamitiName,
+    updateSamitiInfo,
     addMember, updateMember, deleteMember,
     addDeposit, deleteDeposit,
     addLoan, addPayment, closeLoan, deleteLoan,

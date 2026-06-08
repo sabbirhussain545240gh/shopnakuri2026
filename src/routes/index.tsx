@@ -374,7 +374,7 @@ function MembersTab() {
                 <Button variant="outline" size="sm" onClick={() => setEditMember(viewMember)}>
                   <Pencil className="h-4 w-4 mr-1" />সম্পাদনা
                 </Button>
-                <Button variant="outline" size="sm" onClick={() => printMemberCard(viewMember)}>
+                <Button variant="outline" size="sm" onClick={() => printMemberCard(viewMember, data)}>
                   <Printer className="h-4 w-4 mr-1" />প্রিন্ট
                 </Button>
               </div>
@@ -516,9 +516,19 @@ function Info({ label, value, className }: { label: string; value?: string; clas
   );
 }
 
-function printMemberCard(member: Member) {
+function printMemberCard(member: Member, samiti: { samitiName: string; samitiLogo?: string; samitiAddress?: string; establishedDate?: string }) {
   const w = window.open("", "_blank", "width=800,height=600");
   if (!w) return;
+  const headerHtml = `
+    <div style="display:flex;align-items:center;gap:16px;border-bottom:2px solid #333;padding-bottom:10px;margin-bottom:16px;">
+      ${samiti.samitiLogo ? `<img src="${samiti.samitiLogo}" style="width:70px;height:70px;object-fit:contain;" />` : ""}
+      <div style="flex:1;text-align:center;">
+        <h1 style="margin:0;font-size:22px;">${samiti.samitiName}</h1>
+        ${samiti.samitiAddress ? `<div style="font-size:13px;color:#444;margin-top:2px;">${samiti.samitiAddress}</div>` : ""}
+        ${samiti.establishedDate ? `<div style="font-size:12px;color:#666;margin-top:2px;">স্থাপিত: ${fmtDate(samiti.establishedDate)}</div>` : ""}
+      </div>
+      ${samiti.samitiLogo ? `<div style="width:70px;"></div>` : ""}
+    </div>`;
   const photoHtml = member.photo
     ? `<img src="${member.photo}" style="width:120px;height:120px;object-fit:cover;border-radius:8px;border:1px solid #ddd;" />`
     : `<div style="width:120px;height:120px;border-radius:8px;border:1px solid #ddd;background:#f5f5f5;display:flex;align-items:center;justify-content:center;color:#888;font-size:12px;">ছবি নেই</div>`;
@@ -559,8 +569,10 @@ function printMemberCard(member: Member) {
       <div class="no-print" style="margin-bottom:16px;">
         <button onclick="window.print()" style="padding:8px 16px;font-size:14px;cursor:pointer;">প্রিন্ট করুন</button>
       </div>
-      <div style="border:2px solid #333;padding:20px;border-radius:8px;max-width:600px;margin:auto;">
-        <h2 style="text-align:center;margin:0 0 16px 0;font-size:22px;border-bottom:2px solid #333;padding-bottom:8px;">সদস্য তথ্য</h2>
+      <div style="max-width:640px;margin:auto;">
+        ${headerHtml}
+        <div style="border:2px solid #333;padding:20px;border-radius:8px;">
+        <h2 style="text-align:center;margin:0 0 16px 0;font-size:20px;border-bottom:2px solid #333;padding-bottom:8px;">সদস্য তথ্য</h2>
         <div style="display:flex;gap:20px;align-items:flex-start;margin-bottom:16px;">
           ${photoHtml}
           <div style="flex:1;">
@@ -570,6 +582,7 @@ function printMemberCard(member: Member) {
           </div>
         </div>
         ${nomineeRows.length ? `<h3 style="font-size:16px;border-bottom:1px solid #ccc;padding-bottom:6px;margin:16px 0 8px;">নমিনি তথ্য</h3><table style="width:100%;border-collapse:collapse;font-size:14px;">${tableRows(nomineeRows)}</table>` : ""}
+        </div>
       </div>
       <script>setTimeout(()=>window.print(),300)</script>
     </body>
@@ -898,14 +911,30 @@ function CashbookTab() {
 
 // ===== Settings =====
 function SettingsTab() {
-  const { data, setSamitiName, updateSettings, resetAll, importData } = useSamiti();
+  const { data, updateSamitiInfo, updateSettings, resetAll, importData } = useSamiti();
   const [name, setName] = useState(data.samitiName);
+  const [address, setAddress] = useState(data.samitiAddress || "");
+  const [estDate, setEstDate] = useState(data.establishedDate || "");
+  const [logo, setLogo] = useState(data.samitiLogo || "");
   const [rate, setRate] = useState(String(data.settings.defaultInterestRate));
   const [dur, setDur] = useState(String(data.settings.defaultDurationMonths));
   const [confirmReset, setConfirmReset] = useState(false);
 
+  const onLogo = (file?: File) => {
+    if (!file) return;
+    if (file.size > 2 * 1024 * 1024) { toast.error("লোগো ২ MB এর কম হতে হবে"); return; }
+    const reader = new FileReader();
+    reader.onload = () => setLogo(String(reader.result || ""));
+    reader.readAsDataURL(file);
+  };
+
   const saveGeneral = () => {
-    setSamitiName(name.trim() || "আমাদের সমিতি");
+    updateSamitiInfo({
+      samitiName: name.trim() || "আমাদের সমিতি",
+      samitiAddress: address.trim(),
+      establishedDate: estDate,
+      samitiLogo: logo,
+    });
     updateSettings({
       defaultInterestRate: Number(rate) || 0,
       defaultDurationMonths: Number(dur) || 12,
@@ -945,16 +974,29 @@ function SettingsTab() {
     <div className="grid gap-6 md:grid-cols-2">
       <Card>
         <CardHeader>
-          <CardTitle>সাধারণ সেটিংস</CardTitle>
-          <CardDescription>সমিতির নাম ও ঋণের ডিফল্ট মান</CardDescription>
+          <CardTitle>সমিতির তথ্য</CardTitle>
+          <CardDescription>লোগো, নাম, ঠিকানা ও স্থাপিত তারিখ — সকল রিপোর্টের হেডারে ব্যবহৃত হবে</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
+          <div className="flex items-center gap-4">
+            <div className="h-20 w-20 rounded-lg border bg-muted overflow-hidden flex items-center justify-center shrink-0">
+              {logo ? <img src={logo} alt="" className="h-full w-full object-contain" /> : <span className="text-xs text-muted-foreground">লোগো</span>}
+            </div>
+            <div className="space-y-2 flex-1">
+              <Label>সমিতির লোগো</Label>
+              <Input type="file" accept="image/*" onChange={(e) => onLogo(e.target.files?.[0])} />
+              {logo && <Button type="button" variant="ghost" size="sm" onClick={() => setLogo("")}>লোগো সরান</Button>}
+            </div>
+          </div>
           <div><Label>সমিতির নাম</Label><Input value={name} onChange={(e) => setName(e.target.value)} /></div>
+          <div><Label>সমিতির ঠিকানা</Label><Textarea value={address} onChange={(e) => setAddress(e.target.value)} /></div>
+          <div><Label>স্থাপিত তারিখ</Label><Input type="date" value={estDate} onChange={(e) => setEstDate(e.target.value)} /></div>
           <div><Label>ঋণের ডিফল্ট সুদের হার (% বার্ষিক)</Label><Input type="number" value={rate} onChange={(e) => setRate(e.target.value)} /></div>
           <div><Label>ঋণের ডিফল্ট মেয়াদ (মাস)</Label><Input type="number" value={dur} onChange={(e) => setDur(e.target.value)} /></div>
           <Button onClick={saveGeneral} className="w-full">সংরক্ষণ</Button>
         </CardContent>
       </Card>
+
 
       <Card>
         <CardHeader>
@@ -1080,6 +1122,9 @@ function ReportsTab() {
   const handlePrint = () => {
     printReport({
       samitiName: data.samitiName,
+      samitiLogo: data.samitiLogo,
+      samitiAddress: data.samitiAddress,
+      establishedDate: data.establishedDate,
       reportType,
       dateRange: dateRangeText(),
       totals,
@@ -1377,6 +1422,9 @@ function ReportsTab() {
 
 function printReport(p: {
   samitiName: string;
+  samitiLogo?: string;
+  samitiAddress?: string;
+  establishedDate?: string;
   reportType: string;
   dateRange: string;
   totals: any;
@@ -1388,7 +1436,7 @@ function printReport(p: {
 }) {
   const w = window.open("", "_blank", "width=1000,height=700");
   if (!w) return;
-  const { samitiName, reportType, dateRange, totals, memberWise, filtered, members, memberSavingsPivot, groupBy } = p;
+  const { samitiName, samitiLogo, samitiAddress, establishedDate, reportType, dateRange, totals, memberWise, filtered, members, memberSavingsPivot, groupBy } = p;
 
   const titleMap: Record<string, string> = {
     summary: "সারাংশ রিপোর্ট",
@@ -1456,7 +1504,15 @@ function printReport(p: {
     </style></head>
     <body>
       <div class="no-print" style="margin-bottom:12px;"><button onclick="window.print()" style="padding:8px 16px;font-size:14px;cursor:pointer;">প্রিন্ট করুন</button></div>
-      <h1>${samitiName}</h1>
+      <div style="display:flex;align-items:center;gap:16px;border-bottom:2px solid #333;padding-bottom:10px;margin-bottom:10px;">
+        ${samitiLogo ? `<img src="${samitiLogo}" style="width:70px;height:70px;object-fit:contain;" />` : ""}
+        <div style="flex:1;text-align:center;">
+          <h1 style="margin:0;font-size:22px;">${samitiName}</h1>
+          ${samitiAddress ? `<div style="font-size:13px;color:#444;margin-top:2px;">${samitiAddress}</div>` : ""}
+          ${establishedDate ? `<div style="font-size:12px;color:#666;margin-top:2px;">স্থাপিত: ${fmtDate(establishedDate)}</div>` : ""}
+        </div>
+        ${samitiLogo ? `<div style="width:70px;"></div>` : ""}
+      </div>
       <h2>${titleMap[reportType]}</h2>
       <div class="meta">সময়কাল: ${dateRange} | প্রিন্ট তারিখ: ${fmtDate(today())}</div>
       ${body}
