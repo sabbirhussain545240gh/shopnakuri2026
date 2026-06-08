@@ -425,6 +425,7 @@ function printMemberCard(member: Member) {
     ? `<img src="${member.photo}" style="width:120px;height:120px;object-fit:cover;border-radius:8px;border:1px solid #ddd;" />`
     : `<div style="width:120px;height:120px;border-radius:8px;border:1px solid #ddd;background:#f5f5f5;display:flex;align-items:center;justify-content:center;color:#888;font-size:12px;">ছবি নেই</div>`;
   const rows: [string, string][] = [
+    ["সিরিয়াল নম্বর", toBn(member.serial || 0)],
     ["নাম", member.name],
     ["পিতার নাম", member.fatherName],
     ["মাতার নাম", member.motherName],
