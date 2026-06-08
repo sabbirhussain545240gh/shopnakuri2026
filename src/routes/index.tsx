@@ -1270,6 +1270,21 @@ function LoansTab() {
               <div><Label>মেয়াদ (মাস)</Label><Input type="number" value={editForm.durationMonths} onChange={(e) => setEditForm({ ...editForm, durationMonths: e.target.value })} /></div>
               <div><Label>তারিখ</Label><Input type="date" value={editForm.date} onChange={(e) => setEditForm({ ...editForm, date: e.target.value })} /></div>
             </div>
+            {(() => {
+              const amt = Number(editForm.amount) || 0;
+              const rate = Number(editForm.interestRate) || 0;
+              const dur = Number(editForm.durationMonths) || 0;
+              const inst = monthlyInstallment(amt, rate, dur);
+              const first = editForm.date && dur > 0 ? addMonths(editForm.date, 1) : "";
+              const end = editForm.date && dur > 0 ? addMonths(editForm.date, dur) : "";
+              return (
+                <div className="rounded-md border bg-muted/40 p-3 text-sm grid grid-cols-1 sm:grid-cols-3 gap-2">
+                  <div><span className="text-muted-foreground">মাসিক কিস্তি:</span> <span className="font-semibold">{formatTk(inst)}</span></div>
+                  <div><span className="text-muted-foreground">১ম কিস্তির তারিখ:</span> <span className="font-medium">{first ? fmtDate(first) : "—"}</span></div>
+                  <div><span className="text-muted-foreground">ঋণ শেষ:</span> <span className="font-medium">{end ? fmtDate(end) : "—"}</span></div>
+                </div>
+              );
+            })()}
           </div>
           <DialogFooter><Button onClick={submitEdit}>সংরক্ষণ</Button></DialogFooter>
         </DialogContent>
