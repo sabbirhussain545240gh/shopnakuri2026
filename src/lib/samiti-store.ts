@@ -9,6 +9,7 @@ export type Nominee = {
 
 export type Member = {
   id: string;
+  serial: number;
   name: string;
   fatherName: string;
   motherName: string;
@@ -87,7 +88,14 @@ function load(): SamitiData {
   try {
     const raw = localStorage.getItem(KEY);
     if (!raw) return empty;
-    return { ...empty, ...JSON.parse(raw) };
+    const parsed = { ...empty, ...JSON.parse(raw) } as SamitiData;
+    // migrate: assign serials to legacy members
+    let nextSerial = 1;
+    parsed.members = parsed.members.map((m) => {
+      if (typeof (m as any).serial === "number") return m;
+      return { ...m, serial: nextSerial++ };
+    });
+    return parsed;
   } catch {
     return empty;
   }
@@ -122,8 +130,11 @@ export function useSamiti() {
   const setSamitiName = useCallback((name: string) => setState({ ...getState(), samitiName: name }), []);
 
   const addMember = useCallback((m: Omit<Member, "id">) => {
-    const member: Member = { ...m, id: crypto.randomUUID() };
-    setState({ ...getState(), members: [...getState().members, member] });
+    const members = getState().members;
+    const maxSerial = members.length > 0 ? Math.max(...members.map((x) => x.serial || 0)) : 0;
+    const serial = m.serial && m.serial > 0 ? m.serial : maxSerial + 1;
+    const member: Member = { ...m, id: crypto.randomUUID(), serial };
+    setState({ ...getState(), members: [...members, member] });
   }, []);
   const deleteMember = useCallback((id: string) => {
     const s = getState();

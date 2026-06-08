@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useMemo, useState } from "react";
+import { useMemo, useState, useEffect } from "react";
 import {
   useSamiti, toBn, formatTk, memberTotalDeposit, loanPaid, loanTotalDue,
   type Member, type Loan,
@@ -241,6 +241,7 @@ function MembersTab() {
   const { data, addMember, deleteMember } = useSamiti();
   const [open, setOpen] = useState(false);
   const emptyForm = {
+    serial: "",
     name: "", fatherName: "", motherName: "", phone: "",
     birthDate: "", nid: "", address: "", photo: "",
     nominee: { name: "", relation: "", phone: "", nid: "" },
@@ -248,6 +249,11 @@ function MembersTab() {
   };
   const [form, setForm] = useState(emptyForm);
   const [viewMember, setViewMember] = useState<Member | null>(null);
+
+  const nextSerial = data.members.length > 0 ? Math.max(...data.members.map((m) => m.serial || 0)) + 1 : 1;
+  useEffect(() => {
+    if (open) setForm((f) => ({ ...f, serial: String(nextSerial) }));
+  }, [open, nextSerial]);
 
   const onPhoto = (file?: File) => {
     if (!file) return;
@@ -259,7 +265,8 @@ function MembersTab() {
 
   const submit = () => {
     if (!form.name.trim()) { toast.error("নাম দিন"); return; }
-    addMember(form);
+    const serialNum = form.serial ? parseInt(form.serial, 10) : 0;
+    addMember({ ...form, serial: serialNum });
     setForm(emptyForm);
     setOpen(false);
     toast.success("সদস্য যোগ হয়েছে");
@@ -290,6 +297,7 @@ function MembersTab() {
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                <div><Label>সিরিয়াল নম্বর</Label><Input type="number" value={form.serial} onChange={(e) => setForm({ ...form, serial: e.target.value })} /></div>
                 <div><Label>নাম *</Label><Input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} /></div>
                 <div><Label>মোবাইল নং</Label><Input value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} /></div>
                 <div><Label>পিতার নাম</Label><Input value={form.fatherName} onChange={(e) => setForm({ ...form, fatherName: e.target.value })} /></div>
@@ -321,6 +329,7 @@ function MembersTab() {
           <Table>
             <TableHeader>
               <TableRow>
+                <TableHead className="w-16 text-center">সি.নং</TableHead>
                 <TableHead>ছবি</TableHead>
                 <TableHead>নাম</TableHead><TableHead>মোবাইল</TableHead>
                 <TableHead>NID/জন্ম সনদ</TableHead><TableHead>যোগদান</TableHead>
@@ -330,6 +339,7 @@ function MembersTab() {
             <TableBody>
               {data.members.map((m) => (
                 <TableRow key={m.id} className="cursor-pointer" onClick={() => setViewMember(m)}>
+                  <TableCell className="text-center font-semibold">{toBn(m.serial || 0)}</TableCell>
                   <TableCell>
                     <div className="h-10 w-10 rounded-full bg-muted overflow-hidden flex items-center justify-center">
                       {m.photo ? <img src={m.photo} alt={m.name} className="h-full w-full object-cover" /> : <Users className="h-4 w-4 text-muted-foreground" />}
@@ -374,6 +384,7 @@ function MembersTab() {
                 </div>
               </div>
               <div className="grid grid-cols-2 gap-3 text-sm">
+                <Info label="সিরিয়াল নম্বর" value={toBn(viewMember.serial || 0)} />
                 <Info label="পিতার নাম" value={viewMember.fatherName} />
                 <Info label="মাতার নাম" value={viewMember.motherName} />
                 <Info label="মোবাইল" value={viewMember.phone ? toBn(viewMember.phone) : ""} />
@@ -414,6 +425,7 @@ function printMemberCard(member: Member) {
     ? `<img src="${member.photo}" style="width:120px;height:120px;object-fit:cover;border-radius:8px;border:1px solid #ddd;" />`
     : `<div style="width:120px;height:120px;border-radius:8px;border:1px solid #ddd;background:#f5f5f5;display:flex;align-items:center;justify-content:center;color:#888;font-size:12px;">ছবি নেই</div>`;
   const rows: [string, string][] = [
+    ["সিরিয়াল নম্বর", toBn(member.serial || 0)],
     ["নাম", member.name],
     ["পিতার নাম", member.fatherName],
     ["মাতার নাম", member.motherName],
