@@ -354,7 +354,14 @@ function MembersTab() {
 
       <Dialog open={!!viewMember} onOpenChange={(o) => !o && setViewMember(null)}>
         <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
-          <DialogHeader><DialogTitle>সদস্যের তথ্য</DialogTitle></DialogHeader>
+          <DialogHeader className="flex flex-row items-center justify-between">
+            <DialogTitle>সদস্যের তথ্য</DialogTitle>
+            {viewMember && (
+              <Button variant="outline" size="sm" onClick={() => printMemberCard(viewMember)}>
+                <Printer className="h-4 w-4 mr-1" />প্রিন্ট
+              </Button>
+            )}
+          </DialogHeader>
           {viewMember && (
             <div className="space-y-4">
               <div className="flex items-center gap-4">
