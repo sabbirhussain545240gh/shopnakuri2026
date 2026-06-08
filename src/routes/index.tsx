@@ -799,7 +799,7 @@ async function exportMemberCardPdf(member: Member, samiti: SamitiInfo) {
 
 // ===== Savings =====
 function SavingsTab() {
-  const { data, addDeposit, updateDeposit, deleteDeposit } = useSamiti();
+  const { data, addDeposit, addDeposits, updateDeposit, deleteDeposit } = useSamiti();
   const [open, setOpen] = useState(false);
   const [form, setForm] = useState({ memberId: "", amount: "", date: today(), note: "" });
   const [search, setSearch] = useState("");
