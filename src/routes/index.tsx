@@ -898,14 +898,30 @@ function CashbookTab() {
 
 // ===== Settings =====
 function SettingsTab() {
-  const { data, setSamitiName, updateSettings, resetAll, importData } = useSamiti();
+  const { data, updateSamitiInfo, updateSettings, resetAll, importData } = useSamiti();
   const [name, setName] = useState(data.samitiName);
+  const [address, setAddress] = useState(data.samitiAddress || "");
+  const [estDate, setEstDate] = useState(data.establishedDate || "");
+  const [logo, setLogo] = useState(data.samitiLogo || "");
   const [rate, setRate] = useState(String(data.settings.defaultInterestRate));
   const [dur, setDur] = useState(String(data.settings.defaultDurationMonths));
   const [confirmReset, setConfirmReset] = useState(false);
 
+  const onLogo = (file?: File) => {
+    if (!file) return;
+    if (file.size > 2 * 1024 * 1024) { toast.error("লোগো ২ MB এর কম হতে হবে"); return; }
+    const reader = new FileReader();
+    reader.onload = () => setLogo(String(reader.result || ""));
+    reader.readAsDataURL(file);
+  };
+
   const saveGeneral = () => {
-    setSamitiName(name.trim() || "আমাদের সমিতি");
+    updateSamitiInfo({
+      samitiName: name.trim() || "আমাদের সমিতি",
+      samitiAddress: address.trim(),
+      establishedDate: estDate,
+      samitiLogo: logo,
+    });
     updateSettings({
       defaultInterestRate: Number(rate) || 0,
       defaultDurationMonths: Number(dur) || 12,
@@ -945,16 +961,29 @@ function SettingsTab() {
     <div className="grid gap-6 md:grid-cols-2">
       <Card>
         <CardHeader>
-          <CardTitle>সাধারণ সেটিংস</CardTitle>
-          <CardDescription>সমিতির নাম ও ঋণের ডিফল্ট মান</CardDescription>
+          <CardTitle>সমিতির তথ্য</CardTitle>
+          <CardDescription>লোগো, নাম, ঠিকানা ও স্থাপিত তারিখ — সকল রিপোর্টের হেডারে ব্যবহৃত হবে</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
+          <div className="flex items-center gap-4">
+            <div className="h-20 w-20 rounded-lg border bg-muted overflow-hidden flex items-center justify-center shrink-0">
+              {logo ? <img src={logo} alt="" className="h-full w-full object-contain" /> : <span className="text-xs text-muted-foreground">লোগো</span>}
+            </div>
+            <div className="space-y-2 flex-1">
+              <Label>সমিতির লোগো</Label>
+              <Input type="file" accept="image/*" onChange={(e) => onLogo(e.target.files?.[0])} />
+              {logo && <Button type="button" variant="ghost" size="sm" onClick={() => setLogo("")}>লোগো সরান</Button>}
+            </div>
+          </div>
           <div><Label>সমিতির নাম</Label><Input value={name} onChange={(e) => setName(e.target.value)} /></div>
+          <div><Label>সমিতির ঠিকানা</Label><Textarea value={address} onChange={(e) => setAddress(e.target.value)} /></div>
+          <div><Label>স্থাপিত তারিখ</Label><Input type="date" value={estDate} onChange={(e) => setEstDate(e.target.value)} /></div>
           <div><Label>ঋণের ডিফল্ট সুদের হার (% বার্ষিক)</Label><Input type="number" value={rate} onChange={(e) => setRate(e.target.value)} /></div>
           <div><Label>ঋণের ডিফল্ট মেয়াদ (মাস)</Label><Input type="number" value={dur} onChange={(e) => setDur(e.target.value)} /></div>
           <Button onClick={saveGeneral} className="w-full">সংরক্ষণ</Button>
         </CardContent>
       </Card>
+
 
       <Card>
         <CardHeader>
