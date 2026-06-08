@@ -809,10 +809,10 @@ function LoansTab() {
             <DialogHeader><DialogTitle>নতুন ঋণ প্রদান</DialogTitle></DialogHeader>
             <div className="space-y-3">
               <div>
-                <Label>সদস্য (নাম ও মোবাইল) *</Label>
+                <Label>সদস্য (সিরিয়াল ও নাম) *</Label>
                 <Select value={form.memberId} onValueChange={(v) => setField("memberId", v)}>
                   <SelectTrigger className={errors.memberId ? "border-destructive" : ""}><SelectValue placeholder="সদস্য নির্বাচন করুন" /></SelectTrigger>
-                  <SelectContent>{data.members.map((m) => <SelectItem key={m.id} value={m.id}>{m.name}{m.phone ? ` — ${toBn(m.phone)}` : ""}</SelectItem>)}</SelectContent>
+                  <SelectContent>{data.members.map((m) => <SelectItem key={m.id} value={m.id}>{toBn(m.serial)} — {m.name}</SelectItem>)}</SelectContent>
                 </Select>
                 {errors.memberId && <p className="text-xs text-destructive mt-1">{errors.memberId}</p>}
               </div>
