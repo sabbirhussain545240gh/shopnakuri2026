@@ -841,9 +841,32 @@ function LoansTab() {
                 {errors.memberGuarantorId && <p className="text-xs text-destructive mt-1">{errors.memberGuarantorId}</p>}
               </div>
               <div>
-                <Label>পারিবারিক জামিনদার *</Label>
-                <Input className={errors.familyGuarantor ? "border-destructive" : ""} value={form.familyGuarantor} onChange={(e) => setField("familyGuarantor", e.target.value)} placeholder="নাম, সম্পর্ক, মোবাইল" />
-                {errors.familyGuarantor && <p className="text-xs text-destructive mt-1">{errors.familyGuarantor}</p>}
+                <Label>পারিবারিক জামিনদার — নাম *</Label>
+                <Input className={errors.familyGuarantorName ? "border-destructive" : ""} value={form.familyGuarantorName} onChange={(e) => setField("familyGuarantorName", e.target.value)} placeholder="নাম" />
+                {errors.familyGuarantorName && <p className="text-xs text-destructive mt-1">{errors.familyGuarantorName}</p>}
+              </div>
+              <div>
+                <Label>পারিবারিক জামিনদার — সম্পর্ক *</Label>
+                <Select value={form.familyGuarantorRelation} onValueChange={(v) => setField("familyGuarantorRelation", v)}>
+                  <SelectTrigger className={errors.familyGuarantorRelation ? "border-destructive" : ""}><SelectValue placeholder="সম্পর্ক নির্বাচন করুন" /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="বাবা">বাবা</SelectItem>
+                    <SelectItem value="মা">মা</SelectItem>
+                    <SelectItem value="ভাই">ভাই</SelectItem>
+                    <SelectItem value="বোন">বোন</SelectItem>
+                    <SelectItem value="স্বামী">স্বামী</SelectItem>
+                    <SelectItem value="স্ত্রী">স্ত্রী</SelectItem>
+                    <SelectItem value="পুত্র">পুত্র</SelectItem>
+                    <SelectItem value="কন্যা">কন্যা</SelectItem>
+                    <SelectItem value="অন্যান্য">অন্যান্য</SelectItem>
+                  </SelectContent>
+                </Select>
+                {errors.familyGuarantorRelation && <p className="text-xs text-destructive mt-1">{errors.familyGuarantorRelation}</p>}
+              </div>
+              <div>
+                <Label>পারিবারিক জামিনদার — মোবাইল *</Label>
+                <Input className={errors.familyGuarantorPhone ? "border-destructive" : ""} value={form.familyGuarantorPhone} onChange={(e) => setField("familyGuarantorPhone", e.target.value)} placeholder="মোবাইল নম্বর" />
+                {errors.familyGuarantorPhone && <p className="text-xs text-destructive mt-1">{errors.familyGuarantorPhone}</p>}
               </div>
             </div>
             <DialogFooter><Button onClick={submit}>ঋণ প্রদান</Button></DialogFooter>
