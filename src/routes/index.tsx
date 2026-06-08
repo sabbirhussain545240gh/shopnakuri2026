@@ -1115,6 +1115,21 @@ function LoansTab() {
                 <div><Label>মেয়াদ (মাস)</Label><Input type="number" value={form.durationMonths} onChange={(e) => setForm({ ...form, durationMonths: e.target.value })} /></div>
                 <div><Label>তারিখ</Label><Input type="date" value={form.date} onChange={(e) => setForm({ ...form, date: e.target.value })} /></div>
               </div>
+              {(() => {
+                const amt = Number(form.amount) || 0;
+                const rate = Number(form.interestRate) || 0;
+                const dur = Number(form.durationMonths) || 0;
+                const inst = monthlyInstallment(amt, rate, dur);
+                const first = form.date && dur > 0 ? addMonths(form.date, 1) : "";
+                const end = form.date && dur > 0 ? addMonths(form.date, dur) : "";
+                return (
+                  <div className="rounded-md border bg-muted/40 p-3 text-sm grid grid-cols-1 sm:grid-cols-3 gap-2">
+                    <div><span className="text-muted-foreground">মাসিক কিস্তি:</span> <span className="font-semibold">{formatTk(inst)}</span></div>
+                    <div><span className="text-muted-foreground">১ম কিস্তির তারিখ:</span> <span className="font-medium">{first ? fmtDate(first) : "—"}</span></div>
+                    <div><span className="text-muted-foreground">ঋণ শেষ:</span> <span className="font-medium">{end ? fmtDate(end) : "—"}</span></div>
+                  </div>
+                );
+              })()}
               <div>
                 <Label>সদস্য জামিনদার *</Label>
                 <Select value={form.memberGuarantorId} onValueChange={(v) => setField("memberGuarantorId", v)}>
