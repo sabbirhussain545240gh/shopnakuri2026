@@ -265,7 +265,8 @@ function MembersTab() {
 
   const submit = () => {
     if (!form.name.trim()) { toast.error("নাম দিন"); return; }
-    addMember(form);
+    const serialNum = form.serial ? parseInt(form.serial, 10) : 0;
+    addMember({ ...form, serial: serialNum });
     setForm(emptyForm);
     setOpen(false);
     toast.success("সদস্য যোগ হয়েছে");
