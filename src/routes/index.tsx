@@ -72,17 +72,21 @@ function SamitiApp() {
 
       <main className="container mx-auto px-4 py-6">
         <Tabs defaultValue="dashboard" className="w-full">
-          <TabsList className="grid grid-cols-4 w-full max-w-2xl mb-6 h-auto">
-            <TabsTrigger value="dashboard" className="py-2.5"><LayoutDashboard className="h-4 w-4 ml-0 mr-1.5" />ড্যাশবোর্ড</TabsTrigger>
+          <TabsList className="grid grid-cols-3 md:grid-cols-6 w-full mb-6 h-auto">
+            <TabsTrigger value="dashboard" className="py-2.5"><LayoutDashboard className="h-4 w-4 mr-1.5" />ড্যাশবোর্ড</TabsTrigger>
             <TabsTrigger value="members" className="py-2.5"><Users className="h-4 w-4 mr-1.5" />সদস্য</TabsTrigger>
             <TabsTrigger value="savings" className="py-2.5"><PiggyBank className="h-4 w-4 mr-1.5" />সঞ্চয়</TabsTrigger>
             <TabsTrigger value="loans" className="py-2.5"><HandCoins className="h-4 w-4 mr-1.5" />ঋণ</TabsTrigger>
+            <TabsTrigger value="cashbook" className="py-2.5"><Wallet className="h-4 w-4 mr-1.5" />আয়-ব্যয়</TabsTrigger>
+            <TabsTrigger value="settings" className="py-2.5"><SettingsIcon className="h-4 w-4 mr-1.5" />সেটিংস</TabsTrigger>
           </TabsList>
 
           <TabsContent value="dashboard"><Dashboard totals={totals} memberCount={data.members.length} data={data} /></TabsContent>
           <TabsContent value="members"><MembersTab /></TabsContent>
           <TabsContent value="savings"><SavingsTab /></TabsContent>
           <TabsContent value="loans"><LoansTab /></TabsContent>
+          <TabsContent value="cashbook"><CashbookTab /></TabsContent>
+          <TabsContent value="settings"><SettingsTab /></TabsContent>
         </Tabs>
       </main>
 
