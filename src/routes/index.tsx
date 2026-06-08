@@ -132,13 +132,15 @@ function Dashboard({ totals, memberCount, data }: any) {
   const recent = [...data.deposits].sort((a: any, b: any) => b.date.localeCompare(a.date)).slice(0, 5);
   return (
     <div className="space-y-6">
-      <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         <StatCard label="মোট সদস্য" value={toBn(memberCount)} accent="bg-chart-4" />
         <StatCard label="মোট সঞ্চয়" value={formatTk(totals.totalDeposit)} accent="bg-success" />
         <StatCard label="হাতে নগদ" value={formatTk(totals.cashInHand)} accent="bg-primary" />
+        <StatCard label="বকেয়া ঋণ" value={formatTk(totals.outstanding)} accent="bg-destructive" />
         <StatCard label="মোট ঋণ প্রদান" value={formatTk(totals.totalLoanGiven)} accent="bg-warning" />
         <StatCard label="ঋণ আদায়" value={formatTk(totals.totalRepaid)} accent="bg-chart-2" />
-        <StatCard label="বকেয়া ঋণ" value={formatTk(totals.outstanding)} accent="bg-destructive" />
+        <StatCard label="অন্যান্য আয়" value={formatTk(totals.totalIncome)} accent="bg-success" />
+        <StatCard label="অন্যান্য ব্যয়" value={formatTk(totals.totalExpense)} accent="bg-destructive" />
       </div>
 
       <Card>
