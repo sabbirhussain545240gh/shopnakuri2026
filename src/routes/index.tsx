@@ -1409,6 +1409,9 @@ function ReportsTab() {
 
 function printReport(p: {
   samitiName: string;
+  samitiLogo?: string;
+  samitiAddress?: string;
+  establishedDate?: string;
   reportType: string;
   dateRange: string;
   totals: any;
@@ -1420,7 +1423,7 @@ function printReport(p: {
 }) {
   const w = window.open("", "_blank", "width=1000,height=700");
   if (!w) return;
-  const { samitiName, reportType, dateRange, totals, memberWise, filtered, members, memberSavingsPivot, groupBy } = p;
+  const { samitiName, samitiLogo, samitiAddress, establishedDate, reportType, dateRange, totals, memberWise, filtered, members, memberSavingsPivot, groupBy } = p;
 
   const titleMap: Record<string, string> = {
     summary: "সারাংশ রিপোর্ট",
