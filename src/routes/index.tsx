@@ -16,6 +16,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Textarea } from "@/components/ui/textarea";
 import { Users, PiggyBank, HandCoins, LayoutDashboard, Trash2, Plus, CheckCircle2, Pencil, Settings as SettingsIcon, Wallet, Download, Upload, AlertTriangle, TrendingUp, TrendingDown, Menu, Printer, FileText, Receipt } from "lucide-react";
 import { toast, Toaster } from "sonner";
+import { AuthGate, SignOutButton } from "@/components/AuthGate";
 
 export const Route = createFileRoute("/")({
   head: () => ({
