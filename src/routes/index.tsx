@@ -329,6 +329,7 @@ function MembersTab() {
           <Table>
             <TableHeader>
               <TableRow>
+                <TableHead className="w-16 text-center">সি.নং</TableHead>
                 <TableHead>ছবি</TableHead>
                 <TableHead>নাম</TableHead><TableHead>মোবাইল</TableHead>
                 <TableHead>NID/জন্ম সনদ</TableHead><TableHead>যোগদান</TableHead>
