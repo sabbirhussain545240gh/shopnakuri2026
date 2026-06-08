@@ -1109,6 +1109,9 @@ function ReportsTab() {
   const handlePrint = () => {
     printReport({
       samitiName: data.samitiName,
+      samitiLogo: data.samitiLogo,
+      samitiAddress: data.samitiAddress,
+      establishedDate: data.establishedDate,
       reportType,
       dateRange: dateRangeText(),
       totals,
