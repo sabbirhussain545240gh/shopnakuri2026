@@ -122,13 +122,13 @@ function SamitiApp() {
             <div className="h-9 w-9 rounded-lg bg-primary text-primary-foreground flex items-center justify-center font-display font-bold text-lg shrink-0">স</div>
             <h1 className="font-bold text-foreground truncate">{data.samitiName}</h1>
           </div>
-          <Button variant="ghost" size="icon" onClick={() => setMobileOpen((o) => !o)}>
-            <Menu className="h-5 w-5" />
-          </Button>
+          <div className="flex items-center gap-2">
+            <SignOutButton />
+            <Button variant="ghost" size="icon" onClick={() => setMobileOpen((o) => !o)}>
+              <Menu className="h-5 w-5" />
+            </Button>
+          </div>
         </header>
-        {mobileOpen && (
-          <div className="md:hidden border-b bg-card p-3 space-y-1">
-            {navItems.map((item) => {
               const Icon = item.icon;
               const active = tab === item.value;
               return (
