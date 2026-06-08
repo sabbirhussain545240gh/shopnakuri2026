@@ -240,7 +240,7 @@ function Dashboard({ totals, memberCount, data }: any) {
 
 // ===== Members =====
 function MembersTab() {
-  const { data, addMember, deleteMember } = useSamiti();
+  const { data, addMember, updateMember, deleteMember } = useSamiti();
   const [open, setOpen] = useState(false);
   const emptyForm = {
     serial: "",
@@ -251,6 +251,7 @@ function MembersTab() {
   };
   const [form, setForm] = useState(emptyForm);
   const [viewMember, setViewMember] = useState<Member | null>(null);
+  const [editMember, setEditMember] = useState<Member | null>(null);
 
   const nextSerial = data.members.length > 0 ? Math.max(...data.members.map((m) => m.serial || 0)) + 1 : 1;
   useEffect(() => {
