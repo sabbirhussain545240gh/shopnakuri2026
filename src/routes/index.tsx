@@ -129,6 +129,9 @@ function SamitiApp() {
             </Button>
           </div>
         </header>
+        {mobileOpen && (
+          <div className="md:hidden border-b bg-card p-3 space-y-1">
+            {navItems.map((item) => {
               const Icon = item.icon;
               const active = tab === item.value;
               return (
