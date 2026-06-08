@@ -197,6 +197,12 @@ export function useSamiti() {
   const addLoan = useCallback((l: Omit<Loan, "id" | "status">) => {
     setState({ ...getState(), loans: [...getState().loans, { ...l, id: crypto.randomUUID(), status: "active" }] });
   }, []);
+  const updateLoan = useCallback((id: string, updates: Partial<Omit<Loan, "id">>) => {
+    setState({
+      ...getState(),
+      loans: getState().loans.map((l) => (l.id === id ? { ...l, ...updates } : l)),
+    });
+  }, []);
   const addPayment = useCallback((p: Omit<LoanPayment, "id">) => {
     setState({ ...getState(), payments: [...getState().payments, { ...p, id: crypto.randomUUID() }] });
   }, []);
@@ -239,7 +245,7 @@ export function useSamiti() {
     updateSamitiInfo,
     addMember, addMembers, updateMember, deleteMember,
     addDeposit, addDeposits, updateDeposit, deleteDeposit,
-    addLoan, addPayment, deletePayment, closeLoan, deleteLoan,
+    addLoan, updateLoan, addPayment, deletePayment, closeLoan, deleteLoan,
     addTransaction, deleteTransaction,
     updateSettings, resetAll, importData,
   };
