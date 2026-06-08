@@ -17,6 +17,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Users, PiggyBank, HandCoins, LayoutDashboard, Trash2, Plus, CheckCircle2, Pencil, Settings as SettingsIcon, Wallet, Download, Upload, AlertTriangle, TrendingUp, TrendingDown, Menu, Printer, FileText, Receipt } from "lucide-react";
 import { toast, Toaster } from "sonner";
 import { AuthGate, SignOutButton } from "@/components/AuthGate";
+import { AdminPanel } from "@/components/AdminPanel";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -107,8 +108,9 @@ function SamitiApp() {
           })}
         </nav>
         <div className="p-3 border-t space-y-2">
+          <AdminPanel />
           <SignOutButton />
-          <p className="text-xs text-muted-foreground text-center">তথ্য আপনার ব্রাউজারে সংরক্ষিত</p>
+          <p className="text-xs text-muted-foreground text-center">তথ্য ক্লাউডে সংরক্ষিত</p>
         </div>
       </aside>
 
@@ -123,6 +125,7 @@ function SamitiApp() {
             <h1 className="font-bold text-foreground truncate">{data.samitiName}</h1>
           </div>
           <div className="flex items-center gap-2">
+            <AdminPanel />
             <SignOutButton />
             <Button variant="ghost" size="icon" onClick={() => setMobileOpen((o) => !o)}>
               <Menu className="h-5 w-5" />
