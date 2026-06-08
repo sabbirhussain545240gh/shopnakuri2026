@@ -569,8 +569,10 @@ function printMemberCard(member: Member, samiti: { samitiName: string; samitiLog
       <div class="no-print" style="margin-bottom:16px;">
         <button onclick="window.print()" style="padding:8px 16px;font-size:14px;cursor:pointer;">প্রিন্ট করুন</button>
       </div>
-      <div style="border:2px solid #333;padding:20px;border-radius:8px;max-width:600px;margin:auto;">
-        <h2 style="text-align:center;margin:0 0 16px 0;font-size:22px;border-bottom:2px solid #333;padding-bottom:8px;">সদস্য তথ্য</h2>
+      <div style="max-width:640px;margin:auto;">
+        ${headerHtml}
+        <div style="border:2px solid #333;padding:20px;border-radius:8px;">
+        <h2 style="text-align:center;margin:0 0 16px 0;font-size:20px;border-bottom:2px solid #333;padding-bottom:8px;">সদস্য তথ্য</h2>
         <div style="display:flex;gap:20px;align-items:flex-start;margin-bottom:16px;">
           ${photoHtml}
           <div style="flex:1;">
