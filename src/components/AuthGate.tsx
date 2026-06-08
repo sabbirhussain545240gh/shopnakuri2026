@@ -35,15 +35,7 @@ export function AuthGate({ children }: { children: (session: Session) => ReactNo
     }
     setSubmitting(true);
     try {
-      if (mode === "signup") {
-        const { error } = await supabase.auth.signUp({
-          email: email.trim(),
-          password,
-          options: { emailRedirectTo: window.location.origin },
-        });
-        if (error) throw error;
-        toast.success("অ্যাকাউন্ট তৈরি হয়েছে! লগইন হচ্ছে...");
-      } else {
+      {
         const { error } = await supabase.auth.signInWithPassword({
           email: email.trim(),
           password,
