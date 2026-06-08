@@ -232,7 +232,7 @@ export function useSamiti() {
     setSamitiName,
     updateSamitiInfo,
     addMember, addMembers, updateMember, deleteMember,
-    addDeposit, deleteDeposit,
+    addDeposit, updateDeposit, deleteDeposit,
     addLoan, addPayment, deletePayment, closeLoan, deleteLoan,
     addTransaction, deleteTransaction,
     updateSettings, resetAll, importData,
