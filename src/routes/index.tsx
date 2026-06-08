@@ -1145,6 +1145,52 @@ function ReportsTab() {
         </Card>
       )}
 
+      {reportType === "member-savings" && (
+        <Card>
+          <CardHeader>
+            <CardTitle>সদস্য {groupBy === "month" ? "মাস" : "তারিখ"} অনুযায়ী চাঁদা জমা</CardTitle>
+            <CardDescription>সর্বমোট: {formatTk(memberSavingsPivot.grand)}</CardDescription>
+          </CardHeader>
+          <CardContent>
+            {memberSavingsPivot.rows.length === 0 || memberSavingsPivot.periods.length === 0 ? (
+              <p className="text-sm text-muted-foreground text-center py-8">এই সময়কালে কোনও চাঁদা জমা নেই।</p>
+            ) : (
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead className="w-16">সি.নং</TableHead>
+                    <TableHead>সদস্য</TableHead>
+                    {memberSavingsPivot.labels.map((lbl, i) => (
+                      <TableHead key={memberSavingsPivot.periods[i]} className="text-right">{lbl}</TableHead>
+                    ))}
+                    <TableHead className="text-right">মোট</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {memberSavingsPivot.rows.map((r) => (
+                    <TableRow key={r.member.id}>
+                      <TableCell>{toBn(r.member.serial || 0)}</TableCell>
+                      <TableCell className="font-medium">{r.member.name}</TableCell>
+                      {memberSavingsPivot.periods.map((p) => (
+                        <TableCell key={p} className="text-right">{r.cells[p] ? formatTk(r.cells[p]) : "—"}</TableCell>
+                      ))}
+                      <TableCell className="text-right font-semibold text-success">{formatTk(r.total)}</TableCell>
+                    </TableRow>
+                  ))}
+                  <TableRow className="bg-muted/50">
+                    <TableCell colSpan={2} className="font-semibold text-right">মোট</TableCell>
+                    {memberSavingsPivot.periods.map((p) => (
+                      <TableCell key={p} className="text-right font-semibold">{formatTk(memberSavingsPivot.colTotals[p] || 0)}</TableCell>
+                    ))}
+                    <TableCell className="text-right font-bold text-success">{formatTk(memberSavingsPivot.grand)}</TableCell>
+                  </TableRow>
+                </TableBody>
+              </Table>
+            )}
+          </CardContent>
+        </Card>
+      )}
+
       {reportType === "savings" && (
         <Card>
           <CardHeader><CardTitle>সঞ্চয়/চাদা বিস্তারিত</CardTitle><CardDescription>মোট: {formatTk(totals.totalDeposit)}</CardDescription></CardHeader>
