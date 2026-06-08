@@ -516,9 +516,19 @@ function Info({ label, value, className }: { label: string; value?: string; clas
   );
 }
 
-function printMemberCard(member: Member) {
+function printMemberCard(member: Member, samiti: { samitiName: string; samitiLogo?: string; samitiAddress?: string; establishedDate?: string }) {
   const w = window.open("", "_blank", "width=800,height=600");
   if (!w) return;
+  const headerHtml = `
+    <div style="display:flex;align-items:center;gap:16px;border-bottom:2px solid #333;padding-bottom:10px;margin-bottom:16px;">
+      ${samiti.samitiLogo ? `<img src="${samiti.samitiLogo}" style="width:70px;height:70px;object-fit:contain;" />` : ""}
+      <div style="flex:1;text-align:center;">
+        <h1 style="margin:0;font-size:22px;">${samiti.samitiName}</h1>
+        ${samiti.samitiAddress ? `<div style="font-size:13px;color:#444;margin-top:2px;">${samiti.samitiAddress}</div>` : ""}
+        ${samiti.establishedDate ? `<div style="font-size:12px;color:#666;margin-top:2px;">স্থাপিত: ${fmtDate(samiti.establishedDate)}</div>` : ""}
+      </div>
+      ${samiti.samitiLogo ? `<div style="width:70px;"></div>` : ""}
+    </div>`;
   const photoHtml = member.photo
     ? `<img src="${member.photo}" style="width:120px;height:120px;object-fit:cover;border-radius:8px;border:1px solid #ddd;" />`
     : `<div style="width:120px;height:120px;border-radius:8px;border:1px solid #ddd;background:#f5f5f5;display:flex;align-items:center;justify-content:center;color:#888;font-size:12px;">ছবি নেই</div>`;
