@@ -36,7 +36,8 @@ const enMonths = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep",
 const fmtDate = (s: string) => {
   if (!s) return "";
   const [y, m, d] = s.split("-");
-  return `${d} ${enMonths[+m - 1] || m} ${y}`;
+  const dd = String(d).padStart(2, "0");
+  return `${dd} ${enMonths[+m - 1] || m} ${y}`;
 };
 
 const navItems = [
