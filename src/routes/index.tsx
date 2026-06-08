@@ -1021,6 +1021,12 @@ function ReportsTab() {
       filtered.transactions.forEach((t) => {
         csv += `${t.date},${t.type === "income" ? "আয়" : "ব্যয়"},"${t.category}",${t.amount},"${t.note || ""}"\n`;
       });
+    } else if (reportType === "member-savings") {
+      csv = `সিরিয়াল,নাম,${memberSavingsPivot.labels.join(",")},মোট\n`;
+      memberSavingsPivot.rows.forEach((r) => {
+        csv += `${r.member.serial || 0},"${r.member.name}",${memberSavingsPivot.periods.map((p) => r.cells[p] || 0).join(",")},${r.total}\n`;
+      });
+      csv += `,মোট,${memberSavingsPivot.periods.map((p) => memberSavingsPivot.colTotals[p] || 0).join(",")},${memberSavingsPivot.grand}\n`;
     }
     const blob = new Blob(["\ufeff" + csv], { type: "text/csv;charset=utf-8" });
     const url = URL.createObjectURL(blob);
