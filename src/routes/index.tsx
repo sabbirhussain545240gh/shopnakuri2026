@@ -860,7 +860,23 @@ function SavingsTab() {
         ) : (
           <Table>
             <TableHeader>
-              <TableRow><TableHead>তারিখ</TableHead><TableHead>সদস্য</TableHead><TableHead>মন্তব্য</TableHead><TableHead className="text-right">পরিমাণ</TableHead><TableHead></TableHead></TableRow>
+              <TableRow>
+                <TableHead>তারিখ</TableHead>
+                <TableHead>
+                  <div className="relative">
+                    <Search className="absolute left-2 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
+                    <Input
+                      placeholder="সদস্য সার্চ..."
+                      value={search}
+                      onChange={(e) => setSearch(e.target.value)}
+                      className="pl-7 h-7 text-xs w-40"
+                    />
+                  </div>
+                </TableHead>
+                <TableHead>মন্তব্য</TableHead>
+                <TableHead className="text-right">পরিমাণ</TableHead>
+                <TableHead></TableHead>
+              </TableRow>
             </TableHeader>
             <TableBody>
               {filteredDeposits.map((d) => {
