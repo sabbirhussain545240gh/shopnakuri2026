@@ -3,7 +3,7 @@ import { useMemo, useState, useEffect, useRef } from "react";
 import * as XLSX from "xlsx";
 import {
   useSamiti, toBn, formatTk, memberTotalDeposit, loanPaid, loanTotalDue,
-  type Member, type Loan,
+  type Member, type Loan, type Deposit,
 } from "@/lib/samiti-store";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
