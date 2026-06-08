@@ -900,6 +900,8 @@ function ReportsTab() {
   const [from, setFrom] = useState("");
   const [to, setTo] = useState("");
   const [reportType, setReportType] = useState("summary");
+  const [memberFilter, setMemberFilter] = useState<string>("all");
+  const [groupBy, setGroupBy] = useState<"month" | "day">("month");
 
   const inRange = (date: string) => {
     if (from && date < from) return false;
@@ -938,6 +940,40 @@ function ReportsTab() {
     }).sort((a, b) => (a.member.serial || 0) - (b.member.serial || 0));
   }, [data, filtered]);
 
+  // ===== member-wise periodic deposits (pivot) =====
+  const memberSavingsPivot = useMemo(() => {
+    const deps = filtered.deposits.filter((d) => memberFilter === "all" || d.memberId === memberFilter);
+    const keyOf = (date: string) => (groupBy === "month" ? date.slice(0, 7) : date);
+    const labelOf = (k: string) => {
+      if (groupBy === "month") {
+        const [y, mo] = k.split("-");
+        const names = ["জানু", "ফেব্রু", "মার্চ", "এপ্রিল", "মে", "জুন", "জুলাই", "আগস্ট", "সেপ্ট", "অক্টো", "নভে", "ডিসে"];
+        return `${names[+mo - 1] || mo} ${toBn(y)}`;
+      }
+      return fmtDate(k);
+    };
+    const periodSet = new Set<string>();
+    deps.forEach((d) => periodSet.add(keyOf(d.date)));
+    const periods = Array.from(periodSet).sort();
+    const members = (memberFilter === "all" ? data.members : data.members.filter((m) => m.id === memberFilter))
+      .slice()
+      .sort((a, b) => (a.serial || 0) - (b.serial || 0));
+    const rows = members.map((m) => {
+      const cells: Record<string, number> = {};
+      periods.forEach((p) => (cells[p] = 0));
+      deps.filter((d) => d.memberId === m.id).forEach((d) => {
+        const k = keyOf(d.date);
+        cells[k] = (cells[k] || 0) + d.amount;
+      });
+      const total = periods.reduce((s, p) => s + (cells[p] || 0), 0);
+      return { member: m, cells, total };
+    });
+    const colTotals: Record<string, number> = {};
+    periods.forEach((p) => (colTotals[p] = rows.reduce((s, r) => s + (r.cells[p] || 0), 0)));
+    const grand = rows.reduce((s, r) => s + r.total, 0);
+    return { periods, labels: periods.map(labelOf), rows, colTotals, grand };
+  }, [data, filtered, memberFilter, groupBy]);
+
   const dateRangeText = () => {
     if (from && to) return `${fmtDate(from)} থেকে ${fmtDate(to)}`;
     if (from) return `${fmtDate(from)} থেকে`;
@@ -954,6 +990,8 @@ function ReportsTab() {
       memberWise,
       filtered,
       members: data.members,
+      memberSavingsPivot,
+      groupBy,
     });
   };
 
@@ -983,6 +1021,12 @@ function ReportsTab() {
       filtered.transactions.forEach((t) => {
         csv += `${t.date},${t.type === "income" ? "আয়" : "ব্যয়"},"${t.category}",${t.amount},"${t.note || ""}"\n`;
       });
+    } else if (reportType === "member-savings") {
+      csv = `সিরিয়াল,নাম,${memberSavingsPivot.labels.join(",")},মোট\n`;
+      memberSavingsPivot.rows.forEach((r) => {
+        csv += `${r.member.serial || 0},"${r.member.name}",${memberSavingsPivot.periods.map((p) => r.cells[p] || 0).join(",")},${r.total}\n`;
+      });
+      csv += `,মোট,${memberSavingsPivot.periods.map((p) => memberSavingsPivot.colTotals[p] || 0).join(",")},${memberSavingsPivot.grand}\n`;
     }
     const blob = new Blob(["\ufeff" + csv], { type: "text/csv;charset=utf-8" });
     const url = URL.createObjectURL(blob);
@@ -1010,6 +1054,7 @@ function ReportsTab() {
                 <SelectContent>
                   <SelectItem value="summary">সারাংশ</SelectItem>
                   <SelectItem value="members">সদস্যভিত্তিক</SelectItem>
+                  <SelectItem value="member-savings">সদস্য তারিখ/মাস অনুযায়ী চাঁদা জমা</SelectItem>
                   <SelectItem value="savings">সঞ্চয়/চাদা বিস্তারিত</SelectItem>
                   <SelectItem value="loans">ঋণ বিস্তারিত</SelectItem>
                   <SelectItem value="cashbook">আয়-ব্যয় বিস্তারিত</SelectItem>
@@ -1021,6 +1066,32 @@ function ReportsTab() {
             <Button onClick={handlePrint}><Printer className="h-4 w-4 mr-1" />প্রিন্ট</Button>
             <Button variant="outline" onClick={exportCsv}><Download className="h-4 w-4 mr-1" />CSV ডাউনলোড</Button>
           </div>
+          {reportType === "member-savings" && (
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-3 items-end mt-3">
+              <div>
+                <Label>সদস্য</Label>
+                <Select value={memberFilter} onValueChange={setMemberFilter}>
+                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">সকল সদস্য</SelectItem>
+                    {data.members.slice().sort((a, b) => (a.serial || 0) - (b.serial || 0)).map((m) => (
+                      <SelectItem key={m.id} value={m.id}>{toBn(m.serial || 0)}. {m.name}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <Label>গ্রুপিং</Label>
+                <Select value={groupBy} onValueChange={(v) => setGroupBy(v as "month" | "day")}>
+                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="month">মাস অনুযায়ী</SelectItem>
+                    <SelectItem value="day">তারিখ অনুযায়ী</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+          )}
           <p className="text-xs text-muted-foreground mt-3">সময়কাল: {dateRangeText()}</p>
         </CardContent>
       </Card>
@@ -1067,6 +1138,52 @@ function ReportsTab() {
                       <TableCell className="text-right text-destructive font-semibold">{formatTk(r.due)}</TableCell>
                     </TableRow>
                   ))}
+                </TableBody>
+              </Table>
+            )}
+          </CardContent>
+        </Card>
+      )}
+
+      {reportType === "member-savings" && (
+        <Card>
+          <CardHeader>
+            <CardTitle>সদস্য {groupBy === "month" ? "মাস" : "তারিখ"} অনুযায়ী চাঁদা জমা</CardTitle>
+            <CardDescription>সর্বমোট: {formatTk(memberSavingsPivot.grand)}</CardDescription>
+          </CardHeader>
+          <CardContent>
+            {memberSavingsPivot.rows.length === 0 || memberSavingsPivot.periods.length === 0 ? (
+              <p className="text-sm text-muted-foreground text-center py-8">এই সময়কালে কোনও চাঁদা জমা নেই।</p>
+            ) : (
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead className="w-16">সি.নং</TableHead>
+                    <TableHead>সদস্য</TableHead>
+                    {memberSavingsPivot.labels.map((lbl, i) => (
+                      <TableHead key={memberSavingsPivot.periods[i]} className="text-right">{lbl}</TableHead>
+                    ))}
+                    <TableHead className="text-right">মোট</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {memberSavingsPivot.rows.map((r) => (
+                    <TableRow key={r.member.id}>
+                      <TableCell>{toBn(r.member.serial || 0)}</TableCell>
+                      <TableCell className="font-medium">{r.member.name}</TableCell>
+                      {memberSavingsPivot.periods.map((p) => (
+                        <TableCell key={p} className="text-right">{r.cells[p] ? formatTk(r.cells[p]) : "—"}</TableCell>
+                      ))}
+                      <TableCell className="text-right font-semibold text-success">{formatTk(r.total)}</TableCell>
+                    </TableRow>
+                  ))}
+                  <TableRow className="bg-muted/50">
+                    <TableCell colSpan={2} className="font-semibold text-right">মোট</TableCell>
+                    {memberSavingsPivot.periods.map((p) => (
+                      <TableCell key={p} className="text-right font-semibold">{formatTk(memberSavingsPivot.colTotals[p] || 0)}</TableCell>
+                    ))}
+                    <TableCell className="text-right font-bold text-success">{formatTk(memberSavingsPivot.grand)}</TableCell>
+                  </TableRow>
                 </TableBody>
               </Table>
             )}
@@ -1170,10 +1287,12 @@ function printReport(p: {
   memberWise: any[];
   filtered: any;
   members: Member[];
+  memberSavingsPivot?: any;
+  groupBy?: "month" | "day";
 }) {
   const w = window.open("", "_blank", "width=1000,height=700");
   if (!w) return;
-  const { samitiName, reportType, dateRange, totals, memberWise, filtered, members } = p;
+  const { samitiName, reportType, dateRange, totals, memberWise, filtered, members, memberSavingsPivot, groupBy } = p;
 
   const titleMap: Record<string, string> = {
     summary: "সারাংশ রিপোর্ট",
@@ -1181,6 +1300,7 @@ function printReport(p: {
     savings: "সঞ্চয়/চাদা রিপোর্ট",
     loans: "ঋণ রিপোর্ট",
     cashbook: "আয়-ব্যয় রিপোর্ট",
+    "member-savings": `সদস্য ${groupBy === "month" ? "মাস" : "তারিখ"} অনুযায়ী চাঁদা জমা`,
   };
 
   const summaryHtml = `
@@ -1214,6 +1334,17 @@ function printReport(p: {
   } else if (reportType === "cashbook") {
     body += `<p><b>আয়:</b> ${formatTk(totals.totalIncome)} | <b>ব্যয়:</b> ${formatTk(totals.totalExpense)} | <b>নীট:</b> ${formatTk(totals.totalIncome - totals.totalExpense)}</p>`;
     body += `<table style="width:100%;border-collapse:collapse;font-size:12px;">${th(["তারিখ", "ধরন", "খাত", "মন্তব্য", "পরিমাণ"])}${[...filtered.transactions].sort((a: any, b: any) => b.date.localeCompare(a.date)).map((t: any) => td([fmtDate(t.date), t.type === "income" ? "আয়" : "ব্যয়", t.category, t.note || "—", formatTk(t.amount)], ["left", "left", "left", "left", "right"])).join("")}</table>`;
+  } else if (reportType === "member-savings" && memberSavingsPivot) {
+    const headerCells = ["সি.নং", "সদস্য", ...memberSavingsPivot.labels, "মোট"];
+    const bodyRows = memberSavingsPivot.rows.map((r: any) =>
+      td(
+        [toBn(r.member.serial || 0), r.member.name, ...memberSavingsPivot.periods.map((pp: string) => (r.cells[pp] ? formatTk(r.cells[pp]) : "—")), formatTk(r.total)],
+        ["left", "left", ...memberSavingsPivot.periods.map(() => "right"), "right"]
+      )
+    ).join("");
+    const totalsRow = `<tr><td colspan="2" style="padding:6px 8px;border:1px solid #999;background:#eee;text-align:right;font-weight:bold;">মোট</td>${memberSavingsPivot.periods.map((pp: string) => `<td style="padding:6px 8px;border:1px solid #999;background:#eee;text-align:right;font-weight:bold;">${formatTk(memberSavingsPivot.colTotals[pp] || 0)}</td>`).join("")}<td style="padding:6px 8px;border:1px solid #999;background:#eee;text-align:right;font-weight:bold;">${formatTk(memberSavingsPivot.grand)}</td></tr>`;
+    body += `<p><b>সর্বমোট:</b> ${formatTk(memberSavingsPivot.grand)}</p>`;
+    body += `<table style="width:100%;border-collapse:collapse;font-size:12px;">${th(headerCells)}${bodyRows}${totalsRow}</table>`;
   }
 
   w.document.write(`
