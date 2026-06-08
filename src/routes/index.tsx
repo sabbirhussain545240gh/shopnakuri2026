@@ -1313,7 +1313,7 @@ function LoansTab() {
           {receipt && (
             <div id="installment-receipt" className="border rounded-md p-4 text-sm bg-card">
               <div className="text-center mb-3">
-                <div className="text-lg font-bold">{data.settings.samitiName || "সমিতি"}</div>
+                <div className="text-lg font-bold">{data.samitiName || "সমিতি"}</div>
                 <div className="text-xs text-muted-foreground">কিস্তি প্রাপ্তি রিসিপ্ট</div>
               </div>
               <div className="grid grid-cols-2 gap-2">
