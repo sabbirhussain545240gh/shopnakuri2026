@@ -767,6 +767,7 @@ function LoansTab() {
     if (!form.memberGuarantorId.trim()) nextErrors.memberGuarantorId = "সদস্য জামিনদার নির্বাচন করুন";
     if (!form.familyGuarantorName.trim()) nextErrors.familyGuarantorName = "জামিনদারের নাম দিন";
     if (!form.familyGuarantorRelation.trim()) nextErrors.familyGuarantorRelation = "সম্পর্ক নির্বাচন করুন";
+    if (form.familyGuarantorRelation === "অন্যান্য" && !form.familyGuarantorCustomRelation.trim()) nextErrors.familyGuarantorCustomRelation = "কাস্টম সম্পর্ক লিখুন";
     if (!form.familyGuarantorPhone.trim()) nextErrors.familyGuarantorPhone = "মোবাইল নম্বর দিন";
 
     if (Object.keys(nextErrors).length > 0) {
@@ -774,15 +775,17 @@ function LoansTab() {
       return;
     }
 
+    const relation = form.familyGuarantorRelation === "অন্যান্য" ? form.familyGuarantorCustomRelation.trim() : form.familyGuarantorRelation.trim();
+
     addLoan({
       memberId: form.memberId, amount: amt,
       interestRate: rate,
       durationMonths: Number(form.durationMonths) || 12,
       date: form.date,
       memberGuarantorId: form.memberGuarantorId,
-      familyGuarantor: { name: form.familyGuarantorName.trim(), relation: form.familyGuarantorRelation.trim(), phone: form.familyGuarantorPhone.trim() },
+      familyGuarantor: { name: form.familyGuarantorName.trim(), relation, phone: form.familyGuarantorPhone.trim() },
     });
-    setForm({ memberId: "", amount: "", interestRate: String(data.settings.defaultInterestRate), durationMonths: String(data.settings.defaultDurationMonths), date: today(), memberGuarantorId: "", familyGuarantorName: "", familyGuarantorRelation: "", familyGuarantorPhone: "" });
+    setForm({ memberId: "", amount: "", interestRate: String(data.settings.defaultInterestRate), durationMonths: String(data.settings.defaultDurationMonths), date: today(), memberGuarantorId: "", familyGuarantorName: "", familyGuarantorRelation: "", familyGuarantorCustomRelation: "", familyGuarantorPhone: "" });
     setErrors({});
     setOpen(false);
     toast.success("ঋণ প্রদান হয়েছে");
