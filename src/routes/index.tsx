@@ -108,8 +108,9 @@ function SamitiApp() {
           })}
         </nav>
         <div className="p-3 border-t space-y-2">
+          <AdminPanel />
           <SignOutButton />
-          <p className="text-xs text-muted-foreground text-center">তথ্য আপনার ব্রাউজারে সংরক্ষিত</p>
+          <p className="text-xs text-muted-foreground text-center">তথ্য ক্লাউডে সংরক্ষিত</p>
         </div>
       </aside>
 
