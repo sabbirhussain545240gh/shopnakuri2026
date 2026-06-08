@@ -14,7 +14,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Textarea } from "@/components/ui/textarea";
-import { Users, PiggyBank, HandCoins, LayoutDashboard, Trash2, Plus, CheckCircle2, Pencil, Settings as SettingsIcon, Wallet, Download, Upload, AlertTriangle, TrendingUp, TrendingDown, Menu, Printer, FileText } from "lucide-react";
+import { Users, PiggyBank, HandCoins, LayoutDashboard, Trash2, Plus, CheckCircle2, Pencil, Settings as SettingsIcon, Wallet, Download, Upload, AlertTriangle, TrendingUp, TrendingDown, Menu, Printer, FileText, Receipt } from "lucide-react";
 import { toast, Toaster } from "sonner";
 
 export const Route = createFileRoute("/")({
@@ -41,6 +41,7 @@ const navItems = [
   { value: "members", label: "সদস্য", icon: Users },
   { value: "savings", label: "সঞ্চয়/চাদা", icon: PiggyBank },
   { value: "loans", label: "ঋণ", icon: HandCoins },
+  { value: "installments", label: "কিস্তি আদায়", icon: Receipt },
   { value: "cashbook", label: "আয়-ব্যয়", icon: Wallet },
   { value: "reports", label: "রিপোর্ট", icon: FileText },
   { value: "settings", label: "সেটিংস", icon: SettingsIcon },
@@ -146,6 +147,7 @@ function SamitiApp() {
           {tab === "members" && <MembersTab />}
           {tab === "savings" && <SavingsTab />}
           {tab === "loans" && <LoansTab />}
+          {tab === "installments" && <InstallmentsTab />}
           {tab === "cashbook" && <CashbookTab />}
           {tab === "reports" && <ReportsTab />}
           {tab === "settings" && <SettingsTab />}
@@ -953,7 +955,187 @@ function LoansTab() {
   );
 }
 
-// ===== Cashbook (Income/Expense) =====
+// ===== Installments (কিস্তি আদায়) =====
+function InstallmentsTab() {
+  const { data, addPayment, deletePayment, closeLoan } = useSamiti();
+  const [open, setOpen] = useState(false);
+  const [form, setForm] = useState({ loanId: "", amount: "", date: today(), note: "" });
+  const [errors, setErrors] = useState<Record<string, string>>({});
+  const [filterMember, setFilterMember] = useState<string>("all");
+
+  const activeLoans = data.loans.filter((l) => l.status === "active");
+  const loanInfo = (loanId: string) => {
+    const loan = data.loans.find((l) => l.id === loanId);
+    if (!loan) return null;
+    const member = data.members.find((m) => m.id === loan.memberId);
+    const due = loanTotalDue(loan);
+    const paid = loanPaid(data.payments, loan.id);
+    const remaining = Math.max(0, due - paid);
+    const installment = loan.durationMonths > 0 ? due / loan.durationMonths : 0;
+    return { loan, member, due, paid, remaining, installment };
+  };
+
+  const selected = form.loanId ? loanInfo(form.loanId) : null;
+
+  const setField = (k: string, v: string) => {
+    setForm((p) => ({ ...p, [k]: v }));
+    setErrors((p) => { const n = { ...p }; delete n[k]; return n; });
+  };
+
+  const submit = () => {
+    const next: Record<string, string> = {};
+    if (!form.loanId) next.loanId = "ঋণ নির্বাচন করুন";
+    const amt = Number(form.amount);
+    if (!form.amount.trim() || isNaN(amt) || amt <= 0) next.amount = "সঠিক পরিমাণ দিন";
+    if (!form.date) next.date = "তারিখ দিন";
+    if (selected && amt > selected.remaining + 0.01) next.amount = `বকেয়ার চেয়ে বেশি (বকেয়া ${formatTk(selected.remaining)})`;
+    if (Object.keys(next).length) { setErrors(next); return; }
+
+    addPayment({ loanId: form.loanId, amount: amt, date: form.date });
+    if (selected) {
+      const newPaid = selected.paid + amt;
+      if (newPaid >= selected.due - 0.01) {
+        closeLoan(form.loanId);
+        toast.success("কিস্তি গৃহীত — ঋণ পরিশোধিত");
+      } else {
+        toast.success("কিস্তি গৃহীত");
+      }
+    }
+    setForm({ loanId: "", amount: "", date: today(), note: "" });
+    setErrors({});
+    setOpen(false);
+  };
+
+  const allPayments = [...data.payments]
+    .sort((a, b) => b.date.localeCompare(a.date))
+    .filter((p) => {
+      if (filterMember === "all") return true;
+      const loan = data.loans.find((l) => l.id === p.loanId);
+      return loan?.memberId === filterMember;
+    });
+
+  const totalCollected = allPayments.reduce((s, p) => s + p.amount, 0);
+  const totalOutstanding = activeLoans.reduce((s, l) => s + Math.max(0, loanTotalDue(l) - loanPaid(data.payments, l.id)), 0);
+
+  return (
+    <div className="space-y-4">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        <StatCard label="মোট আদায়" value={formatTk(totalCollected)} accent="bg-success" />
+        <StatCard label="মোট বকেয়া" value={formatTk(totalOutstanding)} accent="bg-destructive" />
+        <StatCard label="চলমান ঋণ" value={toBn(activeLoans.length)} accent="bg-primary" />
+      </div>
+
+      <Card>
+        <CardHeader className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+          <div>
+            <CardTitle>কিস্তি আদায়</CardTitle>
+            <CardDescription>মোট {toBn(allPayments.length)}টি কিস্তি</CardDescription>
+          </div>
+          <div className="flex gap-2 items-center flex-wrap">
+            <Select value={filterMember} onValueChange={setFilterMember}>
+              <SelectTrigger className="w-44"><SelectValue placeholder="সদস্য ফিল্টার" /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">সকল সদস্য</SelectItem>
+                {data.members.map((m) => <SelectItem key={m.id} value={m.id}>{toBn(m.serial)} — {m.name}</SelectItem>)}
+              </SelectContent>
+            </Select>
+            <Dialog open={open} onOpenChange={(o) => { setOpen(o); if (!o) setErrors({}); }}>
+              <DialogTrigger asChild>
+                <Button disabled={activeLoans.length === 0}><Plus className="h-4 w-4 mr-1" />নতুন কিস্তি</Button>
+              </DialogTrigger>
+              <DialogContent>
+                <DialogHeader><DialogTitle>কিস্তি আদায়</DialogTitle></DialogHeader>
+                <div className="space-y-3">
+                  <div>
+                    <Label>ঋণ নির্বাচন *</Label>
+                    <Select value={form.loanId} onValueChange={(v) => setField("loanId", v)}>
+                      <SelectTrigger className={errors.loanId ? "border-destructive" : ""}><SelectValue placeholder="চলমান ঋণ নির্বাচন করুন" /></SelectTrigger>
+                      <SelectContent>
+                        {activeLoans.map((l) => {
+                          const m = data.members.find((x) => x.id === l.memberId);
+                          const rem = Math.max(0, loanTotalDue(l) - loanPaid(data.payments, l.id));
+                          return <SelectItem key={l.id} value={l.id}>{m ? `${toBn(m.serial)} — ${m.name}` : "—"} | বকেয়া {formatTk(rem)}</SelectItem>;
+                        })}
+                      </SelectContent>
+                    </Select>
+                    {errors.loanId && <p className="text-xs text-destructive mt-1">{errors.loanId}</p>}
+                  </div>
+                  {selected && (
+                    <div className="rounded-md border bg-muted/40 p-3 text-sm space-y-1">
+                      <div className="flex justify-between"><span className="text-muted-foreground">মূল ঋণ</span><span>{formatTk(selected.loan.amount)}</span></div>
+                      <div className="flex justify-between"><span className="text-muted-foreground">মোট প্রদেয়</span><span>{formatTk(selected.due)}</span></div>
+                      <div className="flex justify-between"><span className="text-muted-foreground">পরিশোধিত</span><span className="text-success font-medium">{formatTk(selected.paid)}</span></div>
+                      <div className="flex justify-between"><span className="text-muted-foreground">বকেয়া</span><span className="text-destructive font-semibold">{formatTk(selected.remaining)}</span></div>
+                      <div className="flex justify-between"><span className="text-muted-foreground">মাসিক কিস্তি (আনু.)</span><span>{formatTk(selected.installment)}</span></div>
+                    </div>
+                  )}
+                  <div className="grid grid-cols-2 gap-3">
+                    <div>
+                      <Label>পরিমাণ *</Label>
+                      <Input type="number" className={errors.amount ? "border-destructive" : ""} value={form.amount} onChange={(e) => setField("amount", e.target.value)} />
+                      {errors.amount && <p className="text-xs text-destructive mt-1">{errors.amount}</p>}
+                      {selected && !errors.amount && (
+                        <button type="button" className="text-xs text-primary mt-1 underline" onClick={() => setField("amount", String(Math.round(Math.min(selected.installment, selected.remaining))))}>
+                          মাসিক কিস্তি বসান
+                        </button>
+                      )}
+                    </div>
+                    <div>
+                      <Label>তারিখ *</Label>
+                      <Input type="date" className={errors.date ? "border-destructive" : ""} value={form.date} onChange={(e) => setField("date", e.target.value)} />
+                      {errors.date && <p className="text-xs text-destructive mt-1">{errors.date}</p>}
+                    </div>
+                  </div>
+                </div>
+                <DialogFooter><Button onClick={submit}>সংরক্ষণ</Button></DialogFooter>
+              </DialogContent>
+            </Dialog>
+          </div>
+        </CardHeader>
+        <CardContent>
+          {allPayments.length === 0 ? (
+            <p className="text-sm text-muted-foreground text-center py-10">কোনও কিস্তি নেই।</p>
+          ) : (
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>তারিখ</TableHead>
+                  <TableHead>সদস্য</TableHead>
+                  <TableHead className="text-right">ঋণ পরিমাণ</TableHead>
+                  <TableHead className="text-right">কিস্তি</TableHead>
+                  <TableHead className="text-right">বর্তমান বকেয়া</TableHead>
+                  <TableHead></TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {allPayments.map((p) => {
+                  const loan = data.loans.find((l) => l.id === p.loanId);
+                  const m = loan ? data.members.find((x) => x.id === loan.memberId) : null;
+                  const rem = loan ? Math.max(0, loanTotalDue(loan) - loanPaid(data.payments, loan.id)) : 0;
+                  return (
+                    <TableRow key={p.id}>
+                      <TableCell>{fmtDate(p.date)}</TableCell>
+                      <TableCell className="font-medium">{m?.name ?? "—"}</TableCell>
+                      <TableCell className="text-right">{loan ? formatTk(loan.amount) : "—"}</TableCell>
+                      <TableCell className="text-right text-success font-semibold">{formatTk(p.amount)}</TableCell>
+                      <TableCell className="text-right text-destructive">{formatTk(rem)}</TableCell>
+                      <TableCell>
+                        <Button size="icon" variant="ghost" onClick={() => { if (confirm("কিস্তি মুছবেন?")) { deletePayment(p.id); toast.success("মুছে ফেলা হয়েছে"); } }}>
+                          <Trash2 className="h-4 w-4 text-destructive" />
+                        </Button>
+                      </TableCell>
+                    </TableRow>
+                  );
+                })}
+              </TableBody>
+            </Table>
+          )}
+        </CardContent>
+      </Card>
+    </div>
+  );
+}
+
 const INCOME_CATS = ["সদস্য ফি", "ভর্তি ফি", "অনুদান", "সুদ আয়", "অন্যান্য"];
 const EXPENSE_CATS = ["স্টেশনারি", "মিটিং খরচ", "যাতায়াত", "ভাড়া", "বিল", "অন্যান্য"];
 
