@@ -1257,23 +1257,6 @@ function ReportsTab() {
           <CardDescription>তারিখ ও ধরন নির্বাচন করে রিপোর্ট দেখুন, প্রিন্ট বা ডাউনলোড করুন</CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-5 gap-3 items-end">
-            <div>
-              <Label>রিপোর্টের ধরন</Label>
-              <Select value={reportType} onValueChange={setReportType}>
-                <SelectTrigger><SelectValue /></SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="summary">সারাংশ</SelectItem>
-                  <SelectItem value="members">সদস্যভিত্তিক</SelectItem>
-                  <SelectItem value="member-savings">সদস্য তারিখ/মাস অনুযায়ী চাঁদা জমা</SelectItem>
-                  <SelectItem value="savings">সঞ্চয়/চাদা বিস্তারিত</SelectItem>
-                  <SelectItem value="loans">ঋণ বিস্তারিত</SelectItem>
-                  <SelectItem value="cashbook">আয়-ব্যয় বিস্তারিত</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-            <div><Label>শুরুর তারিখ</Label><Input type="date" value={from} onChange={(e) => setFrom(e.target.value)} /></div>
-            <div><Label>শেষ তারিখ</Label><Input type="date" value={to} onChange={(e) => setTo(e.target.value)} /></div>
           <div className="grid grid-cols-2 md:grid-cols-7 gap-3 items-end">
             <div className="col-span-2 md:col-span-2">
               <Label>রিপোর্টের ধরন</Label>
