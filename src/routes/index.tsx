@@ -1015,6 +1015,7 @@ function LoansTab() {
   const [editForm, setEditForm] = useState({ memberId: "", amount: "", interestRate: "", durationMonths: "", date: "" });
   const [form, setForm] = useState({ memberId: "", amount: "", interestRate: String(data.settings.defaultInterestRate), durationMonths: String(data.settings.defaultDurationMonths), date: today(), memberGuarantorId: "", familyGuarantorName: "", familyGuarantorRelation: "", familyGuarantorCustomRelation: "", familyGuarantorPhone: "" });
   const [payForm, setPayForm] = useState({ amount: "", date: today() });
+  const [receipt, setReceipt] = useState<null | { loan: Loan; memberName: string; amount: number; date: string; paidAfter: number; remainingAfter: number; receiptNo: string }>(null);
   const [errors, setErrors] = useState<Record<string, string>>({});
 
   const setField = (key: string, value: string) => {
@@ -1061,6 +1062,20 @@ function LoansTab() {
     if (!amt || amt <= 0) { toast.error("সঠিক পরিমাণ দিন"); return; }
     if (!payFor) return;
     addPayment({ loanId: payFor.id, amount: amt, date: payForm.date });
+    const mem = data.members.find((x) => x.id === payFor.memberId);
+    const prevPaid = loanPaid(data.payments, payFor.id);
+    const due = loanTotalDue(payFor);
+    const paidAfter = prevPaid + amt;
+    const remainingAfter = Math.max(0, due - paidAfter);
+    setReceipt({
+      loan: payFor,
+      memberName: mem?.name ?? "—",
+      amount: amt,
+      date: payForm.date,
+      paidAfter,
+      remainingAfter,
+      receiptNo: `R-${Date.now().toString().slice(-6)}`,
+    });
     setPayForm({ amount: "", date: today() });
     setPayFor(null);
     toast.success("কিস্তি যোগ হয়েছে");
@@ -1216,7 +1231,18 @@ function LoansTab() {
                     <TableCell>{fmtDate(l.date)}</TableCell>
                     <TableCell className="text-right">{formatTk(l.amount)}</TableCell>
                     <TableCell className="text-right">{formatTk(due)}</TableCell>
-                    <TableCell className="text-right font-medium">{formatTk(inst)}</TableCell>
+                    <TableCell className="text-right font-medium">
+                      {l.status === "active" ? (
+                        <button
+                          type="button"
+                          className="text-primary underline-offset-2 hover:underline cursor-pointer"
+                          title="ক্লিক করে কিস্তি গ্রহণ করুন"
+                          onClick={() => { setPayFor(l); setPayForm({ amount: String(Math.round(Math.min(inst, remaining))), date: today() }); }}
+                        >
+                          {formatTk(inst)}
+                        </button>
+                      ) : formatTk(inst)}
+                    </TableCell>
                     <TableCell className="text-right">{firstPay ? fmtDate(firstPay) : "—"}</TableCell>
                     <TableCell className="text-right">{endDate ? fmtDate(endDate) : "—"}</TableCell>
                     <TableCell className="text-right text-success font-medium">{formatTk(paid)}</TableCell>
@@ -1229,7 +1255,7 @@ function LoansTab() {
                     <TableCell className="flex gap-1">
                       {l.status === "active" && (
                         <>
-                          <Button size="sm" variant="outline" onClick={() => { setPayFor(l); setPayForm({ amount: "", date: today() }); }}>কিস্তি</Button>
+                          <Button size="sm" variant="outline" onClick={() => { setPayFor(l); setPayForm({ amount: String(Math.round(Math.min(inst, remaining))), date: today() }); }}>কিস্তি</Button>
                           {remaining <= 0 && (
                             <Button size="icon" variant="ghost" onClick={() => { closeLoan(l.id); toast.success("ঋণ পরিশোধিত"); }}>
                               <CheckCircle2 className="h-4 w-4 text-success" />
@@ -1259,11 +1285,71 @@ function LoansTab() {
       <Dialog open={!!payFor} onOpenChange={(o) => !o && setPayFor(null)}>
         <DialogContent>
           <DialogHeader><DialogTitle>কিস্তি গ্রহণ</DialogTitle></DialogHeader>
+          {payFor && (() => {
+            const mem = data.members.find((x) => x.id === payFor.memberId);
+            const inst = monthlyInstallment(payFor.amount, payFor.interestRate, payFor.durationMonths);
+            const paid = loanPaid(data.payments, payFor.id);
+            const remaining = Math.max(0, loanTotalDue(payFor) - paid);
+            return (
+              <div className="rounded-md border bg-muted/40 p-3 text-sm grid grid-cols-2 gap-2 mb-2">
+                <div><span className="text-muted-foreground">সদস্য:</span> <span className="font-medium">{mem?.name ?? "—"}</span></div>
+                <div><span className="text-muted-foreground">মাসিক কিস্তি:</span> <span className="font-semibold">{formatTk(inst)}</span></div>
+                <div><span className="text-muted-foreground">বকেয়া:</span> <span className="font-semibold text-destructive">{formatTk(remaining)}</span></div>
+                <div><span className="text-muted-foreground">পরিশোধিত:</span> <span className="text-success">{formatTk(paid)}</span></div>
+              </div>
+            );
+          })()}
           <div className="space-y-3">
             <div><Label>পরিমাণ *</Label><Input type="number" value={payForm.amount} onChange={(e) => setPayForm({ ...payForm, amount: e.target.value })} /></div>
             <div><Label>তারিখ</Label><Input type="date" value={payForm.date} onChange={(e) => setPayForm({ ...payForm, date: e.target.value })} /></div>
           </div>
-          <DialogFooter><Button onClick={submitPay}>সংরক্ষণ</Button></DialogFooter>
+          <DialogFooter><Button onClick={submitPay}>সংরক্ষণ ও রিসিপ্ট</Button></DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={!!receipt} onOpenChange={(o) => !o && setReceipt(null)}>
+        <DialogContent className="max-w-md">
+          <DialogHeader><DialogTitle>কিস্তি রিসিপ্ট</DialogTitle></DialogHeader>
+          {receipt && (
+            <div id="installment-receipt" className="border rounded-md p-4 text-sm bg-card">
+              <div className="text-center mb-3">
+                <div className="text-lg font-bold">{data.samitiName || "সমিতি"}</div>
+                <div className="text-xs text-muted-foreground">কিস্তি প্রাপ্তি রিসিপ্ট</div>
+              </div>
+              <div className="grid grid-cols-2 gap-2">
+                <div><span className="text-muted-foreground">রিসিপ্ট নং:</span> <span className="font-medium">{receipt.receiptNo}</span></div>
+                <div><span className="text-muted-foreground">তারিখ:</span> <span className="font-medium">{fmtDate(receipt.date)}</span></div>
+                <div className="col-span-2"><span className="text-muted-foreground">সদস্য:</span> <span className="font-medium">{receipt.memberName}</span></div>
+                <div><span className="text-muted-foreground">ঋণ মূল:</span> {formatTk(receipt.loan.amount)}</div>
+                <div><span className="text-muted-foreground">মেয়াদ:</span> {toBn(receipt.loan.durationMonths)} মাস</div>
+              </div>
+              <div className="mt-3 border-t pt-2 flex justify-between text-base">
+                <span className="font-medium">প্রাপ্ত কিস্তি</span>
+                <span className="font-bold text-success">{formatTk(receipt.amount)}</span>
+              </div>
+              <div className="mt-2 grid grid-cols-2 gap-2 text-sm">
+                <div><span className="text-muted-foreground">মোট পরিশোধিত:</span> <span className="font-medium">{formatTk(receipt.paidAfter)}</span></div>
+                <div><span className="text-muted-foreground">অবশিষ্ট বকেয়া:</span> <span className="font-semibold text-destructive">{formatTk(receipt.remainingAfter)}</span></div>
+              </div>
+              <div className="mt-6 flex justify-between text-xs text-muted-foreground">
+                <div>—————————<br />গ্রহীতা</div>
+                <div className="text-right">—————————<br />কোষাধ্যক্ষ</div>
+              </div>
+            </div>
+          )}
+          <DialogFooter className="gap-2">
+            <Button variant="outline" onClick={() => setReceipt(null)}>বন্ধ</Button>
+            <Button onClick={() => {
+              const el = document.getElementById("installment-receipt");
+              if (!el) return;
+              const w = window.open("", "_blank", "width=600,height=700");
+              if (!w) return;
+              w.document.write(`<html><head><title>রিসিপ্ট</title><style>body{font-family:system-ui,sans-serif;padding:20px;}div{margin:4px 0;}.grid{display:grid;grid-template-columns:1fr 1fr;gap:6px;}.center{text-align:center;}hr{margin:10px 0;}</style></head><body>${el.innerHTML}</body></html>`);
+              w.document.close();
+              w.focus();
+              w.print();
+            }}><Printer className="h-4 w-4 mr-1" />প্রিন্ট</Button>
+          </DialogFooter>
         </DialogContent>
       </Dialog>
 
