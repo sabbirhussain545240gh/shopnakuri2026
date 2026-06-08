@@ -253,7 +253,7 @@ function Dashboard({ totals, memberCount, data }: any) {
 
 // ===== Members =====
 function MembersTab() {
-  const { data, addMember, updateMember, deleteMember } = useSamiti();
+  const { data, addMember, addMembers, updateMember, deleteMember } = useSamiti();
   const [open, setOpen] = useState(false);
   const emptyForm = {
     serial: "",
@@ -354,7 +354,8 @@ function MembersTab() {
       const rows: any[] = XLSX.utils.sheet_to_json(ws, { defval: "", raw: true });
       if (rows.length === 0) { toast.error("ফাইলে কোনও তথ্য নেই"); return; }
       let nextS = data.members.length > 0 ? Math.max(...data.members.map((m) => m.serial || 0)) : 0;
-      let added = 0, skipped = 0;
+      const batch: Array<Omit<Member, "id">> = [];
+      let skipped = 0;
       for (const row of rows) {
         const name = pick(row, ["নাম", "Name", "name"]);
         if (!name) { skipped++; continue; }
@@ -362,7 +363,7 @@ function MembersTab() {
         let serial: number;
         if (serialStr) { serial = parseInt(serialStr, 10); nextS = Math.max(nextS, serial); }
         else { serial = ++nextS; }
-        addMember({
+        batch.push({
           serial,
           name,
           fatherName: pick(row, ["পিতার নাম", "Father", "fatherName"]),
@@ -380,8 +381,8 @@ function MembersTab() {
             nid: pick(row, ["নমিনির NID", "Nominee NID"]),
           },
         });
-        added++;
       }
+      const added = addMembers(batch);
       toast.success(`${toBn(added)} জন সদস্য যোগ হয়েছে${skipped ? ` (${toBn(skipped)} টি বাদ)` : ""}`);
     } catch (e) {
       console.error(e);
