@@ -377,6 +377,18 @@ function MembersTab() {
                 <Button variant="outline" size="sm" onClick={() => printMemberCard(viewMember, data)}>
                   <Printer className="h-4 w-4 mr-1" />প্রিন্ট
                 </Button>
+                <Button variant="outline" size="sm" onClick={async () => {
+                  try { toast.loading("PDF তৈরি হচ্ছে...", { id: "mpdf" }); await exportMemberCardPdf(viewMember, data); toast.success("PDF ডাউনলোড হয়েছে", { id: "mpdf" }); }
+                  catch (e) { toast.error("PDF তৈরিতে সমস্যা হয়েছে", { id: "mpdf" }); console.error(e); }
+                }}>
+                  <FileText className="h-4 w-4 mr-1" />PDF
+                </Button>
+                <Button variant="outline" size="sm" onClick={async () => {
+                  try { toast.loading("ছবি তৈরি হচ্ছে...", { id: "mjpg" }); await exportMemberCardJpeg(viewMember, data); toast.success("JPEG ডাউনলোড হয়েছে", { id: "mjpg" }); }
+                  catch (e) { toast.error("ছবি তৈরিতে সমস্যা হয়েছে", { id: "mjpg" }); console.error(e); }
+                }}>
+                  <Download className="h-4 w-4 mr-1" />JPEG
+                </Button>
               </div>
             )}
           </DialogHeader>
