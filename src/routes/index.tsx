@@ -14,7 +14,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Textarea } from "@/components/ui/textarea";
-import { Users, PiggyBank, HandCoins, LayoutDashboard, Trash2, Plus, CheckCircle2, Pencil, Settings as SettingsIcon, Wallet, Download, Upload, AlertTriangle, TrendingUp, TrendingDown, Menu, Printer } from "lucide-react";
+import { Users, PiggyBank, HandCoins, LayoutDashboard, Trash2, Plus, CheckCircle2, Pencil, Settings as SettingsIcon, Wallet, Download, Upload, AlertTriangle, TrendingUp, TrendingDown, Menu, Printer, FileText } from "lucide-react";
 import { toast, Toaster } from "sonner";
 
 export const Route = createFileRoute("/")({
@@ -42,6 +42,7 @@ const navItems = [
   { value: "savings", label: "সঞ্চয়", icon: PiggyBank },
   { value: "loans", label: "ঋণ", icon: HandCoins },
   { value: "cashbook", label: "আয়-ব্যয়", icon: Wallet },
+  { value: "reports", label: "রিপোর্ট", icon: FileText },
   { value: "settings", label: "সেটিংস", icon: SettingsIcon },
 ];
 
@@ -146,6 +147,7 @@ function SamitiApp() {
           {tab === "savings" && <SavingsTab />}
           {tab === "loans" && <LoansTab />}
           {tab === "cashbook" && <CashbookTab />}
+          {tab === "reports" && <ReportsTab />}
           {tab === "settings" && <SettingsTab />}
         </main>
 
@@ -890,4 +892,349 @@ function SettingsTab() {
       </Card>
     </div>
   );
+}
+
+// ===== Reports =====
+function ReportsTab() {
+  const { data } = useSamiti();
+  const [from, setFrom] = useState("");
+  const [to, setTo] = useState("");
+  const [reportType, setReportType] = useState("summary");
+
+  const inRange = (date: string) => {
+    if (from && date < from) return false;
+    if (to && date > to) return false;
+    return true;
+  };
+
+  const filtered = useMemo(() => {
+    const deposits = data.deposits.filter((d) => inRange(d.date));
+    const loans = data.loans.filter((l) => inRange(l.date));
+    const payments = data.payments.filter((p) => inRange(p.date));
+    const transactions = data.transactions.filter((t) => inRange(t.date));
+    return { deposits, loans, payments, transactions };
+  }, [data, from, to]);
+
+  const totals = useMemo(() => {
+    const totalDeposit = filtered.deposits.reduce((a, d) => a + d.amount, 0);
+    const totalLoanGiven = filtered.loans.reduce((a, l) => a + l.amount, 0);
+    const totalRepaid = filtered.payments.reduce((a, p) => a + p.amount, 0);
+    const totalIncome = filtered.transactions.filter((t) => t.type === "income").reduce((a, t) => a + t.amount, 0);
+    const totalExpense = filtered.transactions.filter((t) => t.type === "expense").reduce((a, t) => a + t.amount, 0);
+    const outstanding = data.loans
+      .filter((l) => l.status === "active")
+      .reduce((a, l) => a + (loanTotalDue(l) - loanPaid(data.payments, l.id)), 0);
+    const cashInHand = totalDeposit - totalLoanGiven + totalRepaid + totalIncome - totalExpense;
+    return { totalDeposit, totalLoanGiven, totalRepaid, totalIncome, totalExpense, outstanding, cashInHand };
+  }, [filtered, data]);
+
+  const memberWise = useMemo(() => {
+    return data.members.map((m) => {
+      const dep = filtered.deposits.filter((d) => d.memberId === m.id).reduce((a, d) => a + d.amount, 0);
+      const loans = data.loans.filter((l) => l.memberId === m.id);
+      const loanAmt = loans.reduce((a, l) => a + l.amount, 0);
+      const due = loans.reduce((a, l) => a + (loanTotalDue(l) - loanPaid(data.payments, l.id)), 0);
+      return { member: m, deposit: dep, loanAmt, due };
+    }).sort((a, b) => (a.member.serial || 0) - (b.member.serial || 0));
+  }, [data, filtered]);
+
+  const dateRangeText = () => {
+    if (from && to) return `${fmtDate(from)} থেকে ${fmtDate(to)}`;
+    if (from) return `${fmtDate(from)} থেকে`;
+    if (to) return `${fmtDate(to)} পর্যন্ত`;
+    return "সর্বমোট";
+  };
+
+  const handlePrint = () => {
+    printReport({
+      samitiName: data.samitiName,
+      reportType,
+      dateRange: dateRangeText(),
+      totals,
+      memberWise,
+      filtered,
+      members: data.members,
+    });
+  };
+
+  const exportCsv = () => {
+    let csv = "";
+    if (reportType === "summary" || reportType === "members") {
+      csv = "সিরিয়াল,নাম,মোবাইল,সঞ্চয়,ঋণ,বকেয়া\n";
+      memberWise.forEach((r) => {
+        csv += `${r.member.serial || 0},"${r.member.name}","${r.member.phone || ""}",${r.deposit},${r.loanAmt},${r.due}\n`;
+      });
+    } else if (reportType === "savings") {
+      csv = "তারিখ,সদস্য,পরিমাণ,মন্তব্য\n";
+      filtered.deposits.forEach((d) => {
+        const m = data.members.find((x) => x.id === d.memberId);
+        csv += `${d.date},"${m?.name || ""}",${d.amount},"${d.note || ""}"\n`;
+      });
+    } else if (reportType === "loans") {
+      csv = "তারিখ,সদস্য,মূল,সুদ%,মেয়াদ,পরিশোধ,বকেয়া,অবস্থা\n";
+      filtered.loans.forEach((l) => {
+        const m = data.members.find((x) => x.id === l.memberId);
+        const paid = loanPaid(data.payments, l.id);
+        const due = loanTotalDue(l) - paid;
+        csv += `${l.date},"${m?.name || ""}",${l.amount},${l.interestRate},${l.durationMonths},${paid},${due},${l.status}\n`;
+      });
+    } else if (reportType === "cashbook") {
+      csv = "তারিখ,ধরন,খাত,পরিমাণ,মন্তব্য\n";
+      filtered.transactions.forEach((t) => {
+        csv += `${t.date},${t.type === "income" ? "আয়" : "ব্যয়"},"${t.category}",${t.amount},"${t.note || ""}"\n`;
+      });
+    }
+    const blob = new Blob(["\ufeff" + csv], { type: "text/csv;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `report-${reportType}-${today()}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+    toast.success("ফাইল ডাউনলোড হয়েছে");
+  };
+
+  return (
+    <div className="space-y-6">
+      <Card>
+        <CardHeader>
+          <CardTitle>রিপোর্ট</CardTitle>
+          <CardDescription>তারিখ ও ধরন নির্বাচন করে রিপোর্ট দেখুন, প্রিন্ট বা ডাউনলোড করুন</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-1 md:grid-cols-5 gap-3 items-end">
+            <div>
+              <Label>রিপোর্টের ধরন</Label>
+              <Select value={reportType} onValueChange={setReportType}>
+                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="summary">সারাংশ</SelectItem>
+                  <SelectItem value="members">সদস্যভিত্তিক</SelectItem>
+                  <SelectItem value="savings">সঞ্চয় বিস্তারিত</SelectItem>
+                  <SelectItem value="loans">ঋণ বিস্তারিত</SelectItem>
+                  <SelectItem value="cashbook">আয়-ব্যয় বিস্তারিত</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div><Label>শুরুর তারিখ</Label><Input type="date" value={from} onChange={(e) => setFrom(e.target.value)} /></div>
+            <div><Label>শেষ তারিখ</Label><Input type="date" value={to} onChange={(e) => setTo(e.target.value)} /></div>
+            <Button onClick={handlePrint}><Printer className="h-4 w-4 mr-1" />প্রিন্ট</Button>
+            <Button variant="outline" onClick={exportCsv}><Download className="h-4 w-4 mr-1" />CSV ডাউনলোড</Button>
+          </div>
+          <p className="text-xs text-muted-foreground mt-3">সময়কাল: {dateRangeText()}</p>
+        </CardContent>
+      </Card>
+
+      {(reportType === "summary") && (
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          <StatCard label="মোট সঞ্চয়" value={formatTk(totals.totalDeposit)} accent="bg-success" />
+          <StatCard label="ঋণ প্রদান" value={formatTk(totals.totalLoanGiven)} accent="bg-warning" />
+          <StatCard label="ঋণ আদায়" value={formatTk(totals.totalRepaid)} accent="bg-chart-2" />
+          <StatCard label="বকেয়া ঋণ" value={formatTk(totals.outstanding)} accent="bg-destructive" />
+          <StatCard label="আয়" value={formatTk(totals.totalIncome)} accent="bg-success" />
+          <StatCard label="ব্যয়" value={formatTk(totals.totalExpense)} accent="bg-destructive" />
+          <StatCard label="হাতে নগদ" value={formatTk(totals.cashInHand)} accent="bg-primary" />
+          <StatCard label="মোট সদস্য" value={toBn(data.members.length)} accent="bg-chart-4" />
+        </div>
+      )}
+
+      {(reportType === "members" || reportType === "summary") && (
+        <Card>
+          <CardHeader><CardTitle>সদস্যভিত্তিক হিসাব</CardTitle></CardHeader>
+          <CardContent>
+            {memberWise.length === 0 ? (
+              <p className="text-sm text-muted-foreground text-center py-8">কোনও সদস্য নেই।</p>
+            ) : (
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead className="w-16">সি.নং</TableHead>
+                    <TableHead>নাম</TableHead>
+                    <TableHead>মোবাইল</TableHead>
+                    <TableHead className="text-right">সঞ্চয়</TableHead>
+                    <TableHead className="text-right">ঋণ</TableHead>
+                    <TableHead className="text-right">বকেয়া</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {memberWise.map((r) => (
+                    <TableRow key={r.member.id}>
+                      <TableCell>{toBn(r.member.serial || 0)}</TableCell>
+                      <TableCell className="font-medium">{r.member.name}</TableCell>
+                      <TableCell>{r.member.phone ? toBn(r.member.phone) : "—"}</TableCell>
+                      <TableCell className="text-right text-success font-semibold">{formatTk(r.deposit)}</TableCell>
+                      <TableCell className="text-right">{formatTk(r.loanAmt)}</TableCell>
+                      <TableCell className="text-right text-destructive font-semibold">{formatTk(r.due)}</TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            )}
+          </CardContent>
+        </Card>
+      )}
+
+      {reportType === "savings" && (
+        <Card>
+          <CardHeader><CardTitle>সঞ্চয় বিস্তারিত</CardTitle><CardDescription>মোট: {formatTk(totals.totalDeposit)}</CardDescription></CardHeader>
+          <CardContent>
+            {filtered.deposits.length === 0 ? <p className="text-sm text-muted-foreground text-center py-8">কোনও তথ্য নেই।</p> : (
+              <Table>
+                <TableHeader><TableRow><TableHead>তারিখ</TableHead><TableHead>সদস্য</TableHead><TableHead>মন্তব্য</TableHead><TableHead className="text-right">পরিমাণ</TableHead></TableRow></TableHeader>
+                <TableBody>
+                  {[...filtered.deposits].sort((a, b) => b.date.localeCompare(a.date)).map((d) => {
+                    const m = data.members.find((x) => x.id === d.memberId);
+                    return (
+                      <TableRow key={d.id}>
+                        <TableCell>{fmtDate(d.date)}</TableCell>
+                        <TableCell className="font-medium">{m?.name ?? "—"}</TableCell>
+                        <TableCell className="text-muted-foreground">{d.note || "—"}</TableCell>
+                        <TableCell className="text-right font-semibold text-success">{formatTk(d.amount)}</TableCell>
+                      </TableRow>
+                    );
+                  })}
+                </TableBody>
+              </Table>
+            )}
+          </CardContent>
+        </Card>
+      )}
+
+      {reportType === "loans" && (
+        <Card>
+          <CardHeader><CardTitle>ঋণ বিস্তারিত</CardTitle><CardDescription>মোট প্রদান: {formatTk(totals.totalLoanGiven)} | আদায়: {formatTk(totals.totalRepaid)}</CardDescription></CardHeader>
+          <CardContent>
+            {filtered.loans.length === 0 ? <p className="text-sm text-muted-foreground text-center py-8">কোনও তথ্য নেই।</p> : (
+              <Table>
+                <TableHeader><TableRow><TableHead>তারিখ</TableHead><TableHead>সদস্য</TableHead><TableHead className="text-right">মূল</TableHead><TableHead className="text-right">মোট প্রদেয়</TableHead><TableHead className="text-right">পরিশোধ</TableHead><TableHead className="text-right">বকেয়া</TableHead><TableHead>অবস্থা</TableHead></TableRow></TableHeader>
+                <TableBody>
+                  {filtered.loans.map((l) => {
+                    const m = data.members.find((x) => x.id === l.memberId);
+                    const due = loanTotalDue(l);
+                    const paid = loanPaid(data.payments, l.id);
+                    return (
+                      <TableRow key={l.id}>
+                        <TableCell>{fmtDate(l.date)}</TableCell>
+                        <TableCell className="font-medium">{m?.name ?? "—"}</TableCell>
+                        <TableCell className="text-right">{formatTk(l.amount)}</TableCell>
+                        <TableCell className="text-right">{formatTk(due)}</TableCell>
+                        <TableCell className="text-right text-success">{formatTk(paid)}</TableCell>
+                        <TableCell className="text-right text-destructive font-semibold">{formatTk(Math.max(0, due - paid))}</TableCell>
+                        <TableCell>{l.status === "active" ? "চলমান" : "পরিশোধিত"}</TableCell>
+                      </TableRow>
+                    );
+                  })}
+                </TableBody>
+              </Table>
+            )}
+          </CardContent>
+        </Card>
+      )}
+
+      {reportType === "cashbook" && (
+        <Card>
+          <CardHeader><CardTitle>আয়-ব্যয় বিস্তারিত</CardTitle><CardDescription>আয়: {formatTk(totals.totalIncome)} | ব্যয়: {formatTk(totals.totalExpense)} | নীট: {formatTk(totals.totalIncome - totals.totalExpense)}</CardDescription></CardHeader>
+          <CardContent>
+            {filtered.transactions.length === 0 ? <p className="text-sm text-muted-foreground text-center py-8">কোনও তথ্য নেই।</p> : (
+              <Table>
+                <TableHeader><TableRow><TableHead>তারিখ</TableHead><TableHead>ধরন</TableHead><TableHead>খাত</TableHead><TableHead>মন্তব্য</TableHead><TableHead className="text-right">পরিমাণ</TableHead></TableRow></TableHeader>
+                <TableBody>
+                  {[...filtered.transactions].sort((a, b) => b.date.localeCompare(a.date)).map((t) => (
+                    <TableRow key={t.id}>
+                      <TableCell>{fmtDate(t.date)}</TableCell>
+                      <TableCell>
+                        {t.type === "income"
+                          ? <Badge className="bg-success text-success-foreground">আয়</Badge>
+                          : <Badge variant="destructive">ব্যয়</Badge>}
+                      </TableCell>
+                      <TableCell className="font-medium">{t.category}</TableCell>
+                      <TableCell className="text-muted-foreground">{t.note || "—"}</TableCell>
+                      <TableCell className={cn("text-right font-semibold", t.type === "income" ? "text-success" : "text-destructive")}>{formatTk(t.amount)}</TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            )}
+          </CardContent>
+        </Card>
+      )}
+    </div>
+  );
+}
+
+function printReport(p: {
+  samitiName: string;
+  reportType: string;
+  dateRange: string;
+  totals: any;
+  memberWise: any[];
+  filtered: any;
+  members: Member[];
+}) {
+  const w = window.open("", "_blank", "width=1000,height=700");
+  if (!w) return;
+  const { samitiName, reportType, dateRange, totals, memberWise, filtered, members } = p;
+
+  const titleMap: Record<string, string> = {
+    summary: "সারাংশ রিপোর্ট",
+    members: "সদস্যভিত্তিক রিপোর্ট",
+    savings: "সঞ্চয় রিপোর্ট",
+    loans: "ঋণ রিপোর্ট",
+    cashbook: "আয়-ব্যয় রিপোর্ট",
+  };
+
+  const summaryHtml = `
+    <table style="width:100%;border-collapse:collapse;margin:12px 0;font-size:13px;">
+      <tr><td style="padding:6px 10px;border:1px solid #ccc;background:#f5f5f5;">মোট সঞ্চয়</td><td style="padding:6px 10px;border:1px solid #ccc;text-align:right;">${formatTk(totals.totalDeposit)}</td>
+          <td style="padding:6px 10px;border:1px solid #ccc;background:#f5f5f5;">ঋণ প্রদান</td><td style="padding:6px 10px;border:1px solid #ccc;text-align:right;">${formatTk(totals.totalLoanGiven)}</td></tr>
+      <tr><td style="padding:6px 10px;border:1px solid #ccc;background:#f5f5f5;">ঋণ আদায়</td><td style="padding:6px 10px;border:1px solid #ccc;text-align:right;">${formatTk(totals.totalRepaid)}</td>
+          <td style="padding:6px 10px;border:1px solid #ccc;background:#f5f5f5;">বকেয়া ঋণ</td><td style="padding:6px 10px;border:1px solid #ccc;text-align:right;">${formatTk(totals.outstanding)}</td></tr>
+      <tr><td style="padding:6px 10px;border:1px solid #ccc;background:#f5f5f5;">আয়</td><td style="padding:6px 10px;border:1px solid #ccc;text-align:right;">${formatTk(totals.totalIncome)}</td>
+          <td style="padding:6px 10px;border:1px solid #ccc;background:#f5f5f5;">ব্যয়</td><td style="padding:6px 10px;border:1px solid #ccc;text-align:right;">${formatTk(totals.totalExpense)}</td></tr>
+      <tr><td style="padding:6px 10px;border:1px solid #ccc;background:#f5f5f5;font-weight:bold;">হাতে নগদ</td><td colspan="3" style="padding:6px 10px;border:1px solid #ccc;text-align:right;font-weight:bold;">${formatTk(totals.cashInHand)}</td></tr>
+    </table>`;
+
+  const th = (cols: string[]) => `<tr>${cols.map((c) => `<th style="padding:6px 8px;border:1px solid #999;background:#eee;text-align:left;">${c}</th>`).join("")}</tr>`;
+  const td = (cells: (string | number)[], aligns: string[] = []) =>
+    `<tr>${cells.map((c, i) => `<td style="padding:6px 8px;border:1px solid #ccc;text-align:${aligns[i] || "left"};">${c}</td>`).join("")}</tr>`;
+
+  let body = "";
+  if (reportType === "summary") {
+    body += summaryHtml;
+    body += `<h3>সদস্যভিত্তিক সারসংক্ষেপ</h3>`;
+    body += `<table style="width:100%;border-collapse:collapse;font-size:12px;">${th(["সি.নং", "নাম", "মোবাইল", "সঞ্চয়", "ঋণ", "বকেয়া"])}${memberWise.map((r: any) => td([toBn(r.member.serial || 0), r.member.name, r.member.phone ? toBn(r.member.phone) : "—", formatTk(r.deposit), formatTk(r.loanAmt), formatTk(r.due)], ["left", "left", "left", "right", "right", "right"])).join("")}</table>`;
+  } else if (reportType === "members") {
+    body += `<table style="width:100%;border-collapse:collapse;font-size:12px;">${th(["সি.নং", "নাম", "মোবাইল", "সঞ্চয়", "ঋণ", "বকেয়া"])}${memberWise.map((r: any) => td([toBn(r.member.serial || 0), r.member.name, r.member.phone ? toBn(r.member.phone) : "—", formatTk(r.deposit), formatTk(r.loanAmt), formatTk(r.due)], ["left", "left", "left", "right", "right", "right"])).join("")}</table>`;
+  } else if (reportType === "savings") {
+    body += `<p><b>মোট:</b> ${formatTk(totals.totalDeposit)}</p>`;
+    body += `<table style="width:100%;border-collapse:collapse;font-size:12px;">${th(["তারিখ", "সদস্য", "মন্তব্য", "পরিমাণ"])}${[...filtered.deposits].sort((a: any, b: any) => b.date.localeCompare(a.date)).map((d: any) => { const m = members.find((x) => x.id === d.memberId); return td([fmtDate(d.date), m?.name || "—", d.note || "—", formatTk(d.amount)], ["left", "left", "left", "right"]); }).join("")}</table>`;
+  } else if (reportType === "loans") {
+    body += `<p><b>মোট প্রদান:</b> ${formatTk(totals.totalLoanGiven)} | <b>আদায়:</b> ${formatTk(totals.totalRepaid)}</p>`;
+    body += `<table style="width:100%;border-collapse:collapse;font-size:12px;">${th(["তারিখ", "সদস্য", "মূল", "মোট প্রদেয়", "পরিশোধ", "বকেয়া", "অবস্থা"])}${filtered.loans.map((l: any) => { const m = members.find((x) => x.id === l.memberId); const due = loanTotalDue(l); const paid = loanPaid(p.filtered.payments.concat([]), l.id) || 0; const realPaid = (filtered.payments.filter((pp: any) => pp.loanId === l.id).reduce((a: number, pp: any) => a + pp.amount, 0)); return td([fmtDate(l.date), m?.name || "—", formatTk(l.amount), formatTk(due), formatTk(realPaid), formatTk(Math.max(0, due - realPaid)), l.status === "active" ? "চলমান" : "পরিশোধিত"], ["left", "left", "right", "right", "right", "right", "left"]); }).join("")}</table>`;
+  } else if (reportType === "cashbook") {
+    body += `<p><b>আয়:</b> ${formatTk(totals.totalIncome)} | <b>ব্যয়:</b> ${formatTk(totals.totalExpense)} | <b>নীট:</b> ${formatTk(totals.totalIncome - totals.totalExpense)}</p>`;
+    body += `<table style="width:100%;border-collapse:collapse;font-size:12px;">${th(["তারিখ", "ধরন", "খাত", "মন্তব্য", "পরিমাণ"])}${[...filtered.transactions].sort((a: any, b: any) => b.date.localeCompare(a.date)).map((t: any) => td([fmtDate(t.date), t.type === "income" ? "আয়" : "ব্যয়", t.category, t.note || "—", formatTk(t.amount)], ["left", "left", "left", "left", "right"])).join("")}</table>`;
+  }
+
+  w.document.write(`
+    <!DOCTYPE html>
+    <html><head><meta charset="utf-8" /><title>${titleMap[reportType]} - ${samitiName}</title>
+    <style>
+      body { font-family: "Segoe UI", "Noto Sans Bengali", sans-serif; margin: 0; padding: 24px; color: #111; }
+      h1 { text-align: center; margin: 0 0 4px; font-size: 22px; }
+      h2 { text-align: center; margin: 0 0 4px; font-size: 16px; color: #555; font-weight: normal; }
+      h3 { margin: 16px 0 6px; font-size: 14px; }
+      .meta { text-align: center; font-size: 12px; color: #666; margin-bottom: 12px; border-bottom: 1px solid #ccc; padding-bottom: 8px; }
+      @media print { body { padding: 0; } .no-print { display: none; } }
+    </style></head>
+    <body>
+      <div class="no-print" style="margin-bottom:12px;"><button onclick="window.print()" style="padding:8px 16px;font-size:14px;cursor:pointer;">প্রিন্ট করুন</button></div>
+      <h1>${samitiName}</h1>
+      <h2>${titleMap[reportType]}</h2>
+      <div class="meta">সময়কাল: ${dateRange} | প্রিন্ট তারিখ: ${fmtDate(today())}</div>
+      ${body}
+      <script>setTimeout(()=>window.print(),300)</script>
+    </body></html>
+  `);
+  w.document.close();
 }
