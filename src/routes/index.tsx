@@ -1231,7 +1231,18 @@ function LoansTab() {
                     <TableCell>{fmtDate(l.date)}</TableCell>
                     <TableCell className="text-right">{formatTk(l.amount)}</TableCell>
                     <TableCell className="text-right">{formatTk(due)}</TableCell>
-                    <TableCell className="text-right font-medium">{formatTk(inst)}</TableCell>
+                    <TableCell className="text-right font-medium">
+                      {l.status === "active" ? (
+                        <button
+                          type="button"
+                          className="text-primary underline-offset-2 hover:underline cursor-pointer"
+                          title="ক্লিক করে কিস্তি গ্রহণ করুন"
+                          onClick={() => { setPayFor(l); setPayForm({ amount: String(Math.round(Math.min(inst, remaining))), date: today() }); }}
+                        >
+                          {formatTk(inst)}
+                        </button>
+                      ) : formatTk(inst)}
+                    </TableCell>
                     <TableCell className="text-right">{firstPay ? fmtDate(firstPay) : "—"}</TableCell>
                     <TableCell className="text-right">{endDate ? fmtDate(endDate) : "—"}</TableCell>
                     <TableCell className="text-right text-success font-medium">{formatTk(paid)}</TableCell>
