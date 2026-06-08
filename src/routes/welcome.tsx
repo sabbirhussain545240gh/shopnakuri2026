@@ -1,5 +1,6 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
+import { useServerFn } from "@tanstack/react-start";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -7,6 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Loader2 } from "lucide-react";
 import { toast } from "sonner";
+import { validateMyInvite, consumeMyInvite } from "@/lib/admin.functions";
 
 export const Route = createFileRoute("/welcome")({
   component: WelcomePage,
@@ -14,29 +16,67 @@ export const Route = createFileRoute("/welcome")({
   notFoundComponent: () => <div className="p-8">পাওয়া যায়নি</div>,
 });
 
+type InviteState =
+  | { kind: "loading" }
+  | { kind: "no-session" }
+  | { kind: "invalid"; reason: "expired" | "used" | "revoked" | "not_found" }
+  | { kind: "valid"; inviteId: string };
+
+function reasonText(r: "expired" | "used" | "revoked" | "not_found") {
+  switch (r) {
+    case "expired":
+      return "এই ইনভাইট লিংকের মেয়াদ শেষ হয়েছে।";
+    case "used":
+      return "এই ইনভাইট লিংক ইতিমধ্যে ব্যবহার করা হয়েছে।";
+    case "revoked":
+      return "এই ইনভাইট অ্যাডমিন কর্তৃক বাতিল করা হয়েছে।";
+    case "not_found":
+      return "ইনভাইট পাওয়া যায়নি।";
+  }
+}
+
 function WelcomePage() {
   const navigate = useNavigate();
-  const [ready, setReady] = useState(false);
-  const [hasSession, setHasSession] = useState(false);
+  const checkInvite = useServerFn(validateMyInvite);
+  const consume = useServerFn(consumeMyInvite);
+  const [state, setState] = useState<InviteState>({ kind: "loading" });
   const [password, setPassword] = useState("");
   const [confirm, setConfirm] = useState("");
   const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
-    const check = async () => {
+    let cancelled = false;
+    const run = async () => {
       const { data } = await supabase.auth.getSession();
-      setHasSession(!!data.session);
-      setReady(true);
+      if (!data.session) {
+        if (!cancelled) setState({ kind: "no-session" });
+        return;
+      }
+      try {
+        const res = await checkInvite();
+        if (cancelled) return;
+        if (res.valid) setState({ kind: "valid", inviteId: res.inviteId });
+        else {
+          // Sign out so an invalid/expired link can't grant lingering access.
+          await supabase.auth.signOut();
+          setState({ kind: "invalid", reason: res.reason });
+        }
+      } catch (e: any) {
+        if (!cancelled) {
+          await supabase.auth.signOut();
+          setState({ kind: "invalid", reason: "not_found" });
+        }
+      }
     };
-    check();
-    const { data: sub } = supabase.auth.onAuthStateChange((_e, s) => {
-      setHasSession(!!s);
-    });
-    return () => sub.subscription.unsubscribe();
+    run();
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (state.kind !== "valid") return;
     if (password.length < 6) {
       toast.error("পাসওয়ার্ড কমপক্ষে ৬ অক্ষরের হতে হবে");
       return;
@@ -49,6 +89,7 @@ function WelcomePage() {
     try {
       const { error } = await supabase.auth.updateUser({ password });
       if (error) throw error;
+      await consume({ data: { inviteId: state.inviteId } });
       toast.success("অ্যাকাউন্ট তৈরি হয়েছে");
       navigate({ to: "/" });
     } catch (err: any) {
@@ -58,7 +99,7 @@ function WelcomePage() {
     }
   };
 
-  if (!ready) {
+  if (state.kind === "loading") {
     return (
       <div className="flex min-h-screen items-center justify-center">
         <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
@@ -66,15 +107,17 @@ function WelcomePage() {
     );
   }
 
-  if (!hasSession) {
+  if (state.kind === "no-session" || state.kind === "invalid") {
+    const msg =
+      state.kind === "no-session"
+        ? "লিংকটি মেয়াদোত্তীর্ণ অথবা ইতিমধ্যে ব্যবহার করা হয়েছে। অ্যাডমিনের কাছ থেকে নতুন ইনভাইট নিন।"
+        : reasonText(state.reason) + " অ্যাডমিনের কাছ থেকে নতুন ইনভাইট নিন।";
     return (
       <div className="flex min-h-screen items-center justify-center bg-muted/30 px-4">
         <Card className="w-full max-w-md">
           <CardHeader>
             <CardTitle>ইনভাইট লিংক অবৈধ</CardTitle>
-            <CardDescription>
-              লিংকটি মেয়াদোত্তীর্ণ অথবা ইতিমধ্যে ব্যবহার করা হয়েছে। অ্যাডমিনের কাছ থেকে নতুন ইনভাইট নিন।
-            </CardDescription>
+            <CardDescription>{msg}</CardDescription>
           </CardHeader>
           <CardContent>
             <Button onClick={() => navigate({ to: "/" })} className="w-full">
