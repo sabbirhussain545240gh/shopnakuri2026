@@ -1287,10 +1287,12 @@ function printReport(p: {
   memberWise: any[];
   filtered: any;
   members: Member[];
+  memberSavingsPivot?: any;
+  groupBy?: "month" | "day";
 }) {
   const w = window.open("", "_blank", "width=1000,height=700");
   if (!w) return;
-  const { samitiName, reportType, dateRange, totals, memberWise, filtered, members } = p;
+  const { samitiName, reportType, dateRange, totals, memberWise, filtered, members, memberSavingsPivot, groupBy } = p;
 
   const titleMap: Record<string, string> = {
     summary: "সারাংশ রিপোর্ট",
@@ -1298,6 +1300,7 @@ function printReport(p: {
     savings: "সঞ্চয়/চাদা রিপোর্ট",
     loans: "ঋণ রিপোর্ট",
     cashbook: "আয়-ব্যয় রিপোর্ট",
+    "member-savings": `সদস্য ${groupBy === "month" ? "মাস" : "তারিখ"} অনুযায়ী চাঁদা জমা`,
   };
 
   const summaryHtml = `
