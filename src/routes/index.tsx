@@ -1157,6 +1157,7 @@ function LoansTab() {
           <Table>
             <TableHeader>
               <TableRow>
+                <TableHead>ঋণ নং</TableHead>
                 <TableHead>সদস্য</TableHead><TableHead>তারিখ</TableHead>
                 <TableHead className="text-right">মূল</TableHead><TableHead className="text-right">মোট প্রদেয়</TableHead>
                 <TableHead className="text-right">পরিশোধ</TableHead><TableHead className="text-right">বকেয়া</TableHead>
@@ -1164,13 +1165,14 @@ function LoansTab() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {data.loans.map((l) => {
+              {data.loans.map((l, idx) => {
                 const m = data.members.find((x) => x.id === l.memberId);
                 const due = loanTotalDue(l);
                 const paid = loanPaid(data.payments, l.id);
                 const remaining = Math.max(0, due - paid);
                 return (
                   <TableRow key={l.id}>
+                    <TableCell className="font-medium">{toBn(idx + 1)}</TableCell>
                     <TableCell className="font-medium">{m?.name ?? "—"}</TableCell>
                     <TableCell>{fmtDate(l.date)}</TableCell>
                     <TableCell className="text-right">{formatTk(l.amount)}</TableCell>
@@ -1193,6 +1195,12 @@ function LoansTab() {
                           )}
                         </>
                       )}
+                      <Button size="icon" variant="ghost" title="বিস্তারিত" onClick={() => setDetailFor(l)}>
+                        <Eye className="h-4 w-4" />
+                      </Button>
+                      <Button size="icon" variant="ghost" title="এডিট" onClick={() => startEdit(l)}>
+                        <Pencil className="h-4 w-4" />
+                      </Button>
                       <Button size="icon" variant="ghost" onClick={() => { if (confirm("ঋণ ও কিস্তি মুছবেন?")) { deleteLoan(l.id); toast.success("মুছে ফেলা হয়েছে"); } }}>
                         <Trash2 className="h-4 w-4 text-destructive" />
                       </Button>
@@ -1213,6 +1221,81 @@ function LoansTab() {
             <div><Label>তারিখ</Label><Input type="date" value={payForm.date} onChange={(e) => setPayForm({ ...payForm, date: e.target.value })} /></div>
           </div>
           <DialogFooter><Button onClick={submitPay}>সংরক্ষণ</Button></DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={!!editFor} onOpenChange={(o) => !o && setEditFor(null)}>
+        <DialogContent>
+          <DialogHeader><DialogTitle>ঋণ সম্পাদনা</DialogTitle></DialogHeader>
+          <div className="space-y-3">
+            <div>
+              <Label>সদস্য</Label>
+              <Select value={editForm.memberId} onValueChange={(v) => setEditForm({ ...editForm, memberId: v })}>
+                <SelectTrigger><SelectValue placeholder="সদস্য নির্বাচন করুন" /></SelectTrigger>
+                <SelectContent>{data.members.map((m) => <SelectItem key={m.id} value={m.id}>{toBn(m.serial)} — {m.name}</SelectItem>)}</SelectContent>
+              </Select>
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              <div><Label>পরিমাণ</Label><Input type="number" value={editForm.amount} onChange={(e) => setEditForm({ ...editForm, amount: e.target.value })} /></div>
+              <div><Label>সুদের হার (%)</Label><Input type="number" value={editForm.interestRate} onChange={(e) => setEditForm({ ...editForm, interestRate: e.target.value })} /></div>
+              <div><Label>মেয়াদ (মাস)</Label><Input type="number" value={editForm.durationMonths} onChange={(e) => setEditForm({ ...editForm, durationMonths: e.target.value })} /></div>
+              <div><Label>তারিখ</Label><Input type="date" value={editForm.date} onChange={(e) => setEditForm({ ...editForm, date: e.target.value })} /></div>
+            </div>
+          </div>
+          <DialogFooter><Button onClick={submitEdit}>সংরক্ষণ</Button></DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={!!detailFor} onOpenChange={(o) => !o && setDetailFor(null)}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader><DialogTitle>ঋণের বিস্তারিত</DialogTitle></DialogHeader>
+          {detailFor && (() => {
+            const m = data.members.find((x) => x.id === detailFor.memberId);
+            const gm = data.members.find((x) => x.id === detailFor.memberGuarantorId);
+            const due = loanTotalDue(detailFor);
+            const pays = data.payments.filter((p) => p.loanId === detailFor.id);
+            const paid = pays.reduce((s, p) => s + p.amount, 0);
+            const idx = data.loans.findIndex((x) => x.id === detailFor.id);
+            return (
+              <div className="space-y-3 text-sm">
+                <div className="grid grid-cols-2 gap-2">
+                  <div><span className="text-muted-foreground">ঋণ নং:</span> {toBn(idx + 1)}</div>
+                  <div><span className="text-muted-foreground">তারিখ:</span> {fmtDate(detailFor.date)}</div>
+                  <div><span className="text-muted-foreground">সদস্য:</span> {m?.name ?? "—"}</div>
+                  <div><span className="text-muted-foreground">মোবাইল:</span> {m?.phone ?? "—"}</div>
+                  <div><span className="text-muted-foreground">মূল:</span> {formatTk(detailFor.amount)}</div>
+                  <div><span className="text-muted-foreground">সুদের হার:</span> {toBn(detailFor.interestRate)}%</div>
+                  <div><span className="text-muted-foreground">মেয়াদ:</span> {toBn(detailFor.durationMonths)} মাস</div>
+                  <div><span className="text-muted-foreground">মোট প্রদেয়:</span> {formatTk(due)}</div>
+                  <div><span className="text-success">পরিশোধ:</span> {formatTk(paid)}</div>
+                  <div><span className="text-destructive">বকেয়া:</span> {formatTk(Math.max(0, due - paid))}</div>
+                  <div><span className="text-muted-foreground">অবস্থা:</span> {detailFor.status === "active" ? "চলমান" : "পরিশোধিত"}</div>
+                </div>
+                <div className="border-t pt-2">
+                  <div className="font-medium mb-1">জামিনদার</div>
+                  <div>সদস্য জামিনদার: {gm?.name ?? "—"}</div>
+                  {detailFor.familyGuarantor && (
+                    <div>পারিবারিক: {detailFor.familyGuarantor.name} ({detailFor.familyGuarantor.relation}) — {detailFor.familyGuarantor.phone}</div>
+                  )}
+                </div>
+                <div className="border-t pt-2">
+                  <div className="font-medium mb-1">কিস্তি ({toBn(pays.length)})</div>
+                  {pays.length === 0 ? (
+                    <p className="text-muted-foreground">কোনও কিস্তি নেই।</p>
+                  ) : (
+                    <Table>
+                      <TableHeader><TableRow><TableHead>তারিখ</TableHead><TableHead className="text-right">পরিমাণ</TableHead></TableRow></TableHeader>
+                      <TableBody>
+                        {pays.map((p) => (
+                          <TableRow key={p.id}><TableCell>{fmtDate(p.date)}</TableCell><TableCell className="text-right">{formatTk(p.amount)}</TableCell></TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  )}
+                </div>
+              </div>
+            );
+          })()}
         </DialogContent>
       </Dialog>
     </Card>
