@@ -39,7 +39,7 @@ export type Loan = {
   durationMonths: number;
   status: "active" | "closed";
   memberGuarantorId?: string;
-  familyGuarantor?: string;
+  familyGuarantor?: { name: string; relation: string; phone: string };
 };
 
 export type LoanPayment = {
