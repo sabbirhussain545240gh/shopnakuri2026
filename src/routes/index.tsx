@@ -521,13 +521,13 @@ function printMemberCard(member: Member, samiti: { samitiName: string; samitiLog
   if (!w) return;
   const headerHtml = `
     <div style="display:flex;align-items:center;gap:16px;border-bottom:2px solid #333;padding-bottom:10px;margin-bottom:16px;">
-      ${samiti.samitiLogo ? `<img src="${samiti.samitiLogo}" style="width:70px;height:70px;object-fit:contain;" />` : ""}
+      ${samiti.samitiLogo ? `<img src="${samiti.samitiLogo}" style="width:100px;height:100px;object-fit:contain;" />` : ""}
       <div style="flex:1;text-align:center;">
-        <h1 style="margin:0;font-size:22px;">${samiti.samitiName}</h1>
-        ${samiti.samitiAddress ? `<div style="font-size:13px;color:#444;margin-top:2px;">${samiti.samitiAddress}</div>` : ""}
-        ${samiti.establishedDate ? `<div style="font-size:12px;color:#666;margin-top:2px;">স্থাপিত: ${fmtDate(samiti.establishedDate)}</div>` : ""}
+        <h1 style="margin:0;font-size:28px;">${samiti.samitiName}</h1>
+        ${samiti.samitiAddress ? `<div style="font-size:15px;color:#444;margin-top:4px;">${samiti.samitiAddress}</div>` : ""}
+        ${samiti.establishedDate ? `<div style="font-size:14px;color:#666;margin-top:4px;">স্থাপিত: ${samiti.establishedDate}</div>` : ""}
       </div>
-      ${samiti.samitiLogo ? `<div style="width:70px;"></div>` : ""}
+      ${samiti.samitiLogo ? `<div style="width:100px;"></div>` : ""}
     </div>`;
   const photoHtml = member.photo
     ? `<img src="${member.photo}" style="width:120px;height:120px;object-fit:cover;border-radius:8px;border:1px solid #ddd;" />`
@@ -990,7 +990,7 @@ function SettingsTab() {
           </div>
           <div><Label>সমিতির নাম</Label><Input value={name} onChange={(e) => setName(e.target.value)} /></div>
           <div><Label>সমিতির ঠিকানা</Label><Textarea value={address} onChange={(e) => setAddress(e.target.value)} /></div>
-          <div><Label>স্থাপিত তারিখ</Label><Input type="date" value={estDate} onChange={(e) => setEstDate(e.target.value)} /></div>
+          <div><Label>স্থাপিত</Label><Input value={estDate} onChange={(e) => setEstDate(e.target.value)} placeholder="যেমন: ২০১৫ সাল" /></div>
           <div><Label>ঋণের ডিফল্ট সুদের হার (% বার্ষিক)</Label><Input type="number" value={rate} onChange={(e) => setRate(e.target.value)} /></div>
           <div><Label>ঋণের ডিফল্ট মেয়াদ (মাস)</Label><Input type="number" value={dur} onChange={(e) => setDur(e.target.value)} /></div>
           <Button onClick={saveGeneral} className="w-full">সংরক্ষণ</Button>
@@ -1505,13 +1505,13 @@ function printReport(p: {
     <body>
       <div class="no-print" style="margin-bottom:12px;"><button onclick="window.print()" style="padding:8px 16px;font-size:14px;cursor:pointer;">প্রিন্ট করুন</button></div>
       <div style="display:flex;align-items:center;gap:16px;border-bottom:2px solid #333;padding-bottom:10px;margin-bottom:10px;">
-        ${samitiLogo ? `<img src="${samitiLogo}" style="width:70px;height:70px;object-fit:contain;" />` : ""}
+        ${samitiLogo ? `<img src="${samitiLogo}" style="width:100px;height:100px;object-fit:contain;" />` : ""}
         <div style="flex:1;text-align:center;">
-          <h1 style="margin:0;font-size:22px;">${samitiName}</h1>
-          ${samitiAddress ? `<div style="font-size:13px;color:#444;margin-top:2px;">${samitiAddress}</div>` : ""}
-          ${establishedDate ? `<div style="font-size:12px;color:#666;margin-top:2px;">স্থাপিত: ${fmtDate(establishedDate)}</div>` : ""}
+          <h1 style="margin:0;font-size:28px;">${samitiName}</h1>
+          ${samitiAddress ? `<div style="font-size:15px;color:#444;margin-top:4px;">${samitiAddress}</div>` : ""}
+          ${establishedDate ? `<div style="font-size:14px;color:#666;margin-top:4px;">স্থাপিত: ${establishedDate}</div>` : ""}
         </div>
-        ${samitiLogo ? `<div style="width:70px;"></div>` : ""}
+        ${samitiLogo ? `<div style="width:100px;"></div>` : ""}
       </div>
       <h2>${titleMap[reportType]}</h2>
       <div class="meta">সময়কাল: ${dateRange} | প্রিন্ট তারিখ: ${fmtDate(today())}</div>
