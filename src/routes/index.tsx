@@ -1054,6 +1054,7 @@ function ReportsTab() {
                 <SelectContent>
                   <SelectItem value="summary">সারাংশ</SelectItem>
                   <SelectItem value="members">সদস্যভিত্তিক</SelectItem>
+                  <SelectItem value="member-savings">সদস্য তারিখ/মাস অনুযায়ী চাঁদা জমা</SelectItem>
                   <SelectItem value="savings">সঞ্চয়/চাদা বিস্তারিত</SelectItem>
                   <SelectItem value="loans">ঋণ বিস্তারিত</SelectItem>
                   <SelectItem value="cashbook">আয়-ব্যয় বিস্তারিত</SelectItem>
@@ -1065,6 +1066,32 @@ function ReportsTab() {
             <Button onClick={handlePrint}><Printer className="h-4 w-4 mr-1" />প্রিন্ট</Button>
             <Button variant="outline" onClick={exportCsv}><Download className="h-4 w-4 mr-1" />CSV ডাউনলোড</Button>
           </div>
+          {reportType === "member-savings" && (
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-3 items-end mt-3">
+              <div>
+                <Label>সদস্য</Label>
+                <Select value={memberFilter} onValueChange={setMemberFilter}>
+                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">সকল সদস্য</SelectItem>
+                    {data.members.slice().sort((a, b) => (a.serial || 0) - (b.serial || 0)).map((m) => (
+                      <SelectItem key={m.id} value={m.id}>{toBn(m.serial || 0)}. {m.name}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <Label>গ্রুপিং</Label>
+                <Select value={groupBy} onValueChange={(v) => setGroupBy(v as "month" | "day")}>
+                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="month">মাস অনুযায়ী</SelectItem>
+                    <SelectItem value="day">তারিখ অনুযায়ী</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+          )}
           <p className="text-xs text-muted-foreground mt-3">সময়কাল: {dateRangeText()}</p>
         </CardContent>
       </Card>
