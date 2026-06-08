@@ -1067,7 +1067,7 @@ function LoansTab() {
     toast.success("ঋণ আপডেট হয়েছে");
   };
 
-
+  return (
     <Card>
       <CardHeader className="flex flex-row items-center justify-between gap-2">
         <div>
