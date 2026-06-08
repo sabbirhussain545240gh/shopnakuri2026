@@ -990,7 +990,7 @@ function SettingsTab() {
           </div>
           <div><Label>সমিতির নাম</Label><Input value={name} onChange={(e) => setName(e.target.value)} /></div>
           <div><Label>সমিতির ঠিকানা</Label><Textarea value={address} onChange={(e) => setAddress(e.target.value)} /></div>
-          <div><Label>স্থাপিত তারিখ</Label><Input type="date" value={estDate} onChange={(e) => setEstDate(e.target.value)} /></div>
+          <div><Label>স্থাপিত</Label><Input value={estDate} onChange={(e) => setEstDate(e.target.value)} placeholder="যেমন: ২০১৫ সাল" /></div>
           <div><Label>ঋণের ডিফল্ট সুদের হার (% বার্ষিক)</Label><Input type="number" value={rate} onChange={(e) => setRate(e.target.value)} /></div>
           <div><Label>ঋণের ডিফল্ট মেয়াদ (মাস)</Label><Input type="number" value={dur} onChange={(e) => setDur(e.target.value)} /></div>
           <Button onClick={saveGeneral} className="w-full">সংরক্ষণ</Button>
