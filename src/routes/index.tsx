@@ -1183,7 +1183,11 @@ function LoansTab() {
         {data.loans.length === 0 ? (
           <p className="text-sm text-muted-foreground text-center py-10">কোনও ঋণ নেই।</p>
         ) : (
-          <Table>
+          <>
+            <p className="text-xs text-muted-foreground mb-3 leading-relaxed">
+              <strong>গণনা পদ্ধতি:</strong> মাসিক কিস্তি = (মূল + সুদ) ÷ মেয়াদ (মাস)। সুদ = মূল × সুদের হার × মেয়াদ ÷ (১০০ × ১২)। ১ম কিস্তির তারিখ = ঋণ প্রদানের তারিখ থেকে ১ মাস পর। ঋণ শেষ = ঋণ প্রদানের তারিখ + মেয়াদ (মাস)।
+            </p>
+            <Table>
             <TableHeader>
               <TableRow>
                 <TableHead>ঋণ নং</TableHead>
