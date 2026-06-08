@@ -245,7 +245,7 @@ export function useSamiti() {
     updateSamitiInfo,
     addMember, addMembers, updateMember, deleteMember,
     addDeposit, addDeposits, updateDeposit, deleteDeposit,
-    addLoan, addPayment, deletePayment, closeLoan, deleteLoan,
+    addLoan, updateLoan, addPayment, deletePayment, closeLoan, deleteLoan,
     addTransaction, deleteTransaction,
     updateSettings, resetAll, importData,
   };
