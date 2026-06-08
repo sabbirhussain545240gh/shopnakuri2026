@@ -43,14 +43,24 @@ export function AuthGate({ children }: { children: (session: Session) => ReactNo
         if (error) throw error;
         toast.success("সফলভাবে লগইন হয়েছে");
       } else {
-        const { error } = await supabase.auth.signUp({
+        const { data, error } = await supabase.auth.signUp({
           email: email.trim(),
           password,
           options: { emailRedirectTo: `${window.location.origin}/` },
         });
         if (error) throw error;
-        toast.success("অ্যাকাউন্ট তৈরি হয়েছে");
+        if (data.session) {
+          toast.success("অ্যাকাউন্ট তৈরি হয়েছে");
+        } else {
+          toast.success(
+            "ইমেইল পাঠানো হয়েছে — ইনবক্সে গিয়ে ভেরিফিকেশন লিংকে ক্লিক করুন। যাচাই না হওয়া পর্যন্ত অ্যাকাউন্ট সক্রিয় হবে না।",
+            { duration: 8000 },
+          );
+          setMode("login");
+          setPassword("");
+        }
       }
+
     } catch (err: any) {
       toast.error(err?.message ?? "ত্রুটি ঘটেছে");
     } finally {
