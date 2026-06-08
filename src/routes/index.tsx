@@ -40,6 +40,20 @@ const fmtDate = (s: string) => {
   const dd = String(d).padStart(2, "0");
   return `${dd} ${enMonths[+m - 1] || m} ${y}`;
 };
+const addMonths = (s: string, n: number) => {
+  if (!s) return "";
+  const [y, m, d] = s.split("-").map(Number);
+  const dt = new Date(y, (m - 1) + n, d);
+  const yy = dt.getFullYear();
+  const mm = String(dt.getMonth() + 1).padStart(2, "0");
+  const dd = String(dt.getDate()).padStart(2, "0");
+  return `${yy}-${mm}-${dd}`;
+};
+const monthlyInstallment = (amount: number, rate: number, months: number) => {
+  if (!months || months <= 0) return 0;
+  const interest = (amount * rate * months) / (100 * 12);
+  return (amount + interest) / months;
+};
 
 const navItems = [
   { value: "dashboard", label: "ড্যাশবোর্ড", icon: LayoutDashboard },
@@ -1101,6 +1115,21 @@ function LoansTab() {
                 <div><Label>মেয়াদ (মাস)</Label><Input type="number" value={form.durationMonths} onChange={(e) => setForm({ ...form, durationMonths: e.target.value })} /></div>
                 <div><Label>তারিখ</Label><Input type="date" value={form.date} onChange={(e) => setForm({ ...form, date: e.target.value })} /></div>
               </div>
+              {(() => {
+                const amt = Number(form.amount) || 0;
+                const rate = Number(form.interestRate) || 0;
+                const dur = Number(form.durationMonths) || 0;
+                const inst = monthlyInstallment(amt, rate, dur);
+                const first = form.date && dur > 0 ? addMonths(form.date, 1) : "";
+                const end = form.date && dur > 0 ? addMonths(form.date, dur) : "";
+                return (
+                  <div className="rounded-md border bg-muted/40 p-3 text-sm grid grid-cols-1 sm:grid-cols-3 gap-2">
+                    <div><span className="text-muted-foreground">মাসিক কিস্তি:</span> <span className="font-semibold">{formatTk(inst)}</span></div>
+                    <div><span className="text-muted-foreground">১ম কিস্তির তারিখ:</span> <span className="font-medium">{first ? fmtDate(first) : "—"}</span></div>
+                    <div><span className="text-muted-foreground">ঋণ শেষ:</span> <span className="font-medium">{end ? fmtDate(end) : "—"}</span></div>
+                  </div>
+                );
+              })()}
               <div>
                 <Label>সদস্য জামিনদার *</Label>
                 <Select value={form.memberGuarantorId} onValueChange={(v) => setField("memberGuarantorId", v)}>
@@ -1241,6 +1270,21 @@ function LoansTab() {
               <div><Label>মেয়াদ (মাস)</Label><Input type="number" value={editForm.durationMonths} onChange={(e) => setEditForm({ ...editForm, durationMonths: e.target.value })} /></div>
               <div><Label>তারিখ</Label><Input type="date" value={editForm.date} onChange={(e) => setEditForm({ ...editForm, date: e.target.value })} /></div>
             </div>
+            {(() => {
+              const amt = Number(editForm.amount) || 0;
+              const rate = Number(editForm.interestRate) || 0;
+              const dur = Number(editForm.durationMonths) || 0;
+              const inst = monthlyInstallment(amt, rate, dur);
+              const first = editForm.date && dur > 0 ? addMonths(editForm.date, 1) : "";
+              const end = editForm.date && dur > 0 ? addMonths(editForm.date, dur) : "";
+              return (
+                <div className="rounded-md border bg-muted/40 p-3 text-sm grid grid-cols-1 sm:grid-cols-3 gap-2">
+                  <div><span className="text-muted-foreground">মাসিক কিস্তি:</span> <span className="font-semibold">{formatTk(inst)}</span></div>
+                  <div><span className="text-muted-foreground">১ম কিস্তির তারিখ:</span> <span className="font-medium">{first ? fmtDate(first) : "—"}</span></div>
+                  <div><span className="text-muted-foreground">ঋণ শেষ:</span> <span className="font-medium">{end ? fmtDate(end) : "—"}</span></div>
+                </div>
+              );
+            })()}
           </div>
           <DialogFooter><Button onClick={submitEdit}>সংরক্ষণ</Button></DialogFooter>
         </DialogContent>
@@ -1266,6 +1310,9 @@ function LoansTab() {
                   <div><span className="text-muted-foreground">মূল:</span> {formatTk(detailFor.amount)}</div>
                   <div><span className="text-muted-foreground">সুদের হার:</span> {toBn(detailFor.interestRate)}%</div>
                   <div><span className="text-muted-foreground">মেয়াদ:</span> {toBn(detailFor.durationMonths)} মাস</div>
+                  <div><span className="text-muted-foreground">মাসিক কিস্তি:</span> {formatTk(monthlyInstallment(detailFor.amount, detailFor.interestRate, detailFor.durationMonths))}</div>
+                  <div><span className="text-muted-foreground">১ম কিস্তির তারিখ:</span> {fmtDate(addMonths(detailFor.date, 1))}</div>
+                  <div><span className="text-muted-foreground">ঋণ শেষ:</span> {fmtDate(addMonths(detailFor.date, detailFor.durationMonths))}</div>
                   <div><span className="text-muted-foreground">মোট প্রদেয়:</span> {formatTk(due)}</div>
                   <div><span className="text-success">পরিশোধ:</span> {formatTk(paid)}</div>
                   <div><span className="text-destructive">বকেয়া:</span> {formatTk(Math.max(0, due - paid))}</div>
