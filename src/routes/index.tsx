@@ -831,6 +831,29 @@ function SavingsTab() {
     setEditForm({ memberId: d.memberId, amount: String(d.amount), date: d.date, note: d.note || "" });
   };
 
+  const replicateFromFirst = () => {
+    const sorted = [...data.members].sort((a, b) => (a.serial || 0) - (b.serial || 0));
+    const first = sorted[0];
+    if (!first) { toast.error("কোনও সদস্য নেই"); return; }
+    const firstDeps = data.deposits.filter((d) => d.memberId === first.id);
+    if (firstDeps.length === 0) { toast.error(`${toBn(first.serial)} নং সদস্যের কোনও জমা নেই`); return; }
+    const others = sorted.filter((m) => m.id !== first.id);
+    if (others.length === 0) { toast.error("অন্য কোনও সদস্য নেই"); return; }
+    const existing = new Set(data.deposits.map((d) => `${d.memberId}|${d.date}|${d.amount}`));
+    const batch: Array<Omit<Deposit, "id">> = [];
+    for (const m of others) {
+      for (const d of firstDeps) {
+        const key = `${m.id}|${d.date}|${d.amount}`;
+        if (existing.has(key)) continue;
+        batch.push({ memberId: m.id, amount: d.amount, date: d.date, note: d.note });
+        existing.add(key);
+      }
+    }
+    if (batch.length === 0) { toast.info("সব সদস্যের জন্য ইতিমধ্যে এন্ট্রি করা আছে"); return; }
+    const n = addDeposits(batch);
+    toast.success(`${toBn(n)}টি এন্ট্রি যোগ হয়েছে`);
+  };
+
   const filteredDeposits = useMemo(() => {
     const q = search.trim().toLowerCase();
     if (!q) return [...data.deposits].sort((a, b) => b.date.localeCompare(a.date));
