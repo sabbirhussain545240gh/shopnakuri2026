@@ -1466,7 +1466,7 @@ function ReportsTab() {
   );
 }
 
-function printReport(p: {
+type ReportParams = {
   samitiName: string;
   samitiLogo?: string;
   samitiAddress?: string;
@@ -1479,11 +1479,10 @@ function printReport(p: {
   members: Member[];
   memberSavingsPivot?: any;
   groupBy?: "month" | "day";
-}) {
-  const w = window.open("", "_blank", "width=1000,height=700");
-  if (!w) return;
-  const { samitiName, samitiLogo, samitiAddress, establishedDate, reportType, dateRange, totals, memberWise, filtered, members, memberSavingsPivot, groupBy } = p;
+};
 
+function buildReportHtml(p: ReportParams) {
+  const { samitiName, samitiLogo, samitiAddress, establishedDate, reportType, dateRange, totals, memberWise, filtered, members, memberSavingsPivot, groupBy } = p;
   const titleMap: Record<string, string> = {
     summary: "সারাংশ রিপোর্ট",
     members: "সদস্যভিত্তিক রিপোর্ট",
@@ -1520,7 +1519,7 @@ function printReport(p: {
     body += `<table style="width:100%;border-collapse:collapse;font-size:12px;">${th(["তারিখ", "সদস্য", "মন্তব্য", "পরিমাণ"])}${[...filtered.deposits].sort((a: any, b: any) => b.date.localeCompare(a.date)).map((d: any) => { const m = members.find((x) => x.id === d.memberId); return td([fmtDate(d.date), m?.name || "—", d.note || "—", formatTk(d.amount)], ["left", "left", "left", "right"]); }).join("")}</table>`;
   } else if (reportType === "loans") {
     body += `<p><b>মোট প্রদান:</b> ${formatTk(totals.totalLoanGiven)} | <b>আদায়:</b> ${formatTk(totals.totalRepaid)}</p>`;
-    body += `<table style="width:100%;border-collapse:collapse;font-size:12px;">${th(["তারিখ", "সদস্য", "মূল", "মোট প্রদেয়", "পরিশোধ", "বকেয়া", "অবস্থা"])}${filtered.loans.map((l: any) => { const m = members.find((x) => x.id === l.memberId); const due = loanTotalDue(l); const paid = loanPaid(p.filtered.payments.concat([]), l.id) || 0; const realPaid = (filtered.payments.filter((pp: any) => pp.loanId === l.id).reduce((a: number, pp: any) => a + pp.amount, 0)); return td([fmtDate(l.date), m?.name || "—", formatTk(l.amount), formatTk(due), formatTk(realPaid), formatTk(Math.max(0, due - realPaid)), l.status === "active" ? "চলমান" : "পরিশোধিত"], ["left", "left", "right", "right", "right", "right", "left"]); }).join("")}</table>`;
+    body += `<table style="width:100%;border-collapse:collapse;font-size:12px;">${th(["তারিখ", "সদস্য", "মূল", "মোট প্রদেয়", "পরিশোধ", "বকেয়া", "অবস্থা"])}${filtered.loans.map((l: any) => { const m = members.find((x) => x.id === l.memberId); const due = loanTotalDue(l); const realPaid = (filtered.payments.filter((pp: any) => pp.loanId === l.id).reduce((a: number, pp: any) => a + pp.amount, 0)); return td([fmtDate(l.date), m?.name || "—", formatTk(l.amount), formatTk(due), formatTk(realPaid), formatTk(Math.max(0, due - realPaid)), l.status === "active" ? "চলমান" : "পরিশোধিত"], ["left", "left", "right", "right", "right", "right", "left"]); }).join("")}</table>`;
   } else if (reportType === "cashbook") {
     body += `<p><b>আয়:</b> ${formatTk(totals.totalIncome)} | <b>ব্যয়:</b> ${formatTk(totals.totalExpense)} | <b>নীট:</b> ${formatTk(totals.totalIncome - totals.totalExpense)}</p>`;
     body += `<table style="width:100%;border-collapse:collapse;font-size:12px;">${th(["তারিখ", "ধরন", "খাত", "মন্তব্য", "পরিমাণ"])}${[...filtered.transactions].sort((a: any, b: any) => b.date.localeCompare(a.date)).map((t: any) => td([fmtDate(t.date), t.type === "income" ? "আয়" : "ব্যয়", t.category, t.note || "—", formatTk(t.amount)], ["left", "left", "left", "left", "right"])).join("")}</table>`;
@@ -1537,33 +1536,92 @@ function printReport(p: {
     body += `<table style="width:100%;border-collapse:collapse;font-size:12px;">${th(headerCells)}${bodyRows}${totalsRow}</table>`;
   }
 
+  const inner = `
+    <div style="display:flex;align-items:center;gap:16px;border-bottom:2px solid #333;padding-bottom:10px;margin-bottom:10px;">
+      ${samitiLogo ? `<img src="${samitiLogo}" style="width:100px;height:100px;object-fit:contain;" crossorigin="anonymous" />` : ""}
+      <div style="flex:1;text-align:center;">
+        <h1 style="margin:0;font-size:28px;">${samitiName}</h1>
+        ${samitiAddress ? `<div style="font-size:15px;color:#444;margin-top:4px;">${samitiAddress}</div>` : ""}
+        ${establishedDate ? `<div style="font-size:14px;color:#666;margin-top:4px;">স্থাপিত: ${establishedDate}</div>` : ""}
+      </div>
+      ${samitiLogo ? `<div style="width:100px;"></div>` : ""}
+    </div>
+    <h2 style="text-align:center;margin:0 0 4px;font-size:16px;color:#555;font-weight:normal;">${titleMap[reportType]}</h2>
+    <div style="text-align:center;font-size:12px;color:#666;margin-bottom:12px;border-bottom:1px solid #ccc;padding-bottom:8px;">সময়কাল: ${dateRange} | প্রিন্ট তারিখ: ${fmtDate(today())}</div>
+    ${body}
+  `;
+  return { inner, title: titleMap[reportType] };
+}
+
+function printReport(p: ReportParams) {
+  const w = window.open("", "_blank", "width=1000,height=700");
+  if (!w) return;
+  const { inner, title } = buildReportHtml(p);
   w.document.write(`
     <!DOCTYPE html>
-    <html><head><meta charset="utf-8" /><title>${titleMap[reportType]} - ${samitiName}</title>
+    <html><head><meta charset="utf-8" /><title>${title} - ${p.samitiName}</title>
     <style>
-      body { font-family: "Segoe UI", "Noto Sans Bengali", sans-serif; margin: 0; padding: 24px; color: #111; }
-      h1 { text-align: center; margin: 0 0 4px; font-size: 22px; }
-      h2 { text-align: center; margin: 0 0 4px; font-size: 16px; color: #555; font-weight: normal; }
+      body { font-family: "Segoe UI", "Noto Sans Bengali", sans-serif; margin: 0; padding: 24px; color: #111; background:#fff; }
       h3 { margin: 16px 0 6px; font-size: 14px; }
-      .meta { text-align: center; font-size: 12px; color: #666; margin-bottom: 12px; border-bottom: 1px solid #ccc; padding-bottom: 8px; }
       @media print { body { padding: 0; } .no-print { display: none; } }
     </style></head>
     <body>
       <div class="no-print" style="margin-bottom:12px;"><button onclick="window.print()" style="padding:8px 16px;font-size:14px;cursor:pointer;">প্রিন্ট করুন</button></div>
-      <div style="display:flex;align-items:center;gap:16px;border-bottom:2px solid #333;padding-bottom:10px;margin-bottom:10px;">
-        ${samitiLogo ? `<img src="${samitiLogo}" style="width:100px;height:100px;object-fit:contain;" />` : ""}
-        <div style="flex:1;text-align:center;">
-          <h1 style="margin:0;font-size:28px;">${samitiName}</h1>
-          ${samitiAddress ? `<div style="font-size:15px;color:#444;margin-top:4px;">${samitiAddress}</div>` : ""}
-          ${establishedDate ? `<div style="font-size:14px;color:#666;margin-top:4px;">স্থাপিত: ${establishedDate}</div>` : ""}
-        </div>
-        ${samitiLogo ? `<div style="width:100px;"></div>` : ""}
-      </div>
-      <h2>${titleMap[reportType]}</h2>
-      <div class="meta">সময়কাল: ${dateRange} | প্রিন্ট তারিখ: ${fmtDate(today())}</div>
-      ${body}
+      ${inner}
       <script>setTimeout(()=>window.print(),300)</script>
     </body></html>
   `);
   w.document.close();
+}
+
+async function renderReportCanvas(p: ReportParams): Promise<HTMLCanvasElement> {
+  const { default: html2canvas } = await import("html2canvas");
+  const { inner } = buildReportHtml(p);
+  const container = document.createElement("div");
+  container.style.cssText = "position:fixed;left:-10000px;top:0;width:800px;background:#fff;color:#111;padding:24px;font-family:'Segoe UI','Noto Sans Bengali',sans-serif;";
+  container.innerHTML = inner;
+  document.body.appendChild(container);
+  try {
+    const imgs = Array.from(container.querySelectorAll("img"));
+    await Promise.all(imgs.map((img) => img.complete ? Promise.resolve() : new Promise((res) => { img.onload = img.onerror = () => res(null); })));
+    const canvas = await html2canvas(container, { scale: 2, backgroundColor: "#ffffff", useCORS: true, logging: false });
+    return canvas;
+  } finally {
+    document.body.removeChild(container);
+  }
+}
+
+async function exportReportJpeg(p: ReportParams) {
+  const canvas = await renderReportCanvas(p);
+  const url = canvas.toDataURL("image/jpeg", 0.95);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = `report-${p.reportType}-${today()}.jpg`;
+  a.click();
+}
+
+async function exportReportPdf(p: ReportParams) {
+  const canvas = await renderReportCanvas(p);
+  const { default: jsPDF } = await import("jspdf");
+  const pdf = new jsPDF({ unit: "pt", format: "a4", orientation: "portrait" });
+  const pageW = pdf.internal.pageSize.getWidth();
+  const pageH = pdf.internal.pageSize.getHeight();
+  const imgW = pageW;
+  const imgH = (canvas.height * imgW) / canvas.width;
+  const imgData = canvas.toDataURL("image/jpeg", 0.95);
+  if (imgH <= pageH) {
+    pdf.addImage(imgData, "JPEG", 0, 0, imgW, imgH);
+  } else {
+    let position = 0;
+    let remaining = imgH;
+    while (remaining > 0) {
+      pdf.addImage(imgData, "JPEG", 0, position, imgW, imgH);
+      remaining -= pageH;
+      if (remaining > 0) {
+        position -= pageH;
+        pdf.addPage();
+      }
+    }
+  }
+  pdf.save(`report-${p.reportType}-${today()}.pdf`);
 }
