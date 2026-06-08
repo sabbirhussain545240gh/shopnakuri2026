@@ -253,7 +253,7 @@ function Dashboard({ totals, memberCount, data }: any) {
 
 // ===== Members =====
 function MembersTab() {
-  const { data, addMember, updateMember, deleteMember } = useSamiti();
+  const { data, addMember, addMembers, updateMember, deleteMember } = useSamiti();
   const [open, setOpen] = useState(false);
   const emptyForm = {
     serial: "",
