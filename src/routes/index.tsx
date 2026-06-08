@@ -1428,7 +1428,7 @@ function ReportsTab() {
     const labelOf = (k: string) => {
       if (groupBy === "month") {
         const [y, mo] = k.split("-");
-        const names = ["জানু", "ফেব্রু", "মার্চ", "এপ্রিল", "মে", "জুন", "জুলাই", "আগস্ট", "সেপ্ট", "অক্টো", "নভে", "ডিসে"];
+        const names = ["জান", "ফেব", "মার", "এপ্র", "মে", "জুন", "জুল", "আগ", "সেপ", "অক্ট", "নভ", "ডিস"];
         return `${names[+mo - 1] || mo} ${toBn(y)}`;
       }
       return fmtDate(k);
