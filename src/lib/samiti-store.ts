@@ -88,7 +88,14 @@ function load(): SamitiData {
   try {
     const raw = localStorage.getItem(KEY);
     if (!raw) return empty;
-    return { ...empty, ...JSON.parse(raw) };
+    const parsed = { ...empty, ...JSON.parse(raw) } as SamitiData;
+    // migrate: assign serials to legacy members
+    let nextSerial = 1;
+    parsed.members = parsed.members.map((m) => {
+      if (typeof (m as any).serial === "number") return m;
+      return { ...m, serial: nextSerial++ };
+    });
+    return parsed;
   } catch {
     return empty;
   }
