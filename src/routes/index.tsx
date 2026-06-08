@@ -1255,7 +1255,7 @@ function LoansTab() {
                     <TableCell className="flex gap-1">
                       {l.status === "active" && (
                         <>
-                          <Button size="sm" variant="outline" onClick={() => { setPayFor(l); setPayForm({ amount: "", date: today() }); }}>কিস্তি</Button>
+                          <Button size="sm" variant="outline" onClick={() => { setPayFor(l); setPayForm({ amount: String(Math.round(Math.min(inst, remaining))), date: today() }); }}>কিস্তি</Button>
                           {remaining <= 0 && (
                             <Button size="icon" variant="ghost" onClick={() => { closeLoan(l.id); toast.success("ঋণ পরিশোধিত"); }}>
                               <CheckCircle2 className="h-4 w-4 text-success" />
