@@ -1491,7 +1491,15 @@ function printReport(p: {
     </style></head>
     <body>
       <div class="no-print" style="margin-bottom:12px;"><button onclick="window.print()" style="padding:8px 16px;font-size:14px;cursor:pointer;">প্রিন্ট করুন</button></div>
-      <h1>${samitiName}</h1>
+      <div style="display:flex;align-items:center;gap:16px;border-bottom:2px solid #333;padding-bottom:10px;margin-bottom:10px;">
+        ${samitiLogo ? `<img src="${samitiLogo}" style="width:70px;height:70px;object-fit:contain;" />` : ""}
+        <div style="flex:1;text-align:center;">
+          <h1 style="margin:0;font-size:22px;">${samitiName}</h1>
+          ${samitiAddress ? `<div style="font-size:13px;color:#444;margin-top:2px;">${samitiAddress}</div>` : ""}
+          ${establishedDate ? `<div style="font-size:12px;color:#666;margin-top:2px;">স্থাপিত: ${fmtDate(establishedDate)}</div>` : ""}
+        </div>
+        ${samitiLogo ? `<div style="width:70px;"></div>` : ""}
+      </div>
       <h2>${titleMap[reportType]}</h2>
       <div class="meta">সময়কাল: ${dateRange} | প্রিন্ট তারিখ: ${fmtDate(today())}</div>
       ${body}
