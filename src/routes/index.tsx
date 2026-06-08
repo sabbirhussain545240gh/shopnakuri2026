@@ -2544,3 +2544,58 @@ async function exportReportPdf(p: ReportParams) {
   }
   pdf.save(`report-${p.reportType}-${today()}.pdf`);
 }
+
+const receiptCss = `
+  body{margin:0;padding:20px;background:#fff;color:#111;font-family:"Segoe UI","Noto Sans Bengali",Arial,sans-serif;}
+  .r{width:520px;border:1px solid #ddd;border-radius:8px;padding:20px;background:#fff;}
+  .center{text-align:center;}
+  .title{font-size:20px;font-weight:700;margin:0;}
+  .sub{font-size:12px;color:#666;margin-top:2px;}
+  .grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:14px;font-size:13px;}
+  .grid .full{grid-column:1 / -1;}
+  .muted{color:#666;}
+  .row{display:flex;justify-content:space-between;align-items:center;margin-top:14px;padding-top:10px;border-top:1px solid #eee;font-size:15px;}
+  .amount{font-weight:700;color:#15803d;}
+  .totals{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px;font-size:13px;}
+  .due{color:#b91c1c;font-weight:600;}
+  .sign{display:flex;justify-content:space-between;margin-top:32px;font-size:12px;color:#666;}
+  @media print{body{padding:0;} .no-print{display:none;}}
+`;
+
+function buildReceiptHtml(r: { loan: Loan; memberName: string; amount: number; date: string; paidAfter: number; remainingAfter: number; receiptNo: string }, samitiName: string) {
+  return `<div class="r" id="r">
+    <div class="center"><div class="title">${samitiName}</div><div class="sub">কিস্তি প্রাপ্তি রিসিপ্ট</div></div>
+    <div class="grid">
+      <div><span class="muted">রিসিপ্ট নং:</span> <b>${r.receiptNo}</b></div>
+      <div><span class="muted">তারিখ:</span> <b>${fmtDate(r.date)}</b></div>
+      <div class="full"><span class="muted">সদস্য:</span> <b>${r.memberName}</b></div>
+      <div><span class="muted">ঋণ মূল:</span> ${formatTk(r.loan.amount)}</div>
+      <div><span class="muted">মেয়াদ:</span> ${toBn(r.loan.durationMonths)} মাস</div>
+    </div>
+    <div class="row"><span>প্রাপ্ত কিস্তি</span><span class="amount">${formatTk(r.amount)}</span></div>
+    <div class="totals">
+      <div><span class="muted">মোট পরিশোধিত:</span> <b>${formatTk(r.paidAfter)}</b></div>
+      <div><span class="muted">অবশিষ্ট বকেয়া:</span> <span class="due">${formatTk(r.remainingAfter)}</span></div>
+    </div>
+    <div class="sign"><div>—————————<br/>গ্রহীতা</div><div style="text-align:right">—————————<br/>কোষাধ্যক্ষ</div></div>
+  </div>`;
+}
+
+async function renderReceiptCanvas(r: { loan: Loan; memberName: string; amount: number; date: string; paidAfter: number; remainingAfter: number; receiptNo: string }, samitiName: string): Promise<HTMLCanvasElement> {
+  const { default: html2canvas } = await import("html2canvas");
+  const iframe = document.createElement("iframe");
+  iframe.style.cssText = "position:fixed;left:-10000px;top:0;width:600px;height:10px;border:0;";
+  document.body.appendChild(iframe);
+  try {
+    const doc = iframe.contentDocument!;
+    doc.open();
+    doc.write(`<!DOCTYPE html><html><head><meta charset="utf-8"><style>${receiptCss}</style></head><body>${buildReceiptHtml(r, samitiName)}</body></html>`);
+    doc.close();
+    await new Promise((res) => setTimeout(res, 60));
+    const target = doc.getElementById("r")!;
+    const canvas = await html2canvas(target, { scale: 2, backgroundColor: "#ffffff", useCORS: true, logging: false, windowWidth: 600, windowHeight: target.scrollHeight + 40 });
+    return canvas;
+  } finally {
+    document.body.removeChild(iframe);
+  }
+}
