@@ -1189,6 +1189,9 @@ function LoansTab() {
                 <TableHead>ঋণ নং</TableHead>
                 <TableHead>সদস্য</TableHead><TableHead>তারিখ</TableHead>
                 <TableHead className="text-right">মূল</TableHead><TableHead className="text-right">মোট প্রদেয়</TableHead>
+                <TableHead className="text-right">মাসিক কিস্তি</TableHead>
+                <TableHead className="text-right">১ম কিস্তির তারিখ</TableHead>
+                <TableHead className="text-right">ঋণ শেষ</TableHead>
                 <TableHead className="text-right">পরিশোধ</TableHead><TableHead className="text-right">বকেয়া</TableHead>
                 <TableHead>অবস্থা</TableHead><TableHead></TableHead>
               </TableRow>
@@ -1199,6 +1202,9 @@ function LoansTab() {
                 const due = loanTotalDue(l);
                 const paid = loanPaid(data.payments, l.id);
                 const remaining = Math.max(0, due - paid);
+                const inst = monthlyInstallment(l.amount, l.interestRate, l.durationMonths);
+                const firstPay = addMonths(l.date, 1);
+                const endDate = addMonths(l.date, l.durationMonths);
                 return (
                   <TableRow key={l.id}>
                     <TableCell className="font-medium">{toBn(idx + 1)}</TableCell>
@@ -1206,6 +1212,9 @@ function LoansTab() {
                     <TableCell>{fmtDate(l.date)}</TableCell>
                     <TableCell className="text-right">{formatTk(l.amount)}</TableCell>
                     <TableCell className="text-right">{formatTk(due)}</TableCell>
+                    <TableCell className="text-right font-medium">{formatTk(inst)}</TableCell>
+                    <TableCell className="text-right">{firstPay ? fmtDate(firstPay) : "—"}</TableCell>
+                    <TableCell className="text-right">{endDate ? fmtDate(endDate) : "—"}</TableCell>
                     <TableCell className="text-right text-success font-medium">{formatTk(paid)}</TableCell>
                     <TableCell className="text-right text-destructive font-semibold">{formatTk(remaining)}</TableCell>
                     <TableCell>
