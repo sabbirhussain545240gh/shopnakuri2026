@@ -1338,8 +1338,39 @@ function LoansTab() {
               </div>
             </div>
           )}
-          <DialogFooter className="gap-2">
+          <DialogFooter className="gap-2 flex-wrap">
             <Button variant="outline" onClick={() => setReceipt(null)}>বন্ধ</Button>
+            <Button variant="secondary" onClick={async () => {
+              const el = document.getElementById("installment-receipt");
+              if (!el || !receipt) return;
+              const canvas = await html2canvas(el, { scale: 2, backgroundColor: "#ffffff" });
+              const url = canvas.toDataURL("image/png");
+              const link = document.createElement("a");
+              link.href = url;
+              link.download = `রিসিপ্ট-${receipt.receiptNo}.png`;
+              link.click();
+              toast.success("রিসিপ্ট ডাউনলোড হয়েছে");
+            }}><ImageDown className="h-4 w-4 mr-1" />ডাউনলোড</Button>
+            <Button variant="secondary" onClick={async () => {
+              const el = document.getElementById("installment-receipt");
+              if (!el || !receipt) return;
+              const canvas = await html2canvas(el, { scale: 2, backgroundColor: "#ffffff" });
+              const blob = await new Promise<Blob | null>((res) => canvas.toBlob(res, "image/png"));
+              const text = `কিস্তি রিসিপ্ট\nসমিতি: ${data.samitiName || "সমিতি"}\nরিসিপ্ট নং: ${receipt.receiptNo}\nতারিখ: ${fmtDate(receipt.date)}\nসদস্য: ${receipt.memberName}\nপ্রাপ্ত কিস্তি: ${formatTk(receipt.amount)}\nমোট পরিশোধিত: ${formatTk(receipt.paidAfter)}\nঅবশিষ্ট বকেয়া: ${formatTk(receipt.remainingAfter)}`;
+              const shareData: any = { title: "কিস্তি রিসিপ্ত", text };
+              if (blob) {
+                const file = new File([blob], `রিসিপ্ট-${receipt.receiptNo}.png`, { type: "image/png" });
+                if (navigator.canShare && navigator.canShare({ files: [file] })) {
+                  shareData.files = [file];
+                }
+              }
+              if (navigator.share) {
+                try { await navigator.share(shareData); } catch (e) { /* user cancelled */ }
+              } else {
+                await navigator.clipboard.writeText(text);
+                toast.success("রিসিপ্টের তথ্য কপি হয়েছে");
+              }
+            }}><Share className="h-4 w-4 mr-1" />শেয়ার</Button>
             <Button onClick={() => {
               const el = document.getElementById("installment-receipt");
               if (!el) return;
