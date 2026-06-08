@@ -1,0 +1,165 @@
+import { useEffect, useState, useCallback } from "react";
+
+export type Member = {
+  id: string;
+  name: string;
+  phone: string;
+  address: string;
+  joinDate: string;
+};
+
+export type Deposit = {
+  id: string;
+  memberId: string;
+  amount: number;
+  date: string;
+  note?: string;
+};
+
+export type Loan = {
+  id: string;
+  memberId: string;
+  amount: number;
+  interestRate: number; // percent annual
+  date: string;
+  durationMonths: number;
+  status: "active" | "closed";
+};
+
+export type LoanPayment = {
+  id: string;
+  loanId: string;
+  amount: number;
+  date: string;
+};
+
+export type SamitiData = {
+  members: Member[];
+  deposits: Deposit[];
+  loans: Loan[];
+  payments: LoanPayment[];
+  samitiName: string;
+};
+
+const KEY = "samiti-data-v1";
+
+const empty: SamitiData = {
+  samitiName: "আমাদের সমিতি",
+  members: [],
+  deposits: [],
+  loans: [],
+  payments: [],
+};
+
+function load(): SamitiData {
+  if (typeof window === "undefined") return empty;
+  try {
+    const raw = localStorage.getItem(KEY);
+    if (!raw) return empty;
+    return { ...empty, ...JSON.parse(raw) };
+  } catch {
+    return empty;
+  }
+}
+
+let listeners: Array<() => void> = [];
+let state: SamitiData | null = null;
+
+function getState() {
+  if (state === null) state = load();
+  return state;
+}
+
+function setState(next: SamitiData) {
+  state = next;
+  try { localStorage.setItem(KEY, JSON.stringify(next)); } catch {}
+  listeners.forEach((l) => l());
+}
+
+export function useSamiti() {
+  const [, force] = useState(0);
+  useEffect(() => {
+    const l = () => force((n) => n + 1);
+    listeners.push(l);
+    // hydrate
+    if (state === null) { state = load(); force((n) => n + 1); }
+    return () => { listeners = listeners.filter((x) => x !== l); };
+  }, []);
+
+  const data = getState();
+
+  const setSamitiName = useCallback((name: string) => setState({ ...getState(), samitiName: name }), []);
+
+  const addMember = useCallback((m: Omit<Member, "id">) => {
+    const member: Member = { ...m, id: crypto.randomUUID() };
+    setState({ ...getState(), members: [...getState().members, member] });
+  }, []);
+  const deleteMember = useCallback((id: string) => {
+    const s = getState();
+    setState({
+      ...s,
+      members: s.members.filter((x) => x.id !== id),
+      deposits: s.deposits.filter((d) => d.memberId !== id),
+      loans: s.loans.filter((l) => l.memberId !== id),
+    });
+  }, []);
+
+  const addDeposit = useCallback((d: Omit<Deposit, "id">) => {
+    setState({ ...getState(), deposits: [...getState().deposits, { ...d, id: crypto.randomUUID() }] });
+  }, []);
+  const deleteDeposit = useCallback((id: string) => {
+    setState({ ...getState(), deposits: getState().deposits.filter((x) => x.id !== id) });
+  }, []);
+
+  const addLoan = useCallback((l: Omit<Loan, "id" | "status">) => {
+    setState({ ...getState(), loans: [...getState().loans, { ...l, id: crypto.randomUUID(), status: "active" }] });
+  }, []);
+  const addPayment = useCallback((p: Omit<LoanPayment, "id">) => {
+    setState({ ...getState(), payments: [...getState().payments, { ...p, id: crypto.randomUUID() }] });
+  }, []);
+  const closeLoan = useCallback((id: string) => {
+    setState({
+      ...getState(),
+      loans: getState().loans.map((l) => (l.id === id ? { ...l, status: "closed" } : l)),
+    });
+  }, []);
+  const deleteLoan = useCallback((id: string) => {
+    const s = getState();
+    setState({
+      ...s,
+      loans: s.loans.filter((l) => l.id !== id),
+      payments: s.payments.filter((p) => p.loanId !== id),
+    });
+  }, []);
+
+  return {
+    data,
+    setSamitiName,
+    addMember, deleteMember,
+    addDeposit, deleteDeposit,
+    addLoan, addPayment, closeLoan, deleteLoan,
+  };
+}
+
+// Helpers
+export function toBn(n: number | string): string {
+  const map = ["০","১","২","৩","৪","৫","৬","৭","৮","৯"];
+  return String(n).replace(/\d/g, (d) => map[+d]);
+}
+
+export function formatTk(n: number): string {
+  return "৳ " + toBn(Math.round(n).toLocaleString("en-IN"));
+}
+
+export function memberTotalDeposit(deposits: Deposit[], memberId: string) {
+  return deposits.filter((d) => d.memberId === memberId).reduce((s, d) => s + d.amount, 0);
+}
+
+export function loanPaid(payments: LoanPayment[], loanId: string) {
+  return payments.filter((p) => p.loanId === loanId).reduce((s, p) => s + p.amount, 0);
+}
+
+export function loanTotalDue(loan: Loan) {
+  const interest = (loan.amount * loan.interestRate * loan.durationMonths) / (100 * 12);
+  return loan.amount + interest;
+}
