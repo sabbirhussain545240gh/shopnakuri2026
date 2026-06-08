@@ -1052,7 +1052,22 @@ function LoansTab() {
     toast.success("কিস্তি যোগ হয়েছে");
   };
 
-  return (
+  const startEdit = (l: Loan) => {
+    setEditFor(l);
+    setEditForm({ memberId: l.memberId, amount: String(l.amount), interestRate: String(l.interestRate), durationMonths: String(l.durationMonths), date: l.date });
+  };
+  const submitEdit = () => {
+    if (!editFor) return;
+    const amt = Number(editForm.amount);
+    const rate = Number(editForm.interestRate);
+    const dur = Number(editForm.durationMonths);
+    if (!editForm.memberId || !amt || amt <= 0 || isNaN(rate) || rate <= 0 || !dur) { toast.error("সঠিক তথ্য দিন"); return; }
+    updateLoan(editFor.id, { memberId: editForm.memberId, amount: amt, interestRate: rate, durationMonths: dur, date: editForm.date });
+    setEditFor(null);
+    toast.success("ঋণ আপডেট হয়েছে");
+  };
+
+
     <Card>
       <CardHeader className="flex flex-row items-center justify-between gap-2">
         <div>
