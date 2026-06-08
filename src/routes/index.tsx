@@ -1274,8 +1274,29 @@ function ReportsTab() {
             </div>
             <div><Label>শুরুর তারিখ</Label><Input type="date" value={from} onChange={(e) => setFrom(e.target.value)} /></div>
             <div><Label>শেষ তারিখ</Label><Input type="date" value={to} onChange={(e) => setTo(e.target.value)} /></div>
+          <div className="grid grid-cols-2 md:grid-cols-7 gap-3 items-end">
+            <div className="col-span-2 md:col-span-2">
+              <Label>রিপোর্টের ধরন</Label>
+              <Select value={reportType} onValueChange={setReportType}>
+                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="summary">সারাংশ</SelectItem>
+                  <SelectItem value="members">সদস্যভিত্তিক</SelectItem>
+                  <SelectItem value="member-savings">সদস্য তারিখ/মাস অনুযায়ী চাঁদা জমা</SelectItem>
+                  <SelectItem value="savings">সঞ্চয়/চাদা বিস্তারিত</SelectItem>
+                  <SelectItem value="loans">ঋণ বিস্তারিত</SelectItem>
+                  <SelectItem value="cashbook">আয়-ব্যয় বিস্তারিত</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div><Label>শুরুর তারিখ</Label><Input type="date" value={from} onChange={(e) => setFrom(e.target.value)} /></div>
+            <div><Label>শেষ তারিখ</Label><Input type="date" value={to} onChange={(e) => setTo(e.target.value)} /></div>
             <Button onClick={handlePrint}><Printer className="h-4 w-4 mr-1" />প্রিন্ট</Button>
-            <Button variant="outline" onClick={exportCsv}><Download className="h-4 w-4 mr-1" />CSV ডাউনলোড</Button>
+            <Button variant="outline" onClick={handlePdf}><FileText className="h-4 w-4 mr-1" />PDF</Button>
+            <Button variant="outline" onClick={handleJpeg}><Download className="h-4 w-4 mr-1" />JPEG</Button>
+          </div>
+          <div className="flex justify-end mt-2">
+            <Button variant="ghost" size="sm" onClick={exportCsv}><Download className="h-4 w-4 mr-1" />CSV ডাউনলোড</Button>
           </div>
           {reportType === "member-savings" && (
             <div className="grid grid-cols-1 md:grid-cols-3 gap-3 items-end mt-3">
