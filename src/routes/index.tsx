@@ -40,6 +40,20 @@ const fmtDate = (s: string) => {
   const dd = String(d).padStart(2, "0");
   return `${dd} ${enMonths[+m - 1] || m} ${y}`;
 };
+const addMonths = (s: string, n: number) => {
+  if (!s) return "";
+  const [y, m, d] = s.split("-").map(Number);
+  const dt = new Date(y, (m - 1) + n, d);
+  const yy = dt.getFullYear();
+  const mm = String(dt.getMonth() + 1).padStart(2, "0");
+  const dd = String(dt.getDate()).padStart(2, "0");
+  return `${yy}-${mm}-${dd}`;
+};
+const monthlyInstallment = (amount: number, rate: number, months: number) => {
+  if (!months || months <= 0) return 0;
+  const interest = (amount * rate * months) / (100 * 12);
+  return (amount + interest) / months;
+};
 
 const navItems = [
   { value: "dashboard", label: "ড্যাশবোর্ড", icon: LayoutDashboard },
