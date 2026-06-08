@@ -32,10 +32,11 @@ export const Route = createFileRoute("/")({
 
 
 const today = () => new Date().toISOString().slice(0, 10);
+const bnMonths = ["জান", "ফেব", "মার", "এপ্র", "মে", "জুন", "জুল", "আগ", "সেপ", "অক্ট", "নভ", "ডিস"];
 const fmtDate = (s: string) => {
   if (!s) return "";
   const [y, m, d] = s.split("-");
-  return `${toBn(d)}/${toBn(m)}/${toBn(y)}`;
+  return `${toBn(d)}/${bnMonths[+m - 1] || toBn(m)}/${toBn(y)}`;
 };
 
 const navItems = [
