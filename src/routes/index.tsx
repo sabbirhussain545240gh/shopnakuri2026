@@ -106,10 +106,13 @@ function SamitiApp() {
             );
           })}
         </nav>
-        <div className="p-4 border-t text-xs text-muted-foreground text-center">
-          তথ্য আপনার ব্রাউজারে সংরক্ষিত
+        <div className="p-3 border-t space-y-2">
+          <SignOutButton />
+          <p className="text-xs text-muted-foreground text-center">তথ্য আপনার ব্রাউজারে সংরক্ষিত</p>
         </div>
       </aside>
+
+
 
       {/* Main area */}
       <div className="flex-1 flex flex-col min-w-0">
