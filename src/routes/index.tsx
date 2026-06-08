@@ -14,7 +14,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Textarea } from "@/components/ui/textarea";
-import { Users, PiggyBank, HandCoins, LayoutDashboard, Trash2, Plus, CheckCircle2, Pencil } from "lucide-react";
+import { Users, PiggyBank, HandCoins, LayoutDashboard, Trash2, Plus, CheckCircle2, Pencil, Settings as SettingsIcon, Wallet, Download, Upload, AlertTriangle, TrendingUp, TrendingDown } from "lucide-react";
 import { toast, Toaster } from "sonner";
 
 export const Route = createFileRoute("/")({
@@ -48,7 +48,10 @@ function SamitiApp() {
     const outstanding = data.loans
       .filter((l) => l.status === "active")
       .reduce((a, l) => a + (loanTotalDue(l) - loanPaid(data.payments, l.id)), 0);
-    return { totalDeposit, totalLoanGiven, totalRepaid, activeLoans, outstanding, cashInHand: totalDeposit - totalLoanGiven + totalRepaid };
+    const totalIncome = data.transactions.filter((t) => t.type === "income").reduce((a, t) => a + t.amount, 0);
+    const totalExpense = data.transactions.filter((t) => t.type === "expense").reduce((a, t) => a + t.amount, 0);
+    const cashInHand = totalDeposit - totalLoanGiven + totalRepaid + totalIncome - totalExpense;
+    return { totalDeposit, totalLoanGiven, totalRepaid, activeLoans, outstanding, totalIncome, totalExpense, cashInHand };
   }, [data]);
 
   return (
@@ -69,17 +72,21 @@ function SamitiApp() {
 
       <main className="container mx-auto px-4 py-6">
         <Tabs defaultValue="dashboard" className="w-full">
-          <TabsList className="grid grid-cols-4 w-full max-w-2xl mb-6 h-auto">
-            <TabsTrigger value="dashboard" className="py-2.5"><LayoutDashboard className="h-4 w-4 ml-0 mr-1.5" />ড্যাশবোর্ড</TabsTrigger>
+          <TabsList className="grid grid-cols-3 md:grid-cols-6 w-full mb-6 h-auto">
+            <TabsTrigger value="dashboard" className="py-2.5"><LayoutDashboard className="h-4 w-4 mr-1.5" />ড্যাশবোর্ড</TabsTrigger>
             <TabsTrigger value="members" className="py-2.5"><Users className="h-4 w-4 mr-1.5" />সদস্য</TabsTrigger>
             <TabsTrigger value="savings" className="py-2.5"><PiggyBank className="h-4 w-4 mr-1.5" />সঞ্চয়</TabsTrigger>
             <TabsTrigger value="loans" className="py-2.5"><HandCoins className="h-4 w-4 mr-1.5" />ঋণ</TabsTrigger>
+            <TabsTrigger value="cashbook" className="py-2.5"><Wallet className="h-4 w-4 mr-1.5" />আয়-ব্যয়</TabsTrigger>
+            <TabsTrigger value="settings" className="py-2.5"><SettingsIcon className="h-4 w-4 mr-1.5" />সেটিংস</TabsTrigger>
           </TabsList>
 
           <TabsContent value="dashboard"><Dashboard totals={totals} memberCount={data.members.length} data={data} /></TabsContent>
           <TabsContent value="members"><MembersTab /></TabsContent>
           <TabsContent value="savings"><SavingsTab /></TabsContent>
           <TabsContent value="loans"><LoansTab /></TabsContent>
+          <TabsContent value="cashbook"><CashbookTab /></TabsContent>
+          <TabsContent value="settings"><SettingsTab /></TabsContent>
         </Tabs>
       </main>
 
@@ -125,13 +132,15 @@ function Dashboard({ totals, memberCount, data }: any) {
   const recent = [...data.deposits].sort((a: any, b: any) => b.date.localeCompare(a.date)).slice(0, 5);
   return (
     <div className="space-y-6">
-      <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         <StatCard label="মোট সদস্য" value={toBn(memberCount)} accent="bg-chart-4" />
         <StatCard label="মোট সঞ্চয়" value={formatTk(totals.totalDeposit)} accent="bg-success" />
         <StatCard label="হাতে নগদ" value={formatTk(totals.cashInHand)} accent="bg-primary" />
+        <StatCard label="বকেয়া ঋণ" value={formatTk(totals.outstanding)} accent="bg-destructive" />
         <StatCard label="মোট ঋণ প্রদান" value={formatTk(totals.totalLoanGiven)} accent="bg-warning" />
         <StatCard label="ঋণ আদায়" value={formatTk(totals.totalRepaid)} accent="bg-chart-2" />
-        <StatCard label="বকেয়া ঋণ" value={formatTk(totals.outstanding)} accent="bg-destructive" />
+        <StatCard label="অন্যান্য আয়" value={formatTk(totals.totalIncome)} accent="bg-success" />
+        <StatCard label="অন্যান্য ব্যয়" value={formatTk(totals.totalExpense)} accent="bg-destructive" />
       </div>
 
       <Card>
@@ -320,7 +329,7 @@ function LoansTab() {
   const { data, addLoan, addPayment, closeLoan, deleteLoan } = useSamiti();
   const [open, setOpen] = useState(false);
   const [payFor, setPayFor] = useState<Loan | null>(null);
-  const [form, setForm] = useState({ memberId: "", amount: "", interestRate: "10", durationMonths: "12", date: today() });
+  const [form, setForm] = useState({ memberId: "", amount: "", interestRate: String(data.settings.defaultInterestRate), durationMonths: String(data.settings.defaultDurationMonths), date: today() });
   const [payForm, setPayForm] = useState({ amount: "", date: today() });
 
   const submit = () => {
@@ -333,7 +342,7 @@ function LoansTab() {
       durationMonths: Number(form.durationMonths) || 12,
       date: form.date,
     });
-    setForm({ memberId: "", amount: "", interestRate: "10", durationMonths: "12", date: today() });
+    setForm({ memberId: "", amount: "", interestRate: String(data.settings.defaultInterestRate), durationMonths: String(data.settings.defaultDurationMonths), date: today() });
     setOpen(false);
     toast.success("ঋণ প্রদান হয়েছে");
   };
@@ -444,5 +453,207 @@ function LoansTab() {
         </DialogContent>
       </Dialog>
     </Card>
+  );
+}
+
+// ===== Cashbook (Income/Expense) =====
+const INCOME_CATS = ["সদস্য ফি", "ভর্তি ফি", "অনুদান", "সুদ আয়", "অন্যান্য"];
+const EXPENSE_CATS = ["স্টেশনারি", "মিটিং খরচ", "যাতায়াত", "ভাড়া", "বিল", "অন্যান্য"];
+
+function CashbookTab() {
+  const { data, addTransaction, deleteTransaction } = useSamiti();
+  const [open, setOpen] = useState(false);
+  const [form, setForm] = useState<{ type: "income" | "expense"; category: string; amount: string; date: string; note: string }>({
+    type: "income", category: "", amount: "", date: today(), note: "",
+  });
+
+  const submit = () => {
+    if (!form.category) { toast.error("ধরন নির্বাচন করুন"); return; }
+    const amt = Number(form.amount);
+    if (!amt || amt <= 0) { toast.error("সঠিক পরিমাণ দিন"); return; }
+    addTransaction({ type: form.type, category: form.category, amount: amt, date: form.date, note: form.note });
+    setForm({ type: "income", category: "", amount: "", date: today(), note: "" });
+    setOpen(false);
+    toast.success("সংরক্ষিত হয়েছে");
+  };
+
+  const income = data.transactions.filter((t) => t.type === "income").reduce((a, t) => a + t.amount, 0);
+  const expense = data.transactions.filter((t) => t.type === "expense").reduce((a, t) => a + t.amount, 0);
+  const cats = form.type === "income" ? INCOME_CATS : EXPENSE_CATS;
+
+  return (
+    <div className="space-y-4">
+      <div className="grid grid-cols-3 gap-4">
+        <StatCard label="মোট আয়" value={formatTk(income)} accent="bg-success" />
+        <StatCard label="মোট ব্যয়" value={formatTk(expense)} accent="bg-destructive" />
+        <StatCard label="অবশিষ্ট" value={formatTk(income - expense)} accent="bg-primary" />
+      </div>
+
+      <Card>
+        <CardHeader className="flex flex-row items-center justify-between gap-2">
+          <div>
+            <CardTitle>আয়-ব্যয় খতিয়ান</CardTitle>
+            <CardDescription>মোট {toBn(data.transactions.length)}টি লেনদেন</CardDescription>
+          </div>
+          <Dialog open={open} onOpenChange={setOpen}>
+            <DialogTrigger asChild><Button><Plus className="h-4 w-4 mr-1" />নতুন লেনদেন</Button></DialogTrigger>
+            <DialogContent>
+              <DialogHeader><DialogTitle>আয় বা ব্যয় যোগ করুন</DialogTitle></DialogHeader>
+              <div className="space-y-3">
+                <div className="grid grid-cols-2 gap-2">
+                  <Button type="button" variant={form.type === "income" ? "default" : "outline"} onClick={() => setForm({ ...form, type: "income", category: "" })}>
+                    <TrendingUp className="h-4 w-4 mr-1" />আয়
+                  </Button>
+                  <Button type="button" variant={form.type === "expense" ? "default" : "outline"} onClick={() => setForm({ ...form, type: "expense", category: "" })}>
+                    <TrendingDown className="h-4 w-4 mr-1" />ব্যয়
+                  </Button>
+                </div>
+                <div>
+                  <Label>ধরন *</Label>
+                  <Select value={form.category} onValueChange={(v) => setForm({ ...form, category: v })}>
+                    <SelectTrigger><SelectValue placeholder="ধরন নির্বাচন করুন" /></SelectTrigger>
+                    <SelectContent>{cats.map((c) => <SelectItem key={c} value={c}>{c}</SelectItem>)}</SelectContent>
+                  </Select>
+                </div>
+                <div><Label>পরিমাণ *</Label><Input type="number" value={form.amount} onChange={(e) => setForm({ ...form, amount: e.target.value })} /></div>
+                <div><Label>তারিখ</Label><Input type="date" value={form.date} onChange={(e) => setForm({ ...form, date: e.target.value })} /></div>
+                <div><Label>মন্তব্য</Label><Input value={form.note} onChange={(e) => setForm({ ...form, note: e.target.value })} /></div>
+              </div>
+              <DialogFooter><Button onClick={submit}>সংরক্ষণ</Button></DialogFooter>
+            </DialogContent>
+          </Dialog>
+        </CardHeader>
+        <CardContent>
+          {data.transactions.length === 0 ? (
+            <p className="text-sm text-muted-foreground text-center py-10">এখনও কোনও লেনদেন নেই।</p>
+          ) : (
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>তারিখ</TableHead><TableHead>ধরন</TableHead><TableHead>খাত</TableHead>
+                  <TableHead>মন্তব্য</TableHead><TableHead className="text-right">পরিমাণ</TableHead><TableHead></TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {[...data.transactions].sort((a, b) => b.date.localeCompare(a.date)).map((t) => (
+                  <TableRow key={t.id}>
+                    <TableCell>{fmtDate(t.date)}</TableCell>
+                    <TableCell>
+                      {t.type === "income"
+                        ? <Badge className="bg-success text-success-foreground">আয়</Badge>
+                        : <Badge variant="destructive">ব্যয়</Badge>}
+                    </TableCell>
+                    <TableCell className="font-medium">{t.category}</TableCell>
+                    <TableCell className="text-muted-foreground">{t.note || "—"}</TableCell>
+                    <TableCell className={`text-right font-semibold ${t.type === "income" ? "text-success" : "text-destructive"}`}>
+                      {t.type === "income" ? "+" : "−"} {formatTk(t.amount)}
+                    </TableCell>
+                    <TableCell>
+                      <Button variant="ghost" size="icon" onClick={() => { deleteTransaction(t.id); toast.success("মুছে ফেলা হয়েছে"); }}>
+                        <Trash2 className="h-4 w-4 text-destructive" />
+                      </Button>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          )}
+        </CardContent>
+      </Card>
+    </div>
+  );
+}
+
+// ===== Settings =====
+function SettingsTab() {
+  const { data, setSamitiName, updateSettings, resetAll, importData } = useSamiti();
+  const [name, setName] = useState(data.samitiName);
+  const [rate, setRate] = useState(String(data.settings.defaultInterestRate));
+  const [dur, setDur] = useState(String(data.settings.defaultDurationMonths));
+  const [confirmReset, setConfirmReset] = useState(false);
+
+  const saveGeneral = () => {
+    setSamitiName(name.trim() || "আমাদের সমিতি");
+    updateSettings({
+      defaultInterestRate: Number(rate) || 0,
+      defaultDurationMonths: Number(dur) || 12,
+    });
+    toast.success("সেটিংস সংরক্ষিত হয়েছে");
+  };
+
+  const exportData = () => {
+    const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `samiti-backup-${today()}.json`;
+    a.click();
+    URL.revokeObjectURL(url);
+    toast.success("ব্যাকআপ ডাউনলোড হয়েছে");
+  };
+
+  const handleImport = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = () => {
+      try {
+        const parsed = JSON.parse(String(reader.result));
+        importData(parsed);
+        toast.success("তথ্য পুনরুদ্ধার হয়েছে");
+      } catch {
+        toast.error("ফাইল পড়া যায়নি");
+      }
+    };
+    reader.readAsText(file);
+    e.target.value = "";
+  };
+
+  return (
+    <div className="grid gap-6 md:grid-cols-2">
+      <Card>
+        <CardHeader>
+          <CardTitle>সাধারণ সেটিংস</CardTitle>
+          <CardDescription>সমিতির নাম ও ঋণের ডিফল্ট মান</CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div><Label>সমিতির নাম</Label><Input value={name} onChange={(e) => setName(e.target.value)} /></div>
+          <div><Label>ঋণের ডিফল্ট সুদের হার (% বার্ষিক)</Label><Input type="number" value={rate} onChange={(e) => setRate(e.target.value)} /></div>
+          <div><Label>ঋণের ডিফল্ট মেয়াদ (মাস)</Label><Input type="number" value={dur} onChange={(e) => setDur(e.target.value)} /></div>
+          <Button onClick={saveGeneral} className="w-full">সংরক্ষণ</Button>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>ব্যাকআপ ও পুনরুদ্ধার</CardTitle>
+          <CardDescription>তথ্য রপ্তানি ও আমদানি করুন</CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-3">
+          <Button onClick={exportData} variant="outline" className="w-full justify-start">
+            <Download className="h-4 w-4 mr-2" />ব্যাকআপ ডাউনলোড করুন
+          </Button>
+          <label className="block">
+            <input type="file" accept="application/json" onChange={handleImport} className="hidden" />
+            <Button asChild variant="outline" className="w-full justify-start"><span><Upload className="h-4 w-4 mr-2" />ব্যাকআপ ফাইল থেকে পুনরুদ্ধার</span></Button>
+          </label>
+          <div className="pt-3 border-t">
+            {!confirmReset ? (
+              <Button variant="destructive" className="w-full" onClick={() => setConfirmReset(true)}>
+                <AlertTriangle className="h-4 w-4 mr-2" />সমস্ত তথ্য মুছে ফেলুন
+              </Button>
+            ) : (
+              <div className="space-y-2">
+                <p className="text-sm text-destructive font-medium">এই কাজটি ফেরানো যাবে না। আপনি কি নিশ্চিত?</p>
+                <div className="flex gap-2">
+                  <Button variant="destructive" className="flex-1" onClick={() => { resetAll(); setConfirmReset(false); toast.success("সমস্ত তথ্য মুছে ফেলা হয়েছে"); }}>হ্যাঁ, মুছুন</Button>
+                  <Button variant="outline" className="flex-1" onClick={() => setConfirmReset(false)}>বাতিল</Button>
+                </div>
+              </div>
+            )}
+          </div>
+        </CardContent>
+      </Card>
+    </div>
   );
 }

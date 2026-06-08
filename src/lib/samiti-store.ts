@@ -33,12 +33,28 @@ export type LoanPayment = {
   date: string;
 };
 
+export type Transaction = {
+  id: string;
+  type: "income" | "expense";
+  category: string;
+  amount: number;
+  date: string;
+  note?: string;
+};
+
+export type Settings = {
+  defaultInterestRate: number;
+  defaultDurationMonths: number;
+};
+
 export type SamitiData = {
   members: Member[];
   deposits: Deposit[];
   loans: Loan[];
   payments: LoanPayment[];
+  transactions: Transaction[];
   samitiName: string;
+  settings: Settings;
 };
 
 const KEY = "samiti-data-v1";
@@ -49,6 +65,8 @@ const empty: SamitiData = {
   deposits: [],
   loans: [],
   payments: [],
+  transactions: [],
+  settings: { defaultInterestRate: 10, defaultDurationMonths: 12 },
 };
 
 function load(): SamitiData {
@@ -132,12 +150,29 @@ export function useSamiti() {
     });
   }, []);
 
+  const addTransaction = useCallback((t: Omit<Transaction, "id">) => {
+    setState({ ...getState(), transactions: [...getState().transactions, { ...t, id: crypto.randomUUID() }] });
+  }, []);
+  const deleteTransaction = useCallback((id: string) => {
+    setState({ ...getState(), transactions: getState().transactions.filter((x) => x.id !== id) });
+  }, []);
+
+  const updateSettings = useCallback((s: Partial<Settings>) => {
+    setState({ ...getState(), settings: { ...getState().settings, ...s } });
+  }, []);
+
+  const resetAll = useCallback(() => setState(empty), []);
+
+  const importData = useCallback((d: SamitiData) => setState({ ...empty, ...d }), []);
+
   return {
     data,
     setSamitiName,
     addMember, deleteMember,
     addDeposit, deleteDeposit,
     addLoan, addPayment, closeLoan, deleteLoan,
+    addTransaction, deleteTransaction,
+    updateSettings, resetAll, importData,
   };
 }
 
