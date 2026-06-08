@@ -1310,6 +1310,9 @@ function LoansTab() {
                   <div><span className="text-muted-foreground">মূল:</span> {formatTk(detailFor.amount)}</div>
                   <div><span className="text-muted-foreground">সুদের হার:</span> {toBn(detailFor.interestRate)}%</div>
                   <div><span className="text-muted-foreground">মেয়াদ:</span> {toBn(detailFor.durationMonths)} মাস</div>
+                  <div><span className="text-muted-foreground">মাসিক কিস্তি:</span> {formatTk(monthlyInstallment(detailFor.amount, detailFor.interestRate, detailFor.durationMonths))}</div>
+                  <div><span className="text-muted-foreground">১ম কিস্তির তারিখ:</span> {fmtDate(addMonths(detailFor.date, 1))}</div>
+                  <div><span className="text-muted-foreground">ঋণ শেষ:</span> {fmtDate(addMonths(detailFor.date, detailFor.durationMonths))}</div>
                   <div><span className="text-muted-foreground">মোট প্রদেয়:</span> {formatTk(due)}</div>
                   <div><span className="text-success">পরিশোধ:</span> {formatTk(paid)}</div>
                   <div><span className="text-destructive">বকেয়া:</span> {formatTk(Math.max(0, due - paid))}</div>
