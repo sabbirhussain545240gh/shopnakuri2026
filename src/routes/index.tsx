@@ -521,13 +521,13 @@ function printMemberCard(member: Member, samiti: { samitiName: string; samitiLog
   if (!w) return;
   const headerHtml = `
     <div style="display:flex;align-items:center;gap:16px;border-bottom:2px solid #333;padding-bottom:10px;margin-bottom:16px;">
-      ${samiti.samitiLogo ? `<img src="${samiti.samitiLogo}" style="width:70px;height:70px;object-fit:contain;" />` : ""}
+      ${samiti.samitiLogo ? `<img src="${samiti.samitiLogo}" style="width:100px;height:100px;object-fit:contain;" />` : ""}
       <div style="flex:1;text-align:center;">
-        <h1 style="margin:0;font-size:22px;">${samiti.samitiName}</h1>
-        ${samiti.samitiAddress ? `<div style="font-size:13px;color:#444;margin-top:2px;">${samiti.samitiAddress}</div>` : ""}
-        ${samiti.establishedDate ? `<div style="font-size:12px;color:#666;margin-top:2px;">স্থাপিত: ${fmtDate(samiti.establishedDate)}</div>` : ""}
+        <h1 style="margin:0;font-size:28px;">${samiti.samitiName}</h1>
+        ${samiti.samitiAddress ? `<div style="font-size:15px;color:#444;margin-top:4px;">${samiti.samitiAddress}</div>` : ""}
+        ${samiti.establishedDate ? `<div style="font-size:14px;color:#666;margin-top:4px;">স্থাপিত: ${samiti.establishedDate}</div>` : ""}
       </div>
-      ${samiti.samitiLogo ? `<div style="width:70px;"></div>` : ""}
+      ${samiti.samitiLogo ? `<div style="width:100px;"></div>` : ""}
     </div>`;
   const photoHtml = member.photo
     ? `<img src="${member.photo}" style="width:120px;height:120px;object-fit:cover;border-radius:8px;border:1px solid #ddd;" />`
