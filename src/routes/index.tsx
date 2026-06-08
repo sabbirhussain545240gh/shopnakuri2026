@@ -765,7 +765,9 @@ function LoansTab() {
     const rate = Number(form.interestRate);
     if (!form.interestRate.trim() || isNaN(rate) || rate <= 0) nextErrors.interestRate = "সঠিক সুদের হার দিন";
     if (!form.memberGuarantorId.trim()) nextErrors.memberGuarantorId = "সদস্য জামিনদার নির্বাচন করুন";
-    if (!form.familyGuarantor.trim()) nextErrors.familyGuarantor = "পারিবারিক জামিনদারের তথ্য দিন";
+    if (!form.familyGuarantorName.trim()) nextErrors.familyGuarantorName = "জামিনদারের নাম দিন";
+    if (!form.familyGuarantorRelation.trim()) nextErrors.familyGuarantorRelation = "সম্পর্ক নির্বাচন করুন";
+    if (!form.familyGuarantorPhone.trim()) nextErrors.familyGuarantorPhone = "মোবাইল নম্বর দিন";
 
     if (Object.keys(nextErrors).length > 0) {
       setErrors(nextErrors);
@@ -778,9 +780,9 @@ function LoansTab() {
       durationMonths: Number(form.durationMonths) || 12,
       date: form.date,
       memberGuarantorId: form.memberGuarantorId,
-      familyGuarantor: form.familyGuarantor.trim(),
+      familyGuarantor: { name: form.familyGuarantorName.trim(), relation: form.familyGuarantorRelation.trim(), phone: form.familyGuarantorPhone.trim() },
     });
-    setForm({ memberId: "", amount: "", interestRate: String(data.settings.defaultInterestRate), durationMonths: String(data.settings.defaultDurationMonths), date: today(), memberGuarantorId: "", familyGuarantor: "" });
+    setForm({ memberId: "", amount: "", interestRate: String(data.settings.defaultInterestRate), durationMonths: String(data.settings.defaultDurationMonths), date: today(), memberGuarantorId: "", familyGuarantorName: "", familyGuarantorRelation: "", familyGuarantorPhone: "" });
     setErrors({});
     setOpen(false);
     toast.success("ঋণ প্রদান হয়েছে");
