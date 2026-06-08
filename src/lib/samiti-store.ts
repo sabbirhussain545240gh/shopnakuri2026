@@ -68,6 +68,9 @@ export type SamitiData = {
   payments: LoanPayment[];
   transactions: Transaction[];
   samitiName: string;
+  samitiLogo: string;
+  samitiAddress: string;
+  establishedDate: string;
   settings: Settings;
 };
 
@@ -75,6 +78,9 @@ const KEY = "samiti-data-v1";
 
 const empty: SamitiData = {
   samitiName: "আমাদের সমিতি",
+  samitiLogo: "",
+  samitiAddress: "",
+  establishedDate: "",
   members: [],
   deposits: [],
   loans: [],
