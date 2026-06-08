@@ -799,10 +799,12 @@ async function exportMemberCardPdf(member: Member, samiti: SamitiInfo) {
 
 // ===== Savings =====
 function SavingsTab() {
-  const { data, addDeposit, deleteDeposit } = useSamiti();
+  const { data, addDeposit, updateDeposit, deleteDeposit } = useSamiti();
   const [open, setOpen] = useState(false);
   const [form, setForm] = useState({ memberId: "", amount: "", date: today(), note: "" });
   const [search, setSearch] = useState("");
+  const [editId, setEditId] = useState<string | null>(null);
+  const [editForm, setEditForm] = useState({ memberId: "", amount: "", date: today(), note: "" });
 
   const submit = () => {
     if (!form.memberId) { toast.error("সদস্য নির্বাচন করুন"); return; }
@@ -812,6 +814,21 @@ function SavingsTab() {
     setForm({ memberId: "", amount: "", date: today(), note: "" });
     setOpen(false);
     toast.success("জমা যোগ হয়েছে");
+  };
+
+  const submitEdit = () => {
+    if (!editId) return;
+    if (!editForm.memberId) { toast.error("সদস্য নির্বাচন করুন"); return; }
+    const amt = Number(editForm.amount);
+    if (!amt || amt <= 0) { toast.error("সঠিক পরিমাণ দিন"); return; }
+    updateDeposit(editId, { memberId: editForm.memberId, amount: amt, date: editForm.date, note: editForm.note });
+    setEditId(null);
+    toast.success("জমা আপডেট হয়েছে");
+  };
+
+  const startEdit = (d: Deposit) => {
+    setEditId(d.id);
+    setEditForm({ memberId: d.memberId, amount: String(d.amount), date: d.date, note: d.note || "" });
   };
 
   const filteredDeposits = useMemo(() => {
@@ -849,6 +866,27 @@ function SavingsTab() {
                 <div><Label>মন্তব্য</Label><Input value={form.note} onChange={(e) => setForm({ ...form, note: e.target.value })} /></div>
               </div>
               <DialogFooter><Button onClick={submit}>সংরক্ষণ</Button></DialogFooter>
+            </DialogContent>
+          </Dialog>
+          <Dialog open={!!editId} onOpenChange={(o) => !o && setEditId(null)}>
+            <DialogContent>
+              <DialogHeader><DialogTitle>জমা সম্পাদনা</DialogTitle></DialogHeader>
+              <div className="space-y-3">
+                <div>
+                  <Label>সদস্য *</Label>
+                  <Select value={editForm.memberId} onValueChange={(v) => setEditForm({ ...editForm, memberId: v })}>
+                    <SelectTrigger><SelectValue placeholder="সদস্য নির্বাচন করুন" /></SelectTrigger>
+                    <SelectContent>{data.members.map((m) => <SelectItem key={m.id} value={m.id}>{toBn(m.serial || 0)}. {m.name}</SelectItem>)}</SelectContent>
+                  </Select>
+                </div>
+                <div><Label>পরিমাণ (টাকা) *</Label><Input type="number" value={editForm.amount} onChange={(e) => setEditForm({ ...editForm, amount: e.target.value })} /></div>
+                <div><Label>তারিখ</Label><Input type="date" value={editForm.date} onChange={(e) => setEditForm({ ...editForm, date: e.target.value })} /></div>
+                <div><Label>মন্তব্য</Label><Input value={editForm.note} onChange={(e) => setEditForm({ ...editForm, note: e.target.value })} /></div>
+              </div>
+              <DialogFooter>
+                <Button variant="outline" onClick={() => setEditId(null)}>বাতিল</Button>
+                <Button onClick={submitEdit}>সংরক্ষণ</Button>
+              </DialogFooter>
             </DialogContent>
           </Dialog>
         </div>
@@ -907,9 +945,14 @@ function SavingsTab() {
                     <TableCell className="text-muted-foreground">{d.note || "—"}</TableCell>
                     <TableCell className="text-right font-semibold text-success">{formatTk(d.amount)}</TableCell>
                     <TableCell>
-                      <Button variant="ghost" size="icon" onClick={() => { deleteDeposit(d.id); toast.success("মুছে ফেলা হয়েছে"); }}>
-                        <Trash2 className="h-4 w-4 text-destructive" />
-                      </Button>
+                      <div className="flex items-center gap-1">
+                        <Button variant="ghost" size="icon" onClick={() => startEdit(d)}>
+                          <Pencil className="h-4 w-4 text-muted-foreground" />
+                        </Button>
+                        <Button variant="ghost" size="icon" onClick={() => { deleteDeposit(d.id); toast.success("মুছে ফেলা হয়েছে"); }}>
+                          <Trash2 className="h-4 w-4 text-destructive" />
+                        </Button>
+                      </div>
                     </TableCell>
                   </TableRow>
                 );
