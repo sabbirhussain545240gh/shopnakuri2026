@@ -748,7 +748,7 @@ function LoansTab() {
   const { data, addLoan, addPayment, closeLoan, deleteLoan } = useSamiti();
   const [open, setOpen] = useState(false);
   const [payFor, setPayFor] = useState<Loan | null>(null);
-  const [form, setForm] = useState({ memberId: "", amount: "", interestRate: String(data.settings.defaultInterestRate), durationMonths: String(data.settings.defaultDurationMonths), date: today(), memberGuarantorId: "", familyGuarantorName: "", familyGuarantorRelation: "", familyGuarantorPhone: "" });
+  const [form, setForm] = useState({ memberId: "", amount: "", interestRate: String(data.settings.defaultInterestRate), durationMonths: String(data.settings.defaultDurationMonths), date: today(), memberGuarantorId: "", familyGuarantorName: "", familyGuarantorRelation: "", familyGuarantorCustomRelation: "", familyGuarantorPhone: "" });
   const [payForm, setPayForm] = useState({ amount: "", date: today() });
   const [errors, setErrors] = useState<Record<string, string>>({});
 
