@@ -150,12 +150,29 @@ export function useSamiti() {
     });
   }, []);
 
+  const addTransaction = useCallback((t: Omit<Transaction, "id">) => {
+    setState({ ...getState(), transactions: [...getState().transactions, { ...t, id: crypto.randomUUID() }] });
+  }, []);
+  const deleteTransaction = useCallback((id: string) => {
+    setState({ ...getState(), transactions: getState().transactions.filter((x) => x.id !== id) });
+  }, []);
+
+  const updateSettings = useCallback((s: Partial<Settings>) => {
+    setState({ ...getState(), settings: { ...getState().settings, ...s } });
+  }, []);
+
+  const resetAll = useCallback(() => setState(empty), []);
+
+  const importData = useCallback((d: SamitiData) => setState({ ...empty, ...d }), []);
+
   return {
     data,
     setSamitiName,
     addMember, deleteMember,
     addDeposit, deleteDeposit,
     addLoan, addPayment, closeLoan, deleteLoan,
+    addTransaction, deleteTransaction,
+    updateSettings, resetAll, importData,
   };
 }
 
