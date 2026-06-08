@@ -1136,6 +1136,30 @@ function ReportsTab() {
     });
   };
 
+  const reportParams = (): ReportParams => ({
+    samitiName: data.samitiName,
+    samitiLogo: data.samitiLogo,
+    samitiAddress: data.samitiAddress,
+    establishedDate: data.establishedDate,
+    reportType,
+    dateRange: dateRangeText(),
+    totals,
+    memberWise,
+    filtered,
+    members: data.members,
+    memberSavingsPivot,
+    groupBy,
+  });
+
+  const handlePdf = async () => {
+    try { toast.loading("PDF তৈরি হচ্ছে...", { id: "pdf" }); await exportReportPdf(reportParams()); toast.success("PDF ডাউনলোড হয়েছে", { id: "pdf" }); }
+    catch (e) { toast.error("PDF তৈরিতে সমস্যা হয়েছে", { id: "pdf" }); console.error(e); }
+  };
+  const handleJpeg = async () => {
+    try { toast.loading("ছবি তৈরি হচ্ছে...", { id: "jpg" }); await exportReportJpeg(reportParams()); toast.success("JPEG ডাউনলোড হয়েছে", { id: "jpg" }); }
+    catch (e) { toast.error("ছবি তৈরিতে সমস্যা হয়েছে", { id: "jpg" }); console.error(e); }
+  };
+
   const exportCsv = () => {
     let csv = "";
     if (reportType === "summary" || reportType === "members") {
