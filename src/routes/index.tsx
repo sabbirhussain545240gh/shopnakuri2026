@@ -288,15 +288,132 @@ function MembersTab() {
     toast.success("সদস্য যোগ হয়েছে");
   };
 
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const toIsoDate = (v: any): string => {
+    if (v == null || v === "") return "";
+    if (v instanceof Date) {
+      const y = v.getFullYear();
+      const m = String(v.getMonth() + 1).padStart(2, "0");
+      const d = String(v.getDate()).padStart(2, "0");
+      return `${y}-${m}-${d}`;
+    }
+    const s = String(v).trim();
+    if (/^\d{4}-\d{1,2}-\d{1,2}$/.test(s)) {
+      const [y, m, d] = s.split("-");
+      return `${y}-${m.padStart(2, "0")}-${d.padStart(2, "0")}`;
+    }
+    const m1 = s.match(/^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{2,4})$/);
+    if (m1) {
+      let [, d, m, y] = m1;
+      if (y.length === 2) y = "20" + y;
+      return `${y}-${m.padStart(2, "0")}-${d.padStart(2, "0")}`;
+    }
+    const dt = new Date(s);
+    if (!isNaN(dt.getTime())) {
+      const y = dt.getFullYear();
+      const m = String(dt.getMonth() + 1).padStart(2, "0");
+      const d = String(dt.getDate()).padStart(2, "0");
+      return `${y}-${m}-${d}`;
+    }
+    return "";
+  };
+
+  const pick = (row: any, keys: string[]): string => {
+    for (const k of keys) {
+      const v = row[k];
+      if (v != null && String(v).trim() !== "") return String(v).trim();
+    }
+    return "";
+  };
+
+  const downloadTemplate = () => {
+    const headers = [
+      "সিরিয়াল", "নাম", "পিতার নাম", "মাতার নাম", "মোবাইল",
+      "জন্ম তারিখ", "NID", "ঠিকানা", "যোগদানের তারিখ",
+      "নমিনির নাম", "নমিনির সম্পর্ক", "নমিনির মোবাইল", "নমিনির NID",
+    ];
+    const sample = [{
+      "সিরিয়াল": 1, "নাম": "মোঃ রহিম", "পিতার নাম": "মোঃ করিম", "মাতার নাম": "রহিমা বেগম",
+      "মোবাইল": "01700000000", "জন্ম তারিখ": "1990-01-15", "NID": "1234567890",
+      "ঠিকানা": "ঢাকা", "যোগদানের তারিখ": today(),
+      "নমিনির নাম": "ফাতেমা", "নমিনির সম্পর্ক": "স্ত্রী", "নমিনির মোবাইল": "01800000000", "নমিনির NID": "",
+    }];
+    const ws = XLSX.utils.json_to_sheet(sample, { header: headers });
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, "Members");
+    XLSX.writeFile(wb, "সদস্য-টেমপ্লেট.xlsx");
+  };
+
+  const handleBulkFile = async (file?: File) => {
+    if (!file) return;
+    try {
+      const buf = await file.arrayBuffer();
+      const wb = XLSX.read(buf, { cellDates: true });
+      const ws = wb.Sheets[wb.SheetNames[0]];
+      const rows: any[] = XLSX.utils.sheet_to_json(ws, { defval: "", raw: true });
+      if (rows.length === 0) { toast.error("ফাইলে কোনও তথ্য নেই"); return; }
+      let nextS = data.members.length > 0 ? Math.max(...data.members.map((m) => m.serial || 0)) : 0;
+      let added = 0, skipped = 0;
+      for (const row of rows) {
+        const name = pick(row, ["নাম", "Name", "name"]);
+        if (!name) { skipped++; continue; }
+        const serialStr = pick(row, ["সিরিয়াল", "সিরিয়াল নম্বর", "Serial", "serial"]);
+        let serial: number;
+        if (serialStr) { serial = parseInt(serialStr, 10); nextS = Math.max(nextS, serial); }
+        else { serial = ++nextS; }
+        addMember({
+          serial,
+          name,
+          fatherName: pick(row, ["পিতার নাম", "Father", "fatherName"]),
+          motherName: pick(row, ["মাতার নাম", "Mother", "motherName"]),
+          phone: pick(row, ["মোবাইল", "মোবাইল নং", "Phone", "phone"]),
+          birthDate: toIsoDate(row["জন্ম তারিখ"] ?? row["Birth Date"] ?? row["birthDate"]),
+          nid: pick(row, ["NID", "জন্ম সনদ", "NID/জন্ম সনদ", "nid"]),
+          address: pick(row, ["ঠিকানা", "Address", "address"]),
+          photo: "",
+          joinDate: toIsoDate(row["যোগদানের তারিখ"] ?? row["Join Date"] ?? row["joinDate"]) || today(),
+          nominee: {
+            name: pick(row, ["নমিনির নাম", "Nominee Name"]),
+            relation: pick(row, ["নমিনির সম্পর্ক", "Nominee Relation"]),
+            phone: pick(row, ["নমিনির মোবাইল", "Nominee Phone"]),
+            nid: pick(row, ["নমিনির NID", "Nominee NID"]),
+          },
+        });
+        added++;
+      }
+      toast.success(`${toBn(added)} জন সদস্য যোগ হয়েছে${skipped ? ` (${toBn(skipped)} টি বাদ)` : ""}`);
+    } catch (e) {
+      console.error(e);
+      toast.error("ফাইল পড়তে সমস্যা হয়েছে");
+    } finally {
+      if (fileInputRef.current) fileInputRef.current.value = "";
+    }
+  };
+
   return (
     <Card>
-      <CardHeader className="flex flex-row items-center justify-between gap-2">
+      <CardHeader className="flex flex-row items-center justify-between gap-2 flex-wrap">
         <div>
           <CardTitle>সদস্য তালিকা</CardTitle>
           <CardDescription>মোট {toBn(data.members.length)} জন সদস্য</CardDescription>
         </div>
-        <Dialog open={open} onOpenChange={(o) => { setOpen(o); if (!o) setForm(emptyForm); }}>
-          <DialogTrigger asChild><Button><Plus className="h-4 w-4 mr-1" />নতুন সদস্য</Button></DialogTrigger>
+        <div className="flex gap-2 flex-wrap items-center">
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept=".xlsx,.xls,.csv"
+            className="hidden"
+            onChange={(e) => handleBulkFile(e.target.files?.[0])}
+          />
+          <Button variant="outline" size="sm" onClick={downloadTemplate}>
+            <Download className="h-4 w-4 mr-1" />টেমপ্লেট
+          </Button>
+          <Button variant="outline" size="sm" onClick={() => fileInputRef.current?.click()}>
+            <Upload className="h-4 w-4 mr-1" />Excel আপলোড
+          </Button>
+          <Dialog open={open} onOpenChange={(o) => { setOpen(o); if (!o) setForm(emptyForm); }}>
+            <DialogTrigger asChild><Button><Plus className="h-4 w-4 mr-1" />নতুন সদস্য</Button></DialogTrigger>
           <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
             <DialogHeader><DialogTitle>নতুন সদস্য যোগ করুন</DialogTitle></DialogHeader>
             <div className="space-y-4">
