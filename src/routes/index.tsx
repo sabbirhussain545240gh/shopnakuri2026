@@ -16,8 +16,6 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Textarea } from "@/components/ui/textarea";
 import { Users, PiggyBank, HandCoins, LayoutDashboard, Trash2, Plus, CheckCircle2, Pencil, Settings as SettingsIcon, Wallet, Download, Upload, AlertTriangle, TrendingUp, TrendingDown, Menu, Printer, FileText, Receipt } from "lucide-react";
 import { toast, Toaster } from "sonner";
-import { AuthGate, SignOutButton } from "@/components/AuthGate";
-import { AdminPanel } from "@/components/AdminPanel";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -28,12 +26,10 @@ export const Route = createFileRoute("/")({
       { property: "og:description", content: "সদস্য, সঞ্চয়/চাদা ও ঋণ ব্যবস্থাপনার জন্য সম্পূর্ণ বাংলা সফটওয়্যার।" },
     ],
   }),
-  component: SamitiAppGated,
+  component: SamitiApp,
 });
 
-function SamitiAppGated() {
-  return <AuthGate>{() => <SamitiApp />}</AuthGate>;
-}
+
 
 const today = () => new Date().toISOString().slice(0, 10);
 const fmtDate = (s: string) => {
@@ -107,11 +103,10 @@ function SamitiApp() {
             );
           })}
         </nav>
-        <div className="p-3 border-t space-y-2">
-          <AdminPanel />
-          <SignOutButton />
+        <div className="p-3 border-t">
           <p className="text-xs text-muted-foreground text-center">তথ্য ক্লাউডে সংরক্ষিত</p>
         </div>
+
       </aside>
 
 
@@ -125,12 +120,11 @@ function SamitiApp() {
             <h1 className="font-bold text-foreground truncate">{data.samitiName}</h1>
           </div>
           <div className="flex items-center gap-2">
-            <AdminPanel />
-            <SignOutButton />
             <Button variant="ghost" size="icon" onClick={() => setMobileOpen((o) => !o)}>
               <Menu className="h-5 w-5" />
             </Button>
           </div>
+
         </header>
         {mobileOpen && (
           <div className="md:hidden border-b bg-card p-3 space-y-1">
