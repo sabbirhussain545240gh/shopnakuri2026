@@ -134,6 +134,9 @@ export function useSamiti() {
   const data = getState();
 
   const setSamitiName = useCallback((name: string) => setState({ ...getState(), samitiName: name }), []);
+  const updateSamitiInfo = useCallback((info: Partial<Pick<SamitiData, "samitiName" | "samitiLogo" | "samitiAddress" | "establishedDate">>) => {
+    setState({ ...getState(), ...info });
+  }, []);
 
   const addMember = useCallback((m: Omit<Member, "id">) => {
     const members = getState().members;
