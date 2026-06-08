@@ -413,7 +413,7 @@ function printMemberCard(member: Member) {
   const photoHtml = member.photo
     ? `<img src="${member.photo}" style="width:120px;height:120px;object-fit:cover;border-radius:8px;border:1px solid #ddd;" />`
     : `<div style="width:120px;height:120px;border-radius:8px;border:1px solid #ddd;background:#f5f5f5;display:flex;align-items:center;justify-content:center;color:#888;font-size:12px;">ছবি নেই</div>`;
-  const rows = [
+  const rows: [string, string][] = [
     ["নাম", member.name],
     ["পিতার নাম", member.fatherName],
     ["মাতার নাম", member.motherName],
@@ -423,7 +423,7 @@ function printMemberCard(member: Member) {
     ["ঠিকানা", member.address],
     ["যোগদানের তারিখ", fmtDate(member.joinDate)],
   ];
-  const nomineeRows = member.nominee
+  const nomineeRows: [string, string][] = member.nominee
     ? [
         ["নমিনির নাম", member.nominee.name],
         ["সম্পর্ক", member.nominee.relation],
