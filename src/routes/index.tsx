@@ -1558,7 +1558,7 @@ function InstallmentsTab() {
     if (selected && amt > selected.remaining + 0.01) next.amount = `বকেয়ার চেয়ে বেশি (বকেয়া ${formatTk(selected.remaining)})`;
     if (Object.keys(next).length) { setErrors(next); return; }
 
-    addPayment({ loanId: form.loanId, amount: amt, date: form.date });
+    addPayment({ loanId: form.loanId, amount: amt, date: form.date, note: form.note.trim() || undefined });
     if (selected) {
       const newPaid = selected.paid + amt;
       if (newPaid >= selected.due - 0.01) {
