@@ -2268,7 +2268,58 @@ function ReceiptsHistoryTab() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      <Dialog open={!!editId} onOpenChange={(o) => !o && setEditId(null)}>
+        <DialogContent>
+          <DialogHeader><DialogTitle>কিস্তি সম্পাদনা</DialogTitle></DialogHeader>
+          <div className="space-y-3">
+            <div><Label>পরিমাণ (টাকা) *</Label><Input type="number" value={editForm.amount} onChange={(e) => setEditForm({ ...editForm, amount: e.target.value })} /></div>
+            <div><Label>তারিখ</Label><Input type="date" value={editForm.date} onChange={(e) => setEditForm({ ...editForm, date: e.target.value })} /></div>
+            <div><Label>মন্তব্য</Label><Input value={editForm.note} onChange={(e) => setEditForm({ ...editForm, note: e.target.value })} /></div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setEditId(null)}>বাতিল</Button>
+            <Button onClick={() => {
+              if (!editId) return;
+              const amt = Number(editForm.amount);
+              if (!amt || amt <= 0) { toast.error("সঠিক পরিমাণ দিন"); return; }
+              updatePayment(editId, { amount: amt, date: editForm.date, note: editForm.note });
+              setEditId(null);
+              toast.success("কিস্তি আপডেট হয়েছে");
+            }}>সংরক্ষণ</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <AlertDialog open={!!deleteId} onOpenChange={(o) => !o && setDeleteId(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>কিস্তি বাতিল করবেন?</AlertDialogTitle>
+            <AlertDialogDescription>
+              {(() => {
+                const r = rows.find((x) => x.id === deleteId);
+                return r ? (
+                  <>
+                    <span className="font-medium text-foreground">{r.memberName}</span> (ঋণ নং {toBn(r.loanNo)}) — {formatTk(r.amount)} ({fmtDate(r.date)})।
+                    <br />এই কিস্তিটি স্থায়ীভাবে মুছে যাবে এবং ঋণের বকেয়া হিসেবে যোগ হবে। এই কাজটি ফেরানো যাবে না।
+                  </>
+                ) : "এই কিস্তিটি স্থায়ীভাবে মুছে যাবে।";
+              })()}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>না</AlertDialogCancel>
+            <AlertDialogAction onClick={() => {
+              if (!deleteId) return;
+              deletePayment(deleteId);
+              setDeleteId(null);
+              toast.success("কিস্তি বাতিল করা হয়েছে");
+            }} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">হ্যাঁ, বাতিল করুন</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
+
   );
 }
 
