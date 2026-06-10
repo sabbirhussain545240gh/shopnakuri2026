@@ -154,9 +154,14 @@ function SamitiApp() {
         {/* Mobile header */}
         <header className="md:hidden border-b bg-card/70 backdrop-blur sticky top-0 z-20 px-4 py-3 flex items-center justify-between">
           <div className="flex items-center gap-3 min-w-0">
-            <div className="h-9 w-9 rounded-lg bg-primary text-primary-foreground flex items-center justify-center font-display font-bold text-lg shrink-0">স</div>
+            {data.samitiLogo ? (
+              <img src={data.samitiLogo} alt="logo" className="h-9 w-9 rounded-lg object-cover ring-1 ring-border bg-white shrink-0" />
+            ) : (
+              <div className="h-9 w-9 rounded-lg bg-primary text-primary-foreground flex items-center justify-center font-display font-bold text-lg shrink-0">স</div>
+            )}
             <h1 className="font-bold text-foreground truncate">{data.samitiName}</h1>
           </div>
+
           <div className="flex items-center gap-2">
             <CloudStatusBadge />
             <Button variant="ghost" size="icon" onClick={() => setMobileOpen((o) => !o)}>
