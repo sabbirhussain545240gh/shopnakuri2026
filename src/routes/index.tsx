@@ -835,12 +835,27 @@ function SavingsTab() {
   const [search, setSearch] = useState("");
   const [editId, setEditId] = useState<string | null>(null);
   const [editForm, setEditForm] = useState({ memberId: "", amount: "", date: today(), note: "" });
+  const [memberOpen, setMemberOpen] = useState(false);
+  const [editMemberOpen, setEditMemberOpen] = useState(false);
+  const [receipt, setReceipt] = useState<null | DepositReceiptData>(null);
 
   const submit = () => {
     if (!form.memberId) { toast.error("সদস্য নির্বাচন করুন"); return; }
     const amt = Number(form.amount);
     if (!amt || amt <= 0) { toast.error("সঠিক পরিমাণ দিন"); return; }
     addDeposit({ memberId: form.memberId, amount: amt, date: form.date, note: form.note });
+    const mem = data.members.find((x) => x.id === form.memberId);
+    const prevTotal = memberTotalDeposit(data.deposits, form.memberId);
+    setReceipt({
+      memberName: mem?.name ?? "—",
+      memberSerial: mem?.serial,
+      amount: amt,
+      date: form.date,
+      totalAfter: prevTotal + amt,
+      receiptNo: `D-${Date.now().toString().slice(-6)}`,
+      note: form.note.trim() || undefined,
+      logo: data.samitiLogo || undefined,
+    });
     setForm({ memberId: "", amount: "", date: today(), note: "" });
     setOpen(false);
     toast.success("জমা যোগ হয়েছে");
@@ -860,6 +875,9 @@ function SavingsTab() {
     setEditId(d.id);
     setEditForm({ memberId: d.memberId, amount: String(d.amount), date: d.date, note: d.note || "" });
   };
+
+  const selectedMember = data.members.find((m) => m.id === form.memberId);
+  const selectedEditMember = data.members.find((m) => m.id === editForm.memberId);
 
   const replicateFromFirst = () => {
     const sorted = [...data.members].sort((a, b) => (a.serial || 0) - (b.serial || 0));
