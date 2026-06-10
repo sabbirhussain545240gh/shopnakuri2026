@@ -108,12 +108,17 @@ function SamitiApp() {
       {/* Desktop Sidebar */}
       <aside className="w-64 border-r bg-card hidden md:flex flex-col sticky top-0 h-screen">
         <div className="p-4 border-b flex items-center gap-3">
-          <div className="h-10 w-10 rounded-xl bg-primary text-primary-foreground flex items-center justify-center font-display font-bold text-xl shadow-sm shrink-0">স</div>
+          {data.samitiLogo ? (
+            <img src={data.samitiLogo} alt="logo" className="h-10 w-10 rounded-xl object-cover ring-1 ring-border shadow-sm shrink-0 bg-white" />
+          ) : (
+            <div className="h-10 w-10 rounded-xl bg-primary text-primary-foreground flex items-center justify-center font-display font-bold text-xl shadow-sm shrink-0">স</div>
+          )}
           <div className="min-w-0">
             <h1 className="text-base font-bold text-foreground leading-tight truncate">{data.samitiName}</h1>
             <p className="text-xs text-muted-foreground">সমিতি ম্যানেজমেন্ট</p>
           </div>
         </div>
+
         <nav className="flex-1 p-3 space-y-1 overflow-y-auto">
           {navItems.map((item) => {
             const Icon = item.icon;
