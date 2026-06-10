@@ -77,14 +77,18 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Lovable App" },
-      { name: "description", content: "Lovable Generated Project" },
+      { title: "স্বপ্ন কুড়ি বন্ধন সমিতি" },
+      { name: "description", content: "একতাই শক্তি একতাই বল" },
       { name: "author", content: "Lovable" },
-      { property: "og:title", content: "Lovable App" },
-      { property: "og:description", content: "Lovable Generated Project" },
+      { property: "og:title", content: "স্বপ্ন কুড়ি বন্ধন সমিতি" },
+      { property: "og:description", content: "একতাই শক্তি একতাই বল" },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
       { name: "twitter:site", content: "@Lovable" },
+      { name: "twitter:title", content: "স্বপ্ন কুড়ি বন্ধন সমিতি" },
+      { name: "twitter:description", content: "একতাই শক্তি একতাই বল" },
+      { property: "og:image", content: "https://storage.googleapis.com/gpt-engineer-file-uploads/fJvY7UPw0QfsoGgBTbkYvQbLJIw2/social-images/social-1781108596146-e2be3591-1fd9-41d4-94ca-aa34062a9724.webp" },
+      { name: "twitter:image", content: "https://storage.googleapis.com/gpt-engineer-file-uploads/fJvY7UPw0QfsoGgBTbkYvQbLJIw2/social-images/social-1781108596146-e2be3591-1fd9-41d4-94ca-aa34062a9724.webp" },
     ],
     links: [
       {
