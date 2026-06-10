@@ -2586,9 +2586,12 @@ const receiptCss = `
   @media print{body{padding:0;} .no-print{display:none;}}
 `;
 
-function buildReceiptHtml(r: { loan: Loan; memberName: string; amount: number; date: string; paidAfter: number; remainingAfter: number; receiptNo: string }, samitiName: string) {
+function buildReceiptHtml(r: { loan: Loan; memberName: string; amount: number; date: string; paidAfter: number; remainingAfter: number; receiptNo: string; note?: string; logo?: string }, samitiName: string) {
   return `<div class="r" id="r">
-    <div class="center"><div class="title">${samitiName}</div><div class="sub">কিস্তি প্রাপ্তি রিসিপ্ট</div></div>
+    <div class="header">
+      ${r.logo ? `<img src="${r.logo}" alt="logo" class="logo"/>` : ""}
+      <div class="head-text"><div class="title">${samitiName}</div><div class="sub">কিস্তি প্রাপ্তি রিসিপ্ট</div></div>
+    </div>
     <div class="grid">
       <div><span class="muted">রিসিপ্ট নং:</span> <b>${r.receiptNo}</b></div>
       <div><span class="muted">তারিখ:</span> <b>${fmtDate(r.date)}</b></div>
@@ -2601,11 +2604,12 @@ function buildReceiptHtml(r: { loan: Loan; memberName: string; amount: number; d
       <div><span class="muted">মোট পরিশোধিত:</span> <b>${formatTk(r.paidAfter)}</b></div>
       <div><span class="muted">অবশিষ্ট বকেয়া:</span> <span class="due">${formatTk(r.remainingAfter)}</span></div>
     </div>
+    ${r.note ? `<div class="note"><span class="muted">নোট:</span> <b>${r.note.replace(/</g, "&lt;")}</b></div>` : ""}
     <div class="sign"><div>—————————<br/>গ্রহীতা</div><div style="text-align:right">—————————<br/>কোষাধ্যক্ষ</div></div>
   </div>`;
 }
 
-async function renderReceiptCanvas(r: { loan: Loan; memberName: string; amount: number; date: string; paidAfter: number; remainingAfter: number; receiptNo: string }, samitiName: string): Promise<HTMLCanvasElement> {
+async function renderReceiptCanvas(r: { loan: Loan; memberName: string; amount: number; date: string; paidAfter: number; remainingAfter: number; receiptNo: string; note?: string; logo?: string }, samitiName: string): Promise<HTMLCanvasElement> {
   const { default: html2canvas } = await import("html2canvas");
   const iframe = document.createElement("iframe");
   iframe.style.cssText = "position:fixed;left:-10000px;top:0;width:600px;height:10px;border:0;";
