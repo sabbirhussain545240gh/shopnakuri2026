@@ -1073,7 +1073,7 @@ function LoansTab() {
     const amt = Number(payForm.amount);
     if (!amt || amt <= 0) { toast.error("সঠিক পরিমাণ দিন"); return; }
     if (!payFor) return;
-    addPayment({ loanId: payFor.id, amount: amt, date: payForm.date });
+    addPayment({ loanId: payFor.id, amount: amt, date: payForm.date, note: payForm.note.trim() || undefined });
     const mem = data.members.find((x) => x.id === payFor.memberId);
     const prevPaid = loanPaid(data.payments, payFor.id);
     const due = loanTotalDue(payFor);
@@ -1087,6 +1087,8 @@ function LoansTab() {
       paidAfter,
       remainingAfter,
       receiptNo: `R-${Date.now().toString().slice(-6)}`,
+      note: payForm.note.trim() || undefined,
+      logo: data.samitiLogo || undefined,
     });
     setPayForm({ amount: "", date: today(), note: "" });
     setPayFor(null);
