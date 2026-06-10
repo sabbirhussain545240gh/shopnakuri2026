@@ -53,6 +53,13 @@ const fmtDate = (s: string) => {
   const dd = String(d).padStart(2, "0");
   return `${dd} ${enMonths[+m - 1] || m} ${y}`;
 };
+const bnMonths = ["জানুয়ারি","ফেব্রুয়ারি","মার্চ","এপ্রিল","মে","জুন","জুলাই","আগস্ট","সেপ্টেম্বর","অক্টোবর","নভেম্বর","ডিসেম্বর"];
+const toBnDigits = (s: string | number) => String(s).replace(/[0-9]/g, (d) => "০১২৩৪৫৬৭৮৯"[+d]);
+const fmtMonthYearBn = (s: string) => {
+  if (!s) return "";
+  const [y, m] = s.split("-");
+  return `${bnMonths[+m - 1] || m} ${toBnDigits(y)}`;
+};
 const addMonths = (s: string, n: number) => {
   if (!s) return "";
   const [y, m, d] = s.split("-").map(Number);
@@ -292,7 +299,7 @@ function Dashboard({ totals, memberCount, data }: any) {
               <div className="mt-2 h-px w-16 sm:w-20 bg-gradient-to-r from-white/50 to-transparent rounded-full" />
               {data.samitiAddress && <p className="text-xs sm:text-sm text-primary-foreground/80 mt-2 truncate">📍 {data.samitiAddress}</p>}
               <div className="flex flex-wrap items-center gap-x-3 gap-y-1 mt-2 text-[11px] sm:text-xs text-primary-foreground/70">
-                {data.establishedDate && <span className="truncate">স্থাপিত: {fmtDate(data.establishedDate)}</span>}
+                {data.establishedDate && <span className="truncate">স্থাপিত: {fmtMonthYearBn(data.establishedDate)}</span>}
                 <span className="truncate">আজ: {fmtDate(todayStr)}</span>
               </div>
             </div>
