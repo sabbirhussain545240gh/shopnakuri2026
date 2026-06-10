@@ -3407,36 +3407,40 @@ function buildReportHtml(p: ReportParams) {
   };
 
   const summaryHtml = `
-    <table style="width:100%;border-collapse:collapse;margin:12px 0;font-size:13px;">
-      <tr><td style="padding:6px 10px;border:1px solid #ccc;background:#f5f5f5;">মোট সঞ্চয়/চাদা</td><td style="padding:6px 10px;border:1px solid #ccc;text-align:right;">${formatTk(totals.totalDeposit)}</td>
-          <td style="padding:6px 10px;border:1px solid #ccc;background:#f5f5f5;">ঋণ প্রদান</td><td style="padding:6px 10px;border:1px solid #ccc;text-align:right;">${formatTk(totals.totalLoanGiven)}</td></tr>
-      <tr><td style="padding:6px 10px;border:1px solid #ccc;background:#f5f5f5;">ঋণ আদায়</td><td style="padding:6px 10px;border:1px solid #ccc;text-align:right;">${formatTk(totals.totalRepaid)}</td>
-          <td style="padding:6px 10px;border:1px solid #ccc;background:#f5f5f5;">বকেয়া ঋণ</td><td style="padding:6px 10px;border:1px solid #ccc;text-align:right;">${formatTk(totals.outstanding)}</td></tr>
-      <tr><td style="padding:6px 10px;border:1px solid #ccc;background:#f5f5f5;">আয়</td><td style="padding:6px 10px;border:1px solid #ccc;text-align:right;">${formatTk(totals.totalIncome)}</td>
-          <td style="padding:6px 10px;border:1px solid #ccc;background:#f5f5f5;">ব্যয়</td><td style="padding:6px 10px;border:1px solid #ccc;text-align:right;">${formatTk(totals.totalExpense)}</td></tr>
-      <tr><td style="padding:6px 10px;border:1px solid #ccc;background:#f5f5f5;font-weight:bold;">হাতে নগদ</td><td colspan="3" style="padding:6px 10px;border:1px solid #ccc;text-align:right;font-weight:bold;">${formatTk(totals.cashInHand)}</td></tr>
+    <table style="width:100%;border-collapse:collapse;margin:12px 0;font-size:15px;">
+      <tr><td style="padding:8px 12px;border:1px solid #ccc;background:#f5f5f5;">মোট সঞ্চয়/চাদা</td><td style="padding:8px 12px;border:1px solid #ccc;text-align:right;white-space:nowrap;font-variant-numeric:tabular-nums;">${formatTk(totals.totalDeposit)}</td>
+          <td style="padding:8px 12px;border:1px solid #ccc;background:#f5f5f5;">ঋণ প্রদান</td><td style="padding:8px 12px;border:1px solid #ccc;text-align:right;white-space:nowrap;font-variant-numeric:tabular-nums;">${formatTk(totals.totalLoanGiven)}</td></tr>
+      <tr><td style="padding:8px 12px;border:1px solid #ccc;background:#f5f5f5;">ঋণ আদায়</td><td style="padding:8px 12px;border:1px solid #ccc;text-align:right;white-space:nowrap;font-variant-numeric:tabular-nums;">${formatTk(totals.totalRepaid)}</td>
+          <td style="padding:8px 12px;border:1px solid #ccc;background:#f5f5f5;">বকেয়া ঋণ</td><td style="padding:8px 12px;border:1px solid #ccc;text-align:right;white-space:nowrap;font-variant-numeric:tabular-nums;">${formatTk(totals.outstanding)}</td></tr>
+      <tr><td style="padding:8px 12px;border:1px solid #ccc;background:#f5f5f5;">আয়</td><td style="padding:8px 12px;border:1px solid #ccc;text-align:right;white-space:nowrap;font-variant-numeric:tabular-nums;">${formatTk(totals.totalIncome)}</td>
+          <td style="padding:8px 12px;border:1px solid #ccc;background:#f5f5f5;">ব্যয়</td><td style="padding:8px 12px;border:1px solid #ccc;text-align:right;white-space:nowrap;font-variant-numeric:tabular-nums;">${formatTk(totals.totalExpense)}</td></tr>
+      <tr><td style="padding:8px 12px;border:1px solid #ccc;background:#f5f5f5;font-weight:bold;">হাতে নগদ</td><td colspan="3" style="padding:8px 12px;border:1px solid #ccc;text-align:right;font-weight:bold;white-space:nowrap;font-variant-numeric:tabular-nums;">${formatTk(totals.cashInHand)}</td></tr>
     </table>`;
 
-  const th = (cols: string[]) => `<tr>${cols.map((c) => `<th style="padding:6px 8px;border:1px solid #999;background:#eee;text-align:left;">${c}</th>`).join("")}</tr>`;
+  const th = (cols: string[]) => `<tr>${cols.map((c) => `<th style="padding:8px 10px;border:1px solid #999;background:#eee;text-align:left;font-size:14px;">${c}</th>`).join("")}</tr>`;
   const td = (cells: (string | number)[], aligns: string[] = []) =>
-    `<tr>${cells.map((c, i) => `<td style="padding:6px 8px;border:1px solid #ccc;text-align:${aligns[i] || "left"};">${c}</td>`).join("")}</tr>`;
+    `<tr>${cells.map((c, i) => {
+      const a = aligns[i] || "left";
+      const numeric = a === "right";
+      return `<td style="padding:7px 10px;border:1px solid #ccc;text-align:${a};font-size:14px;${numeric ? "white-space:nowrap;font-variant-numeric:tabular-nums;" : ""}">${c}</td>`;
+    }).join("")}</tr>`;
 
   let body = "";
   if (reportType === "summary") {
     body += summaryHtml;
     body += `<h3>সদস্যভিত্তিক সারসংক্ষেপ</h3>`;
-    body += `<table style="width:100%;border-collapse:collapse;font-size:12px;">${th(["সি.নং", "নাম", "মোবাইল", "সঞ্চয়/চাদা", "ঋণ", "বকেয়া"])}${memberWise.map((r: any) => td([toBn(r.member.serial || 0), r.member.name, r.member.phone ? toBn(r.member.phone) : "—", formatTk(r.deposit), formatTk(r.loanAmt), formatTk(r.due)], ["left", "left", "left", "right", "right", "right"])).join("")}</table>`;
+    body += `<table style="width:100%;border-collapse:collapse;font-size:14px;">${th(["সি.নং", "নাম", "মোবাইল", "সঞ্চয়/চাদা", "ঋণ", "বকেয়া"])}${memberWise.map((r: any) => td([toBn(r.member.serial || 0), r.member.name, r.member.phone ? toBn(r.member.phone) : "—", formatTk(r.deposit), formatTk(r.loanAmt), formatTk(r.due)], ["left", "left", "left", "right", "right", "right"])).join("")}</table>`;
   } else if (reportType === "members") {
-    body += `<table style="width:100%;border-collapse:collapse;font-size:12px;">${th(["সি.নং", "নাম", "মোবাইল", "সঞ্চয়/চাদা", "ঋণ", "বকেয়া"])}${memberWise.map((r: any) => td([toBn(r.member.serial || 0), r.member.name, r.member.phone ? toBn(r.member.phone) : "—", formatTk(r.deposit), formatTk(r.loanAmt), formatTk(r.due)], ["left", "left", "left", "right", "right", "right"])).join("")}</table>`;
+    body += `<table style="width:100%;border-collapse:collapse;font-size:14px;">${th(["সি.নং", "নাম", "মোবাইল", "সঞ্চয়/চাদা", "ঋণ", "বকেয়া"])}${memberWise.map((r: any) => td([toBn(r.member.serial || 0), r.member.name, r.member.phone ? toBn(r.member.phone) : "—", formatTk(r.deposit), formatTk(r.loanAmt), formatTk(r.due)], ["left", "left", "left", "right", "right", "right"])).join("")}</table>`;
   } else if (reportType === "savings") {
-    body += `<p><b>মোট:</b> ${formatTk(totals.totalDeposit)}</p>`;
-    body += `<table style="width:100%;border-collapse:collapse;font-size:12px;">${th(["তারিখ", "সদস্য", "মন্তব্য", "পরিমাণ"])}${[...filtered.deposits].sort((a: any, b: any) => b.date.localeCompare(a.date)).map((d: any) => { const m = members.find((x) => x.id === d.memberId); return td([fmtDate(d.date), m?.name || "—", d.note || "—", formatTk(d.amount)], ["left", "left", "left", "right"]); }).join("")}</table>`;
+    body += `<p style="font-size:14px;"><b>মোট:</b> ${formatTk(totals.totalDeposit)}</p>`;
+    body += `<table style="width:100%;border-collapse:collapse;font-size:14px;">${th(["তারিখ", "সদস্য", "মন্তব্য", "পরিমাণ"])}${[...filtered.deposits].sort((a: any, b: any) => b.date.localeCompare(a.date)).map((d: any) => { const m = members.find((x) => x.id === d.memberId); return td([fmtDate(d.date), m?.name || "—", d.note || "—", formatTk(d.amount)], ["left", "left", "left", "right"]); }).join("")}</table>`;
   } else if (reportType === "loans") {
-    body += `<p><b>মোট প্রদান:</b> ${formatTk(totals.totalLoanGiven)} | <b>আদায়:</b> ${formatTk(totals.totalRepaid)}</p>`;
-    body += `<table style="width:100%;border-collapse:collapse;font-size:12px;">${th(["তারিখ", "সদস্য", "মূল", "মোট প্রদেয়", "পরিশোধ", "বকেয়া", "অবস্থা"])}${filtered.loans.map((l: any) => { const m = members.find((x) => x.id === l.memberId); const due = loanTotalDue(l); const realPaid = (filtered.payments.filter((pp: any) => pp.loanId === l.id).reduce((a: number, pp: any) => a + pp.amount, 0)); return td([fmtDate(l.date), m?.name || "—", formatTk(l.amount), formatTk(due), formatTk(realPaid), formatTk(Math.max(0, due - realPaid)), l.status === "active" ? "চলমান" : "পরিশোধিত"], ["left", "left", "right", "right", "right", "right", "left"]); }).join("")}</table>`;
+    body += `<p style="font-size:14px;"><b>মোট প্রদান:</b> ${formatTk(totals.totalLoanGiven)} | <b>আদায়:</b> ${formatTk(totals.totalRepaid)}</p>`;
+    body += `<table style="width:100%;border-collapse:collapse;font-size:14px;">${th(["তারিখ", "সদস্য", "মূল", "মোট প্রদেয়", "পরিশোধ", "বকেয়া", "অবস্থা"])}${filtered.loans.map((l: any) => { const m = members.find((x) => x.id === l.memberId); const due = loanTotalDue(l); const realPaid = (filtered.payments.filter((pp: any) => pp.loanId === l.id).reduce((a: number, pp: any) => a + pp.amount, 0)); return td([fmtDate(l.date), m?.name || "—", formatTk(l.amount), formatTk(due), formatTk(realPaid), formatTk(Math.max(0, due - realPaid)), l.status === "active" ? "চলমান" : "পরিশোধিত"], ["left", "left", "right", "right", "right", "right", "left"]); }).join("")}</table>`;
   } else if (reportType === "cashbook") {
-    body += `<p><b>আয়:</b> ${formatTk(totals.totalIncome)} | <b>ব্যয়:</b> ${formatTk(totals.totalExpense)} | <b>নীট:</b> ${formatTk(totals.totalIncome - totals.totalExpense)}</p>`;
-    body += `<table style="width:100%;border-collapse:collapse;font-size:12px;">${th(["তারিখ", "ধরন", "খাত", "মন্তব্য", "পরিমাণ"])}${[...filtered.transactions].sort((a: any, b: any) => b.date.localeCompare(a.date)).map((t: any) => td([fmtDate(t.date), t.type === "income" ? "আয়" : "ব্যয়", t.category, t.note || "—", formatTk(t.amount)], ["left", "left", "left", "left", "right"])).join("")}</table>`;
+    body += `<p style="font-size:14px;"><b>আয়:</b> ${formatTk(totals.totalIncome)} | <b>ব্যয়:</b> ${formatTk(totals.totalExpense)} | <b>নীট:</b> ${formatTk(totals.totalIncome - totals.totalExpense)}</p>`;
+    body += `<table style="width:100%;border-collapse:collapse;font-size:14px;">${th(["তারিখ", "ধরন", "খাত", "মন্তব্য", "পরিমাণ"])}${[...filtered.transactions].sort((a: any, b: any) => b.date.localeCompare(a.date)).map((t: any) => td([fmtDate(t.date), t.type === "income" ? "আয়" : "ব্যয়", t.category, t.note || "—", formatTk(t.amount)], ["left", "left", "left", "left", "right"])).join("")}</table>`;
   } else if (reportType === "member-savings" && memberSavingsPivot) {
     const headerCells = ["সি.নং", "সদস্য", ...memberSavingsPivot.labels, "মোট"];
     const bodyRows = memberSavingsPivot.rows.map((r: any) =>
@@ -3445,9 +3449,9 @@ function buildReportHtml(p: ReportParams) {
         ["left", "left", ...memberSavingsPivot.periods.map(() => "right"), "right"]
       )
     ).join("");
-    const totalsRow = `<tr><td colspan="2" style="padding:6px 8px;border:1px solid #999;background:#eee;text-align:right;font-weight:bold;">মোট</td>${memberSavingsPivot.periods.map((pp: string) => `<td style="padding:6px 8px;border:1px solid #999;background:#eee;text-align:right;font-weight:bold;">${formatTk(memberSavingsPivot.colTotals[pp] || 0)}</td>`).join("")}<td style="padding:6px 8px;border:1px solid #999;background:#eee;text-align:right;font-weight:bold;">${formatTk(memberSavingsPivot.grand)}</td></tr>`;
-    body += `<p><b>সর্বমোট:</b> ${formatTk(memberSavingsPivot.grand)}</p>`;
-    body += `<table style="width:100%;border-collapse:collapse;font-size:12px;">${th(headerCells)}${bodyRows}${totalsRow}</table>`;
+    const totalsRow = `<tr><td colspan="2" style="padding:7px 10px;border:1px solid #999;background:#eee;text-align:right;font-weight:bold;font-size:14px;">মোট</td>${memberSavingsPivot.periods.map((pp: string) => `<td style="padding:7px 10px;border:1px solid #999;background:#eee;text-align:right;font-weight:bold;font-size:14px;white-space:nowrap;font-variant-numeric:tabular-nums;">${formatTk(memberSavingsPivot.colTotals[pp] || 0)}</td>`).join("")}<td style="padding:7px 10px;border:1px solid #999;background:#eee;text-align:right;font-weight:bold;font-size:14px;white-space:nowrap;font-variant-numeric:tabular-nums;">${formatTk(memberSavingsPivot.grand)}</td></tr>`;
+    body += `<p style="font-size:14px;"><b>সর্বমোট:</b> ${formatTk(memberSavingsPivot.grand)}</p>`;
+    body += `<table style="width:100%;border-collapse:collapse;font-size:14px;">${th(headerCells)}${bodyRows}${totalsRow}</table>`;
   }
 
   const inner = `
