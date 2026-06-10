@@ -2144,6 +2144,9 @@ function DepositsHistoryTab() {
                   <TableCell className="text-right font-semibold text-success">{formatTk(r.amount)}</TableCell>
                   <TableCell>
                     <div className="flex items-center justify-center gap-1">
+                      <Button variant="ghost" size="icon" title="রিসিপ্ট দেখুন" onClick={() => openReceipt(r)}>
+                        <Receipt className="h-4 w-4 text-primary" />
+                      </Button>
                       <Button variant="ghost" size="icon" title="সম্পাদনা" onClick={() => startEdit(r)}>
                         <Pencil className="h-4 w-4 text-muted-foreground" />
                       </Button>
@@ -2151,6 +2154,7 @@ function DepositsHistoryTab() {
                         <Trash2 className="h-4 w-4 text-destructive" />
                       </Button>
                     </div>
+
                   </TableCell>
                 </TableRow>
               ))}
