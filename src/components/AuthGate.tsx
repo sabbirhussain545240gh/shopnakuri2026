@@ -19,15 +19,22 @@ export function AuthGate({ children }: { children: (session: Session) => ReactNo
   const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
-    const { data: sub } = supabase.auth.onAuthStateChange((_event, sess) => {
+    const { data: sub } = supabase.auth.onAuthStateChange((event, sess) => {
       const ok = sess?.user?.email?.toLowerCase() === ALLOWED_EMAIL;
       if (sess && !ok) {
         supabase.auth.signOut();
         setSession(null);
+        stopCloudSync();
         toast.error("এই অ্যাকাউন্টের অ্যাক্সেস নেই");
         return;
       }
       setSession(sess);
+      if (sess && ok && (event === "SIGNED_IN" || event === "INITIAL_SESSION" || event === "TOKEN_REFRESHED")) {
+        startCloudSync(sess.user.id);
+      }
+      if (event === "SIGNED_OUT") {
+        stopCloudSync();
+      }
     });
     supabase.auth.getSession().then(({ data }) => {
       const sess = data.session;
@@ -37,6 +44,7 @@ export function AuthGate({ children }: { children: (session: Session) => ReactNo
         setSession(null);
       } else {
         setSession(sess);
+        if (sess && ok) startCloudSync(sess.user.id);
       }
       setLoading(false);
     });
