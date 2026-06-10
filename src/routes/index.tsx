@@ -835,12 +835,27 @@ function SavingsTab() {
   const [search, setSearch] = useState("");
   const [editId, setEditId] = useState<string | null>(null);
   const [editForm, setEditForm] = useState({ memberId: "", amount: "", date: today(), note: "" });
+  const [memberOpen, setMemberOpen] = useState(false);
+  const [editMemberOpen, setEditMemberOpen] = useState(false);
+  const [receipt, setReceipt] = useState<null | DepositReceiptData>(null);
 
   const submit = () => {
     if (!form.memberId) { toast.error("সদস্য নির্বাচন করুন"); return; }
     const amt = Number(form.amount);
     if (!amt || amt <= 0) { toast.error("সঠিক পরিমাণ দিন"); return; }
     addDeposit({ memberId: form.memberId, amount: amt, date: form.date, note: form.note });
+    const mem = data.members.find((x) => x.id === form.memberId);
+    const prevTotal = memberTotalDeposit(data.deposits, form.memberId);
+    setReceipt({
+      memberName: mem?.name ?? "—",
+      memberSerial: mem?.serial,
+      amount: amt,
+      date: form.date,
+      totalAfter: prevTotal + amt,
+      receiptNo: `D-${Date.now().toString().slice(-6)}`,
+      note: form.note.trim() || undefined,
+      logo: data.samitiLogo || undefined,
+    });
     setForm({ memberId: "", amount: "", date: today(), note: "" });
     setOpen(false);
     toast.success("জমা যোগ হয়েছে");
@@ -860,6 +875,9 @@ function SavingsTab() {
     setEditId(d.id);
     setEditForm({ memberId: d.memberId, amount: String(d.amount), date: d.date, note: d.note || "" });
   };
+
+  const selectedMember = data.members.find((m) => m.id === form.memberId);
+  const selectedEditMember = data.members.find((m) => m.id === editForm.memberId);
 
   const replicateFromFirst = () => {
     const sorted = [...data.members].sort((a, b) => (a.serial || 0) - (b.serial || 0));
@@ -895,6 +913,7 @@ function SavingsTab() {
   }, [data.deposits, data.members, search]);
 
   return (
+    <>
     <Card>
       <CardHeader className="flex flex-row items-center justify-between gap-2 flex-wrap">
         <div>
@@ -912,10 +931,30 @@ function SavingsTab() {
               <div className="space-y-3">
                 <div>
                   <Label>সদস্য *</Label>
-                  <Select value={form.memberId} onValueChange={(v) => setForm({ ...form, memberId: v })}>
-                    <SelectTrigger><SelectValue placeholder="সদস্য নির্বাচন করুন" /></SelectTrigger>
-                    <SelectContent>{data.members.map((m) => <SelectItem key={m.id} value={m.id}>{toBn(m.serial || 0)}. {m.name}</SelectItem>)}</SelectContent>
-                  </Select>
+                  <Popover open={memberOpen} onOpenChange={setMemberOpen}>
+                    <PopoverTrigger asChild>
+                      <Button variant="outline" role="combobox" className="w-full justify-between font-normal">
+                        {selectedMember ? `${toBn(selectedMember.serial || 0)}. ${selectedMember.name}` : "সদস্য নির্বাচন করুন"}
+                        <ChevronsUpDown className="h-4 w-4 opacity-50" />
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-[--radix-popover-trigger-width] p-0" align="start">
+                      <Command filter={(value, search) => value.toLowerCase().includes(search.toLowerCase()) ? 1 : 0}>
+                        <CommandInput placeholder="ক্রম বা নাম দিয়ে খুঁজুন..." />
+                        <CommandList>
+                          <CommandEmpty>কোনও সদস্য পাওয়া যায়নি</CommandEmpty>
+                          <CommandGroup>
+                            {data.members.map((m) => (
+                              <CommandItem key={m.id} value={`${toBn(m.serial || 0)} ${m.serial} ${m.name} ${m.phone || ""}`} onSelect={() => { setForm({ ...form, memberId: m.id }); setMemberOpen(false); }}>
+                                <Check className={cn("h-4 w-4", form.memberId === m.id ? "opacity-100" : "opacity-0")} />
+                                {toBn(m.serial || 0)}. {m.name}
+                              </CommandItem>
+                            ))}
+                          </CommandGroup>
+                        </CommandList>
+                      </Command>
+                    </PopoverContent>
+                  </Popover>
                 </div>
                 <div><Label>পরিমাণ (টাকা) *</Label><Input type="number" value={form.amount} onChange={(e) => setForm({ ...form, amount: e.target.value })} /></div>
                 <div><Label>তারিখ</Label><Input type="date" value={form.date} onChange={(e) => setForm({ ...form, date: e.target.value })} /></div>
@@ -930,10 +969,30 @@ function SavingsTab() {
               <div className="space-y-3">
                 <div>
                   <Label>সদস্য *</Label>
-                  <Select value={editForm.memberId} onValueChange={(v) => setEditForm({ ...editForm, memberId: v })}>
-                    <SelectTrigger><SelectValue placeholder="সদস্য নির্বাচন করুন" /></SelectTrigger>
-                    <SelectContent>{data.members.map((m) => <SelectItem key={m.id} value={m.id}>{toBn(m.serial || 0)}. {m.name}</SelectItem>)}</SelectContent>
-                  </Select>
+                  <Popover open={editMemberOpen} onOpenChange={setEditMemberOpen}>
+                    <PopoverTrigger asChild>
+                      <Button variant="outline" role="combobox" className="w-full justify-between font-normal">
+                        {selectedEditMember ? `${toBn(selectedEditMember.serial || 0)}. ${selectedEditMember.name}` : "সদস্য নির্বাচন করুন"}
+                        <ChevronsUpDown className="h-4 w-4 opacity-50" />
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-[--radix-popover-trigger-width] p-0" align="start">
+                      <Command filter={(value, search) => value.toLowerCase().includes(search.toLowerCase()) ? 1 : 0}>
+                        <CommandInput placeholder="ক্রম বা নাম দিয়ে খুঁজুন..." />
+                        <CommandList>
+                          <CommandEmpty>কোনও সদস্য পাওয়া যায়নি</CommandEmpty>
+                          <CommandGroup>
+                            {data.members.map((m) => (
+                              <CommandItem key={m.id} value={`${toBn(m.serial || 0)} ${m.serial} ${m.name} ${m.phone || ""}`} onSelect={() => { setEditForm({ ...editForm, memberId: m.id }); setEditMemberOpen(false); }}>
+                                <Check className={cn("h-4 w-4", editForm.memberId === m.id ? "opacity-100" : "opacity-0")} />
+                                {toBn(m.serial || 0)}. {m.name}
+                              </CommandItem>
+                            ))}
+                          </CommandGroup>
+                        </CommandList>
+                      </Command>
+                    </PopoverContent>
+                  </Popover>
                 </div>
                 <div><Label>পরিমাণ (টাকা) *</Label><Input type="number" value={editForm.amount} onChange={(e) => setEditForm({ ...editForm, amount: e.target.value })} /></div>
                 <div><Label>তারিখ</Label><Input type="date" value={editForm.date} onChange={(e) => setEditForm({ ...editForm, date: e.target.value })} /></div>
@@ -1018,6 +1077,108 @@ function SavingsTab() {
         )}
       </CardContent>
     </Card>
+
+    <Dialog open={!!receipt} onOpenChange={(o) => !o && setReceipt(null)}>
+      <DialogContent className="max-w-md">
+        <DialogHeader><DialogTitle>জমা রিসিপ্ট</DialogTitle></DialogHeader>
+        {receipt && (
+          <div id="deposit-receipt" className="border rounded-md p-4 text-sm bg-card">
+            <div className="flex items-center justify-center gap-3 mb-3">
+              {receipt.logo && (
+                <img src={receipt.logo} alt="logo" className="h-12 w-12 object-contain rounded" />
+              )}
+              <div className="text-center">
+                <div className="text-lg font-bold">{data.samitiName || "সমিতি"}</div>
+                <div className="text-xs text-muted-foreground">সঞ্চয়/চাদা জমা রিসিপ্ট</div>
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-2">
+              <div><span className="text-muted-foreground">রিসিপ্ট নং:</span> <span className="font-medium">{receipt.receiptNo}</span></div>
+              <div><span className="text-muted-foreground">তারিখ:</span> <span className="font-medium">{fmtDate(receipt.date)}</span></div>
+              <div className="col-span-2"><span className="text-muted-foreground">সদস্য:</span> <span className="font-medium">{receipt.memberSerial ? `${toBn(receipt.memberSerial)}. ` : ""}{receipt.memberName}</span></div>
+            </div>
+            <div className="mt-3 border-t pt-2 flex justify-between text-base">
+              <span className="font-medium">জমার পরিমাণ</span>
+              <span className="font-bold text-success">{formatTk(receipt.amount)}</span>
+            </div>
+            <div className="mt-2 text-sm">
+              <span className="text-muted-foreground">মোট সঞ্চয় (এই জমা সহ):</span> <span className="font-semibold">{formatTk(receipt.totalAfter)}</span>
+            </div>
+            {receipt.note && (
+              <div className="mt-3 text-sm border-t pt-2">
+                <span className="text-muted-foreground">নোট:</span> <span className="font-medium whitespace-pre-wrap">{receipt.note}</span>
+              </div>
+            )}
+            <div className="mt-6 flex justify-between text-xs text-muted-foreground">
+              <div>—————————<br />গ্রহীতা</div>
+              <div className="text-right">—————————<br />কোষাধ্যক্ষ</div>
+            </div>
+          </div>
+        )}
+        <DialogFooter className="gap-2 flex-wrap">
+          <Button variant="outline" onClick={() => setReceipt(null)}>বন্ধ</Button>
+          <Button variant="secondary" onClick={async () => {
+            if (!receipt) return;
+            try {
+              toast.loading("ছবি তৈরি হচ্ছে...", { id: "djpg" });
+              const canvas = await renderDepositReceiptCanvas(receipt, data.samitiName || "সমিতি");
+              const blob = await new Promise<Blob | null>((res) => canvas.toBlob(res, "image/jpeg", 0.95));
+              if (!blob) throw new Error("blob");
+              const url = URL.createObjectURL(blob);
+              const link = document.createElement("a");
+              link.href = url;
+              link.download = `জমা-রিসিপ্ট-${receipt.receiptNo}.jpg`;
+              document.body.appendChild(link);
+              link.click();
+              link.remove();
+              setTimeout(() => URL.revokeObjectURL(url), 1000);
+              toast.success("JPEG ডাউনলোড হয়েছে", { id: "djpg" });
+            } catch (e) {
+              console.error(e);
+              toast.error("ডাউনলোড ব্যর্থ হয়েছে", { id: "djpg" });
+            }
+          }}><ImageDown className="h-4 w-4 mr-1" />JPEG ডাউনলোড</Button>
+          <Button variant="secondary" onClick={async () => {
+            if (!receipt) return;
+            const text = `জমা রিসিপ্ট\nসমিতি: ${data.samitiName || "সমিতি"}\nরিসিপ্ট নং: ${receipt.receiptNo}\nতারিখ: ${fmtDate(receipt.date)}\nসদস্য: ${receipt.memberSerial ? `${toBn(receipt.memberSerial)}. ` : ""}${receipt.memberName}\nজমার পরিমাণ: ${formatTk(receipt.amount)}\nমোট সঞ্চয়: ${formatTk(receipt.totalAfter)}`;
+            try {
+              toast.loading("শেয়ার প্রস্তুত হচ্ছে...", { id: "dshare" });
+              const canvas = await renderDepositReceiptCanvas(receipt, data.samitiName || "সমিতি");
+              const blob = await new Promise<Blob | null>((res) => canvas.toBlob(res, "image/jpeg", 0.95));
+              toast.dismiss("dshare");
+              const file = blob ? new File([blob], `জমা-রিসিপ্ট-${receipt.receiptNo}.jpg`, { type: "image/jpeg" }) : null;
+              const nav: any = navigator;
+              if (file && nav.canShare && nav.canShare({ files: [file] }) && nav.share) {
+                try { await nav.share({ title: "জমা রিসিপ্ট", text, files: [file] }); return; } catch (e: any) {
+                  if (e?.name === "AbortError") return;
+                }
+              }
+              if (nav.share) {
+                try { await nav.share({ title: "জমা রিসিপ্ট", text }); return; } catch (e: any) {
+                  if (e?.name === "AbortError") return;
+                }
+              }
+              await navigator.clipboard.writeText(text);
+              toast.success("রিসিপ্টের তথ্য কপি হয়েছে");
+            } catch (e) {
+              console.error(e);
+              try { await navigator.clipboard.writeText(text); toast.success("রিসিপ্টের তথ্য কপি হয়েছে", { id: "dshare" }); }
+              catch { toast.error("শেয়ার ব্যর্থ হয়েছে", { id: "dshare" }); }
+            }
+          }}><Share className="h-4 w-4 mr-1" />শেয়ার</Button>
+          <Button onClick={() => {
+            if (!receipt) return;
+            const html = buildDepositReceiptHtml(receipt, data.samitiName || "সমিতি");
+            const w = window.open("", "_blank", "width=600,height=750");
+            if (!w) return;
+            w.document.write(`<!DOCTYPE html><html><head><meta charset="utf-8"><title>জমা রিসিপ্ট</title><style>${receiptCss}</style></head><body>${html}<script>setTimeout(()=>window.print(),300)</script></body></html>`);
+            w.document.close();
+            w.focus();
+          }}><Printer className="h-4 w-4 mr-1" />প্রিন্ট</Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+    </>
   );
 }
 
@@ -2778,6 +2939,56 @@ async function renderReceiptCanvas(r: { loan: Loan; memberName: string; amount: 
     const doc = iframe.contentDocument!;
     doc.open();
     doc.write(`<!DOCTYPE html><html><head><meta charset="utf-8"><style>${receiptCss}</style></head><body>${buildReceiptHtml(r, samitiName)}</body></html>`);
+    doc.close();
+    await new Promise((res) => setTimeout(res, 60));
+    const target = doc.getElementById("r")!;
+    const canvas = await html2canvas(target, { scale: 2, backgroundColor: "#ffffff", useCORS: true, logging: false, windowWidth: 600, windowHeight: target.scrollHeight + 40 });
+    return canvas;
+  } finally {
+    document.body.removeChild(iframe);
+  }
+}
+
+type DepositReceiptData = {
+  memberName: string;
+  memberSerial?: number;
+  amount: number;
+  date: string;
+  totalAfter: number;
+  receiptNo: string;
+  note?: string;
+  logo?: string;
+};
+
+function buildDepositReceiptHtml(r: DepositReceiptData, samitiName: string) {
+  return `<div class="r" id="r">
+    <div class="header">
+      ${r.logo ? `<img src="${r.logo}" alt="logo" class="logo"/>` : ""}
+      <div class="head-text"><div class="title">${samitiName}</div><div class="sub">সঞ্চয়/চাদা জমা রিসিপ্ট</div></div>
+    </div>
+    <div class="grid">
+      <div><span class="muted">রিসিপ্ট নং:</span> <b>${r.receiptNo}</b></div>
+      <div><span class="muted">তারিখ:</span> <b>${fmtDate(r.date)}</b></div>
+      <div class="full"><span class="muted">সদস্য:</span> <b>${r.memberSerial ? `${toBn(r.memberSerial)}. ` : ""}${r.memberName}</b></div>
+    </div>
+    <div class="row"><span>জমার পরিমাণ</span><span class="amount">${formatTk(r.amount)}</span></div>
+    <div class="totals">
+      <div class="full"><span class="muted">মোট সঞ্চয় (এই জমা সহ):</span> <b>${formatTk(r.totalAfter)}</b></div>
+    </div>
+    ${r.note ? `<div class="note"><span class="muted">নোট:</span> <b>${r.note.replace(/</g, "&lt;")}</b></div>` : ""}
+    <div class="sign"><div>—————————<br/>গ্রহীতা</div><div style="text-align:right">—————————<br/>কোষাধ্যক্ষ</div></div>
+  </div>`;
+}
+
+async function renderDepositReceiptCanvas(r: DepositReceiptData, samitiName: string): Promise<HTMLCanvasElement> {
+  const { default: html2canvas } = await import("html2canvas");
+  const iframe = document.createElement("iframe");
+  iframe.style.cssText = "position:fixed;left:-10000px;top:0;width:600px;height:10px;border:0;";
+  document.body.appendChild(iframe);
+  try {
+    const doc = iframe.contentDocument!;
+    doc.open();
+    doc.write(`<!DOCTYPE html><html><head><meta charset="utf-8"><style>${receiptCss}</style></head><body>${buildDepositReceiptHtml(r, samitiName)}</body></html>`);
     doc.close();
     await new Promise((res) => setTimeout(res, 60));
     const target = doc.getElementById("r")!;
