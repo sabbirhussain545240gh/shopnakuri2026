@@ -1340,7 +1340,7 @@ function LoansTab() {
               <div className="grid grid-cols-2 gap-2">
                 <div><span className="text-muted-foreground">রিসিপ্ট নং:</span> <span className="font-medium">{receipt.receiptNo}</span></div>
                 <div><span className="text-muted-foreground">তারিখ:</span> <span className="font-medium">{fmtDate(receipt.date)}</span></div>
-                <div className="col-span-2"><span className="text-muted-foreground">সদস্য:</span> <span className="font-medium">{receipt.memberName}</span></div>
+                <div className="col-span-2"><span className="text-muted-foreground">সদস্য:</span> <span className="font-medium">{receipt.memberName}{receipt.loanNo ? ` (ঋণ নং ${toBn(receipt.loanNo)})` : ""}</span></div>
                 <div><span className="text-muted-foreground">ঋণ মূল:</span> {formatTk(receipt.loan.amount)}</div>
                 <div><span className="text-muted-foreground">মেয়াদ:</span> {toBn(receipt.loan.durationMonths)} মাস</div>
               </div>
