@@ -2608,7 +2608,7 @@ function buildReceiptHtml(r: { loan: Loan; memberName: string; amount: number; d
     <div class="grid">
       <div><span class="muted">রিসিপ্ট নং:</span> <b>${r.receiptNo}</b></div>
       <div><span class="muted">তারিখ:</span> <b>${fmtDate(r.date)}</b></div>
-      <div class="full"><span class="muted">সদস্য:</span> <b>${r.memberName}</b></div>
+      <div class="full"><span class="muted">সদস্য:</span> <b>${r.memberName}${r.loanNo ? ` (ঋণ নং ${toBn(r.loanNo)})` : ""}</b></div>
       <div><span class="muted">ঋণ মূল:</span> ${formatTk(r.loan.amount)}</div>
       <div><span class="muted">মেয়াদ:</span> ${toBn(r.loan.durationMonths)} মাস</div>
     </div>
