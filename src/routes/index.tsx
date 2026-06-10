@@ -74,6 +74,7 @@ const navItems = [
   { value: "loans", label: "ঋণ", icon: HandCoins },
   { value: "installments", label: "কিস্তি আদায়", icon: Receipt },
   { value: "receipts", label: "রিসিপ্ট ইতিহাস", icon: FileText },
+  { value: "deposits", label: "জমা ইতিহাস", icon: PiggyBank },
   { value: "cashbook", label: "আয়-ব্যয়", icon: Wallet },
   { value: "reports", label: "রিপোর্ট", icon: FileText },
   { value: "settings", label: "সেটিংস", icon: SettingsIcon },
