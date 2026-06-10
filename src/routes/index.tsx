@@ -913,6 +913,7 @@ function SavingsTab() {
   }, [data.deposits, data.members, search]);
 
   return (
+    <>
     <Card>
       <CardHeader className="flex flex-row items-center justify-between gap-2 flex-wrap">
         <div>
