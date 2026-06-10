@@ -112,6 +112,76 @@ function load(): SamitiData {
 let listeners: Array<() => void> = [];
 let state: SamitiData | null = null;
 
+// ---- Cloud sync ----
+let cloudUserId: string | null = null;
+let suppressCloudSave = false;
+let saveTimer: ReturnType<typeof setTimeout> | null = null;
+let cloudStatus: "idle" | "loading" | "saving" | "saved" | "error" = "idle";
+const statusListeners: Array<() => void> = [];
+
+export function getCloudStatus() {
+  return cloudStatus;
+}
+export function subscribeCloudStatus(fn: () => void) {
+  statusListeners.push(fn);
+  return () => {
+    const i = statusListeners.indexOf(fn);
+    if (i >= 0) statusListeners.splice(i, 1);
+  };
+}
+function setCloudStatus(s: typeof cloudStatus) {
+  cloudStatus = s;
+  statusListeners.forEach((f) => f());
+}
+
+async function pushToCloud() {
+  if (!cloudUserId) return;
+  const { supabase } = await import("@/integrations/supabase/client");
+  setCloudStatus("saving");
+  const { error } = await supabase
+    .from("samiti_cloud_data")
+    .upsert({ user_id: cloudUserId, data: getState() as any, updated_at: new Date().toISOString() });
+  setCloudStatus(error ? "error" : "saved");
+}
+
+function scheduleCloudSave() {
+  if (!cloudUserId || suppressCloudSave) return;
+  if (saveTimer) clearTimeout(saveTimer);
+  saveTimer = setTimeout(() => {
+    pushToCloud().catch(() => setCloudStatus("error"));
+  }, 800);
+}
+
+export async function startCloudSync(userId: string) {
+  cloudUserId = userId;
+  setCloudStatus("loading");
+  try {
+    const { supabase } = await import("@/integrations/supabase/client");
+    const { data, error } = await supabase
+      .from("samiti_cloud_data")
+      .select("data")
+      .eq("user_id", userId)
+      .maybeSingle();
+    if (error) throw error;
+    if (data?.data && typeof data.data === "object" && Object.keys(data.data as object).length > 0) {
+      suppressCloudSave = true;
+      setState({ ...empty, ...(data.data as SamitiData) });
+      suppressCloudSave = false;
+      setCloudStatus("saved");
+    } else {
+      await pushToCloud();
+    }
+  } catch {
+    setCloudStatus("error");
+  }
+}
+
+export function stopCloudSync() {
+  cloudUserId = null;
+  if (saveTimer) { clearTimeout(saveTimer); saveTimer = null; }
+  setCloudStatus("idle");
+}
+
 function getState() {
   if (state === null) state = load();
   return state;
@@ -121,6 +191,7 @@ function setState(next: SamitiData) {
   state = next;
   try { localStorage.setItem(KEY, JSON.stringify(next)); } catch {}
   listeners.forEach((l) => l());
+  scheduleCloudSave();
 }
 
 export function useSamiti() {
