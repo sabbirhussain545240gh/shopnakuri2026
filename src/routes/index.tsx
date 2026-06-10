@@ -2123,7 +2123,7 @@ function ReceiptsHistoryTab() {
                 <TableHead>সদস্য</TableHead>
                 <TableHead>নোট</TableHead>
                 <TableHead className="text-right">পরিমাণ</TableHead>
-                <TableHead className="w-24 text-center">কার্যক্রম</TableHead>
+                <TableHead className="w-36 text-center">কার্যক্রম</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -2137,13 +2137,22 @@ function ReceiptsHistoryTab() {
                   <TableCell className="font-medium">{r.memberName} <span className="text-xs text-muted-foreground">(ঋণ নং {toBn(r.loanNo)})</span></TableCell>
                   <TableCell className="text-muted-foreground text-sm">{r.note || "—"}</TableCell>
                   <TableCell className="text-right font-semibold text-success">{formatTk(r.amount)}</TableCell>
-                  <TableCell className="text-center">
-                    <Button variant="ghost" size="icon" title="রিসিপ্ট দেখুন" onClick={() => openReceipt(r)}>
-                      <Receipt className="h-4 w-4 text-primary" />
-                    </Button>
+                  <TableCell>
+                    <div className="flex items-center justify-center gap-1">
+                      <Button variant="ghost" size="icon" title="রিসিপ্ট দেখুন" onClick={() => openReceipt(r)}>
+                        <Receipt className="h-4 w-4 text-primary" />
+                      </Button>
+                      <Button variant="ghost" size="icon" title="সম্পাদনা" onClick={() => { setEditId(r.id); setEditForm({ amount: String(r.amount), date: r.date, note: r.note }); }}>
+                        <Pencil className="h-4 w-4 text-muted-foreground" />
+                      </Button>
+                      <Button variant="ghost" size="icon" title="বাতিল/মুছে ফেলুন" onClick={() => setDeleteId(r.id)}>
+                        <Trash2 className="h-4 w-4 text-destructive" />
+                      </Button>
+                    </div>
                   </TableCell>
                 </TableRow>
               ))}
+
               {rows.length > 0 && (
                 <TableRow>
                   <TableCell colSpan={5} className="text-right font-semibold">মোট</TableCell>
