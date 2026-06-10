@@ -1027,7 +1027,7 @@ function LoansTab() {
   const [editForm, setEditForm] = useState({ memberId: "", amount: "", interestRate: "", durationMonths: "", date: "" });
   const [form, setForm] = useState({ memberId: "", amount: "", interestRate: String(data.settings.defaultInterestRate), durationMonths: String(data.settings.defaultDurationMonths), date: today(), memberGuarantorId: "", familyGuarantorName: "", familyGuarantorRelation: "", familyGuarantorCustomRelation: "", familyGuarantorPhone: "" });
   const [payForm, setPayForm] = useState({ amount: "", date: today(), note: "" });
-  const [receipt, setReceipt] = useState<null | { loan: Loan; memberName: string; amount: number; date: string; paidAfter: number; remainingAfter: number; receiptNo: string; note?: string; logo?: string }>(null);
+  const [receipt, setReceipt] = useState<null | { loan: Loan; memberName: string; amount: number; date: string; paidAfter: number; remainingAfter: number; receiptNo: string; note?: string; logo?: string; loanNo?: number }>(null);
   const [errors, setErrors] = useState<Record<string, string>>({});
 
   const setField = (key: string, value: string) => {
@@ -1087,6 +1087,7 @@ function LoansTab() {
       paidAfter,
       remainingAfter,
       receiptNo: `R-${Date.now().toString().slice(-6)}`,
+      loanNo: data.loans.findIndex((l) => l.id === payFor.id) + 1,
       note: payForm.note.trim() || undefined,
       logo: data.samitiLogo || undefined,
     });
@@ -1339,7 +1340,7 @@ function LoansTab() {
               <div className="grid grid-cols-2 gap-2">
                 <div><span className="text-muted-foreground">রিসিপ্ট নং:</span> <span className="font-medium">{receipt.receiptNo}</span></div>
                 <div><span className="text-muted-foreground">তারিখ:</span> <span className="font-medium">{fmtDate(receipt.date)}</span></div>
-                <div className="col-span-2"><span className="text-muted-foreground">সদস্য:</span> <span className="font-medium">{receipt.memberName}</span></div>
+                <div className="col-span-2"><span className="text-muted-foreground">সদস্য:</span> <span className="font-medium">{receipt.memberName}{receipt.loanNo ? ` (ঋণ নং ${toBn(receipt.loanNo)})` : ""}</span></div>
                 <div><span className="text-muted-foreground">ঋণ মূল:</span> {formatTk(receipt.loan.amount)}</div>
                 <div><span className="text-muted-foreground">মেয়াদ:</span> {toBn(receipt.loan.durationMonths)} মাস</div>
               </div>
@@ -2598,7 +2599,7 @@ const receiptCss = `
   @media print{body{padding:0;} .no-print{display:none;}}
 `;
 
-function buildReceiptHtml(r: { loan: Loan; memberName: string; amount: number; date: string; paidAfter: number; remainingAfter: number; receiptNo: string; note?: string; logo?: string }, samitiName: string) {
+function buildReceiptHtml(r: { loan: Loan; memberName: string; amount: number; date: string; paidAfter: number; remainingAfter: number; receiptNo: string; note?: string; logo?: string; loanNo?: number }, samitiName: string) {
   return `<div class="r" id="r">
     <div class="header">
       ${r.logo ? `<img src="${r.logo}" alt="logo" class="logo"/>` : ""}
@@ -2607,7 +2608,7 @@ function buildReceiptHtml(r: { loan: Loan; memberName: string; amount: number; d
     <div class="grid">
       <div><span class="muted">রিসিপ্ট নং:</span> <b>${r.receiptNo}</b></div>
       <div><span class="muted">তারিখ:</span> <b>${fmtDate(r.date)}</b></div>
-      <div class="full"><span class="muted">সদস্য:</span> <b>${r.memberName}</b></div>
+      <div class="full"><span class="muted">সদস্য:</span> <b>${r.memberName}${r.loanNo ? ` (ঋণ নং ${toBn(r.loanNo)})` : ""}</b></div>
       <div><span class="muted">ঋণ মূল:</span> ${formatTk(r.loan.amount)}</div>
       <div><span class="muted">মেয়াদ:</span> ${toBn(r.loan.durationMonths)} মাস</div>
     </div>
@@ -2621,7 +2622,7 @@ function buildReceiptHtml(r: { loan: Loan; memberName: string; amount: number; d
   </div>`;
 }
 
-async function renderReceiptCanvas(r: { loan: Loan; memberName: string; amount: number; date: string; paidAfter: number; remainingAfter: number; receiptNo: string; note?: string; logo?: string }, samitiName: string): Promise<HTMLCanvasElement> {
+async function renderReceiptCanvas(r: { loan: Loan; memberName: string; amount: number; date: string; paidAfter: number; remainingAfter: number; receiptNo: string; note?: string; logo?: string; loanNo?: number }, samitiName: string): Promise<HTMLCanvasElement> {
   const { default: html2canvas } = await import("html2canvas");
   const iframe = document.createElement("iframe");
   iframe.style.cssText = "position:fixed;left:-10000px;top:0;width:600px;height:10px;border:0;";
