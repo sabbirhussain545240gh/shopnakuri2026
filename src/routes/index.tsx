@@ -287,10 +287,11 @@ function Dashboard({ totals, memberCount, data }: any) {
               </div>
             )}
             <div className="min-w-0">
-              <p className="text-[10px] sm:text-xs uppercase tracking-widest text-primary-foreground/70 font-medium truncate">সমিতি ম্যানেজমেন্ট ড্যাশবোর্ড</p>
-              <h1 className="text-xl sm:text-2xl md:text-3xl font-bold mt-1 truncate">{data.samitiName || "আমাদের সমিতি"}</h1>
-              {data.samitiAddress && <p className="text-xs sm:text-sm text-primary-foreground/80 mt-1 truncate">📍 {data.samitiAddress}</p>}
-              <div className="flex flex-wrap items-center gap-x-3 gap-y-1 mt-2 text-[11px] sm:text-xs text-primary-foreground/80">
+              <p className="text-[10px] sm:text-xs uppercase tracking-[0.18em] text-primary-foreground/60 font-medium truncate">সমিতি ম্যানেজমেন্ট ড্যাশবোর্ড</p>
+              <h1 className="font-display text-2xl sm:text-3xl md:text-4xl font-bold mt-1.5 truncate leading-tight drop-shadow-sm">{data.samitiName || "আমাদের সমিতি"}</h1>
+              <div className="mt-2 h-px w-16 sm:w-20 bg-gradient-to-r from-white/50 to-transparent rounded-full" />
+              {data.samitiAddress && <p className="text-xs sm:text-sm text-primary-foreground/80 mt-2 truncate">📍 {data.samitiAddress}</p>}
+              <div className="flex flex-wrap items-center gap-x-3 gap-y-1 mt-2 text-[11px] sm:text-xs text-primary-foreground/70">
                 {data.establishedDate && <span className="truncate">প্রতিষ্ঠিত: {fmtDate(data.establishedDate)}</span>}
                 <span className="truncate">আজ: {fmtDate(todayStr)}</span>
               </div>
