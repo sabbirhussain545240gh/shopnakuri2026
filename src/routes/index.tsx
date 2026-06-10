@@ -1087,6 +1087,7 @@ function LoansTab() {
       paidAfter,
       remainingAfter,
       receiptNo: `R-${Date.now().toString().slice(-6)}`,
+      loanNo: data.loans.findIndex((l) => l.id === payFor.id) + 1,
       note: payForm.note.trim() || undefined,
       logo: data.samitiLogo || undefined,
     });
