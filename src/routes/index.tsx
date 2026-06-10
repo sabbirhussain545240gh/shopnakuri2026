@@ -311,34 +311,25 @@ function Dashboard({ totals, memberCount, data }: any) {
         </CardContent>
       </Card>
 
-      {/* Settings summary — mirrors values from Settings tab */}
-      <Card className="border-dashed bg-secondary/40 animate-in fade-in slide-in-from-top-2 duration-500" style={{ animationDelay: "80ms", animationFillMode: "both" }}>
-        <CardContent className="p-3 sm:p-4">
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-sm">
-            <div className="flex items-center gap-2 min-w-0">
-              <div className="h-8 w-8 rounded-lg bg-primary/15 grid place-items-center shrink-0">
-                <SettingsIcon className="h-4 w-4 text-primary" />
+      {/* Notice marquee */}
+      <Card className="border-l-4 border-l-primary bg-secondary/40 overflow-hidden animate-in fade-in slide-in-from-top-2 duration-500" style={{ animationDelay: "80ms", animationFillMode: "both" }}>
+        <CardContent className="p-0">
+          <div className="flex items-stretch">
+            <div className="shrink-0 bg-primary text-primary-foreground px-3 sm:px-4 flex items-center gap-2 text-xs sm:text-sm font-semibold">
+              <AlertTriangle className="h-4 w-4" />
+              <span>নোটিশ</span>
+            </div>
+            <div className="relative flex-1 overflow-hidden py-2.5">
+              <div className="whitespace-nowrap animate-marquee text-sm sm:text-base text-foreground/90">
+                {(data.settings as any).notice?.trim()
+                  ? (data.settings as any).notice
+                  : `স্বাগতম ${data.samitiName || "আমাদের সমিতি"} ম্যানেজমেন্ট সিস্টেমে — নিয়মিত সঞ্চয় জমা দিন • ঋণের কিস্তি সময়মতো পরিশোধ করুন • যেকোনো জিজ্ঞাসায় কমিটির সাথে যোগাযোগ করুন • ধন্যবাদ।`}
               </div>
-              <div className="min-w-0">
-                <p className="text-[11px] text-muted-foreground leading-tight">সেটিংস</p>
-                <p className="font-semibold text-foreground truncate">কনফিগারেশন</p>
-              </div>
-            </div>
-            <div className="min-w-0">
-              <p className="text-[11px] text-muted-foreground leading-tight">ডিফল্ট সুদ হার</p>
-              <p className="font-bold text-foreground tabular-nums truncate">{toBn(data.settings.defaultInterestRate)}%</p>
-            </div>
-            <div className="min-w-0">
-              <p className="text-[11px] text-muted-foreground leading-tight">ডিফল্ট মেয়াদ</p>
-              <p className="font-bold text-foreground tabular-nums truncate">{toBn(data.settings.defaultDurationMonths)} মাস</p>
-            </div>
-            <div className="min-w-0">
-              <p className="text-[11px] text-muted-foreground leading-tight">মোট সদস্য</p>
-              <p className="font-bold text-foreground tabular-nums truncate">{toBn(memberCount)} জন</p>
             </div>
           </div>
         </CardContent>
       </Card>
+
 
       {/* Overview */}
       <div>
