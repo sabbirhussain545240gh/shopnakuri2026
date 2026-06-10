@@ -118,6 +118,8 @@ let suppressCloudSave = false;
 let saveTimer: ReturnType<typeof setTimeout> | null = null;
 let cloudStatus: "idle" | "loading" | "saving" | "saved" | "error" = "idle";
 const statusListeners: Array<() => void> = [];
+let initialLoadPromise: Promise<void> | null = null;
+let initialLoadResolve: (() => void) | null = null;
 
 export function getCloudStatus() {
   return cloudStatus;
@@ -132,6 +134,11 @@ export function subscribeCloudStatus(fn: () => void) {
 function setCloudStatus(s: typeof cloudStatus) {
   cloudStatus = s;
   statusListeners.forEach((f) => f());
+}
+
+/** Resolves when the first cloud fetch after sign-in finishes (success or error). */
+export function awaitInitialCloudLoad(): Promise<void> {
+  return initialLoadPromise ?? Promise.resolve();
 }
 
 async function pushToCloud() {
@@ -156,6 +163,16 @@ export async function startCloudSync(userId: string) {
   if (cloudUserId === userId) return;
   cloudUserId = userId;
   setCloudStatus("loading");
+  // Create a fresh promise so callers can gate UI on initial cloud fetch
+  initialLoadPromise = new Promise<void>((resolve) => {
+    initialLoadResolve = resolve;
+  });
+  const finishInitial = () => {
+    if (initialLoadResolve) {
+      initialLoadResolve();
+      initialLoadResolve = null;
+    }
+  };
   try {
     const { supabase } = await import("@/integrations/supabase/client");
     const { data, error } = await supabase
@@ -166,6 +183,7 @@ export async function startCloudSync(userId: string) {
     if (error) throw error;
     if (data?.data && typeof data.data === "object" && Object.keys(data.data as object).length > 0) {
       suppressCloudSave = true;
+      // setState also writes to localStorage so the cache is fresh for next load
       setState({ ...empty, ...(data.data as SamitiData) });
       suppressCloudSave = false;
       setCloudStatus("saved");
@@ -174,12 +192,16 @@ export async function startCloudSync(userId: string) {
     }
   } catch {
     setCloudStatus("error");
+  } finally {
+    finishInitial();
   }
 }
 
 export function stopCloudSync() {
   cloudUserId = null;
   if (saveTimer) { clearTimeout(saveTimer); saveTimer = null; }
+  if (initialLoadResolve) { initialLoadResolve(); initialLoadResolve = null; }
+  initialLoadPromise = null;
   setCloudStatus("idle");
 }
 
