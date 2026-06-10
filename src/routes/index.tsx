@@ -186,6 +186,7 @@ function SamitiApp() {
           {tab === "savings" && <SavingsTab />}
           {tab === "loans" && <LoansTab />}
           {tab === "installments" && <InstallmentsTab />}
+          {tab === "receipts" && <ReceiptsHistoryTab />}
           {tab === "cashbook" && <CashbookTab />}
           {tab === "reports" && <ReportsTab />}
           {tab === "settings" && <SettingsTab />}
