@@ -53,6 +53,13 @@ const fmtDate = (s: string) => {
   const dd = String(d).padStart(2, "0");
   return `${dd} ${enMonths[+m - 1] || m} ${y}`;
 };
+const bnMonths = ["জানুয়ারি","ফেব্রুয়ারি","মার্চ","এপ্রিল","মে","জুন","জুলাই","আগস্ট","সেপ্টেম্বর","অক্টোবর","নভেম্বর","ডিসেম্বর"];
+const toBnDigits = (s: string | number) => String(s).replace(/[0-9]/g, (d) => "০১২৩৪৫৬৭৮৯"[+d]);
+const fmtMonthYearBn = (s: string) => {
+  if (!s) return "";
+  const [y, m] = s.split("-");
+  return `${bnMonths[+m - 1] || m} ${toBnDigits(y)}`;
+};
 const addMonths = (s: string, n: number) => {
   if (!s) return "";
   const [y, m, d] = s.split("-").map(Number);
