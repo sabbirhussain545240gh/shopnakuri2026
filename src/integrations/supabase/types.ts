@@ -44,6 +44,24 @@ export type Database = {
         }
         Relationships: []
       }
+      samiti_cloud_data: {
+        Row: {
+          data: Json
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          data?: Json
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          data?: Json
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       user_roles: {
         Row: {
           created_at: string

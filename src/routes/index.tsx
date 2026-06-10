@@ -18,6 +18,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Textarea } from "@/components/ui/textarea";
 import { Users, PiggyBank, HandCoins, LayoutDashboard, Trash2, Plus, CheckCircle2, Pencil, Settings as SettingsIcon, Wallet, Download, Upload, AlertTriangle, TrendingUp, TrendingDown, Menu, Printer, FileText, Receipt, Search, Eye, Share, ImageDown } from "lucide-react";
 import { toast, Toaster } from "sonner";
+import { AuthGate, SignOutButton, CloudStatusBadge } from "@/components/AuthGate";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -28,8 +29,16 @@ export const Route = createFileRoute("/")({
       { property: "og:description", content: "সদস্য, সঞ্চয়/চাদা ও ঋণ ব্যবস্থাপনার জন্য সম্পূর্ণ বাংলা সফটওয়্যার।" },
     ],
   }),
-  component: SamitiApp,
+  component: GatedApp,
 });
+
+function GatedApp() {
+  return (
+    <AuthGate>
+      {() => <SamitiApp />}
+    </AuthGate>
+  );
+}
 
 
 
@@ -121,8 +130,9 @@ function SamitiApp() {
             );
           })}
         </nav>
-        <div className="p-3 border-t">
-          <p className="text-xs text-muted-foreground text-center">তথ্য ক্লাউডে সংরক্ষিত</p>
+        <div className="p-3 border-t space-y-2">
+          <div className="flex items-center justify-center"><CloudStatusBadge /></div>
+          <SignOutButton />
         </div>
 
       </aside>
@@ -138,6 +148,7 @@ function SamitiApp() {
             <h1 className="font-bold text-foreground truncate">{data.samitiName}</h1>
           </div>
           <div className="flex items-center gap-2">
+            <CloudStatusBadge />
             <Button variant="ghost" size="icon" onClick={() => setMobileOpen((o) => !o)}>
               <Menu className="h-5 w-5" />
             </Button>

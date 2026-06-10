@@ -5,8 +5,9 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { LogOut, Loader2 } from "lucide-react";
+import { LogOut, Loader2, Cloud, CloudOff, CheckCircle2, AlertCircle } from "lucide-react";
 import { toast } from "sonner";
+import { startCloudSync, stopCloudSync, subscribeCloudStatus, getCloudStatus } from "@/lib/samiti-store";
 
 const ALLOWED_EMAIL = "sabbirhussain545240@gmail.com";
 
@@ -18,15 +19,22 @@ export function AuthGate({ children }: { children: (session: Session) => ReactNo
   const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
-    const { data: sub } = supabase.auth.onAuthStateChange((_event, sess) => {
+    const { data: sub } = supabase.auth.onAuthStateChange((event, sess) => {
       const ok = sess?.user?.email?.toLowerCase() === ALLOWED_EMAIL;
       if (sess && !ok) {
         supabase.auth.signOut();
         setSession(null);
+        stopCloudSync();
         toast.error("এই অ্যাকাউন্টের অ্যাক্সেস নেই");
         return;
       }
       setSession(sess);
+      if (sess && ok && (event === "SIGNED_IN" || event === "INITIAL_SESSION")) {
+        startCloudSync(sess.user.id);
+      }
+      if (event === "SIGNED_OUT") {
+        stopCloudSync();
+      }
     });
     supabase.auth.getSession().then(({ data }) => {
       const sess = data.session;
@@ -36,6 +44,7 @@ export function AuthGate({ children }: { children: (session: Session) => ReactNo
         setSession(null);
       } else {
         setSession(sess);
+        if (sess && ok) startCloudSync(sess.user.id);
       }
       setLoading(false);
     });
@@ -204,5 +213,25 @@ export function SignOutButton() {
       <LogOut className="mr-2 h-4 w-4" />
       লগআউট
     </Button>
+  );
+}
+
+export function CloudStatusBadge() {
+  const [status, setStatus] = useState(getCloudStatus());
+  useEffect(() => subscribeCloudStatus(() => setStatus(getCloudStatus())), []);
+  const map = {
+    idle: { icon: CloudOff, text: "অফলাইন", cls: "text-muted-foreground" },
+    loading: { icon: Loader2, text: "লোড হচ্ছে...", cls: "text-muted-foreground animate-spin" },
+    saving: { icon: Loader2, text: "সেভ হচ্ছে...", cls: "text-blue-600 animate-spin" },
+    saved: { icon: CheckCircle2, text: "ক্লাউডে সেভ", cls: "text-green-600" },
+    error: { icon: AlertCircle, text: "সেভ ব্যর্থ", cls: "text-destructive" },
+  } as const;
+  const it = map[status];
+  const Icon = it.icon;
+  return (
+    <span className="inline-flex items-center gap-1.5 text-xs font-medium">
+      <Icon className={`h-3.5 w-3.5 ${it.cls}`} />
+      <span className={it.cls.replace("animate-spin", "")}>{it.text}</span>
+    </span>
   );
 }
