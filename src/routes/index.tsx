@@ -1607,16 +1607,55 @@ function InstallmentsTab() {
             <CardDescription>মোট {toBn(allPayments.length)}টি কিস্তি</CardDescription>
           </div>
           <div className="flex gap-2 items-center flex-wrap">
-            <Select value={filterLoan} onValueChange={setFilterLoan}>
-              <SelectTrigger className="w-56"><SelectValue placeholder="ঋণি নির্বাচন" /></SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">সকল ঋণি</SelectItem>
-                {data.loans.map((l, idx) => {
-                  const m = data.members.find((x) => x.id === l.memberId);
-                  return <SelectItem key={l.id} value={l.id}>ঋণ নং {toBn(idx + 1)} — {m?.name ?? "—"}{l.status === "closed" ? " (পরিশোধিত)" : ""}</SelectItem>;
-                })}
-              </SelectContent>
-            </Select>
+            <Popover open={loanOpen} onOpenChange={setLoanOpen}>
+              <PopoverTrigger asChild>
+                <Button variant="outline" role="combobox" aria-expanded={loanOpen} className="w-56 justify-between">
+                  <span className="truncate">
+                    {filterLoan === "all"
+                      ? "সকল ঋণি"
+                      : (() => {
+                          const l = data.loans.find((x) => x.id === filterLoan);
+                          if (!l) return "ঋণি নির্বাচন";
+                          const idx = data.loans.findIndex((x) => x.id === l.id);
+                          const m = data.members.find((x) => x.id === l.memberId);
+                          return `ঋণ নং ${toBn(idx + 1)} — ${m?.name ?? "—"}${l.status === "closed" ? " (পরিশোধিত)" : ""}`;
+                        })()}
+                  </span>
+                  <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-56 p-0">
+                <Command>
+                  <CommandInput placeholder="ঋণ নং বা নাম খুঁজুন..." />
+                  <CommandList>
+                    <CommandEmpty>কোনো ঋণ পাওয়া যায়নি</CommandEmpty>
+                    <CommandGroup>
+                      <CommandItem
+                        value="all"
+                        onSelect={() => { setFilterLoan("all"); setLoanOpen(false); }}
+                      >
+                        <Check className={cn("mr-2 h-4 w-4", filterLoan === "all" ? "opacity-100" : "opacity-0")} />
+                        সকল ঋণি
+                      </CommandItem>
+                      {data.loans.map((l, idx) => {
+                        const m = data.members.find((x) => x.id === l.memberId);
+                        const label = `ঋণ নং ${toBn(idx + 1)} — ${m?.name ?? "—"}${l.status === "closed" ? " (পরিশোধিত)" : ""}`;
+                        return (
+                          <CommandItem
+                            key={l.id}
+                            value={label}
+                            onSelect={() => { setFilterLoan(l.id); setLoanOpen(false); }}
+                          >
+                            <Check className={cn("mr-2 h-4 w-4", filterLoan === l.id ? "opacity-100" : "opacity-0")} />
+                            {label}
+                          </CommandItem>
+                        );
+                      })}
+                    </CommandGroup>
+                  </CommandList>
+                </Command>
+              </PopoverContent>
+            </Popover>
             <Select value={filterMember} onValueChange={setFilterMember}>
               <SelectTrigger className="w-44"><SelectValue placeholder="সদস্য ফিল্টার" /></SelectTrigger>
               <SelectContent>
