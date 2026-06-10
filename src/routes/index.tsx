@@ -273,56 +273,69 @@ function Dashboard({ totals, memberCount, data }: any) {
       <Card className="overflow-hidden border-0 bg-gradient-to-br from-primary via-primary to-primary/80 text-primary-foreground shadow-xl animate-in fade-in slide-in-from-top-2 duration-500 relative">
         <div className="absolute -top-16 -right-16 h-48 w-48 rounded-full bg-white/10 blur-3xl pointer-events-none" />
         <div className="absolute -bottom-20 -left-10 h-56 w-56 rounded-full bg-white/5 blur-3xl pointer-events-none" />
-        <CardContent className="p-6 md:p-8 relative">
-          <div className="flex flex-col md:flex-row md:items-center gap-4 md:gap-6">
+        <CardContent className="p-5 sm:p-6 md:p-8 relative">
+          <div className="grid grid-cols-[auto_minmax(0,1fr)] items-center gap-4 md:grid-cols-[auto_minmax(0,1fr)_auto] md:gap-6">
             {data.samitiLogo ? (
-              <img src={data.samitiLogo} alt="logo" className="h-16 w-16 md:h-20 md:w-20 rounded-2xl object-cover ring-2 ring-white/30 bg-white shrink-0 shadow-md transition-transform duration-500 hover:scale-105" />
+              <img
+                src={data.samitiLogo}
+                alt="logo"
+                className="h-14 w-14 sm:h-16 sm:w-16 md:h-20 md:w-20 rounded-2xl object-cover ring-2 ring-white/30 bg-white shrink-0 shadow-md transition-transform duration-500 hover:scale-105"
+              />
             ) : (
-              <div className="h-16 w-16 md:h-20 md:w-20 rounded-2xl bg-white/15 ring-2 ring-white/30 flex items-center justify-center font-display font-bold text-3xl shrink-0">স</div>
+              <div className="h-14 w-14 sm:h-16 sm:w-16 md:h-20 md:w-20 rounded-2xl bg-white/15 ring-2 ring-white/30 grid place-items-center font-display font-bold text-2xl sm:text-3xl shrink-0">
+                স
+              </div>
             )}
-            <div className="flex-1 min-w-0">
-              <p className="text-xs uppercase tracking-widest text-primary-foreground/70 font-medium">সমিতি ম্যানেজমেন্ট ড্যাশবোর্ড</p>
-              <h1 className="text-2xl md:text-3xl font-bold mt-1 truncate">{data.samitiName || "আমাদের সমিতি"}</h1>
-              {data.samitiAddress && <p className="text-sm text-primary-foreground/80 mt-1 truncate">📍 {data.samitiAddress}</p>}
-              <div className="flex flex-wrap items-center gap-x-4 gap-y-1 mt-2 text-xs text-primary-foreground/80">
-                {data.establishedDate && <span>প্রতিষ্ঠিত: {fmtDate(data.establishedDate)}</span>}
-                <span>আজ: {fmtDate(todayStr)}</span>
+            <div className="min-w-0">
+              <p className="text-[10px] sm:text-xs uppercase tracking-widest text-primary-foreground/70 font-medium truncate">সমিতি ম্যানেজমেন্ট ড্যাশবোর্ড</p>
+              <h1 className="text-xl sm:text-2xl md:text-3xl font-bold mt-1 truncate">{data.samitiName || "আমাদের সমিতি"}</h1>
+              {data.samitiAddress && <p className="text-xs sm:text-sm text-primary-foreground/80 mt-1 truncate">📍 {data.samitiAddress}</p>}
+              <div className="flex flex-wrap items-center gap-x-3 gap-y-1 mt-2 text-[11px] sm:text-xs text-primary-foreground/80">
+                {data.establishedDate && <span className="truncate">প্রতিষ্ঠিত: {fmtDate(data.establishedDate)}</span>}
+                <span className="truncate">আজ: {fmtDate(todayStr)}</span>
               </div>
             </div>
-            <div className="md:text-right border-t md:border-t-0 md:border-l border-white/20 pt-3 md:pt-0 md:pl-6">
-              <p className="text-xs uppercase tracking-widest text-primary-foreground/70 font-medium">তহবিলে নগদ</p>
-              <p className="text-3xl md:text-4xl font-bold tracking-tight mt-1 tabular-nums">{formatTk(netSurplus)}</p>
+            <div className="col-span-2 md:col-span-1 md:text-right border-t md:border-t-0 md:border-l border-white/20 pt-3 md:pt-0 md:pl-6">
+              <p className="text-[10px] sm:text-xs uppercase tracking-widest text-primary-foreground/70 font-medium">তহবিলে নগদ</p>
+              <p className="text-2xl sm:text-3xl md:text-4xl font-bold tracking-tight mt-1 tabular-nums">{formatTk(netSurplus)}</p>
             </div>
           </div>
         </CardContent>
       </Card>
 
-      {/* Settings summary */}
+      {/* Settings summary — mirrors values from Settings tab */}
       <Card className="border-dashed bg-secondary/40 animate-in fade-in slide-in-from-top-2 duration-500" style={{ animationDelay: "80ms", animationFillMode: "both" }}>
-        <CardContent className="p-4 flex flex-wrap items-center gap-x-6 gap-y-2 text-sm">
-          <div className="flex items-center gap-2">
-            <SettingsIcon className="h-4 w-4 text-primary" />
-            <span className="font-semibold text-foreground">সেটিংস:</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <span className="text-muted-foreground">ডিফল্ট সুদ হার:</span>
-            <span className="font-bold text-foreground tabular-nums">{toBn(data.settings.defaultInterestRate)}%</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <span className="text-muted-foreground">ডিফল্ট মেয়াদ:</span>
-            <span className="font-bold text-foreground tabular-nums">{toBn(data.settings.defaultDurationMonths)} মাস</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <span className="text-muted-foreground">মোট সদস্য:</span>
-            <span className="font-bold text-foreground tabular-nums">{toBn(memberCount)} জন</span>
+        <CardContent className="p-3 sm:p-4">
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-sm">
+            <div className="flex items-center gap-2 min-w-0">
+              <div className="h-8 w-8 rounded-lg bg-primary/15 grid place-items-center shrink-0">
+                <SettingsIcon className="h-4 w-4 text-primary" />
+              </div>
+              <div className="min-w-0">
+                <p className="text-[11px] text-muted-foreground leading-tight">সেটিংস</p>
+                <p className="font-semibold text-foreground truncate">কনফিগারেশন</p>
+              </div>
+            </div>
+            <div className="min-w-0">
+              <p className="text-[11px] text-muted-foreground leading-tight">ডিফল্ট সুদ হার</p>
+              <p className="font-bold text-foreground tabular-nums truncate">{toBn(data.settings.defaultInterestRate)}%</p>
+            </div>
+            <div className="min-w-0">
+              <p className="text-[11px] text-muted-foreground leading-tight">ডিফল্ট মেয়াদ</p>
+              <p className="font-bold text-foreground tabular-nums truncate">{toBn(data.settings.defaultDurationMonths)} মাস</p>
+            </div>
+            <div className="min-w-0">
+              <p className="text-[11px] text-muted-foreground leading-tight">মোট সদস্য</p>
+              <p className="font-bold text-foreground tabular-nums truncate">{toBn(memberCount)} জন</p>
+            </div>
           </div>
         </CardContent>
       </Card>
 
       {/* Overview */}
       <div>
-        <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide mb-3">সংক্ষিপ্ত পরিসংখ্যান</h2>
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <h2 className="text-xs sm:text-sm font-semibold text-muted-foreground uppercase tracking-wide mb-3">সংক্ষিপ্ত পরিসংখ্যান</h2>
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
           <StatCard delay={100} label="মোট সদস্য" value={toBn(memberCount)} accent="bg-chart-4" icon={Users} hint="নিবন্ধিত সদস্য" />
           <StatCard delay={160} label="মোট সঞ্চয়/চাদা" value={formatTk(totals.totalDeposit)} accent="bg-success" icon={PiggyBank} hint={`${toBn(data.deposits.length)}টি জমা`} />
           <StatCard delay={220} label="বকেয়া ঋণ" value={formatTk(totals.outstanding)} accent="bg-destructive" icon={AlertTriangle} hint={`${toBn(activeLoanCount)}টি চলমান ঋণ`} />
@@ -332,14 +345,15 @@ function Dashboard({ totals, memberCount, data }: any) {
 
       {/* Loans */}
       <div>
-        <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide mb-3">ঋণ কার্যক্রম</h2>
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <h2 className="text-xs sm:text-sm font-semibold text-muted-foreground uppercase tracking-wide mb-3">ঋণ কার্যক্রম</h2>
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
           <StatCard delay={340} label="মোট ঋণ প্রদান" value={formatTk(totals.totalLoanGiven)} accent="bg-warning" icon={HandCoins} />
           <StatCard delay={400} label="মোট ঋণ আদায়" value={formatTk(totals.totalRepaid)} accent="bg-chart-2" icon={Receipt} hint={`${toBn(data.payments.length)}টি কিস্তি`} />
           <StatCard delay={460} label="অন্যান্য আয়" value={formatTk(totals.totalIncome)} accent="bg-success" icon={TrendingUp} />
           <StatCard delay={520} label="অন্যান্য ব্যয়" value={formatTk(totals.totalExpense)} accent="bg-destructive" icon={TrendingDown} />
         </div>
       </div>
+
 
 
       {/* Recent activity */}
