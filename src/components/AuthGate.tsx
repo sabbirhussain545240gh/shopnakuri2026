@@ -7,18 +7,24 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { LogOut, Loader2, Cloud, CloudOff, CheckCircle2, AlertCircle } from "lucide-react";
 import { toast } from "sonner";
-import { startCloudSync, stopCloudSync, subscribeCloudStatus, getCloudStatus } from "@/lib/samiti-store";
+import { startCloudSync, stopCloudSync, subscribeCloudStatus, getCloudStatus, awaitInitialCloudLoad } from "@/lib/samiti-store";
 
 const ALLOWED_EMAIL = "sabbirhussain545240@gmail.com";
 
 export function AuthGate({ children }: { children: (session: Session) => ReactNode }) {
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
+  const [hydrating, setHydrating] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
+    const beginSync = async (userId: string) => {
+      setHydrating(true);
+      startCloudSync(userId);
+      try { await awaitInitialCloudLoad(); } finally { setHydrating(false); }
+    };
     const { data: sub } = supabase.auth.onAuthStateChange((event, sess) => {
       const ok = sess?.user?.email?.toLowerCase() === ALLOWED_EMAIL;
       if (sess && !ok) {
@@ -30,7 +36,7 @@ export function AuthGate({ children }: { children: (session: Session) => ReactNo
       }
       setSession(sess);
       if (sess && ok && (event === "SIGNED_IN" || event === "INITIAL_SESSION")) {
-        startCloudSync(sess.user.id);
+        beginSync(sess.user.id);
       }
       if (event === "SIGNED_OUT") {
         stopCloudSync();
@@ -44,7 +50,7 @@ export function AuthGate({ children }: { children: (session: Session) => ReactNo
         setSession(null);
       } else {
         setSession(sess);
-        if (sess && ok) startCloudSync(sess.user.id);
+        if (sess && ok) beginSync(sess.user.id);
       }
       setLoading(false);
     });
@@ -118,10 +124,13 @@ export function AuthGate({ children }: { children: (session: Session) => ReactNo
     }
   };
 
-  if (loading) {
+  if (loading || (session && hydrating)) {
     return (
-      <div className="flex min-h-screen items-center justify-center">
+      <div className="flex min-h-screen flex-col items-center justify-center gap-3">
         <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+        {hydrating && (
+          <p className="text-sm text-muted-foreground">ক্লাউড থেকে ডেটা লোড হচ্ছে...</p>
+        )}
       </div>
     );
   }
