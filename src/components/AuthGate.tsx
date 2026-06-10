@@ -42,13 +42,39 @@ export function AuthGate({ children }: { children: (session: Session) => ReactNo
     return () => sub.subscription.unsubscribe();
   }, []);
 
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  const [emailError, setEmailError] = useState<string | null>(null);
+  const [passwordError, setPasswordError] = useState<string | null>(null);
+
+  const validate = () => {
+    let ok = true;
+    const trimmed = email.trim();
+    if (!trimmed) {
+      setEmailError("ইমেইল লিখুন");
+      ok = false;
+    } else if (!emailRegex.test(trimmed)) {
+      setEmailError("সঠিক ইমেইল ঠিকানা দিন (যেমন: name@example.com)");
+      ok = false;
+    } else {
+      setEmailError(null);
+    }
+    if (!password) {
+      setPasswordError("পাসওয়ার্ড লিখুন");
+      ok = false;
+    } else if (password.length < 6) {
+      setPasswordError("পাসওয়ার্ড কমপক্ষে ৬ অক্ষরের হতে হবে");
+      ok = false;
+    } else {
+      setPasswordError(null);
+    }
+    return ok;
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!email.trim() || !password) {
-      toast.error("ইমেইল ও পাসওয়ার্ড দিন");
-      return;
-    }
+    if (!validate()) return;
     if (email.trim().toLowerCase() !== ALLOWED_EMAIL) {
+      setEmailError("এই ইমেইলের অ্যাক্সেস নেই");
       toast.error("এই অ্যাকাউন্টের অ্যাক্সেস নেই");
       return;
     }
@@ -58,7 +84,23 @@ export function AuthGate({ children }: { children: (session: Session) => ReactNo
         email: email.trim(),
         password,
       });
-      if (error) throw error;
+      if (error) {
+        const msg = (error.message || "").toLowerCase();
+        if (msg.includes("invalid login") || msg.includes("invalid credentials") || msg.includes("invalid email or password")) {
+          setPasswordError("ইমেইল অথবা পাসওয়ার্ড ভুল");
+          toast.error("ইমেইল অথবা পাসওয়ার্ড ভুল");
+        } else if (msg.includes("email not confirmed")) {
+          setEmailError("ইমেইল এখনো নিশ্চিত করা হয়নি");
+          toast.error("ইমেইল এখনো নিশ্চিত করা হয়নি");
+        } else if (msg.includes("rate") || msg.includes("too many")) {
+          toast.error("অনেক বেশি চেষ্টা হয়েছে, কিছুক্ষণ পরে আবার চেষ্টা করুন");
+        } else if (msg.includes("network") || msg.includes("fetch")) {
+          toast.error("নেটওয়ার্ক সমস্যা, ইন্টারনেট সংযোগ পরীক্ষা করুন");
+        } else {
+          toast.error(error.message);
+        }
+        return;
+      }
       toast.success("সফলভাবে লগইন হয়েছে");
     } catch (err: any) {
       toast.error(err?.message ?? "ত্রুটি ঘটেছে");
@@ -92,10 +134,24 @@ export function AuthGate({ children }: { children: (session: Session) => ReactNo
                   type="email"
                   autoComplete="email"
                   value={email}
-                  onChange={(e) => setEmail(e.target.value)}
+                  onChange={(e) => {
+                    setEmail(e.target.value);
+                    if (emailError) setEmailError(null);
+                  }}
+                  onBlur={() => {
+                    const trimmed = email.trim();
+                    if (trimmed && !emailRegex.test(trimmed)) {
+                      setEmailError("সঠিক ইমেইল ঠিকানা দিন (যেমন: name@example.com)");
+                    }
+                  }}
                   placeholder="you@example.com"
+                  aria-invalid={!!emailError}
+                  aria-describedby={emailError ? "email-error" : undefined}
                   required
                 />
+                {emailError && (
+                  <p id="email-error" className="text-sm text-destructive">{emailError}</p>
+                )}
               </div>
               <div className="space-y-2">
                 <Label htmlFor="password">পাসওয়ার্ড</Label>
@@ -104,11 +160,19 @@ export function AuthGate({ children }: { children: (session: Session) => ReactNo
                   type="password"
                   autoComplete="current-password"
                   value={password}
-                  onChange={(e) => setPassword(e.target.value)}
+                  onChange={(e) => {
+                    setPassword(e.target.value);
+                    if (passwordError) setPasswordError(null);
+                  }}
                   placeholder="••••••••"
                   minLength={6}
+                  aria-invalid={!!passwordError}
+                  aria-describedby={passwordError ? "password-error" : undefined}
                   required
                 />
+                {passwordError && (
+                  <p id="password-error" className="text-sm text-destructive">{passwordError}</p>
+                )}
               </div>
               <Button type="submit" className="w-full" disabled={submitting}>
                 {submitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
