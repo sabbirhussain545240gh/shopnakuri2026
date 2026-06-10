@@ -343,7 +343,7 @@ function Dashboard({ totals, memberCount, data }: any) {
 
 
       {/* Recent activity */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 animate-in fade-in slide-in-from-bottom-2 duration-500" style={{ animationDelay: "580ms", animationFillMode: "both" }}>
         <Card>
           <CardHeader className="flex flex-row items-center justify-between">
             <div>
