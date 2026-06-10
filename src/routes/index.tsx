@@ -2036,9 +2036,13 @@ function InstallmentsTab() {
 }
 
 function ReceiptsHistoryTab() {
-  const { data } = useSamiti();
+  const { data, updatePayment, deletePayment } = useSamiti();
   const [q, setQ] = useState("");
   const [receipt, setReceipt] = useState<null | { loan: Loan; memberName: string; amount: number; date: string; paidAfter: number; remainingAfter: number; receiptNo: string; note?: string; logo?: string; loanNo?: number }>(null);
+  const [editId, setEditId] = useState<string | null>(null);
+  const [editForm, setEditForm] = useState({ amount: "", date: today(), note: "" });
+  const [deleteId, setDeleteId] = useState<string | null>(null);
+
 
   const rows = useMemo(() => {
     const memberById = new Map(data.members.map((m) => [m.id, m]));
@@ -2119,7 +2123,7 @@ function ReceiptsHistoryTab() {
                 <TableHead>সদস্য</TableHead>
                 <TableHead>নোট</TableHead>
                 <TableHead className="text-right">পরিমাণ</TableHead>
-                <TableHead className="w-24 text-center">কার্যক্রম</TableHead>
+                <TableHead className="w-36 text-center">কার্যক্রম</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -2133,13 +2137,22 @@ function ReceiptsHistoryTab() {
                   <TableCell className="font-medium">{r.memberName} <span className="text-xs text-muted-foreground">(ঋণ নং {toBn(r.loanNo)})</span></TableCell>
                   <TableCell className="text-muted-foreground text-sm">{r.note || "—"}</TableCell>
                   <TableCell className="text-right font-semibold text-success">{formatTk(r.amount)}</TableCell>
-                  <TableCell className="text-center">
-                    <Button variant="ghost" size="icon" title="রিসিপ্ট দেখুন" onClick={() => openReceipt(r)}>
-                      <Receipt className="h-4 w-4 text-primary" />
-                    </Button>
+                  <TableCell>
+                    <div className="flex items-center justify-center gap-1">
+                      <Button variant="ghost" size="icon" title="রিসিপ্ট দেখুন" onClick={() => openReceipt(r)}>
+                        <Receipt className="h-4 w-4 text-primary" />
+                      </Button>
+                      <Button variant="ghost" size="icon" title="সম্পাদনা" onClick={() => { setEditId(r.id); setEditForm({ amount: String(r.amount), date: r.date, note: r.note }); }}>
+                        <Pencil className="h-4 w-4 text-muted-foreground" />
+                      </Button>
+                      <Button variant="ghost" size="icon" title="বাতিল/মুছে ফেলুন" onClick={() => setDeleteId(r.id)}>
+                        <Trash2 className="h-4 w-4 text-destructive" />
+                      </Button>
+                    </div>
                   </TableCell>
                 </TableRow>
               ))}
+
               {rows.length > 0 && (
                 <TableRow>
                   <TableCell colSpan={5} className="text-right font-semibold">মোট</TableCell>
@@ -2255,7 +2268,58 @@ function ReceiptsHistoryTab() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      <Dialog open={!!editId} onOpenChange={(o) => !o && setEditId(null)}>
+        <DialogContent>
+          <DialogHeader><DialogTitle>কিস্তি সম্পাদনা</DialogTitle></DialogHeader>
+          <div className="space-y-3">
+            <div><Label>পরিমাণ (টাকা) *</Label><Input type="number" value={editForm.amount} onChange={(e) => setEditForm({ ...editForm, amount: e.target.value })} /></div>
+            <div><Label>তারিখ</Label><Input type="date" value={editForm.date} onChange={(e) => setEditForm({ ...editForm, date: e.target.value })} /></div>
+            <div><Label>মন্তব্য</Label><Input value={editForm.note} onChange={(e) => setEditForm({ ...editForm, note: e.target.value })} /></div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setEditId(null)}>বাতিল</Button>
+            <Button onClick={() => {
+              if (!editId) return;
+              const amt = Number(editForm.amount);
+              if (!amt || amt <= 0) { toast.error("সঠিক পরিমাণ দিন"); return; }
+              updatePayment(editId, { amount: amt, date: editForm.date, note: editForm.note });
+              setEditId(null);
+              toast.success("কিস্তি আপডেট হয়েছে");
+            }}>সংরক্ষণ</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <AlertDialog open={!!deleteId} onOpenChange={(o) => !o && setDeleteId(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>কিস্তি বাতিল করবেন?</AlertDialogTitle>
+            <AlertDialogDescription>
+              {(() => {
+                const r = rows.find((x) => x.id === deleteId);
+                return r ? (
+                  <>
+                    <span className="font-medium text-foreground">{r.memberName}</span> (ঋণ নং {toBn(r.loanNo)}) — {formatTk(r.amount)} ({fmtDate(r.date)})।
+                    <br />এই কিস্তিটি স্থায়ীভাবে মুছে যাবে এবং ঋণের বকেয়া হিসেবে যোগ হবে। এই কাজটি ফেরানো যাবে না।
+                  </>
+                ) : "এই কিস্তিটি স্থায়ীভাবে মুছে যাবে।";
+              })()}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>না</AlertDialogCancel>
+            <AlertDialogAction onClick={() => {
+              if (!deleteId) return;
+              deletePayment(deleteId);
+              setDeleteId(null);
+              toast.success("কিস্তি বাতিল করা হয়েছে");
+            }} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">হ্যাঁ, বাতিল করুন</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
+
   );
 }
 
