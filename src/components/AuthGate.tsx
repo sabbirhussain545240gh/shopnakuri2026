@@ -8,20 +8,35 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { LogOut, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 
+const ALLOWED_EMAIL = "sabbirhussain545240@gmail.com";
+
 export function AuthGate({ children }: { children: (session: Session) => ReactNode }) {
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
-  const [mode, setMode] = useState<"login" | "signup">("login");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
     const { data: sub } = supabase.auth.onAuthStateChange((_event, sess) => {
+      const ok = sess?.user?.email?.toLowerCase() === ALLOWED_EMAIL;
+      if (sess && !ok) {
+        supabase.auth.signOut();
+        setSession(null);
+        toast.error("এই অ্যাকাউন্টের অ্যাক্সেস নেই");
+        return;
+      }
       setSession(sess);
     });
     supabase.auth.getSession().then(({ data }) => {
-      setSession(data.session);
+      const sess = data.session;
+      const ok = sess?.user?.email?.toLowerCase() === ALLOWED_EMAIL;
+      if (sess && !ok) {
+        supabase.auth.signOut();
+        setSession(null);
+      } else {
+        setSession(sess);
+      }
       setLoading(false);
     });
     return () => sub.subscription.unsubscribe();
@@ -33,34 +48,18 @@ export function AuthGate({ children }: { children: (session: Session) => ReactNo
       toast.error("ইমেইল ও পাসওয়ার্ড দিন");
       return;
     }
+    if (email.trim().toLowerCase() !== ALLOWED_EMAIL) {
+      toast.error("এই অ্যাকাউন্টের অ্যাক্সেস নেই");
+      return;
+    }
     setSubmitting(true);
     try {
-      if (mode === "login") {
-        const { error } = await supabase.auth.signInWithPassword({
-          email: email.trim(),
-          password,
-        });
-        if (error) throw error;
-        toast.success("সফলভাবে লগইন হয়েছে");
-      } else {
-        const { data, error } = await supabase.auth.signUp({
-          email: email.trim(),
-          password,
-          options: { emailRedirectTo: `${window.location.origin}/` },
-        });
-        if (error) throw error;
-        if (data.session) {
-          toast.success("অ্যাকাউন্ট তৈরি হয়েছে");
-        } else {
-          toast.success(
-            "ইমেইল পাঠানো হয়েছে — ইনবক্সে গিয়ে ভেরিফিকেশন লিংকে ক্লিক করুন। যাচাই না হওয়া পর্যন্ত অ্যাকাউন্ট সক্রিয় হবে না।",
-            { duration: 8000 },
-          );
-          setMode("login");
-          setPassword("");
-        }
-      }
-
+      const { error } = await supabase.auth.signInWithPassword({
+        email: email.trim(),
+        password,
+      });
+      if (error) throw error;
+      toast.success("সফলভাবে লগইন হয়েছে");
     } catch (err: any) {
       toast.error(err?.message ?? "ত্রুটি ঘটেছে");
     } finally {
@@ -77,15 +76,12 @@ export function AuthGate({ children }: { children: (session: Session) => ReactNo
   }
 
   if (!session) {
-    const isLogin = mode === "login";
     return (
       <div className="flex min-h-screen items-center justify-center bg-muted/30 px-4">
         <Card className="w-full max-w-md">
           <CardHeader className="text-center">
             <CardTitle className="text-2xl">সমিতি ম্যানেজমেন্ট</CardTitle>
-            <CardDescription>
-              {isLogin ? "অ্যাকাউন্টে লগইন করুন" : "নতুন অ্যাকাউন্ট তৈরি করুন"}
-            </CardDescription>
+            <CardDescription>অ্যাকাউন্টে লগইন করুন</CardDescription>
           </CardHeader>
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-4">
@@ -106,7 +102,7 @@ export function AuthGate({ children }: { children: (session: Session) => ReactNo
                 <Input
                   id="password"
                   type="password"
-                  autoComplete={isLogin ? "current-password" : "new-password"}
+                  autoComplete="current-password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="••••••••"
@@ -116,19 +112,9 @@ export function AuthGate({ children }: { children: (session: Session) => ReactNo
               </div>
               <Button type="submit" className="w-full" disabled={submitting}>
                 {submitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                {isLogin ? "লগইন" : "সাইন আপ"}
+                লগইন
               </Button>
             </form>
-            <p className="mt-4 text-center text-sm text-muted-foreground">
-              {isLogin ? "অ্যাকাউন্ট নেই? " : "ইতিমধ্যে অ্যাকাউন্ট আছে? "}
-              <button
-                type="button"
-                className="font-medium text-primary hover:underline"
-                onClick={() => setMode(isLogin ? "signup" : "login")}
-              >
-                {isLogin ? "সাইন আপ করুন" : "লগইন করুন"}
-              </button>
-            </p>
           </CardContent>
         </Card>
       </div>
@@ -137,7 +123,6 @@ export function AuthGate({ children }: { children: (session: Session) => ReactNo
 
   return <>{children(session)}</>;
 }
-
 
 export function SignOutButton() {
   const [loading, setLoading] = useState(false);
