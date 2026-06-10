@@ -2797,6 +2797,7 @@ function SettingsTab() {
   const [logo, setLogo] = useState(data.samitiLogo || "");
   const [rate, setRate] = useState(String(data.settings.defaultInterestRate));
   const [dur, setDur] = useState(String(data.settings.defaultDurationMonths));
+  const [notice, setNotice] = useState(data.settings.notice || "");
   const [confirmReset, setConfirmReset] = useState(false);
 
   const onLogo = (file?: File) => {
