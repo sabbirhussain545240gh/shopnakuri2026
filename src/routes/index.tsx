@@ -1535,6 +1535,7 @@ function InstallmentsTab() {
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [filterMember, setFilterMember] = useState<string>("all");
   const [filterLoan, setFilterLoan] = useState<string>("all");
+  const [loanOpen, setLoanOpen] = useState(false);
 
   const activeLoans = data.loans.filter((l) => l.status === "active");
   const loanInfo = (loanId: string) => {
