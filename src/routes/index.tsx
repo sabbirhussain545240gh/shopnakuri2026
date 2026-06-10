@@ -2599,7 +2599,7 @@ const receiptCss = `
   @media print{body{padding:0;} .no-print{display:none;}}
 `;
 
-function buildReceiptHtml(r: { loan: Loan; memberName: string; amount: number; date: string; paidAfter: number; remainingAfter: number; receiptNo: string; note?: string; logo?: string }, samitiName: string) {
+function buildReceiptHtml(r: { loan: Loan; memberName: string; amount: number; date: string; paidAfter: number; remainingAfter: number; receiptNo: string; note?: string; logo?: string; loanNo?: number }, samitiName: string) {
   return `<div class="r" id="r">
     <div class="header">
       ${r.logo ? `<img src="${r.logo}" alt="logo" class="logo"/>` : ""}
