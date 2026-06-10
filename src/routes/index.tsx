@@ -2028,6 +2028,25 @@ function DepositsHistoryTab() {
   const [editForm, setEditForm] = useState({ memberId: "", amount: "", date: today(), note: "" });
   const [editMemberOpen, setEditMemberOpen] = useState(false);
   const [deleteId, setDeleteId] = useState<string | null>(null);
+  const [receipt, setReceipt] = useState<null | DepositReceiptData>(null);
+
+  const openReceipt = (r: { id: string; memberId: string; memberName: string; memberSerial: number; amount: number; date: string; note: string; depositNo: number }) => {
+    const memberDeposits = data.deposits.filter((d) => d.memberId === r.memberId);
+    const totalAfter = memberDeposits
+      .filter((d) => d.date < r.date || (d.date === r.date && d.id <= r.id))
+      .reduce((s, d) => s + d.amount, 0);
+    setReceipt({
+      memberName: r.memberName,
+      memberSerial: r.memberSerial,
+      amount: r.amount,
+      date: r.date,
+      totalAfter,
+      receiptNo: `D-${toBn(r.depositNo)}`,
+      note: r.note,
+      logo: data.samitiLogo,
+    });
+  };
+
 
   const rows = useMemo(() => {
     const memberById = new Map(data.members.map((m) => [m.id, m]));
