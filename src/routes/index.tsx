@@ -292,7 +292,7 @@ function Dashboard({ totals, memberCount, data }: any) {
               <div className="mt-2 h-px w-16 sm:w-20 bg-gradient-to-r from-white/50 to-transparent rounded-full" />
               {data.samitiAddress && <p className="text-xs sm:text-sm text-primary-foreground/80 mt-2 truncate">📍 {data.samitiAddress}</p>}
               <div className="flex flex-wrap items-center gap-x-3 gap-y-1 mt-2 text-[11px] sm:text-xs text-primary-foreground/70">
-                {data.establishedDate && <span className="truncate">স্থাপিত: {fmtDate(data.establishedDate)}</span>}
+                {data.establishedDate && <span className="truncate">স্থাপিত: {fmtMonthYearBn(data.establishedDate)}</span>}
                 <span className="truncate">আজ: {fmtDate(todayStr)}</span>
               </div>
             </div>
