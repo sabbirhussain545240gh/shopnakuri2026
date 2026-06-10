@@ -74,6 +74,7 @@ const navItems = [
   { value: "loans", label: "ঋণ", icon: HandCoins },
   { value: "installments", label: "কিস্তি আদায়", icon: Receipt },
   { value: "receipts", label: "রিসিপ্ট ইতিহাস", icon: FileText },
+  { value: "deposits", label: "জমা ইতিহাস", icon: PiggyBank },
   { value: "cashbook", label: "আয়-ব্যয়", icon: Wallet },
   { value: "reports", label: "রিপোর্ট", icon: FileText },
   { value: "settings", label: "সেটিংস", icon: SettingsIcon },
@@ -189,6 +190,7 @@ function SamitiApp() {
           {tab === "loans" && <LoansTab />}
           {tab === "installments" && <InstallmentsTab />}
           {tab === "receipts" && <ReceiptsHistoryTab />}
+          {tab === "deposits" && <DepositsHistoryTab />}
           {tab === "cashbook" && <CashbookTab />}
           {tab === "reports" && <ReportsTab />}
           {tab === "settings" && <SettingsTab />}
@@ -2018,7 +2020,92 @@ function ReceiptsHistoryTab() {
   );
 }
 
+function DepositsHistoryTab() {
+  const { data } = useSamiti();
+  const [q, setQ] = useState("");
 
+  const rows = useMemo(() => {
+    const memberById = new Map(data.members.map((m) => [m.id, m]));
+    return [...data.deposits]
+      .sort((a, b) => (a.date < b.date ? 1 : -1))
+      .map((d, idx) => {
+        const member = memberById.get(d.memberId);
+        return {
+          id: d.id,
+          date: d.date,
+          depositNo: idx + 1,
+          memberName: member?.name ?? "—",
+          memberSerial: member?.serial ?? 0,
+          amount: d.amount,
+          note: d.note ?? "",
+        };
+      })
+      .filter((r) => {
+        if (!q.trim()) return true;
+        const s = q.toLowerCase();
+        return (
+          r.memberName.toLowerCase().includes(s) ||
+          String(r.memberSerial).includes(s) ||
+          toBn(r.memberSerial).includes(s) ||
+          r.note.toLowerCase().includes(s)
+        );
+      });
+  }, [data, q]);
+
+  const total = rows.reduce((s, r) => s + r.amount, 0);
+
+  return (
+    <div className="space-y-4">
+      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
+        <div>
+          <h2 className="text-2xl font-bold">জমা ইতিহাস</h2>
+          <p className="text-sm text-muted-foreground">সকল সঞ্চয়/চাদা জমার তালিকা</p>
+        </div>
+        <div className="relative w-full md:w-72">
+          <Search className="h-4 w-4 absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
+          <Input value={q} onChange={(e) => setQ(e.target.value)} placeholder="সদস্য / সদস্য নং / নোট খুঁজুন" className="pl-9" />
+        </div>
+      </div>
+
+      <Card>
+        <CardContent className="p-0">
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead className="w-16 text-center">ক্রম</TableHead>
+                <TableHead>তারিখ</TableHead>
+                <TableHead className="w-24 text-center">জমা নং</TableHead>
+                <TableHead>সদস্য</TableHead>
+                <TableHead>নোট</TableHead>
+                <TableHead className="text-right">পরিমাণ</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {rows.length === 0 ? (
+                <TableRow><TableCell colSpan={6} className="text-center text-muted-foreground py-8">কোনো জমা পাওয়া যায়নি</TableCell></TableRow>
+              ) : rows.map((r, i) => (
+                <TableRow key={r.id}>
+                  <TableCell className="text-center text-muted-foreground">{toBn(i + 1)}</TableCell>
+                  <TableCell>{fmtDate(r.date)}</TableCell>
+                  <TableCell className="text-center font-semibold">{toBn(r.depositNo)}</TableCell>
+                  <TableCell className="font-medium">{r.memberName} <span className="text-xs text-muted-foreground">(সদস্য নং {toBn(r.memberSerial)})</span></TableCell>
+                  <TableCell className="text-muted-foreground text-sm">{r.note || "—"}</TableCell>
+                  <TableCell className="text-right font-semibold text-success">{formatTk(r.amount)}</TableCell>
+                </TableRow>
+              ))}
+              {rows.length > 0 && (
+                <TableRow>
+                  <TableCell colSpan={5} className="text-right font-semibold">মোট</TableCell>
+                  <TableCell className="text-right font-bold">{formatTk(total)}</TableCell>
+                </TableRow>
+              )}
+            </TableBody>
+          </Table>
+        </CardContent>
+      </Card>
+    </div>
+  );
+}
 
 const INCOME_CATS = ["সদস্য ফি", "ভর্তি ফি", "অনুদান", "সুদ আয়", "অন্যান্য"];
 const EXPENSE_CATS = ["স্টেশনারি", "মিটিং খরচ", "যাতায়াত", "ভাড়া", "বিল", "অন্যান্য"];
