@@ -29,7 +29,7 @@ export function AuthGate({ children }: { children: (session: Session) => ReactNo
         return;
       }
       setSession(sess);
-      if (sess && ok && (event === "SIGNED_IN" || event === "INITIAL_SESSION" || event === "TOKEN_REFRESHED")) {
+      if (sess && ok && (event === "SIGNED_IN" || event === "INITIAL_SESSION")) {
         startCloudSync(sess.user.id);
       }
       if (event === "SIGNED_OUT") {
