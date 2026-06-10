@@ -1088,7 +1088,7 @@ function LoansTab() {
       remainingAfter,
       receiptNo: `R-${Date.now().toString().slice(-6)}`,
     });
-    setPayForm({ amount: "", date: today() });
+    setPayForm({ amount: "", date: today(), note: "" });
     setPayFor(null);
     toast.success("কিস্তি যোগ হয়েছে");
   };
@@ -1249,7 +1249,7 @@ function LoansTab() {
                           type="button"
                           className="text-primary underline-offset-2 hover:underline cursor-pointer"
                           title="ক্লিক করে কিস্তি গ্রহণ করুন"
-                          onClick={() => { setPayFor(l); setPayForm({ amount: String(Math.round(Math.min(inst, remaining))), date: today() }); }}
+                          onClick={() => { setPayFor(l); setPayForm({ amount: String(Math.round(Math.min(inst, remaining))), date: today(), note: "" }); }}
                         >
                           {formatTk(inst)}
                         </button>
@@ -1267,7 +1267,7 @@ function LoansTab() {
                     <TableCell className="flex gap-1">
                       {l.status === "active" && (
                         <>
-                          <Button size="sm" variant="outline" onClick={() => { setPayFor(l); setPayForm({ amount: String(Math.round(Math.min(inst, remaining))), date: today() }); }}>কিস্তি</Button>
+                          <Button size="sm" variant="outline" onClick={() => { setPayFor(l); setPayForm({ amount: String(Math.round(Math.min(inst, remaining))), date: today(), note: "" }); }}>কিস্তি</Button>
                           {remaining <= 0 && (
                             <Button size="icon" variant="ghost" onClick={() => { closeLoan(l.id); toast.success("ঋণ পরিশোধিত"); }}>
                               <CheckCircle2 className="h-4 w-4 text-success" />
