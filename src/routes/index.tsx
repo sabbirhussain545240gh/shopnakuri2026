@@ -22,6 +22,28 @@ import { Textarea } from "@/components/ui/textarea";
 import { Users, PiggyBank, HandCoins, LayoutDashboard, Trash2, Plus, CheckCircle2, Pencil, Settings as SettingsIcon, Wallet, Download, Upload, AlertTriangle, TrendingUp, TrendingDown, Menu, Printer, FileText, Receipt, Search, Eye, Share, ImageDown, Check, ChevronsUpDown } from "lucide-react";
 import { toast, Toaster } from "sonner";
 import { AuthGate, SignOutButton, CloudStatusBadge } from "@/components/AuthGate";
+import { buildReceiptQr, type VerifyPayload } from "@/lib/receipt-qr";
+
+function ReceiptQrPreview({ payload }: { payload: VerifyPayload }) {
+  const [src, setSrc] = useState<string>("");
+  const key = JSON.stringify(payload);
+  useEffect(() => {
+    let cancel = false;
+    buildReceiptQr(payload).then(({ dataUrl }) => { if (!cancel) setSrc(dataUrl); });
+    return () => { cancel = true; };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [key]);
+  if (!src) return null;
+  return (
+    <div className="mt-4 pt-3 border-t border-dashed flex items-center gap-3">
+      <img src={src} alt="QR" className="h-24 w-24" />
+      <div className="text-xs text-muted-foreground leading-relaxed">
+        <div className="text-foreground font-semibold mb-0.5">যাচাই করুন</div>
+        এই QR কোড স্ক্যান করে রিসিপ্টের তথ্য যাচাই করতে পারবেন।
+      </div>
+    </div>
+  );
+}
 
 export const Route = createFileRoute("/")({
   head: () => ({
