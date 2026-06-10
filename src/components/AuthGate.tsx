@@ -134,10 +134,24 @@ export function AuthGate({ children }: { children: (session: Session) => ReactNo
                   type="email"
                   autoComplete="email"
                   value={email}
-                  onChange={(e) => setEmail(e.target.value)}
+                  onChange={(e) => {
+                    setEmail(e.target.value);
+                    if (emailError) setEmailError(null);
+                  }}
+                  onBlur={() => {
+                    const trimmed = email.trim();
+                    if (trimmed && !emailRegex.test(trimmed)) {
+                      setEmailError("সঠিক ইমেইল ঠিকানা দিন (যেমন: name@example.com)");
+                    }
+                  }}
                   placeholder="you@example.com"
+                  aria-invalid={!!emailError}
+                  aria-describedby={emailError ? "email-error" : undefined}
                   required
                 />
+                {emailError && (
+                  <p id="email-error" className="text-sm text-destructive">{emailError}</p>
+                )}
               </div>
               <div className="space-y-2">
                 <Label htmlFor="password">পাসওয়ার্ড</Label>
@@ -146,11 +160,19 @@ export function AuthGate({ children }: { children: (session: Session) => ReactNo
                   type="password"
                   autoComplete="current-password"
                   value={password}
-                  onChange={(e) => setPassword(e.target.value)}
+                  onChange={(e) => {
+                    setPassword(e.target.value);
+                    if (passwordError) setPasswordError(null);
+                  }}
                   placeholder="••••••••"
                   minLength={6}
+                  aria-invalid={!!passwordError}
+                  aria-describedby={passwordError ? "password-error" : undefined}
                   required
                 />
+                {passwordError && (
+                  <p id="password-error" className="text-sm text-destructive">{passwordError}</p>
+                )}
               </div>
               <Button type="submit" className="w-full" disabled={submitting}>
                 {submitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
