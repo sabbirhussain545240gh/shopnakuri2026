@@ -5,8 +5,9 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { LogOut, Loader2 } from "lucide-react";
+import { LogOut, Loader2, Cloud, CloudOff, CheckCircle2, AlertCircle } from "lucide-react";
 import { toast } from "sonner";
+import { startCloudSync, stopCloudSync, subscribeCloudStatus, getCloudStatus } from "@/lib/samiti-store";
 
 const ALLOWED_EMAIL = "sabbirhussain545240@gmail.com";
 
