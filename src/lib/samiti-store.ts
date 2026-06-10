@@ -62,6 +62,7 @@ export type Transaction = {
 export type Settings = {
   defaultInterestRate: number;
   defaultDurationMonths: number;
+  notice?: string;
 };
 
 export type SamitiData = {
