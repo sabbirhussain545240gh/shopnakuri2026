@@ -1604,6 +1604,16 @@ function InstallmentsTab() {
             <CardDescription>মোট {toBn(allPayments.length)}টি কিস্তি</CardDescription>
           </div>
           <div className="flex gap-2 items-center flex-wrap">
+            <Select value={filterLoan} onValueChange={setFilterLoan}>
+              <SelectTrigger className="w-56"><SelectValue placeholder="ঋণি নির্বাচন" /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">সকল ঋণি</SelectItem>
+                {data.loans.map((l, idx) => {
+                  const m = data.members.find((x) => x.id === l.memberId);
+                  return <SelectItem key={l.id} value={l.id}>ঋণ নং {toBn(idx + 1)} — {m?.name ?? "—"}{l.status === "closed" ? " (পরিশোধিত)" : ""}</SelectItem>;
+                })}
+              </SelectContent>
+            </Select>
             <Select value={filterMember} onValueChange={setFilterMember}>
               <SelectTrigger className="w-44"><SelectValue placeholder="সদস্য ফিল্টার" /></SelectTrigger>
               <SelectContent>
