@@ -234,65 +234,158 @@ function EditSamitiName({ name, onSave }: { name: string; onSave: (n: string) =>
   );
 }
 
-function StatCard({ label, value, accent }: { label: string; value: string; accent?: string }) {
+function StatCard({ label, value, accent, icon: Icon, hint }: { label: string; value: string; accent?: string; icon?: any; hint?: string }) {
   return (
-    <Card className="overflow-hidden">
-      <div className={`h-1 ${accent ?? "bg-primary"}`} />
+    <Card className="overflow-hidden relative hover:shadow-md transition-shadow">
+      <div className={`absolute inset-x-0 top-0 h-1 ${accent ?? "bg-primary"}`} />
       <CardContent className="pt-5">
-        <p className="text-sm text-muted-foreground">{label}</p>
-        <p className="text-2xl md:text-3xl font-bold mt-1 text-foreground">{value}</p>
+        <div className="flex items-start justify-between gap-2">
+          <p className="text-sm text-muted-foreground font-medium">{label}</p>
+          {Icon && (
+            <div className={`h-8 w-8 rounded-lg ${accent ?? "bg-primary"} bg-opacity-10 flex items-center justify-center shrink-0`}>
+              <Icon className="h-4 w-4 text-white" />
+            </div>
+          )}
+        </div>
+        <p className="text-2xl md:text-3xl font-bold mt-2 text-foreground tracking-tight">{value}</p>
+        {hint && <p className="text-xs text-muted-foreground mt-1">{hint}</p>}
       </CardContent>
     </Card>
   );
 }
 
 function Dashboard({ totals, memberCount, data }: any) {
-  const recent = [...data.deposits].sort((a: any, b: any) => b.date.localeCompare(a.date)).slice(0, 5);
+  const recentDeposits = [...data.deposits].sort((a: any, b: any) => b.date.localeCompare(a.date)).slice(0, 5);
+  const recentPayments = [...data.payments].sort((a: any, b: any) => b.date.localeCompare(a.date)).slice(0, 5);
+  const today = new Date();
+  const todayStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, "0")}-${String(today.getDate()).padStart(2, "0")}`;
+  const memberById = new Map(data.members.map((m: Member) => [m.id, m]));
+  const loanById = new Map(data.loans.map((l: Loan) => [l.id, l]));
+  const activeLoanCount = data.loans.filter((l: Loan) => l.status === "active").length;
+  const netSurplus = totals.cashInHand;
+
   return (
     <div className="space-y-6">
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <StatCard label="মোট সদস্য" value={toBn(memberCount)} accent="bg-chart-4" />
-        <StatCard label="মোট সঞ্চয়/চাদা" value={formatTk(totals.totalDeposit)} accent="bg-success" />
-        <StatCard label="হাতে নগদ" value={formatTk(totals.cashInHand)} accent="bg-primary" />
-        <StatCard label="বকেয়া ঋণ" value={formatTk(totals.outstanding)} accent="bg-destructive" />
-        <StatCard label="মোট ঋণ প্রদান" value={formatTk(totals.totalLoanGiven)} accent="bg-warning" />
-        <StatCard label="ঋণ আদায়" value={formatTk(totals.totalRepaid)} accent="bg-chart-2" />
-        <StatCard label="অন্যান্য আয়" value={formatTk(totals.totalIncome)} accent="bg-success" />
-        <StatCard label="অন্যান্য ব্যয়" value={formatTk(totals.totalExpense)} accent="bg-destructive" />
-      </div>
-
-      <Card>
-        <CardHeader>
-          <CardTitle>সাম্প্রতিক জমা</CardTitle>
-          <CardDescription>সর্বশেষ ৫টি জমার তথ্য</CardDescription>
-        </CardHeader>
-        <CardContent>
-          {recent.length === 0 ? (
-            <p className="text-sm text-muted-foreground text-center py-8">এখনও কোনও জমা যোগ করা হয়নি।</p>
-          ) : (
-            <Table>
-              <TableHeader>
-                <TableRow><TableHead>তারিখ</TableHead><TableHead>সদস্য</TableHead><TableHead className="text-right">পরিমাণ</TableHead></TableRow>
-              </TableHeader>
-              <TableBody>
-                {recent.map((d: any) => {
-                  const m = data.members.find((x: Member) => x.id === d.memberId);
-                  return (
-                    <TableRow key={d.id}>
-                      <TableCell>{fmtDate(d.date)}</TableCell>
-                      <TableCell className="font-medium">{m?.name ?? "—"}</TableCell>
-                      <TableCell className="text-right font-semibold text-success">{formatTk(d.amount)}</TableCell>
-                    </TableRow>
-                  );
-                })}
-              </TableBody>
-            </Table>
-          )}
+      {/* Hero header */}
+      <Card className="overflow-hidden border-0 bg-gradient-to-br from-primary via-primary to-primary/80 text-primary-foreground shadow-lg">
+        <CardContent className="p-6 md:p-8">
+          <div className="flex flex-col md:flex-row md:items-center gap-4 md:gap-6">
+            {data.samitiLogo ? (
+              <img src={data.samitiLogo} alt="logo" className="h-16 w-16 md:h-20 md:w-20 rounded-2xl object-cover ring-2 ring-white/30 bg-white shrink-0 shadow-md" />
+            ) : (
+              <div className="h-16 w-16 md:h-20 md:w-20 rounded-2xl bg-white/15 ring-2 ring-white/30 flex items-center justify-center font-display font-bold text-3xl shrink-0">স</div>
+            )}
+            <div className="flex-1 min-w-0">
+              <p className="text-xs uppercase tracking-widest text-primary-foreground/70 font-medium">সমিতি ম্যানেজমেন্ট ড্যাশবোর্ড</p>
+              <h1 className="text-2xl md:text-3xl font-bold mt-1 truncate">{data.samitiName || "আমাদের সমিতি"}</h1>
+              {data.samitiAddress && <p className="text-sm text-primary-foreground/80 mt-1 truncate">📍 {data.samitiAddress}</p>}
+              <div className="flex flex-wrap items-center gap-x-4 gap-y-1 mt-2 text-xs text-primary-foreground/80">
+                {data.establishedDate && <span>প্রতিষ্ঠিত: {fmtDate(data.establishedDate)}</span>}
+                <span>আজ: {fmtDate(todayStr)}</span>
+              </div>
+            </div>
+            <div className="md:text-right border-t md:border-t-0 md:border-l border-white/20 pt-3 md:pt-0 md:pl-6">
+              <p className="text-xs uppercase tracking-widest text-primary-foreground/70 font-medium">তহবিলে নগদ</p>
+              <p className="text-3xl md:text-4xl font-bold tracking-tight mt-1">{formatTk(netSurplus)}</p>
+            </div>
+          </div>
         </CardContent>
       </Card>
+
+      {/* Overview */}
+      <div>
+        <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide mb-3">সংক্ষিপ্ত পরিসংখ্যান</h2>
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          <StatCard label="মোট সদস্য" value={toBn(memberCount)} accent="bg-chart-4" icon={Users} hint="নিবন্ধিত সদস্য" />
+          <StatCard label="মোট সঞ্চয়/চাদা" value={formatTk(totals.totalDeposit)} accent="bg-success" icon={PiggyBank} hint={`${toBn(data.deposits.length)}টি জমা`} />
+          <StatCard label="বকেয়া ঋণ" value={formatTk(totals.outstanding)} accent="bg-destructive" icon={AlertTriangle} hint={`${toBn(activeLoanCount)}টি চলমান ঋণ`} />
+          <StatCard label="হাতে নগদ" value={formatTk(totals.cashInHand)} accent="bg-primary" icon={Wallet} hint="বর্তমান তহবিল" />
+        </div>
+      </div>
+
+      {/* Loans */}
+      <div>
+        <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide mb-3">ঋণ কার্যক্রম</h2>
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          <StatCard label="মোট ঋণ প্রদান" value={formatTk(totals.totalLoanGiven)} accent="bg-warning" icon={HandCoins} />
+          <StatCard label="মোট ঋণ আদায়" value={formatTk(totals.totalRepaid)} accent="bg-chart-2" icon={Receipt} hint={`${toBn(data.payments.length)}টি কিস্তি`} />
+          <StatCard label="অন্যান্য আয়" value={formatTk(totals.totalIncome)} accent="bg-success" icon={TrendingUp} />
+          <StatCard label="অন্যান্য ব্যয়" value={formatTk(totals.totalExpense)} accent="bg-destructive" icon={TrendingDown} />
+        </div>
+      </div>
+
+      {/* Recent activity */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between">
+            <div>
+              <CardTitle className="flex items-center gap-2"><PiggyBank className="h-4 w-4 text-success" />সাম্প্রতিক জমা</CardTitle>
+              <CardDescription>সর্বশেষ ৫টি সঞ্চয়/চাদা</CardDescription>
+            </div>
+          </CardHeader>
+          <CardContent>
+            {recentDeposits.length === 0 ? (
+              <p className="text-sm text-muted-foreground text-center py-8">এখনও কোনও জমা যোগ করা হয়নি।</p>
+            ) : (
+              <Table>
+                <TableHeader>
+                  <TableRow><TableHead>তারিখ</TableHead><TableHead>সদস্য</TableHead><TableHead className="text-right">পরিমাণ</TableHead></TableRow>
+                </TableHeader>
+                <TableBody>
+                  {recentDeposits.map((d: any) => {
+                    const m: any = memberById.get(d.memberId);
+                    return (
+                      <TableRow key={d.id}>
+                        <TableCell className="text-sm">{fmtDate(d.date)}</TableCell>
+                        <TableCell className="font-medium">{m?.name ?? "—"}</TableCell>
+                        <TableCell className="text-right font-semibold text-success">{formatTk(d.amount)}</TableCell>
+                      </TableRow>
+                    );
+                  })}
+                </TableBody>
+              </Table>
+            )}
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between">
+            <div>
+              <CardTitle className="flex items-center gap-2"><Receipt className="h-4 w-4 text-primary" />সাম্প্রতিক কিস্তি</CardTitle>
+              <CardDescription>সর্বশেষ ৫টি ঋণ আদায়</CardDescription>
+            </div>
+          </CardHeader>
+          <CardContent>
+            {recentPayments.length === 0 ? (
+              <p className="text-sm text-muted-foreground text-center py-8">এখনও কোনও কিস্তি আদায় হয়নি।</p>
+            ) : (
+              <Table>
+                <TableHeader>
+                  <TableRow><TableHead>তারিখ</TableHead><TableHead>সদস্য</TableHead><TableHead className="text-right">পরিমাণ</TableHead></TableRow>
+                </TableHeader>
+                <TableBody>
+                  {recentPayments.map((p: any) => {
+                    const loan: any = loanById.get(p.loanId);
+                    const m: any = loan ? memberById.get(loan.memberId) : undefined;
+                    return (
+                      <TableRow key={p.id}>
+                        <TableCell className="text-sm">{fmtDate(p.date)}</TableCell>
+                        <TableCell className="font-medium">{m?.name ?? "—"}</TableCell>
+                        <TableCell className="text-right font-semibold text-primary">{formatTk(p.amount)}</TableCell>
+                      </TableRow>
+                    );
+                  })}
+                </TableBody>
+              </Table>
+            )}
+          </CardContent>
+        </Card>
+      </div>
     </div>
   );
 }
+
+
 
 // ===== Members =====
 function MembersTab() {
