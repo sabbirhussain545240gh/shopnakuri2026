@@ -3576,8 +3576,23 @@ const receiptCss = `
   .totals{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px;font-size:13px;}
   .due{color:#b91c1c;font-weight:600;}
   .sign{display:flex;justify-content:space-between;margin-top:32px;font-size:12px;color:#666;}
+  .qr{margin-top:14px;padding-top:10px;border-top:1px dashed #ccc;display:flex;align-items:center;gap:12px;}
+  .qr img{width:110px;height:110px;}
+  .qr .qr-text{font-size:11px;color:#555;line-height:1.5;}
+  .qr .qr-text b{color:#111;font-size:12px;}
   @media print{body{padding:0;} .no-print{display:none;}}
 `;
+
+const qrBlockHtml = (qrDataUrl?: string) =>
+  qrDataUrl
+    ? `<div class="qr">
+        <img src="${qrDataUrl}" alt="QR" />
+        <div class="qr-text">
+          <b>যাচাই করুন</b><br/>
+          এই QR কোডটি স্ক্যান করে রিসিপ্টের তথ্য যাচাই করতে পারবেন।
+        </div>
+      </div>`
+    : "";
 
 function buildReceiptHtml(r: { loan: Loan; memberName: string; amount: number; date: string; paidAfter: number; remainingAfter: number; receiptNo: string; note?: string; logo?: string; loanNo?: number }, samitiName: string) {
   return `<div class="r" id="r">
