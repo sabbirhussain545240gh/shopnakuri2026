@@ -153,6 +153,7 @@ function scheduleCloudSave() {
 }
 
 export async function startCloudSync(userId: string) {
+  if (cloudUserId === userId) return;
   cloudUserId = userId;
   setCloudStatus("loading");
   try {
