@@ -930,10 +930,30 @@ function SavingsTab() {
               <div className="space-y-3">
                 <div>
                   <Label>সদস্য *</Label>
-                  <Select value={form.memberId} onValueChange={(v) => setForm({ ...form, memberId: v })}>
-                    <SelectTrigger><SelectValue placeholder="সদস্য নির্বাচন করুন" /></SelectTrigger>
-                    <SelectContent>{data.members.map((m) => <SelectItem key={m.id} value={m.id}>{toBn(m.serial || 0)}. {m.name}</SelectItem>)}</SelectContent>
-                  </Select>
+                  <Popover open={memberOpen} onOpenChange={setMemberOpen}>
+                    <PopoverTrigger asChild>
+                      <Button variant="outline" role="combobox" className="w-full justify-between font-normal">
+                        {selectedMember ? `${toBn(selectedMember.serial || 0)}. ${selectedMember.name}` : "সদস্য নির্বাচন করুন"}
+                        <ChevronsUpDown className="h-4 w-4 opacity-50" />
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-[--radix-popover-trigger-width] p-0" align="start">
+                      <Command filter={(value, search) => value.toLowerCase().includes(search.toLowerCase()) ? 1 : 0}>
+                        <CommandInput placeholder="ক্রম বা নাম দিয়ে খুঁজুন..." />
+                        <CommandList>
+                          <CommandEmpty>কোনও সদস্য পাওয়া যায়নি</CommandEmpty>
+                          <CommandGroup>
+                            {data.members.map((m) => (
+                              <CommandItem key={m.id} value={`${toBn(m.serial || 0)} ${m.serial} ${m.name} ${m.phone || ""}`} onSelect={() => { setForm({ ...form, memberId: m.id }); setMemberOpen(false); }}>
+                                <Check className={cn("h-4 w-4", form.memberId === m.id ? "opacity-100" : "opacity-0")} />
+                                {toBn(m.serial || 0)}. {m.name}
+                              </CommandItem>
+                            ))}
+                          </CommandGroup>
+                        </CommandList>
+                      </Command>
+                    </PopoverContent>
+                  </Popover>
                 </div>
                 <div><Label>পরিমাণ (টাকা) *</Label><Input type="number" value={form.amount} onChange={(e) => setForm({ ...form, amount: e.target.value })} /></div>
                 <div><Label>তারিখ</Label><Input type="date" value={form.date} onChange={(e) => setForm({ ...form, date: e.target.value })} /></div>
