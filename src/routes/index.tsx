@@ -2128,7 +2128,7 @@ function DepositsHistoryTab() {
                 <TableHead>সদস্য</TableHead>
                 <TableHead>নোট</TableHead>
                 <TableHead className="text-right">পরিমাণ</TableHead>
-                <TableHead className="w-28 text-center">কার্যক্রম</TableHead>
+                <TableHead className="w-36 text-center">কার্যক্রম</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
