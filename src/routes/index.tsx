@@ -1532,6 +1532,7 @@ function InstallmentsTab() {
   const [form, setForm] = useState({ loanId: "", amount: "", date: today(), note: "" });
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [filterMember, setFilterMember] = useState<string>("all");
+  const [filterLoan, setFilterLoan] = useState<string>("all");
 
   const activeLoans = data.loans.filter((l) => l.status === "active");
   const loanInfo = (loanId: string) => {
