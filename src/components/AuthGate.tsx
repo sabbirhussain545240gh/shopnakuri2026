@@ -215,3 +215,23 @@ export function SignOutButton() {
     </Button>
   );
 }
+
+export function CloudStatusBadge() {
+  const [status, setStatus] = useState(getCloudStatus());
+  useEffect(() => subscribeCloudStatus(() => setStatus(getCloudStatus())), []);
+  const map = {
+    idle: { icon: CloudOff, text: "অফলাইন", cls: "text-muted-foreground" },
+    loading: { icon: Loader2, text: "লোড হচ্ছে...", cls: "text-muted-foreground animate-spin" },
+    saving: { icon: Loader2, text: "সেভ হচ্ছে...", cls: "text-blue-600 animate-spin" },
+    saved: { icon: CheckCircle2, text: "ক্লাউডে সেভ", cls: "text-green-600" },
+    error: { icon: AlertCircle, text: "সেভ ব্যর্থ", cls: "text-destructive" },
+  } as const;
+  const it = map[status];
+  const Icon = it.icon;
+  return (
+    <span className="inline-flex items-center gap-1.5 text-xs font-medium">
+      <Icon className={`h-3.5 w-3.5 ${it.cls}`} />
+      <span className={it.cls.replace("animate-spin", "")}>{it.text}</span>
+    </span>
+  );
+}
