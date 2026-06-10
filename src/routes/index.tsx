@@ -130,8 +130,9 @@ function SamitiApp() {
             );
           })}
         </nav>
-        <div className="p-3 border-t">
-          <p className="text-xs text-muted-foreground text-center">তথ্য ক্লাউডে সংরক্ষিত</p>
+        <div className="p-3 border-t space-y-2">
+          <div className="flex items-center justify-center"><CloudStatusBadge /></div>
+          <SignOutButton />
         </div>
 
       </aside>
