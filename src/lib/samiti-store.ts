@@ -90,7 +90,7 @@ const empty: SamitiData = {
   loans: [],
   payments: [],
   transactions: [],
-  settings: { defaultInterestRate: 10, defaultDurationMonths: 12 },
+  settings: { defaultInterestRate: 10, defaultDurationMonths: 12, notice: "" },
 };
 
 function load(): SamitiData {
