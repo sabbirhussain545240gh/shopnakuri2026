@@ -1671,6 +1671,7 @@ function InstallmentsTab() {
               <TableHeader>
                 <TableRow>
                   <TableHead>তারিখ</TableHead>
+                  <TableHead>ঋণ নং</TableHead>
                   <TableHead>সদস্য</TableHead>
                   <TableHead className="text-right">ঋণ পরিমাণ</TableHead>
                   <TableHead className="text-right">কিস্তি</TableHead>
@@ -1681,11 +1682,13 @@ function InstallmentsTab() {
               <TableBody>
                 {allPayments.map((p) => {
                   const loan = data.loans.find((l) => l.id === p.loanId);
+                  const loanIdx = loan ? data.loans.findIndex((l) => l.id === loan.id) + 1 : 0;
                   const m = loan ? data.members.find((x) => x.id === loan.memberId) : null;
                   const rem = loan ? Math.max(0, loanTotalDue(loan) - loanPaid(data.payments, loan.id)) : 0;
                   return (
                     <TableRow key={p.id}>
                       <TableCell>{fmtDate(p.date)}</TableCell>
+                      <TableCell className="font-medium">{loan ? toBn(loanIdx) : "—"}</TableCell>
                       <TableCell className="font-medium">{m?.name ?? "—"}</TableCell>
                       <TableCell className="text-right">{loan ? formatTk(loan.amount) : "—"}</TableCell>
                       <TableCell className="text-right text-success font-semibold">{formatTk(p.amount)}</TableCell>
