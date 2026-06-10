@@ -2573,6 +2573,10 @@ const receiptCss = `
   body{margin:0;padding:20px;background:#fff;color:#111;font-family:"Segoe UI","Noto Sans Bengali",Arial,sans-serif;}
   .r{width:520px;border:1px solid #ddd;border-radius:8px;padding:20px;background:#fff;}
   .center{text-align:center;}
+  .header{display:flex;align-items:center;justify-content:center;gap:12px;margin-bottom:6px;}
+  .logo{width:54px;height:54px;object-fit:contain;border-radius:6px;}
+  .head-text{text-align:center;}
+  .note{margin-top:10px;padding-top:8px;border-top:1px solid #eee;font-size:13px;white-space:pre-wrap;}
   .title{font-size:20px;font-weight:700;margin:0;}
   .sub{font-size:12px;color:#666;margin-top:2px;}
   .grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:14px;font-size:13px;}
