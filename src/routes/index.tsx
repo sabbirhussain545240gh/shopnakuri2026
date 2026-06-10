@@ -2022,8 +2022,12 @@ function ReceiptsHistoryTab() {
 }
 
 function DepositsHistoryTab() {
-  const { data } = useSamiti();
+  const { data, updateDeposit, deleteDeposit } = useSamiti();
   const [q, setQ] = useState("");
+  const [editId, setEditId] = useState<string | null>(null);
+  const [editForm, setEditForm] = useState({ memberId: "", amount: "", date: today(), note: "" });
+  const [editMemberOpen, setEditMemberOpen] = useState(false);
+  const [deleteId, setDeleteId] = useState<string | null>(null);
 
   const rows = useMemo(() => {
     const memberById = new Map(data.members.map((m) => [m.id, m]));
@@ -2033,6 +2037,7 @@ function DepositsHistoryTab() {
         const member = memberById.get(d.memberId);
         return {
           id: d.id,
+          memberId: d.memberId,
           date: d.date,
           depositNo: idx + 1,
           memberName: member?.name ?? "—",
@@ -2054,6 +2059,31 @@ function DepositsHistoryTab() {
   }, [data, q]);
 
   const total = rows.reduce((s, r) => s + r.amount, 0);
+
+  const startEdit = (r: { id: string; memberId: string; amount: number; date: string; note: string }) => {
+    setEditId(r.id);
+    setEditForm({ memberId: r.memberId, amount: String(r.amount), date: r.date, note: r.note });
+  };
+
+  const submitEdit = () => {
+    if (!editId) return;
+    if (!editForm.memberId) { toast.error("সদস্য নির্বাচন করুন"); return; }
+    const amt = Number(editForm.amount);
+    if (!amt || amt <= 0) { toast.error("সঠিক পরিমাণ দিন"); return; }
+    updateDeposit(editId, { memberId: editForm.memberId, amount: amt, date: editForm.date, note: editForm.note });
+    setEditId(null);
+    toast.success("জমা আপডেট হয়েছে");
+  };
+
+  const confirmDelete = () => {
+    if (!deleteId) return;
+    deleteDeposit(deleteId);
+    setDeleteId(null);
+    toast.success("জমা বাতিল করা হয়েছে");
+  };
+
+  const selectedEditMember = data.members.find((m) => m.id === editForm.memberId);
+  const deletingRow = rows.find((r) => r.id === deleteId);
 
   return (
     <div className="space-y-4">
@@ -2079,11 +2109,12 @@ function DepositsHistoryTab() {
                 <TableHead>সদস্য</TableHead>
                 <TableHead>নোট</TableHead>
                 <TableHead className="text-right">পরিমাণ</TableHead>
+                <TableHead className="w-28 text-center">কার্যক্রম</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {rows.length === 0 ? (
-                <TableRow><TableCell colSpan={6} className="text-center text-muted-foreground py-8">কোনো জমা পাওয়া যায়নি</TableCell></TableRow>
+                <TableRow><TableCell colSpan={7} className="text-center text-muted-foreground py-8">কোনো জমা পাওয়া যায়নি</TableCell></TableRow>
               ) : rows.map((r, i) => (
                 <TableRow key={r.id}>
                   <TableCell className="text-center text-muted-foreground">{toBn(i + 1)}</TableCell>
@@ -2092,18 +2123,91 @@ function DepositsHistoryTab() {
                   <TableCell className="font-medium">{r.memberName} <span className="text-xs text-muted-foreground">(সদস্য নং {toBn(r.memberSerial)})</span></TableCell>
                   <TableCell className="text-muted-foreground text-sm">{r.note || "—"}</TableCell>
                   <TableCell className="text-right font-semibold text-success">{formatTk(r.amount)}</TableCell>
+                  <TableCell>
+                    <div className="flex items-center justify-center gap-1">
+                      <Button variant="ghost" size="icon" title="সম্পাদনা" onClick={() => startEdit(r)}>
+                        <Pencil className="h-4 w-4 text-muted-foreground" />
+                      </Button>
+                      <Button variant="ghost" size="icon" title="বাতিল/মুছে ফেলুন" onClick={() => setDeleteId(r.id)}>
+                        <Trash2 className="h-4 w-4 text-destructive" />
+                      </Button>
+                    </div>
+                  </TableCell>
                 </TableRow>
               ))}
               {rows.length > 0 && (
                 <TableRow>
                   <TableCell colSpan={5} className="text-right font-semibold">মোট</TableCell>
                   <TableCell className="text-right font-bold">{formatTk(total)}</TableCell>
+                  <TableCell />
                 </TableRow>
               )}
             </TableBody>
           </Table>
         </CardContent>
       </Card>
+
+      <Dialog open={!!editId} onOpenChange={(o) => !o && setEditId(null)}>
+        <DialogContent>
+          <DialogHeader><DialogTitle>জমা সম্পাদনা</DialogTitle></DialogHeader>
+          <div className="space-y-3">
+            <div>
+              <Label>সদস্য *</Label>
+              <Popover open={editMemberOpen} onOpenChange={setEditMemberOpen}>
+                <PopoverTrigger asChild>
+                  <Button variant="outline" role="combobox" className="w-full justify-between font-normal">
+                    {selectedEditMember ? `${toBn(selectedEditMember.serial || 0)}. ${selectedEditMember.name}` : "সদস্য নির্বাচন করুন"}
+                    <ChevronsUpDown className="h-4 w-4 opacity-50" />
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-[--radix-popover-trigger-width] p-0" align="start">
+                  <Command filter={(value, search) => value.toLowerCase().includes(search.toLowerCase()) ? 1 : 0}>
+                    <CommandInput placeholder="ক্রম বা নাম দিয়ে খুঁজুন..." />
+                    <CommandList>
+                      <CommandEmpty>কোনও সদস্য পাওয়া যায়নি</CommandEmpty>
+                      <CommandGroup>
+                        {data.members.map((m) => (
+                          <CommandItem key={m.id} value={`${toBn(m.serial || 0)} ${m.serial} ${m.name} ${m.phone || ""}`} onSelect={() => { setEditForm({ ...editForm, memberId: m.id }); setEditMemberOpen(false); }}>
+                            <Check className={cn("h-4 w-4", editForm.memberId === m.id ? "opacity-100" : "opacity-0")} />
+                            {toBn(m.serial || 0)}. {m.name}
+                          </CommandItem>
+                        ))}
+                      </CommandGroup>
+                    </CommandList>
+                  </Command>
+                </PopoverContent>
+              </Popover>
+            </div>
+            <div><Label>পরিমাণ (টাকা) *</Label><Input type="number" value={editForm.amount} onChange={(e) => setEditForm({ ...editForm, amount: e.target.value })} /></div>
+            <div><Label>তারিখ</Label><Input type="date" value={editForm.date} onChange={(e) => setEditForm({ ...editForm, date: e.target.value })} /></div>
+            <div><Label>মন্তব্য</Label><Input value={editForm.note} onChange={(e) => setEditForm({ ...editForm, note: e.target.value })} /></div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setEditId(null)}>বাতিল</Button>
+            <Button onClick={submitEdit}>সংরক্ষণ</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <AlertDialog open={!!deleteId} onOpenChange={(o) => !o && setDeleteId(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>জমা বাতিল করবেন?</AlertDialogTitle>
+            <AlertDialogDescription>
+              {deletingRow ? (
+                <>
+                  <span className="font-medium text-foreground">{deletingRow.memberName}</span> (সদস্য নং {toBn(deletingRow.memberSerial)}) — {formatTk(deletingRow.amount)} ({fmtDate(deletingRow.date)})।
+                  <br />এই জমাটি স্থায়ীভাবে মুছে যাবে এবং সদস্যের মোট সঞ্চয় থেকে বাদ পড়বে। এই কাজটি ফেরানো যাবে না।
+                </>
+              ) : "এই জমাটি স্থায়ীভাবে মুছে যাবে।"}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>না</AlertDialogCancel>
+            <AlertDialogAction onClick={confirmDelete} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">হ্যাঁ, বাতিল করুন</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
