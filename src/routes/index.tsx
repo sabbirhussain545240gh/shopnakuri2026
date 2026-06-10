@@ -1316,6 +1316,7 @@ function LoansTab() {
           <div className="space-y-3">
             <div><Label>পরিমাণ *</Label><Input type="number" value={payForm.amount} onChange={(e) => setPayForm({ ...payForm, amount: e.target.value })} /></div>
             <div><Label>তারিখ</Label><Input type="date" value={payForm.date} onChange={(e) => setPayForm({ ...payForm, date: e.target.value })} /></div>
+            <div><Label>মন্তব্য / নোট</Label><Textarea rows={2} placeholder="ঐচ্ছিক — কিস্তি সংক্রান্ত নোট লিখুন" value={payForm.note} onChange={(e) => setPayForm({ ...payForm, note: e.target.value })} /></div>
           </div>
           <DialogFooter><Button onClick={submitPay}>সংরক্ষণ ও রিসিপ্ট</Button></DialogFooter>
         </DialogContent>
