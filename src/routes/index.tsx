@@ -2622,7 +2622,7 @@ function buildReceiptHtml(r: { loan: Loan; memberName: string; amount: number; d
   </div>`;
 }
 
-async function renderReceiptCanvas(r: { loan: Loan; memberName: string; amount: number; date: string; paidAfter: number; remainingAfter: number; receiptNo: string; note?: string; logo?: string }, samitiName: string): Promise<HTMLCanvasElement> {
+async function renderReceiptCanvas(r: { loan: Loan; memberName: string; amount: number; date: string; paidAfter: number; remainingAfter: number; receiptNo: string; note?: string; logo?: string; loanNo?: number }, samitiName: string): Promise<HTMLCanvasElement> {
   const { default: html2canvas } = await import("html2canvas");
   const iframe = document.createElement("iframe");
   iframe.style.cssText = "position:fixed;left:-10000px;top:0;width:600px;height:10px;border:0;";
