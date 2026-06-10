@@ -234,20 +234,23 @@ function EditSamitiName({ name, onSave }: { name: string; onSave: (n: string) =>
   );
 }
 
-function StatCard({ label, value, accent, icon: Icon, hint }: { label: string; value: string; accent?: string; icon?: any; hint?: string }) {
+function StatCard({ label, value, accent, icon: Icon, hint, delay = 0 }: { label: string; value: string; accent?: string; icon?: any; hint?: string; delay?: number }) {
   return (
-    <Card className="overflow-hidden relative hover:shadow-md transition-shadow">
-      <div className={`absolute inset-x-0 top-0 h-1 ${accent ?? "bg-primary"}`} />
+    <Card
+      className="overflow-hidden relative group transition-all duration-300 ease-out hover:-translate-y-1 hover:shadow-xl animate-in fade-in slide-in-from-bottom-2"
+      style={{ animationDelay: `${delay}ms`, animationDuration: "500ms", animationFillMode: "both" }}
+    >
+      <div className={`absolute inset-x-0 top-0 h-1 ${accent ?? "bg-primary"} transition-all duration-300 group-hover:h-1.5`} />
       <CardContent className="pt-5">
         <div className="flex items-start justify-between gap-2">
           <p className="text-sm text-muted-foreground font-medium">{label}</p>
           {Icon && (
-            <div className={`h-8 w-8 rounded-lg ${accent ?? "bg-primary"} bg-opacity-10 flex items-center justify-center shrink-0`}>
+            <div className={`h-9 w-9 rounded-xl ${accent ?? "bg-primary"} flex items-center justify-center shrink-0 shadow-sm transition-transform duration-300 group-hover:scale-110 group-hover:rotate-3`}>
               <Icon className="h-4 w-4 text-white" />
             </div>
           )}
         </div>
-        <p className="text-2xl md:text-3xl font-bold mt-2 text-foreground tracking-tight">{value}</p>
+        <p className="text-2xl md:text-3xl font-bold mt-2 text-foreground tracking-tight tabular-nums">{value}</p>
         {hint && <p className="text-xs text-muted-foreground mt-1">{hint}</p>}
       </CardContent>
     </Card>
@@ -267,11 +270,13 @@ function Dashboard({ totals, memberCount, data }: any) {
   return (
     <div className="space-y-6">
       {/* Hero header */}
-      <Card className="overflow-hidden border-0 bg-gradient-to-br from-primary via-primary to-primary/80 text-primary-foreground shadow-lg">
-        <CardContent className="p-6 md:p-8">
+      <Card className="overflow-hidden border-0 bg-gradient-to-br from-primary via-primary to-primary/80 text-primary-foreground shadow-xl animate-in fade-in slide-in-from-top-2 duration-500 relative">
+        <div className="absolute -top-16 -right-16 h-48 w-48 rounded-full bg-white/10 blur-3xl pointer-events-none" />
+        <div className="absolute -bottom-20 -left-10 h-56 w-56 rounded-full bg-white/5 blur-3xl pointer-events-none" />
+        <CardContent className="p-6 md:p-8 relative">
           <div className="flex flex-col md:flex-row md:items-center gap-4 md:gap-6">
             {data.samitiLogo ? (
-              <img src={data.samitiLogo} alt="logo" className="h-16 w-16 md:h-20 md:w-20 rounded-2xl object-cover ring-2 ring-white/30 bg-white shrink-0 shadow-md" />
+              <img src={data.samitiLogo} alt="logo" className="h-16 w-16 md:h-20 md:w-20 rounded-2xl object-cover ring-2 ring-white/30 bg-white shrink-0 shadow-md transition-transform duration-500 hover:scale-105" />
             ) : (
               <div className="h-16 w-16 md:h-20 md:w-20 rounded-2xl bg-white/15 ring-2 ring-white/30 flex items-center justify-center font-display font-bold text-3xl shrink-0">স</div>
             )}
@@ -286,8 +291,30 @@ function Dashboard({ totals, memberCount, data }: any) {
             </div>
             <div className="md:text-right border-t md:border-t-0 md:border-l border-white/20 pt-3 md:pt-0 md:pl-6">
               <p className="text-xs uppercase tracking-widest text-primary-foreground/70 font-medium">তহবিলে নগদ</p>
-              <p className="text-3xl md:text-4xl font-bold tracking-tight mt-1">{formatTk(netSurplus)}</p>
+              <p className="text-3xl md:text-4xl font-bold tracking-tight mt-1 tabular-nums">{formatTk(netSurplus)}</p>
             </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Settings summary */}
+      <Card className="border-dashed bg-secondary/40 animate-in fade-in slide-in-from-top-2 duration-500" style={{ animationDelay: "80ms", animationFillMode: "both" }}>
+        <CardContent className="p-4 flex flex-wrap items-center gap-x-6 gap-y-2 text-sm">
+          <div className="flex items-center gap-2">
+            <SettingsIcon className="h-4 w-4 text-primary" />
+            <span className="font-semibold text-foreground">সেটিংস:</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <span className="text-muted-foreground">ডিফল্ট সুদ হার:</span>
+            <span className="font-bold text-foreground tabular-nums">{toBn(data.settings.defaultInterestRate)}%</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <span className="text-muted-foreground">ডিফল্ট মেয়াদ:</span>
+            <span className="font-bold text-foreground tabular-nums">{toBn(data.settings.defaultDurationMonths)} মাস</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <span className="text-muted-foreground">মোট সদস্য:</span>
+            <span className="font-bold text-foreground tabular-nums">{toBn(memberCount)} জন</span>
           </div>
         </CardContent>
       </Card>
@@ -296,10 +323,10 @@ function Dashboard({ totals, memberCount, data }: any) {
       <div>
         <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide mb-3">সংক্ষিপ্ত পরিসংখ্যান</h2>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          <StatCard label="মোট সদস্য" value={toBn(memberCount)} accent="bg-chart-4" icon={Users} hint="নিবন্ধিত সদস্য" />
-          <StatCard label="মোট সঞ্চয়/চাদা" value={formatTk(totals.totalDeposit)} accent="bg-success" icon={PiggyBank} hint={`${toBn(data.deposits.length)}টি জমা`} />
-          <StatCard label="বকেয়া ঋণ" value={formatTk(totals.outstanding)} accent="bg-destructive" icon={AlertTriangle} hint={`${toBn(activeLoanCount)}টি চলমান ঋণ`} />
-          <StatCard label="হাতে নগদ" value={formatTk(totals.cashInHand)} accent="bg-primary" icon={Wallet} hint="বর্তমান তহবিল" />
+          <StatCard delay={100} label="মোট সদস্য" value={toBn(memberCount)} accent="bg-chart-4" icon={Users} hint="নিবন্ধিত সদস্য" />
+          <StatCard delay={160} label="মোট সঞ্চয়/চাদা" value={formatTk(totals.totalDeposit)} accent="bg-success" icon={PiggyBank} hint={`${toBn(data.deposits.length)}টি জমা`} />
+          <StatCard delay={220} label="বকেয়া ঋণ" value={formatTk(totals.outstanding)} accent="bg-destructive" icon={AlertTriangle} hint={`${toBn(activeLoanCount)}টি চলমান ঋণ`} />
+          <StatCard delay={280} label="হাতে নগদ" value={formatTk(totals.cashInHand)} accent="bg-primary" icon={Wallet} hint="বর্তমান তহবিল" />
         </div>
       </div>
 
@@ -307,15 +334,16 @@ function Dashboard({ totals, memberCount, data }: any) {
       <div>
         <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide mb-3">ঋণ কার্যক্রম</h2>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          <StatCard label="মোট ঋণ প্রদান" value={formatTk(totals.totalLoanGiven)} accent="bg-warning" icon={HandCoins} />
-          <StatCard label="মোট ঋণ আদায়" value={formatTk(totals.totalRepaid)} accent="bg-chart-2" icon={Receipt} hint={`${toBn(data.payments.length)}টি কিস্তি`} />
-          <StatCard label="অন্যান্য আয়" value={formatTk(totals.totalIncome)} accent="bg-success" icon={TrendingUp} />
-          <StatCard label="অন্যান্য ব্যয়" value={formatTk(totals.totalExpense)} accent="bg-destructive" icon={TrendingDown} />
+          <StatCard delay={340} label="মোট ঋণ প্রদান" value={formatTk(totals.totalLoanGiven)} accent="bg-warning" icon={HandCoins} />
+          <StatCard delay={400} label="মোট ঋণ আদায়" value={formatTk(totals.totalRepaid)} accent="bg-chart-2" icon={Receipt} hint={`${toBn(data.payments.length)}টি কিস্তি`} />
+          <StatCard delay={460} label="অন্যান্য আয়" value={formatTk(totals.totalIncome)} accent="bg-success" icon={TrendingUp} />
+          <StatCard delay={520} label="অন্যান্য ব্যয়" value={formatTk(totals.totalExpense)} accent="bg-destructive" icon={TrendingDown} />
         </div>
       </div>
 
+
       {/* Recent activity */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 animate-in fade-in slide-in-from-bottom-2 duration-500" style={{ animationDelay: "580ms", animationFillMode: "both" }}>
         <Card>
           <CardHeader className="flex flex-row items-center justify-between">
             <div>
