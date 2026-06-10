@@ -1351,6 +1351,11 @@ function LoansTab() {
                 <div><span className="text-muted-foreground">মোট পরিশোধিত:</span> <span className="font-medium">{formatTk(receipt.paidAfter)}</span></div>
                 <div><span className="text-muted-foreground">অবশিষ্ট বকেয়া:</span> <span className="font-semibold text-destructive">{formatTk(receipt.remainingAfter)}</span></div>
               </div>
+              {receipt.note && (
+                <div className="mt-3 text-sm border-t pt-2">
+                  <span className="text-muted-foreground">নোট:</span> <span className="font-medium whitespace-pre-wrap">{receipt.note}</span>
+                </div>
+              )}
               <div className="mt-6 flex justify-between text-xs text-muted-foreground">
                 <div>—————————<br />গ্রহীতা</div>
                 <div className="text-right">—————————<br />কোষাধ্যক্ষ</div>
