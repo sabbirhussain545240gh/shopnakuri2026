@@ -968,10 +968,30 @@ function SavingsTab() {
               <div className="space-y-3">
                 <div>
                   <Label>সদস্য *</Label>
-                  <Select value={editForm.memberId} onValueChange={(v) => setEditForm({ ...editForm, memberId: v })}>
-                    <SelectTrigger><SelectValue placeholder="সদস্য নির্বাচন করুন" /></SelectTrigger>
-                    <SelectContent>{data.members.map((m) => <SelectItem key={m.id} value={m.id}>{toBn(m.serial || 0)}. {m.name}</SelectItem>)}</SelectContent>
-                  </Select>
+                  <Popover open={editMemberOpen} onOpenChange={setEditMemberOpen}>
+                    <PopoverTrigger asChild>
+                      <Button variant="outline" role="combobox" className="w-full justify-between font-normal">
+                        {selectedEditMember ? `${toBn(selectedEditMember.serial || 0)}. ${selectedEditMember.name}` : "সদস্য নির্বাচন করুন"}
+                        <ChevronsUpDown className="h-4 w-4 opacity-50" />
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-[--radix-popover-trigger-width] p-0" align="start">
+                      <Command filter={(value, search) => value.toLowerCase().includes(search.toLowerCase()) ? 1 : 0}>
+                        <CommandInput placeholder="ক্রম বা নাম দিয়ে খুঁজুন..." />
+                        <CommandList>
+                          <CommandEmpty>কোনও সদস্য পাওয়া যায়নি</CommandEmpty>
+                          <CommandGroup>
+                            {data.members.map((m) => (
+                              <CommandItem key={m.id} value={`${toBn(m.serial || 0)} ${m.serial} ${m.name} ${m.phone || ""}`} onSelect={() => { setEditForm({ ...editForm, memberId: m.id }); setEditMemberOpen(false); }}>
+                                <Check className={cn("h-4 w-4", editForm.memberId === m.id ? "opacity-100" : "opacity-0")} />
+                                {toBn(m.serial || 0)}. {m.name}
+                              </CommandItem>
+                            ))}
+                          </CommandGroup>
+                        </CommandList>
+                      </Command>
+                    </PopoverContent>
+                  </Popover>
                 </div>
                 <div><Label>পরিমাণ (টাকা) *</Label><Input type="number" value={editForm.amount} onChange={(e) => setEditForm({ ...editForm, amount: e.target.value })} /></div>
                 <div><Label>তারিখ</Label><Input type="date" value={editForm.date} onChange={(e) => setEditForm({ ...editForm, date: e.target.value })} /></div>
