@@ -1327,9 +1327,14 @@ function LoansTab() {
           <DialogHeader><DialogTitle>কিস্তি রিসিপ্ট</DialogTitle></DialogHeader>
           {receipt && (
             <div id="installment-receipt" className="border rounded-md p-4 text-sm bg-card">
-              <div className="text-center mb-3">
-                <div className="text-lg font-bold">{data.samitiName || "সমিতি"}</div>
-                <div className="text-xs text-muted-foreground">কিস্তি প্রাপ্তি রিসিপ্ট</div>
+              <div className="flex items-center justify-center gap-3 mb-3">
+                {receipt.logo && (
+                  <img src={receipt.logo} alt="logo" className="h-12 w-12 object-contain rounded" />
+                )}
+                <div className="text-center">
+                  <div className="text-lg font-bold">{data.samitiName || "সমিতি"}</div>
+                  <div className="text-xs text-muted-foreground">কিস্তি প্রাপ্তি রিসিপ্ট</div>
+                </div>
               </div>
               <div className="grid grid-cols-2 gap-2">
                 <div><span className="text-muted-foreground">রিসিপ্ট নং:</span> <span className="font-medium">{receipt.receiptNo}</span></div>
