@@ -1696,6 +1696,10 @@ function LoansTab() {
                   <span className="text-muted-foreground">নোট:</span> <span className="font-medium whitespace-pre-wrap">{receipt.note}</span>
                 </div>
               )}
+              <ReceiptQrPreview payload={{
+                t: "installment", s: data.samitiName || "সমিতি", n: receipt.receiptNo, m: receipt.memberName,
+                a: receipt.amount, d: receipt.date, pa: receipt.paidAfter, ra: receipt.remainingAfter, ln: receipt.loanNo,
+              }} />
               <div className="mt-6 flex justify-between text-xs text-muted-foreground">
                 <div>—————————<br />গ্রহীতা</div>
                 <div className="text-right">—————————<br />কোষাধ্যক্ষ</div>
