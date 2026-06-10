@@ -1313,10 +1313,11 @@ function SavingsTab() {
               catch { toast.error("শেয়ার ব্যর্থ হয়েছে", { id: "dshare" }); }
             }
           }}><Share className="h-4 w-4 mr-1" />শেয়ার</Button>
-          <Button onClick={() => {
+          <Button onClick={async () => {
             if (!receipt) return;
-            const html = buildDepositReceiptHtml(receipt, data.samitiName || "সমিতি");
-            const w = window.open("", "_blank", "width=600,height=750");
+            const qrDataUrl = await buildDepositQr(receipt, data.samitiName || "সমিতি");
+            const html = buildDepositReceiptHtml(receipt, data.samitiName || "সমিতি", qrDataUrl);
+            const w = window.open("", "_blank", "width=600,height=800");
             if (!w) return;
             w.document.write(`<!DOCTYPE html><html><head><meta charset="utf-8"><title>জমা রিসিপ্ট</title><style>${receiptCss}</style></head><body>${html}<script>setTimeout(()=>window.print(),300)</script></body></html>`);
             w.document.close();
