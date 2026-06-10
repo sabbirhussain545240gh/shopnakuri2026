@@ -1077,6 +1077,108 @@ function SavingsTab() {
         )}
       </CardContent>
     </Card>
+
+    <Dialog open={!!receipt} onOpenChange={(o) => !o && setReceipt(null)}>
+      <DialogContent className="max-w-md">
+        <DialogHeader><DialogTitle>জমা রিসিপ্ট</DialogTitle></DialogHeader>
+        {receipt && (
+          <div id="deposit-receipt" className="border rounded-md p-4 text-sm bg-card">
+            <div className="flex items-center justify-center gap-3 mb-3">
+              {receipt.logo && (
+                <img src={receipt.logo} alt="logo" className="h-12 w-12 object-contain rounded" />
+              )}
+              <div className="text-center">
+                <div className="text-lg font-bold">{data.samitiName || "সমিতি"}</div>
+                <div className="text-xs text-muted-foreground">সঞ্চয়/চাদা জমা রিসিপ্ট</div>
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-2">
+              <div><span className="text-muted-foreground">রিসিপ্ট নং:</span> <span className="font-medium">{receipt.receiptNo}</span></div>
+              <div><span className="text-muted-foreground">তারিখ:</span> <span className="font-medium">{fmtDate(receipt.date)}</span></div>
+              <div className="col-span-2"><span className="text-muted-foreground">সদস্য:</span> <span className="font-medium">{receipt.memberSerial ? `${toBn(receipt.memberSerial)}. ` : ""}{receipt.memberName}</span></div>
+            </div>
+            <div className="mt-3 border-t pt-2 flex justify-between text-base">
+              <span className="font-medium">জমার পরিমাণ</span>
+              <span className="font-bold text-success">{formatTk(receipt.amount)}</span>
+            </div>
+            <div className="mt-2 text-sm">
+              <span className="text-muted-foreground">মোট সঞ্চয় (এই জমা সহ):</span> <span className="font-semibold">{formatTk(receipt.totalAfter)}</span>
+            </div>
+            {receipt.note && (
+              <div className="mt-3 text-sm border-t pt-2">
+                <span className="text-muted-foreground">নোট:</span> <span className="font-medium whitespace-pre-wrap">{receipt.note}</span>
+              </div>
+            )}
+            <div className="mt-6 flex justify-between text-xs text-muted-foreground">
+              <div>—————————<br />গ্রহীতা</div>
+              <div className="text-right">—————————<br />কোষাধ্যক্ষ</div>
+            </div>
+          </div>
+        )}
+        <DialogFooter className="gap-2 flex-wrap">
+          <Button variant="outline" onClick={() => setReceipt(null)}>বন্ধ</Button>
+          <Button variant="secondary" onClick={async () => {
+            if (!receipt) return;
+            try {
+              toast.loading("ছবি তৈরি হচ্ছে...", { id: "djpg" });
+              const canvas = await renderDepositReceiptCanvas(receipt, data.samitiName || "সমিতি");
+              const blob = await new Promise<Blob | null>((res) => canvas.toBlob(res, "image/jpeg", 0.95));
+              if (!blob) throw new Error("blob");
+              const url = URL.createObjectURL(blob);
+              const link = document.createElement("a");
+              link.href = url;
+              link.download = `জমা-রিসিপ্ট-${receipt.receiptNo}.jpg`;
+              document.body.appendChild(link);
+              link.click();
+              link.remove();
+              setTimeout(() => URL.revokeObjectURL(url), 1000);
+              toast.success("JPEG ডাউনলোড হয়েছে", { id: "djpg" });
+            } catch (e) {
+              console.error(e);
+              toast.error("ডাউনলোড ব্যর্থ হয়েছে", { id: "djpg" });
+            }
+          }}><ImageDown className="h-4 w-4 mr-1" />JPEG ডাউনলোড</Button>
+          <Button variant="secondary" onClick={async () => {
+            if (!receipt) return;
+            const text = `জমা রিসিপ্ট\nসমিতি: ${data.samitiName || "সমিতি"}\nরিসিপ্ট নং: ${receipt.receiptNo}\nতারিখ: ${fmtDate(receipt.date)}\nসদস্য: ${receipt.memberSerial ? `${toBn(receipt.memberSerial)}. ` : ""}${receipt.memberName}\nজমার পরিমাণ: ${formatTk(receipt.amount)}\nমোট সঞ্চয়: ${formatTk(receipt.totalAfter)}`;
+            try {
+              toast.loading("শেয়ার প্রস্তুত হচ্ছে...", { id: "dshare" });
+              const canvas = await renderDepositReceiptCanvas(receipt, data.samitiName || "সমিতি");
+              const blob = await new Promise<Blob | null>((res) => canvas.toBlob(res, "image/jpeg", 0.95));
+              toast.dismiss("dshare");
+              const file = blob ? new File([blob], `জমা-রিসিপ্ট-${receipt.receiptNo}.jpg`, { type: "image/jpeg" }) : null;
+              const nav: any = navigator;
+              if (file && nav.canShare && nav.canShare({ files: [file] }) && nav.share) {
+                try { await nav.share({ title: "জমা রিসিপ্ট", text, files: [file] }); return; } catch (e: any) {
+                  if (e?.name === "AbortError") return;
+                }
+              }
+              if (nav.share) {
+                try { await nav.share({ title: "জমা রিসিপ্ট", text }); return; } catch (e: any) {
+                  if (e?.name === "AbortError") return;
+                }
+              }
+              await navigator.clipboard.writeText(text);
+              toast.success("রিসিপ্টের তথ্য কপি হয়েছে");
+            } catch (e) {
+              console.error(e);
+              try { await navigator.clipboard.writeText(text); toast.success("রিসিপ্টের তথ্য কপি হয়েছে", { id: "dshare" }); }
+              catch { toast.error("শেয়ার ব্যর্থ হয়েছে", { id: "dshare" }); }
+            }
+          }}><Share className="h-4 w-4 mr-1" />শেয়ার</Button>
+          <Button onClick={() => {
+            if (!receipt) return;
+            const html = buildDepositReceiptHtml(receipt, data.samitiName || "সমিতি");
+            const w = window.open("", "_blank", "width=600,height=750");
+            if (!w) return;
+            w.document.write(`<!DOCTYPE html><html><head><meta charset="utf-8"><title>জমা রিসিপ্ট</title><style>${receiptCss}</style></head><body>${html}<script>setTimeout(()=>window.print(),300)</script></body></html>`);
+            w.document.close();
+            w.focus();
+          }}><Printer className="h-4 w-4 mr-1" />প্রিন্ট</Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+    </>
   );
 }
 
