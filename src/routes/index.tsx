@@ -234,20 +234,23 @@ function EditSamitiName({ name, onSave }: { name: string; onSave: (n: string) =>
   );
 }
 
-function StatCard({ label, value, accent, icon: Icon, hint }: { label: string; value: string; accent?: string; icon?: any; hint?: string }) {
+function StatCard({ label, value, accent, icon: Icon, hint, delay = 0 }: { label: string; value: string; accent?: string; icon?: any; hint?: string; delay?: number }) {
   return (
-    <Card className="overflow-hidden relative hover:shadow-md transition-shadow">
-      <div className={`absolute inset-x-0 top-0 h-1 ${accent ?? "bg-primary"}`} />
+    <Card
+      className="overflow-hidden relative group transition-all duration-300 ease-out hover:-translate-y-1 hover:shadow-xl animate-in fade-in slide-in-from-bottom-2"
+      style={{ animationDelay: `${delay}ms`, animationDuration: "500ms", animationFillMode: "both" }}
+    >
+      <div className={`absolute inset-x-0 top-0 h-1 ${accent ?? "bg-primary"} transition-all duration-300 group-hover:h-1.5`} />
       <CardContent className="pt-5">
         <div className="flex items-start justify-between gap-2">
           <p className="text-sm text-muted-foreground font-medium">{label}</p>
           {Icon && (
-            <div className={`h-8 w-8 rounded-lg ${accent ?? "bg-primary"} bg-opacity-10 flex items-center justify-center shrink-0`}>
+            <div className={`h-9 w-9 rounded-xl ${accent ?? "bg-primary"} flex items-center justify-center shrink-0 shadow-sm transition-transform duration-300 group-hover:scale-110 group-hover:rotate-3`}>
               <Icon className="h-4 w-4 text-white" />
             </div>
           )}
         </div>
-        <p className="text-2xl md:text-3xl font-bold mt-2 text-foreground tracking-tight">{value}</p>
+        <p className="text-2xl md:text-3xl font-bold mt-2 text-foreground tracking-tight tabular-nums">{value}</p>
         {hint && <p className="text-xs text-muted-foreground mt-1">{hint}</p>}
       </CardContent>
     </Card>
