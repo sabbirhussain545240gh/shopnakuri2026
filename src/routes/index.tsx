@@ -2818,6 +2818,7 @@ function SettingsTab() {
     updateSettings({
       defaultInterestRate: Number(rate) || 0,
       defaultDurationMonths: Number(dur) || 12,
+      notice: notice.trim(),
     });
     toast.success("সেটিংস সংরক্ষিত হয়েছে");
   };
