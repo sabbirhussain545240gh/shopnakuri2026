@@ -1621,7 +1621,8 @@ function InstallmentsTab() {
                         {activeLoans.map((l) => {
                           const m = data.members.find((x) => x.id === l.memberId);
                           const rem = Math.max(0, loanTotalDue(l) - loanPaid(data.payments, l.id));
-                          return <SelectItem key={l.id} value={l.id}>{m ? `${toBn(m.serial)} — ${m.name}` : "—"} | বকেয়া {formatTk(rem)}</SelectItem>;
+                          const loanNo = data.loans.findIndex((x) => x.id === l.id) + 1;
+                          return <SelectItem key={l.id} value={l.id}>ঋণ নং {toBn(loanNo)} | {m ? `${toBn(m.serial)} — ${m.name}` : "—"} | বকেয়া {formatTk(rem)}</SelectItem>;
                         })}
                       </SelectContent>
                     </Select>
