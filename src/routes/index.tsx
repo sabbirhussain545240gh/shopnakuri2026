@@ -1388,7 +1388,7 @@ function LoansTab() {
             }}><ImageDown className="h-4 w-4 mr-1" />JPEG ডাউনলোড</Button>
             <Button variant="secondary" onClick={async () => {
               if (!receipt) return;
-              const text = `কিস্তি রিসিপ্ট\nসমিতি: ${data.samitiName || "সমিতি"}\nরিসিপ্ট নং: ${receipt.receiptNo}\nতারিখ: ${fmtDate(receipt.date)}\nসদস্য: ${receipt.memberName}\nপ্রাপ্ত কিস্তি: ${formatTk(receipt.amount)}\nমোট পরিশোধিত: ${formatTk(receipt.paidAfter)}\nঅবশিষ্ট বকেয়া: ${formatTk(receipt.remainingAfter)}`;
+              const text = `কিস্তি রিসিপ্ট\nসমিতি: ${data.samitiName || "সমিতি"}\nরিসিপ্ট নং: ${receipt.receiptNo}\nতারিখ: ${fmtDate(receipt.date)}\nসদস্য: ${receipt.memberName}${receipt.loanNo ? ` (ঋণ নং ${toBn(receipt.loanNo)})` : ""}\nপ্রাপ্ত কিস্তি: ${formatTk(receipt.amount)}\nমোট পরিশোধিত: ${formatTk(receipt.paidAfter)}\nঅবশিষ্ট বকেয়া: ${formatTk(receipt.remainingAfter)}`;
               try {
                 toast.loading("শেয়ার প্রস্তুত হচ্ছে...", { id: "rshare" });
                 const canvas = await renderReceiptCanvas(receipt, data.samitiName || "সমিতি");
