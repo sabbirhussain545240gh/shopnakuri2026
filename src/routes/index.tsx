@@ -1653,6 +1653,10 @@ function InstallmentsTab() {
                       {errors.date && <p className="text-xs text-destructive mt-1">{errors.date}</p>}
                     </div>
                   </div>
+                  <div>
+                    <Label>মন্তব্য / নোট</Label>
+                    <Textarea rows={2} placeholder="ঐচ্ছিক — কিস্তি সংক্রান্ত নোট লিখুন" value={form.note} onChange={(e) => setField("note", e.target.value)} />
+                  </div>
                 </div>
                 <DialogFooter><Button onClick={submit}>সংরক্ষণ</Button></DialogFooter>
               </DialogContent>
