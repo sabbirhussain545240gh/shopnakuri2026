@@ -22,6 +22,28 @@ import { Textarea } from "@/components/ui/textarea";
 import { Users, PiggyBank, HandCoins, LayoutDashboard, Trash2, Plus, CheckCircle2, Pencil, Settings as SettingsIcon, Wallet, Download, Upload, AlertTriangle, TrendingUp, TrendingDown, Menu, Printer, FileText, Receipt, Search, Eye, Share, ImageDown, Check, ChevronsUpDown } from "lucide-react";
 import { toast, Toaster } from "sonner";
 import { AuthGate, SignOutButton, CloudStatusBadge } from "@/components/AuthGate";
+import { buildReceiptQr, type VerifyPayload } from "@/lib/receipt-qr";
+
+function ReceiptQrPreview({ payload }: { payload: VerifyPayload }) {
+  const [src, setSrc] = useState<string>("");
+  const key = JSON.stringify(payload);
+  useEffect(() => {
+    let cancel = false;
+    buildReceiptQr(payload).then(({ dataUrl }) => { if (!cancel) setSrc(dataUrl); });
+    return () => { cancel = true; };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [key]);
+  if (!src) return null;
+  return (
+    <div className="mt-4 pt-3 border-t border-dashed flex items-center gap-3">
+      <img src={src} alt="QR" className="h-24 w-24" />
+      <div className="text-xs text-muted-foreground leading-relaxed">
+        <div className="text-foreground font-semibold mb-0.5">যাচাই করুন</div>
+        এই QR কোড স্ক্যান করে রিসিপ্টের তথ্য যাচাই করতে পারবেন।
+      </div>
+    </div>
+  );
+}
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -1256,6 +1278,10 @@ function SavingsTab() {
                 <span className="text-muted-foreground">নোট:</span> <span className="font-medium whitespace-pre-wrap">{receipt.note}</span>
               </div>
             )}
+            <ReceiptQrPreview payload={{
+              t: "deposit", s: data.samitiName || "সমিতি", n: receipt.receiptNo, m: receipt.memberName,
+              a: receipt.amount, d: receipt.date, ms: receipt.memberSerial, ta: receipt.totalAfter,
+            }} />
             <div className="mt-6 flex justify-between text-xs text-muted-foreground">
               <div>—————————<br />গ্রহীতা</div>
               <div className="text-right">—————————<br />কোষাধ্যক্ষ</div>
@@ -1313,10 +1339,11 @@ function SavingsTab() {
               catch { toast.error("শেয়ার ব্যর্থ হয়েছে", { id: "dshare" }); }
             }
           }}><Share className="h-4 w-4 mr-1" />শেয়ার</Button>
-          <Button onClick={() => {
+          <Button onClick={async () => {
             if (!receipt) return;
-            const html = buildDepositReceiptHtml(receipt, data.samitiName || "সমিতি");
-            const w = window.open("", "_blank", "width=600,height=750");
+            const qrDataUrl = await buildDepositQr(receipt, data.samitiName || "সমিতি");
+            const html = buildDepositReceiptHtml(receipt, data.samitiName || "সমিতি", qrDataUrl);
+            const w = window.open("", "_blank", "width=600,height=800");
             if (!w) return;
             w.document.write(`<!DOCTYPE html><html><head><meta charset="utf-8"><title>জমা রিসিপ্ট</title><style>${receiptCss}</style></head><body>${html}<script>setTimeout(()=>window.print(),300)</script></body></html>`);
             w.document.close();
@@ -1669,6 +1696,10 @@ function LoansTab() {
                   <span className="text-muted-foreground">নোট:</span> <span className="font-medium whitespace-pre-wrap">{receipt.note}</span>
                 </div>
               )}
+              <ReceiptQrPreview payload={{
+                t: "installment", s: data.samitiName || "সমিতি", n: receipt.receiptNo, m: receipt.memberName,
+                a: receipt.amount, d: receipt.date, pa: receipt.paidAfter, ra: receipt.remainingAfter, ln: receipt.loanNo,
+              }} />
               <div className="mt-6 flex justify-between text-xs text-muted-foreground">
                 <div>—————————<br />গ্রহীতা</div>
                 <div className="text-right">—————————<br />কোষাধ্যক্ষ</div>
@@ -1726,10 +1757,11 @@ function LoansTab() {
                 catch { toast.error("শেয়ার ব্যর্থ হয়েছে", { id: "rshare" }); }
               }
             }}><Share className="h-4 w-4 mr-1" />শেয়ার</Button>
-            <Button onClick={() => {
+            <Button onClick={async () => {
               if (!receipt) return;
-              const html = buildReceiptHtml(receipt, data.samitiName || "সমিতি");
-              const w = window.open("", "_blank", "width=600,height=750");
+              const qrDataUrl = await buildInstallmentQr(receipt, data.samitiName || "সমিতি");
+              const html = buildReceiptHtml(receipt, data.samitiName || "সমিতি", qrDataUrl);
+              const w = window.open("", "_blank", "width=600,height=800");
               if (!w) return;
               w.document.write(`<!DOCTYPE html><html><head><meta charset="utf-8"><title>রিসিপ্ট</title><style>${receiptCss}</style></head><body>${html}<script>setTimeout(()=>window.print(),300)</script></body></html>`);
               w.document.close();
@@ -2240,6 +2272,10 @@ function ReceiptsHistoryTab() {
                   <span className="text-muted-foreground">নোট:</span> <span className="font-medium whitespace-pre-wrap">{receipt.note}</span>
                 </div>
               )}
+              <ReceiptQrPreview payload={{
+                t: "installment", s: data.samitiName || "সমিতি", n: receipt.receiptNo, m: receipt.memberName,
+                a: receipt.amount, d: receipt.date, pa: receipt.paidAfter, ra: receipt.remainingAfter, ln: receipt.loanNo,
+              }} />
               <div className="mt-6 flex justify-between text-xs text-muted-foreground">
                 <div>—————————<br />গ্রহীতা</div>
                 <div className="text-right">—————————<br />কোষাধ্যক্ষ</div>
@@ -2297,10 +2333,11 @@ function ReceiptsHistoryTab() {
                 catch { toast.error("শেয়ার ব্যর্থ হয়েছে", { id: "rhshare" }); }
               }
             }}><Share className="h-4 w-4 mr-1" />শেয়ার</Button>
-            <Button onClick={() => {
+            <Button onClick={async () => {
               if (!receipt) return;
-              const html = buildReceiptHtml(receipt, data.samitiName || "সমিতি");
-              const w = window.open("", "_blank", "width=600,height=750");
+              const qrDataUrl = await buildInstallmentQr(receipt, data.samitiName || "সমিতি");
+              const html = buildReceiptHtml(receipt, data.samitiName || "সমিতি", qrDataUrl);
+              const w = window.open("", "_blank", "width=600,height=800");
               if (!w) return;
               w.document.write(`<!DOCTYPE html><html><head><meta charset="utf-8"><title>রিসিপ্ট</title><style>${receiptCss}</style></head><body>${html}<script>setTimeout(()=>window.print(),300)</script></body></html>`);
               w.document.close();
@@ -2607,6 +2644,10 @@ function DepositsHistoryTab() {
                   <span className="text-muted-foreground">নোট:</span> <span className="font-medium whitespace-pre-wrap">{receipt.note}</span>
                 </div>
               )}
+              <ReceiptQrPreview payload={{
+                t: "deposit", s: data.samitiName || "সমিতি", n: receipt.receiptNo, m: receipt.memberName,
+                a: receipt.amount, d: receipt.date, ms: receipt.memberSerial, ta: receipt.totalAfter,
+              }} />
               <div className="mt-6 flex justify-between text-xs text-muted-foreground">
                 <div>—————————<br />গ্রহীতা</div>
                 <div className="text-right">—————————<br />কোষাধ্যক্ষ</div>
@@ -2664,10 +2705,11 @@ function DepositsHistoryTab() {
                 catch { toast.error("শেয়ার ব্যর্থ হয়েছে", { id: "dshare" }); }
               }
             }}><Share className="h-4 w-4 mr-1" />শেয়ার</Button>
-            <Button onClick={() => {
+            <Button onClick={async () => {
               if (!receipt) return;
-              const html = buildDepositReceiptHtml(receipt, data.samitiName || "সমিতি");
-              const w = window.open("", "_blank", "width=600,height=750");
+              const qrDataUrl = await buildDepositQr(receipt, data.samitiName || "সমিতি");
+              const html = buildDepositReceiptHtml(receipt, data.samitiName || "সমিতি", qrDataUrl);
+              const w = window.open("", "_blank", "width=600,height=800");
               if (!w) return;
               w.document.write(`<!DOCTYPE html><html><head><meta charset="utf-8"><title>জমা রিসিপ্ট</title><style>${receiptCss}</style></head><body>${html}<script>setTimeout(()=>window.print(),300)</script></body></html>`);
               w.document.close();
@@ -3576,10 +3618,25 @@ const receiptCss = `
   .totals{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px;font-size:13px;}
   .due{color:#b91c1c;font-weight:600;}
   .sign{display:flex;justify-content:space-between;margin-top:32px;font-size:12px;color:#666;}
+  .qr{margin-top:14px;padding-top:10px;border-top:1px dashed #ccc;display:flex;align-items:center;gap:12px;}
+  .qr img{width:110px;height:110px;}
+  .qr .qr-text{font-size:11px;color:#555;line-height:1.5;}
+  .qr .qr-text b{color:#111;font-size:12px;}
   @media print{body{padding:0;} .no-print{display:none;}}
 `;
 
-function buildReceiptHtml(r: { loan: Loan; memberName: string; amount: number; date: string; paidAfter: number; remainingAfter: number; receiptNo: string; note?: string; logo?: string; loanNo?: number }, samitiName: string) {
+const qrBlockHtml = (qrDataUrl?: string) =>
+  qrDataUrl
+    ? `<div class="qr">
+        <img src="${qrDataUrl}" alt="QR" />
+        <div class="qr-text">
+          <b>যাচাই করুন</b><br/>
+          এই QR কোডটি স্ক্যান করে রিসিপ্টের তথ্য যাচাই করতে পারবেন।
+        </div>
+      </div>`
+    : "";
+
+function buildReceiptHtml(r: { loan: Loan; memberName: string; amount: number; date: string; paidAfter: number; remainingAfter: number; receiptNo: string; note?: string; logo?: string; loanNo?: number }, samitiName: string, qrDataUrl?: string) {
   return `<div class="r" id="r">
     <div class="header">
       ${r.logo ? `<img src="${r.logo}" alt="logo" class="logo"/>` : ""}
@@ -3598,11 +3655,22 @@ function buildReceiptHtml(r: { loan: Loan; memberName: string; amount: number; d
       <div><span class="muted">অবশিষ্ট বকেয়া:</span> <span class="due">${formatTk(r.remainingAfter)}</span></div>
     </div>
     ${r.note ? `<div class="note"><span class="muted">নোট:</span> <b>${r.note.replace(/</g, "&lt;")}</b></div>` : ""}
+    ${qrBlockHtml(qrDataUrl)}
     <div class="sign"><div>—————————<br/>গ্রহীতা</div><div style="text-align:right">—————————<br/>কোষাধ্যক্ষ</div></div>
   </div>`;
 }
 
+async function buildInstallmentQr(r: { memberName: string; amount: number; date: string; paidAfter: number; remainingAfter: number; receiptNo: string; loanNo?: number }, samitiName: string): Promise<string> {
+  const { buildReceiptQr } = await import("@/lib/receipt-qr");
+  const { dataUrl } = await buildReceiptQr({
+    t: "installment", s: samitiName, n: r.receiptNo, m: r.memberName,
+    a: r.amount, d: r.date, pa: r.paidAfter, ra: r.remainingAfter, ln: r.loanNo,
+  });
+  return dataUrl;
+}
+
 async function renderReceiptCanvas(r: { loan: Loan; memberName: string; amount: number; date: string; paidAfter: number; remainingAfter: number; receiptNo: string; note?: string; logo?: string; loanNo?: number }, samitiName: string): Promise<HTMLCanvasElement> {
+  const qrDataUrl = await buildInstallmentQr(r, samitiName);
   const { default: html2canvas } = await import("html2canvas");
   const iframe = document.createElement("iframe");
   iframe.style.cssText = "position:fixed;left:-10000px;top:0;width:600px;height:10px;border:0;";
@@ -3610,7 +3678,7 @@ async function renderReceiptCanvas(r: { loan: Loan; memberName: string; amount: 
   try {
     const doc = iframe.contentDocument!;
     doc.open();
-    doc.write(`<!DOCTYPE html><html><head><meta charset="utf-8"><style>${receiptCss}</style></head><body>${buildReceiptHtml(r, samitiName)}</body></html>`);
+    doc.write(`<!DOCTYPE html><html><head><meta charset="utf-8"><style>${receiptCss}</style></head><body>${buildReceiptHtml(r, samitiName, qrDataUrl)}</body></html>`);
     doc.close();
     await new Promise((res) => setTimeout(res, 60));
     const target = doc.getElementById("r")!;
@@ -3632,7 +3700,7 @@ type DepositReceiptData = {
   logo?: string;
 };
 
-function buildDepositReceiptHtml(r: DepositReceiptData, samitiName: string) {
+function buildDepositReceiptHtml(r: DepositReceiptData, samitiName: string, qrDataUrl?: string) {
   return `<div class="r" id="r">
     <div class="header">
       ${r.logo ? `<img src="${r.logo}" alt="logo" class="logo"/>` : ""}
@@ -3648,11 +3716,22 @@ function buildDepositReceiptHtml(r: DepositReceiptData, samitiName: string) {
       <div class="full"><span class="muted">মোট সঞ্চয় (এই জমা সহ):</span> <b>${formatTk(r.totalAfter)}</b></div>
     </div>
     ${r.note ? `<div class="note"><span class="muted">নোট:</span> <b>${r.note.replace(/</g, "&lt;")}</b></div>` : ""}
+    ${qrBlockHtml(qrDataUrl)}
     <div class="sign"><div>—————————<br/>গ্রহীতা</div><div style="text-align:right">—————————<br/>কোষাধ্যক্ষ</div></div>
   </div>`;
 }
 
+async function buildDepositQr(r: DepositReceiptData, samitiName: string): Promise<string> {
+  const { buildReceiptQr } = await import("@/lib/receipt-qr");
+  const { dataUrl } = await buildReceiptQr({
+    t: "deposit", s: samitiName, n: r.receiptNo, m: r.memberName,
+    a: r.amount, d: r.date, ms: r.memberSerial, ta: r.totalAfter,
+  });
+  return dataUrl;
+}
+
 async function renderDepositReceiptCanvas(r: DepositReceiptData, samitiName: string): Promise<HTMLCanvasElement> {
+  const qrDataUrl = await buildDepositQr(r, samitiName);
   const { default: html2canvas } = await import("html2canvas");
   const iframe = document.createElement("iframe");
   iframe.style.cssText = "position:fixed;left:-10000px;top:0;width:600px;height:10px;border:0;";
@@ -3660,7 +3739,7 @@ async function renderDepositReceiptCanvas(r: DepositReceiptData, samitiName: str
   try {
     const doc = iframe.contentDocument!;
     doc.open();
-    doc.write(`<!DOCTYPE html><html><head><meta charset="utf-8"><style>${receiptCss}</style></head><body>${buildDepositReceiptHtml(r, samitiName)}</body></html>`);
+    doc.write(`<!DOCTYPE html><html><head><meta charset="utf-8"><style>${receiptCss}</style></head><body>${buildDepositReceiptHtml(r, samitiName, qrDataUrl)}</body></html>`);
     doc.close();
     await new Promise((res) => setTimeout(res, 60));
     const target = doc.getElementById("r")!;
@@ -3670,3 +3749,4 @@ async function renderDepositReceiptCanvas(r: DepositReceiptData, samitiName: str
     document.body.removeChild(iframe);
   }
 }
+
