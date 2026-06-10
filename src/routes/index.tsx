@@ -3594,7 +3594,7 @@ const qrBlockHtml = (qrDataUrl?: string) =>
       </div>`
     : "";
 
-function buildReceiptHtml(r: { loan: Loan; memberName: string; amount: number; date: string; paidAfter: number; remainingAfter: number; receiptNo: string; note?: string; logo?: string; loanNo?: number }, samitiName: string) {
+function buildReceiptHtml(r: { loan: Loan; memberName: string; amount: number; date: string; paidAfter: number; remainingAfter: number; receiptNo: string; note?: string; logo?: string; loanNo?: number }, samitiName: string, qrDataUrl?: string) {
   return `<div class="r" id="r">
     <div class="header">
       ${r.logo ? `<img src="${r.logo}" alt="logo" class="logo"/>` : ""}
@@ -3613,11 +3613,22 @@ function buildReceiptHtml(r: { loan: Loan; memberName: string; amount: number; d
       <div><span class="muted">অবশিষ্ট বকেয়া:</span> <span class="due">${formatTk(r.remainingAfter)}</span></div>
     </div>
     ${r.note ? `<div class="note"><span class="muted">নোট:</span> <b>${r.note.replace(/</g, "&lt;")}</b></div>` : ""}
+    ${qrBlockHtml(qrDataUrl)}
     <div class="sign"><div>—————————<br/>গ্রহীতা</div><div style="text-align:right">—————————<br/>কোষাধ্যক্ষ</div></div>
   </div>`;
 }
 
+async function buildInstallmentQr(r: { memberName: string; amount: number; date: string; paidAfter: number; remainingAfter: number; receiptNo: string; loanNo?: number }, samitiName: string): Promise<string> {
+  const { buildReceiptQr } = await import("@/lib/receipt-qr");
+  const { dataUrl } = await buildReceiptQr({
+    t: "installment", s: samitiName, n: r.receiptNo, m: r.memberName,
+    a: r.amount, d: r.date, pa: r.paidAfter, ra: r.remainingAfter, ln: r.loanNo,
+  });
+  return dataUrl;
+}
+
 async function renderReceiptCanvas(r: { loan: Loan; memberName: string; amount: number; date: string; paidAfter: number; remainingAfter: number; receiptNo: string; note?: string; logo?: string; loanNo?: number }, samitiName: string): Promise<HTMLCanvasElement> {
+  const qrDataUrl = await buildInstallmentQr(r, samitiName);
   const { default: html2canvas } = await import("html2canvas");
   const iframe = document.createElement("iframe");
   iframe.style.cssText = "position:fixed;left:-10000px;top:0;width:600px;height:10px;border:0;";
@@ -3625,7 +3636,7 @@ async function renderReceiptCanvas(r: { loan: Loan; memberName: string; amount: 
   try {
     const doc = iframe.contentDocument!;
     doc.open();
-    doc.write(`<!DOCTYPE html><html><head><meta charset="utf-8"><style>${receiptCss}</style></head><body>${buildReceiptHtml(r, samitiName)}</body></html>`);
+    doc.write(`<!DOCTYPE html><html><head><meta charset="utf-8"><style>${receiptCss}</style></head><body>${buildReceiptHtml(r, samitiName, qrDataUrl)}</body></html>`);
     doc.close();
     await new Promise((res) => setTimeout(res, 60));
     const target = doc.getElementById("r")!;
@@ -3647,7 +3658,7 @@ type DepositReceiptData = {
   logo?: string;
 };
 
-function buildDepositReceiptHtml(r: DepositReceiptData, samitiName: string) {
+function buildDepositReceiptHtml(r: DepositReceiptData, samitiName: string, qrDataUrl?: string) {
   return `<div class="r" id="r">
     <div class="header">
       ${r.logo ? `<img src="${r.logo}" alt="logo" class="logo"/>` : ""}
@@ -3663,11 +3674,22 @@ function buildDepositReceiptHtml(r: DepositReceiptData, samitiName: string) {
       <div class="full"><span class="muted">মোট সঞ্চয় (এই জমা সহ):</span> <b>${formatTk(r.totalAfter)}</b></div>
     </div>
     ${r.note ? `<div class="note"><span class="muted">নোট:</span> <b>${r.note.replace(/</g, "&lt;")}</b></div>` : ""}
+    ${qrBlockHtml(qrDataUrl)}
     <div class="sign"><div>—————————<br/>গ্রহীতা</div><div style="text-align:right">—————————<br/>কোষাধ্যক্ষ</div></div>
   </div>`;
 }
 
+async function buildDepositQr(r: DepositReceiptData, samitiName: string): Promise<string> {
+  const { buildReceiptQr } = await import("@/lib/receipt-qr");
+  const { dataUrl } = await buildReceiptQr({
+    t: "deposit", s: samitiName, n: r.receiptNo, m: r.memberName,
+    a: r.amount, d: r.date, ms: r.memberSerial, ta: r.totalAfter,
+  });
+  return dataUrl;
+}
+
 async function renderDepositReceiptCanvas(r: DepositReceiptData, samitiName: string): Promise<HTMLCanvasElement> {
+  const qrDataUrl = await buildDepositQr(r, samitiName);
   const { default: html2canvas } = await import("html2canvas");
   const iframe = document.createElement("iframe");
   iframe.style.cssText = "position:fixed;left:-10000px;top:0;width:600px;height:10px;border:0;";
@@ -3675,7 +3697,7 @@ async function renderDepositReceiptCanvas(r: DepositReceiptData, samitiName: str
   try {
     const doc = iframe.contentDocument!;
     doc.open();
-    doc.write(`<!DOCTYPE html><html><head><meta charset="utf-8"><style>${receiptCss}</style></head><body>${buildDepositReceiptHtml(r, samitiName)}</body></html>`);
+    doc.write(`<!DOCTYPE html><html><head><meta charset="utf-8"><style>${receiptCss}</style></head><body>${buildDepositReceiptHtml(r, samitiName, qrDataUrl)}</body></html>`);
     doc.close();
     await new Promise((res) => setTimeout(res, 60));
     const target = doc.getElementById("r")!;
@@ -3685,3 +3707,4 @@ async function renderDepositReceiptCanvas(r: DepositReceiptData, samitiName: str
     document.body.removeChild(iframe);
   }
 }
+
