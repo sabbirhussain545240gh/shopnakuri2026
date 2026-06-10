@@ -47,6 +47,7 @@ export type LoanPayment = {
   loanId: string;
   amount: number;
   date: string;
+  note?: string;
 };
 
 export type Transaction = {

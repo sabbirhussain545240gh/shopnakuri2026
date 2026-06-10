@@ -1026,8 +1026,8 @@ function LoansTab() {
   const [detailFor, setDetailFor] = useState<Loan | null>(null);
   const [editForm, setEditForm] = useState({ memberId: "", amount: "", interestRate: "", durationMonths: "", date: "" });
   const [form, setForm] = useState({ memberId: "", amount: "", interestRate: String(data.settings.defaultInterestRate), durationMonths: String(data.settings.defaultDurationMonths), date: today(), memberGuarantorId: "", familyGuarantorName: "", familyGuarantorRelation: "", familyGuarantorCustomRelation: "", familyGuarantorPhone: "" });
-  const [payForm, setPayForm] = useState({ amount: "", date: today() });
-  const [receipt, setReceipt] = useState<null | { loan: Loan; memberName: string; amount: number; date: string; paidAfter: number; remainingAfter: number; receiptNo: string }>(null);
+  const [payForm, setPayForm] = useState({ amount: "", date: today(), note: "" });
+  const [receipt, setReceipt] = useState<null | { loan: Loan; memberName: string; amount: number; date: string; paidAfter: number; remainingAfter: number; receiptNo: string; note?: string; logo?: string }>(null);
   const [errors, setErrors] = useState<Record<string, string>>({});
 
   const setField = (key: string, value: string) => {
@@ -1073,7 +1073,7 @@ function LoansTab() {
     const amt = Number(payForm.amount);
     if (!amt || amt <= 0) { toast.error("সঠিক পরিমাণ দিন"); return; }
     if (!payFor) return;
-    addPayment({ loanId: payFor.id, amount: amt, date: payForm.date });
+    addPayment({ loanId: payFor.id, amount: amt, date: payForm.date, note: payForm.note.trim() || undefined });
     const mem = data.members.find((x) => x.id === payFor.memberId);
     const prevPaid = loanPaid(data.payments, payFor.id);
     const due = loanTotalDue(payFor);
@@ -1087,8 +1087,10 @@ function LoansTab() {
       paidAfter,
       remainingAfter,
       receiptNo: `R-${Date.now().toString().slice(-6)}`,
+      note: payForm.note.trim() || undefined,
+      logo: data.samitiLogo || undefined,
     });
-    setPayForm({ amount: "", date: today() });
+    setPayForm({ amount: "", date: today(), note: "" });
     setPayFor(null);
     toast.success("কিস্তি যোগ হয়েছে");
   };
@@ -1249,7 +1251,7 @@ function LoansTab() {
                           type="button"
                           className="text-primary underline-offset-2 hover:underline cursor-pointer"
                           title="ক্লিক করে কিস্তি গ্রহণ করুন"
-                          onClick={() => { setPayFor(l); setPayForm({ amount: String(Math.round(Math.min(inst, remaining))), date: today() }); }}
+                          onClick={() => { setPayFor(l); setPayForm({ amount: String(Math.round(Math.min(inst, remaining))), date: today(), note: "" }); }}
                         >
                           {formatTk(inst)}
                         </button>
@@ -1267,7 +1269,7 @@ function LoansTab() {
                     <TableCell className="flex gap-1">
                       {l.status === "active" && (
                         <>
-                          <Button size="sm" variant="outline" onClick={() => { setPayFor(l); setPayForm({ amount: String(Math.round(Math.min(inst, remaining))), date: today() }); }}>কিস্তি</Button>
+                          <Button size="sm" variant="outline" onClick={() => { setPayFor(l); setPayForm({ amount: String(Math.round(Math.min(inst, remaining))), date: today(), note: "" }); }}>কিস্তি</Button>
                           {remaining <= 0 && (
                             <Button size="icon" variant="ghost" onClick={() => { closeLoan(l.id); toast.success("ঋণ পরিশোধিত"); }}>
                               <CheckCircle2 className="h-4 w-4 text-success" />
@@ -1314,6 +1316,7 @@ function LoansTab() {
           <div className="space-y-3">
             <div><Label>পরিমাণ *</Label><Input type="number" value={payForm.amount} onChange={(e) => setPayForm({ ...payForm, amount: e.target.value })} /></div>
             <div><Label>তারিখ</Label><Input type="date" value={payForm.date} onChange={(e) => setPayForm({ ...payForm, date: e.target.value })} /></div>
+            <div><Label>মন্তব্য / নোট</Label><Textarea rows={2} placeholder="ঐচ্ছিক — কিস্তি সংক্রান্ত নোট লিখুন" value={payForm.note} onChange={(e) => setPayForm({ ...payForm, note: e.target.value })} /></div>
           </div>
           <DialogFooter><Button onClick={submitPay}>সংরক্ষণ ও রিসিপ্ট</Button></DialogFooter>
         </DialogContent>
@@ -1324,9 +1327,14 @@ function LoansTab() {
           <DialogHeader><DialogTitle>কিস্তি রিসিপ্ট</DialogTitle></DialogHeader>
           {receipt && (
             <div id="installment-receipt" className="border rounded-md p-4 text-sm bg-card">
-              <div className="text-center mb-3">
-                <div className="text-lg font-bold">{data.samitiName || "সমিতি"}</div>
-                <div className="text-xs text-muted-foreground">কিস্তি প্রাপ্তি রিসিপ্ট</div>
+              <div className="flex items-center justify-center gap-3 mb-3">
+                {receipt.logo && (
+                  <img src={receipt.logo} alt="logo" className="h-12 w-12 object-contain rounded" />
+                )}
+                <div className="text-center">
+                  <div className="text-lg font-bold">{data.samitiName || "সমিতি"}</div>
+                  <div className="text-xs text-muted-foreground">কিস্তি প্রাপ্তি রিসিপ্ট</div>
+                </div>
               </div>
               <div className="grid grid-cols-2 gap-2">
                 <div><span className="text-muted-foreground">রিসিপ্ট নং:</span> <span className="font-medium">{receipt.receiptNo}</span></div>
@@ -1343,6 +1351,11 @@ function LoansTab() {
                 <div><span className="text-muted-foreground">মোট পরিশোধিত:</span> <span className="font-medium">{formatTk(receipt.paidAfter)}</span></div>
                 <div><span className="text-muted-foreground">অবশিষ্ট বকেয়া:</span> <span className="font-semibold text-destructive">{formatTk(receipt.remainingAfter)}</span></div>
               </div>
+              {receipt.note && (
+                <div className="mt-3 text-sm border-t pt-2">
+                  <span className="text-muted-foreground">নোট:</span> <span className="font-medium whitespace-pre-wrap">{receipt.note}</span>
+                </div>
+              )}
               <div className="mt-6 flex justify-between text-xs text-muted-foreground">
                 <div>—————————<br />গ্রহীতা</div>
                 <div className="text-right">—————————<br />কোষাধ্যক্ষ</div>
@@ -1545,7 +1558,7 @@ function InstallmentsTab() {
     if (selected && amt > selected.remaining + 0.01) next.amount = `বকেয়ার চেয়ে বেশি (বকেয়া ${formatTk(selected.remaining)})`;
     if (Object.keys(next).length) { setErrors(next); return; }
 
-    addPayment({ loanId: form.loanId, amount: amt, date: form.date });
+    addPayment({ loanId: form.loanId, amount: amt, date: form.date, note: form.note.trim() || undefined });
     if (selected) {
       const newPaid = selected.paid + amt;
       if (newPaid >= selected.due - 0.01) {
@@ -1639,6 +1652,10 @@ function InstallmentsTab() {
                       <Input type="date" className={errors.date ? "border-destructive" : ""} value={form.date} onChange={(e) => setField("date", e.target.value)} />
                       {errors.date && <p className="text-xs text-destructive mt-1">{errors.date}</p>}
                     </div>
+                  </div>
+                  <div>
+                    <Label>মন্তব্য / নোট</Label>
+                    <Textarea rows={2} placeholder="ঐচ্ছিক — কিস্তি সংক্রান্ত নোট লিখুন" value={form.note} onChange={(e) => setField("note", e.target.value)} />
                   </div>
                 </div>
                 <DialogFooter><Button onClick={submit}>সংরক্ষণ</Button></DialogFooter>
@@ -2560,6 +2577,10 @@ const receiptCss = `
   body{margin:0;padding:20px;background:#fff;color:#111;font-family:"Segoe UI","Noto Sans Bengali",Arial,sans-serif;}
   .r{width:520px;border:1px solid #ddd;border-radius:8px;padding:20px;background:#fff;}
   .center{text-align:center;}
+  .header{display:flex;align-items:center;justify-content:center;gap:12px;margin-bottom:6px;}
+  .logo{width:54px;height:54px;object-fit:contain;border-radius:6px;}
+  .head-text{text-align:center;}
+  .note{margin-top:10px;padding-top:8px;border-top:1px solid #eee;font-size:13px;white-space:pre-wrap;}
   .title{font-size:20px;font-weight:700;margin:0;}
   .sub{font-size:12px;color:#666;margin-top:2px;}
   .grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:14px;font-size:13px;}
@@ -2573,9 +2594,12 @@ const receiptCss = `
   @media print{body{padding:0;} .no-print{display:none;}}
 `;
 
-function buildReceiptHtml(r: { loan: Loan; memberName: string; amount: number; date: string; paidAfter: number; remainingAfter: number; receiptNo: string }, samitiName: string) {
+function buildReceiptHtml(r: { loan: Loan; memberName: string; amount: number; date: string; paidAfter: number; remainingAfter: number; receiptNo: string; note?: string; logo?: string }, samitiName: string) {
   return `<div class="r" id="r">
-    <div class="center"><div class="title">${samitiName}</div><div class="sub">কিস্তি প্রাপ্তি রিসিপ্ট</div></div>
+    <div class="header">
+      ${r.logo ? `<img src="${r.logo}" alt="logo" class="logo"/>` : ""}
+      <div class="head-text"><div class="title">${samitiName}</div><div class="sub">কিস্তি প্রাপ্তি রিসিপ্ট</div></div>
+    </div>
     <div class="grid">
       <div><span class="muted">রিসিপ্ট নং:</span> <b>${r.receiptNo}</b></div>
       <div><span class="muted">তারিখ:</span> <b>${fmtDate(r.date)}</b></div>
@@ -2588,11 +2612,12 @@ function buildReceiptHtml(r: { loan: Loan; memberName: string; amount: number; d
       <div><span class="muted">মোট পরিশোধিত:</span> <b>${formatTk(r.paidAfter)}</b></div>
       <div><span class="muted">অবশিষ্ট বকেয়া:</span> <span class="due">${formatTk(r.remainingAfter)}</span></div>
     </div>
+    ${r.note ? `<div class="note"><span class="muted">নোট:</span> <b>${r.note.replace(/</g, "&lt;")}</b></div>` : ""}
     <div class="sign"><div>—————————<br/>গ্রহীতা</div><div style="text-align:right">—————————<br/>কোষাধ্যক্ষ</div></div>
   </div>`;
 }
 
-async function renderReceiptCanvas(r: { loan: Loan; memberName: string; amount: number; date: string; paidAfter: number; remainingAfter: number; receiptNo: string }, samitiName: string): Promise<HTMLCanvasElement> {
+async function renderReceiptCanvas(r: { loan: Loan; memberName: string; amount: number; date: string; paidAfter: number; remainingAfter: number; receiptNo: string; note?: string; logo?: string }, samitiName: string): Promise<HTMLCanvasElement> {
   const { default: html2canvas } = await import("html2canvas");
   const iframe = document.createElement("iframe");
   iframe.style.cssText = "position:fixed;left:-10000px;top:0;width:600px;height:10px;border:0;";
