@@ -321,8 +321,8 @@ function Dashboard({ totals, memberCount, data }: any) {
             </div>
             <div className="relative flex-1 overflow-hidden py-2.5">
               <div className="whitespace-nowrap animate-marquee text-sm sm:text-base text-foreground/90">
-                {(data.settings as any).notice?.trim()
-                  ? (data.settings as any).notice
+                {data.settings.notice?.trim()
+                  ? data.settings.notice
                   : `স্বাগতম ${data.samitiName || "আমাদের সমিতি"} ম্যানেজমেন্ট সিস্টেমে — নিয়মিত সঞ্চয় জমা দিন • ঋণের কিস্তি সময়মতো পরিশোধ করুন • যেকোনো জিজ্ঞাসায় কমিটির সাথে যোগাযোগ করুন • ধন্যবাদ।`}
               </div>
             </div>
