@@ -29,8 +29,16 @@ export const Route = createFileRoute("/")({
       { property: "og:description", content: "সদস্য, সঞ্চয়/চাদা ও ঋণ ব্যবস্থাপনার জন্য সম্পূর্ণ বাংলা সফটওয়্যার।" },
     ],
   }),
-  component: SamitiApp,
+  component: GatedApp,
 });
+
+function GatedApp() {
+  return (
+    <AuthGate>
+      {() => <SamitiApp />}
+    </AuthGate>
+  );
+}
 
 
 
