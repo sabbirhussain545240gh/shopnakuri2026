@@ -1935,6 +1935,7 @@ function InstallmentsTab() {
 function ReceiptsHistoryTab() {
   const { data } = useSamiti();
   const [q, setQ] = useState("");
+  const [receipt, setReceipt] = useState<null | { loan: Loan; memberName: string; amount: number; date: string; paidAfter: number; remainingAfter: number; receiptNo: string; note?: string; logo?: string; loanNo?: number }>(null);
 
   const rows = useMemo(() => {
     const memberById = new Map(data.members.map((m) => [m.id, m]));
@@ -1947,6 +1948,8 @@ function ReceiptsHistoryTab() {
         const member = loan ? memberById.get(loan.memberId) : undefined;
         return {
           id: p.id,
+          loanId: p.loanId,
+          loan,
           date: p.date,
           memberName: member?.name ?? "—",
           loanNo: loanIndexById.get(p.loanId) ?? 0,
@@ -1967,6 +1970,27 @@ function ReceiptsHistoryTab() {
   }, [data, q]);
 
   const total = rows.reduce((s, r) => s + r.amount, 0);
+
+  const openReceipt = (r: typeof rows[number]) => {
+    if (!r.loan) { toast.error("ঋণ পাওয়া যায়নি"); return; }
+    const loanPayments = data.payments.filter((p) => p.loanId === r.loanId);
+    const paidAfter = loanPayments
+      .filter((p) => p.date < r.date || (p.date === r.date && p.id <= r.id))
+      .reduce((s, p) => s + p.amount, 0);
+    const remainingAfter = Math.max(0, loanTotalDue(r.loan) - paidAfter);
+    setReceipt({
+      loan: r.loan,
+      memberName: r.memberName,
+      amount: r.amount,
+      date: r.date,
+      paidAfter,
+      remainingAfter,
+      receiptNo: `R-${toBn(r.loanNo)}-${toBn(loanPayments.findIndex((p) => p.id === r.id) + 1)}`,
+      note: r.note,
+      logo: data.samitiLogo,
+      loanNo: r.loanNo,
+    });
+  };
 
   return (
     <div className="space-y-4">
@@ -1992,11 +2016,12 @@ function ReceiptsHistoryTab() {
                 <TableHead>সদস্য</TableHead>
                 <TableHead>নোট</TableHead>
                 <TableHead className="text-right">পরিমাণ</TableHead>
+                <TableHead className="w-24 text-center">কার্যক্রম</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {rows.length === 0 ? (
-                <TableRow><TableCell colSpan={6} className="text-center text-muted-foreground py-8">কোনো রিসিপ্ট পাওয়া যায়নি</TableCell></TableRow>
+                <TableRow><TableCell colSpan={7} className="text-center text-muted-foreground py-8">কোনো রিসিপ্ট পাওয়া যায়নি</TableCell></TableRow>
               ) : rows.map((r, i) => (
                 <TableRow key={r.id}>
                   <TableCell className="text-center text-muted-foreground">{toBn(i + 1)}</TableCell>
@@ -2005,21 +2030,132 @@ function ReceiptsHistoryTab() {
                   <TableCell className="font-medium">{r.memberName} <span className="text-xs text-muted-foreground">(ঋণ নং {toBn(r.loanNo)})</span></TableCell>
                   <TableCell className="text-muted-foreground text-sm">{r.note || "—"}</TableCell>
                   <TableCell className="text-right font-semibold text-success">{formatTk(r.amount)}</TableCell>
+                  <TableCell className="text-center">
+                    <Button variant="ghost" size="icon" title="রিসিপ্ট দেখুন" onClick={() => openReceipt(r)}>
+                      <Receipt className="h-4 w-4 text-primary" />
+                    </Button>
+                  </TableCell>
                 </TableRow>
               ))}
               {rows.length > 0 && (
                 <TableRow>
                   <TableCell colSpan={5} className="text-right font-semibold">মোট</TableCell>
                   <TableCell className="text-right font-bold">{formatTk(total)}</TableCell>
+                  <TableCell />
                 </TableRow>
               )}
             </TableBody>
           </Table>
         </CardContent>
       </Card>
+
+      <Dialog open={!!receipt} onOpenChange={(o) => !o && setReceipt(null)}>
+        <DialogContent className="max-w-md">
+          <DialogHeader><DialogTitle>কিস্তি রিসিপ্ট</DialogTitle></DialogHeader>
+          {receipt && (
+            <div className="border rounded-md p-4 text-sm bg-card">
+              <div className="flex items-center justify-center gap-3 mb-3">
+                {receipt.logo && (
+                  <img src={receipt.logo} alt="logo" className="h-12 w-12 object-contain rounded" />
+                )}
+                <div className="text-center">
+                  <div className="text-lg font-bold">{data.samitiName || "সমিতি"}</div>
+                  <div className="text-xs text-muted-foreground">কিস্তি প্রাপ্তি রিসিপ্ট</div>
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-2">
+                <div><span className="text-muted-foreground">রিসিপ্ট নং:</span> <span className="font-medium">{receipt.receiptNo}</span></div>
+                <div><span className="text-muted-foreground">তারিখ:</span> <span className="font-medium">{fmtDate(receipt.date)}</span></div>
+                <div className="col-span-2"><span className="text-muted-foreground">সদস্য:</span> <span className="font-medium">{receipt.memberName}{receipt.loanNo ? ` (ঋণ নং ${toBn(receipt.loanNo)})` : ""}</span></div>
+                <div><span className="text-muted-foreground">ঋণ মূল:</span> {formatTk(receipt.loan.amount)}</div>
+                <div><span className="text-muted-foreground">মেয়াদ:</span> {toBn(receipt.loan.durationMonths)} মাস</div>
+              </div>
+              <div className="mt-3 border-t pt-2 flex justify-between text-base">
+                <span className="font-medium">প্রাপ্ত কিস্তি</span>
+                <span className="font-bold text-success">{formatTk(receipt.amount)}</span>
+              </div>
+              <div className="mt-2 grid grid-cols-2 gap-2 text-sm">
+                <div><span className="text-muted-foreground">মোট পরিশোধিত:</span> <span className="font-medium">{formatTk(receipt.paidAfter)}</span></div>
+                <div><span className="text-muted-foreground">অবশিষ্ট বকেয়া:</span> <span className="font-semibold text-destructive">{formatTk(receipt.remainingAfter)}</span></div>
+              </div>
+              {receipt.note && (
+                <div className="mt-3 text-sm border-t pt-2">
+                  <span className="text-muted-foreground">নোট:</span> <span className="font-medium whitespace-pre-wrap">{receipt.note}</span>
+                </div>
+              )}
+              <div className="mt-6 flex justify-between text-xs text-muted-foreground">
+                <div>—————————<br />গ্রহীতা</div>
+                <div className="text-right">—————————<br />কোষাধ্যক্ষ</div>
+              </div>
+            </div>
+          )}
+          <DialogFooter className="gap-2 flex-wrap">
+            <Button variant="outline" onClick={() => setReceipt(null)}>বন্ধ</Button>
+            <Button variant="secondary" onClick={async () => {
+              if (!receipt) return;
+              try {
+                toast.loading("ছবি তৈরি হচ্ছে...", { id: "rhjpg" });
+                const canvas = await renderReceiptCanvas(receipt, data.samitiName || "সমিতি");
+                const blob = await new Promise<Blob | null>((res) => canvas.toBlob(res, "image/jpeg", 0.95));
+                if (!blob) throw new Error("blob");
+                const url = URL.createObjectURL(blob);
+                const link = document.createElement("a");
+                link.href = url;
+                link.download = `রিসিপ্ট-${receipt.receiptNo}.jpg`;
+                document.body.appendChild(link);
+                link.click();
+                link.remove();
+                setTimeout(() => URL.revokeObjectURL(url), 1000);
+                toast.success("JPEG ডাউনলোড হয়েছে", { id: "rhjpg" });
+              } catch (e) {
+                console.error(e);
+                toast.error("ডাউনলোড ব্যর্থ হয়েছে", { id: "rhjpg" });
+              }
+            }}><ImageDown className="h-4 w-4 mr-1" />JPEG ডাউনলোড</Button>
+            <Button variant="secondary" onClick={async () => {
+              if (!receipt) return;
+              const text = `কিস্তি রিসিপ্ট\nসমিতি: ${data.samitiName || "সমিতি"}\nরিসিপ্ট নং: ${receipt.receiptNo}\nতারিখ: ${fmtDate(receipt.date)}\nসদস্য: ${receipt.memberName}${receipt.loanNo ? ` (ঋণ নং ${toBn(receipt.loanNo)})` : ""}\nপ্রাপ্ত কিস্তি: ${formatTk(receipt.amount)}\nমোট পরিশোধিত: ${formatTk(receipt.paidAfter)}\nঅবশিষ্ট বকেয়া: ${formatTk(receipt.remainingAfter)}`;
+              try {
+                toast.loading("শেয়ার প্রস্তুত হচ্ছে...", { id: "rhshare" });
+                const canvas = await renderReceiptCanvas(receipt, data.samitiName || "সমিতি");
+                const blob = await new Promise<Blob | null>((res) => canvas.toBlob(res, "image/jpeg", 0.95));
+                toast.dismiss("rhshare");
+                const file = blob ? new File([blob], `রিসিপ্ট-${receipt.receiptNo}.jpg`, { type: "image/jpeg" }) : null;
+                const nav: any = navigator;
+                if (file && nav.canShare && nav.canShare({ files: [file] }) && nav.share) {
+                  try { await nav.share({ title: "কিস্তি রিসিপ্ট", text, files: [file] }); return; } catch (e: any) {
+                    if (e?.name === "AbortError") return;
+                  }
+                }
+                if (nav.share) {
+                  try { await nav.share({ title: "কিস্তি রিসিপ্ট", text }); return; } catch (e: any) {
+                    if (e?.name === "AbortError") return;
+                  }
+                }
+                await navigator.clipboard.writeText(text);
+                toast.success("রিসিপ্টের তথ্য কপি হয়েছে");
+              } catch (e) {
+                console.error(e);
+                try { await navigator.clipboard.writeText(text); toast.success("রিসিপ্টের তথ্য কপি হয়েছে", { id: "rhshare" }); }
+                catch { toast.error("শেয়ার ব্যর্থ হয়েছে", { id: "rhshare" }); }
+              }
+            }}><Share className="h-4 w-4 mr-1" />শেয়ার</Button>
+            <Button onClick={() => {
+              if (!receipt) return;
+              const html = buildReceiptHtml(receipt, data.samitiName || "সমিতি");
+              const w = window.open("", "_blank", "width=600,height=750");
+              if (!w) return;
+              w.document.write(`<!DOCTYPE html><html><head><meta charset="utf-8"><title>রিসিপ্ট</title><style>${receiptCss}</style></head><body>${html}<script>setTimeout(()=>window.print(),300)</script></body></html>`);
+              w.document.close();
+              w.focus();
+            }}><Printer className="h-4 w-4 mr-1" />প্রিন্ট</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
+
 
 function DepositsHistoryTab() {
   const { data, updateDeposit, deleteDeposit } = useSamiti();
