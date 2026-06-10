@@ -1580,6 +1580,7 @@ function InstallmentsTab() {
   const allPayments = [...data.payments]
     .sort((a, b) => b.date.localeCompare(a.date))
     .filter((p) => {
+      if (filterLoan !== "all" && p.loanId !== filterLoan) return false;
       if (filterMember === "all") return true;
       const loan = data.loans.find((l) => l.id === p.loanId);
       return loan?.memberId === filterMember;
