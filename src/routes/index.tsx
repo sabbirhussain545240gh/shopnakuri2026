@@ -2948,3 +2948,53 @@ async function renderReceiptCanvas(r: { loan: Loan; memberName: string; amount: 
     document.body.removeChild(iframe);
   }
 }
+
+type DepositReceiptData = {
+  memberName: string;
+  memberSerial?: number;
+  amount: number;
+  date: string;
+  totalAfter: number;
+  receiptNo: string;
+  note?: string;
+  logo?: string;
+};
+
+function buildDepositReceiptHtml(r: DepositReceiptData, samitiName: string) {
+  return `<div class="r" id="r">
+    <div class="header">
+      ${r.logo ? `<img src="${r.logo}" alt="logo" class="logo"/>` : ""}
+      <div class="head-text"><div class="title">${samitiName}</div><div class="sub">সঞ্চয়/চাদা জমা রিসিপ্ট</div></div>
+    </div>
+    <div class="grid">
+      <div><span class="muted">রিসিপ্ট নং:</span> <b>${r.receiptNo}</b></div>
+      <div><span class="muted">তারিখ:</span> <b>${fmtDate(r.date)}</b></div>
+      <div class="full"><span class="muted">সদস্য:</span> <b>${r.memberSerial ? `${toBn(r.memberSerial)}. ` : ""}${r.memberName}</b></div>
+    </div>
+    <div class="row"><span>জমার পরিমাণ</span><span class="amount">${formatTk(r.amount)}</span></div>
+    <div class="totals">
+      <div class="full"><span class="muted">মোট সঞ্চয় (এই জমা সহ):</span> <b>${formatTk(r.totalAfter)}</b></div>
+    </div>
+    ${r.note ? `<div class="note"><span class="muted">নোট:</span> <b>${r.note.replace(/</g, "&lt;")}</b></div>` : ""}
+    <div class="sign"><div>—————————<br/>গ্রহীতা</div><div style="text-align:right">—————————<br/>কোষাধ্যক্ষ</div></div>
+  </div>`;
+}
+
+async function renderDepositReceiptCanvas(r: DepositReceiptData, samitiName: string): Promise<HTMLCanvasElement> {
+  const { default: html2canvas } = await import("html2canvas");
+  const iframe = document.createElement("iframe");
+  iframe.style.cssText = "position:fixed;left:-10000px;top:0;width:600px;height:10px;border:0;";
+  document.body.appendChild(iframe);
+  try {
+    const doc = iframe.contentDocument!;
+    doc.open();
+    doc.write(`<!DOCTYPE html><html><head><meta charset="utf-8"><style>${receiptCss}</style></head><body>${buildDepositReceiptHtml(r, samitiName)}</body></html>`);
+    doc.close();
+    await new Promise((res) => setTimeout(res, 60));
+    const target = doc.getElementById("r")!;
+    const canvas = await html2canvas(target, { scale: 2, backgroundColor: "#ffffff", useCORS: true, logging: false, windowWidth: 600, windowHeight: target.scrollHeight + 40 });
+    return canvas;
+  } finally {
+    document.body.removeChild(iframe);
+  }
+}
