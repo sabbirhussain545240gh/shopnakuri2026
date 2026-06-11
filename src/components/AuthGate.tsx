@@ -250,22 +250,35 @@ export function CloudStatusBadge() {
   );
 }
 
-function IntroSplash({ onEnter }: { onEnter: () => void }) {
+function IntroSplash({ onEnter, onSkipIfDisabled }: { onEnter: () => void; onSkipIfDisabled?: () => void }) {
   const { data } = useSamiti();
-  const quotes = (data.settings.quotes && data.settings.quotes.length > 0) ? data.settings.quotes : DEFAULT_QUOTES;
-  const goals = (data.settings.goals && data.settings.goals.length > 0) ? data.settings.goals : DEFAULT_GOALS;
+  const s = data.settings;
+  const enabled = s.splashEnabled !== false;
+  useEffect(() => {
+    if (!enabled && onSkipIfDisabled) onSkipIfDisabled();
+  }, [enabled, onSkipIfDisabled]);
+  if (!enabled) return null;
+  const quotes = (s.quotes && s.quotes.length > 0) ? s.quotes : DEFAULT_QUOTES;
+  const goals = (s.goals && s.goals.length > 0) ? s.goals : DEFAULT_GOALS;
+  const title = s.splashTitle?.trim() || data.samitiName || "স্বপ্ন কুড়ি বন্ধন সমিতি";
+  const subtitle = s.splashSubtitle?.trim() || `স্থাপিত: ${data.establishedDate || "ডিসেম্বর ২০২৫"} · একতাই শক্তি, একতাই বল`;
+  const icon = s.splashIcon?.trim() || "🌾";
+  const footer = s.splashFooter?.trim() || `© ${new Date().getFullYear()} ${title}`;
+  const goalsTitle = s.goalsSectionTitle?.trim() || "আমাদের লক্ষ্য ও উদ্দেশ্য";
+  const goalsSubtitle = s.goalsSectionSubtitle?.trim() || "সদস্যদের কল্যাণ ও আর্থিক স্বনির্ভরতাই আমাদের মূল লক্ষ্য";
+  const quotesTitle = s.quotesSectionTitle?.trim() || "অনুপ্রেরণামূলক বাণী";
   return (
     <div className="min-h-screen bg-gradient-to-br from-emerald-50 via-background to-sky-50 dark:from-emerald-950/30 dark:via-background dark:to-sky-950/30">
       <div className="mx-auto max-w-5xl px-4 py-10 md:py-16">
         <div className="text-center">
           <div className="inline-flex h-20 w-20 items-center justify-center rounded-full bg-gradient-to-br from-emerald-500 to-sky-600 text-3xl text-white shadow-lg">
-            🌾
+            {icon}
           </div>
           <h1 className="mt-5 font-serif text-3xl md:text-5xl font-bold tracking-tight text-foreground">
-            স্বপ্ন কুড়ি বন্ধন সমিতি
+            {title}
           </h1>
           <p className="mt-3 text-base md:text-lg text-muted-foreground">
-            স্থাপিত: ডিসেম্বর ২০২৫ · একতাই শক্তি, একতাই বল
+            {subtitle}
           </p>
           <div className="mt-6">
             <Button size="lg" onClick={onEnter} className="px-8">
@@ -274,49 +287,53 @@ function IntroSplash({ onEnter }: { onEnter: () => void }) {
           </div>
         </div>
 
-        <Card className="mt-10 border-emerald-200/60 dark:border-emerald-900/40">
-          <CardHeader>
-            <CardTitle className="text-xl md:text-2xl">আমাদের লক্ষ্য ও উদ্দেশ্য</CardTitle>
-            <CardDescription>সদস্যদের কল্যাণ ও আর্থিক স্বনির্ভরতাই আমাদের মূল লক্ষ্য</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-              {goals.map((g) => (
-                <div key={g.title} className="rounded-lg border bg-card p-4 transition-shadow hover:shadow-md">
-                  <div className="text-3xl">{g.icon}</div>
-                  <div className="mt-2 font-semibold text-foreground">{g.title}</div>
-                  <div className="mt-1 text-sm text-muted-foreground">{g.desc}</div>
-                </div>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
+        {goals.length > 0 && (
+          <Card className="mt-10 border-emerald-200/60 dark:border-emerald-900/40">
+            <CardHeader>
+              <CardTitle className="text-xl md:text-2xl">{goalsTitle}</CardTitle>
+              <CardDescription>{goalsSubtitle}</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                {goals.map((g, i) => (
+                  <div key={i} className="rounded-lg border bg-card p-4 transition-shadow hover:shadow-md">
+                    <div className="text-3xl">{g.icon}</div>
+                    <div className="mt-2 font-semibold text-foreground">{g.title}</div>
+                    <div className="mt-1 text-sm text-muted-foreground">{g.desc}</div>
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        )}
 
-        <Card className="mt-8">
-          <CardHeader>
-            <CardTitle className="text-xl md:text-2xl">অনুপ্রেরণামূলক বাণী</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="grid gap-3 md:grid-cols-2">
-              {quotes.map((q, i) => (
-                <div
-                  key={i}
-                  className="rounded-lg border-l-4 border-emerald-500 bg-emerald-50/70 dark:bg-emerald-950/30 p-4"
-                >
-                  <p className="font-serif text-base md:text-lg text-foreground">“{q.bn}”</p>
-                  <p className="mt-1 text-xs text-muted-foreground italic">{q.en}</p>
-                </div>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
+        {quotes.length > 0 && (
+          <Card className="mt-8">
+            <CardHeader>
+              <CardTitle className="text-xl md:text-2xl">{quotesTitle}</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="grid gap-3 md:grid-cols-2">
+                {quotes.map((q, i) => (
+                  <div
+                    key={i}
+                    className="rounded-lg border-l-4 border-emerald-500 bg-emerald-50/70 dark:bg-emerald-950/30 p-4"
+                  >
+                    <p className="font-serif text-base md:text-lg text-foreground">“{q.bn}”</p>
+                    {q.en && <p className="mt-1 text-xs text-muted-foreground italic">{q.en}</p>}
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        )}
 
         <div className="mt-10 text-center">
           <Button size="lg" onClick={onEnter} className="px-8">
             লগইন করে প্রবেশ করুন
           </Button>
           <p className="mt-3 text-xs text-muted-foreground">
-            © {new Date().getFullYear()} স্বপ্ন কুড়ি বন্ধন সমিতি
+            {footer}
           </p>
         </div>
       </div>
