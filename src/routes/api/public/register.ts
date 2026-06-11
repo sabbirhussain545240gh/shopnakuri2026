@@ -28,18 +28,18 @@ export const Route = createFileRoute("/api/public/register")({
           return new Response(JSON.stringify({ error: "অবৈধ ইনপুট" }), { status: 400 });
         }
         const creds = normalize(parsed.identifier);
-        if (!creds) {
-          return new Response(JSON.stringify({ error: "সঠিক ইমেইল বা মোবাইল নম্বর দিন" }), { status: 400 });
+        if (!creds || !creds.email) {
+          return new Response(JSON.stringify({ error: "সঠিক ইমেইল ঠিকানা দিন" }), { status: 400 });
         }
-        const ident = creds.email ?? creds.phone!;
+        const ident = creds.email;
         const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
 
         const { data: created, error: cErr } = await supabaseAdmin.auth.admin.createUser({
-          ...(creds.email
-            ? { email: creds.email, email_confirm: true }
-            : { phone: creds.phone, phone_confirm: true }),
+          email: creds.email,
+          email_confirm: true,
           password: parsed.password,
         });
+
         if (cErr || !created.user) {
           return new Response(JSON.stringify({ error: cErr?.message ?? "অ্যাকাউন্ট তৈরি ব্যর্থ" }), { status: 400 });
         }
