@@ -112,6 +112,7 @@ const navItems = [
   { value: "cashbook", label: "আয়-ব্যয়", icon: Wallet },
   { value: "reports", label: "রিপোর্ট", icon: FileText },
   { value: "settings", label: "সেটিংস", icon: SettingsIcon },
+  { value: "admin", label: "সুপার এডমিন", icon: ShieldCheck },
 ];
 
 function SamitiApp() {
