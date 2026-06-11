@@ -2889,6 +2889,8 @@ function SettingsTab() {
       goalsSectionTitle: goalsSectionTitle.trim(),
       goalsSectionSubtitle: goalsSectionSubtitle.trim(),
       quotesSectionTitle: quotesSectionTitle.trim(),
+      messages: messages.map((m) => ({ role: m.role.trim(), name: m.name.trim(), photo: m.photo || "", message: m.message.trim() })).filter((m) => m.name || m.message || m.role),
+      messagesSectionTitle: messagesSectionTitle.trim(),
     });
     toast.success("সেটিংস সংরক্ষিত হয়েছে");
   };
