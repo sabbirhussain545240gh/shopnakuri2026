@@ -126,6 +126,7 @@ export function MemberPortal() {
   const [data, setData] = useState<MemberViewResponse | null>(null);
   const [loading, setLoading] = useState(true);
   const [err, setErr] = useState<string | null>(null);
+  const [viewing, setViewing] = useState<{ title: string; html: string } | null>(null);
 
   useEffect(() => {
     let alive = true;
@@ -149,6 +150,10 @@ export function MemberPortal() {
       </div>
     );
   }
+
+  const srcDoc = viewing
+    ? `<!DOCTYPE html><html><head><meta charset="utf-8"><style>${receiptCss}</style></head><body>${viewing.html}</body></html>`
+    : "";
 
   return (
     <div className="min-h-screen bg-muted/20">
@@ -190,14 +195,58 @@ export function MemberPortal() {
 
         {data?.ok && (
           <>
-            {data.member && <MemberProfileCard member={data.member} />}
+            {data.summary && <SamitiSummaryCard summary={data.summary} member={data.member} />}
+            {data.member && <MemberProfileCard member={data.member} data={data} />}
             <LoansSection data={data} />
-            <InstallmentReceiptsSection data={data} />
-            <DepositReceiptsSection data={data} />
+            <InstallmentReceiptsSection data={data} onView={(title, html) => setViewing({ title, html })} />
+            <DepositReceiptsSection data={data} onView={(title, html) => setViewing({ title, html })} />
           </>
         )}
       </main>
+
+      <Dialog open={!!viewing} onOpenChange={(o) => !o && setViewing(null)}>
+        <DialogContent className="max-w-2xl p-0 overflow-hidden">
+          <DialogHeader className="p-4 pb-2">
+            <DialogTitle>{viewing?.title || "রিসিপ্ট"}</DialogTitle>
+          </DialogHeader>
+          <iframe title="receipt" srcDoc={srcDoc} className="w-full h-[70vh] bg-white border-0" />
+        </DialogContent>
+      </Dialog>
     </div>
+  );
+}
+
+function SamitiSummaryCard({ summary, member }: { summary: NonNullable<MemberViewResponse["summary"]>; member: MemberViewResponse["member"] }) {
+  const items = [
+    { icon: Users, label: "মোট সদস্য", value: toBn(summary.totalMembers), color: "text-blue-600" },
+    { icon: PiggyBank, label: "মোট সঞ্চয়", value: formatTk(summary.totalDeposits), color: "text-green-600" },
+    { icon: HandCoins, label: "মোট ঋণ বিতরণ", value: formatTk(summary.totalLoanAmount), color: "text-amber-600" },
+    { icon: TrendingUp, label: "চলমান/পরিশোধিত ঋণ", value: `${toBn(summary.activeLoans)} / ${toBn(summary.closedLoans)}`, color: "text-purple-600" },
+    { icon: Wallet, label: "মোট আদায়", value: formatTk(summary.totalPayments), color: "text-emerald-600" },
+    { icon: AlertTriangle, label: "মোট বকেয়া", value: formatTk(summary.totalRemaining), color: "text-destructive" },
+  ];
+  return (
+    <Card className="border-primary/30 bg-gradient-to-br from-primary/5 to-transparent">
+      <CardHeader className="pb-2">
+        <CardTitle className="flex items-center gap-2 text-base">
+          <TrendingUp className="h-5 w-5 text-primary" /> সমিতির সারাংশ
+        </CardTitle>
+        <CardDescription>সদস্য {member?.name || ""} হিসেবে সমিতির সামগ্রিক চিত্র</CardDescription>
+      </CardHeader>
+      <CardContent>
+        <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+          {items.map((it) => {
+            const Icon = it.icon;
+            return (
+              <div key={it.label} className="rounded-lg border bg-card p-3">
+                <div className="flex items-center gap-2 text-xs text-muted-foreground"><Icon className={`h-4 w-4 ${it.color}`} /> {it.label}</div>
+                <div className="font-semibold text-base mt-1">{it.value}</div>
+              </div>
+            );
+          })}
+        </div>
+      </CardContent>
+    </Card>
   );
 }
 
