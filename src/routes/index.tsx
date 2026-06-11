@@ -27,6 +27,7 @@ import { AuthGate, SignOutButton, CloudStatusBadge } from "@/components/AuthGate
 import { buildReceiptQr, type VerifyPayload } from "@/lib/receipt-qr";
 import { useMyRoles, allowedTabs, roleLabel, type TabKey } from "@/lib/permissions";
 import { RoleManager } from "@/components/RoleManager";
+import { NotificationBell } from "@/components/NotificationBell";
 import { useServerFn } from "@tanstack/react-start";
 import { listPendingAccounts } from "@/lib/approval.functions";
 
@@ -220,8 +221,9 @@ function SamitiApp() {
               ভূমিকা: <span className="font-medium text-foreground">{myRoleLabel}</span>
             </div>
           )}
-          <div className="flex items-center justify-center"><CloudStatusBadge /></div>
+          <div className="flex items-center justify-center gap-2"><CloudStatusBadge /><NotificationBell /></div>
           <SignOutButton />
+
         </div>
 
 
@@ -244,6 +246,7 @@ function SamitiApp() {
 
           <div className="flex items-center gap-2">
             <CloudStatusBadge />
+            <NotificationBell />
             <Button variant="ghost" size="icon" onClick={() => setMobileOpen((o) => !o)} className="relative">
               <Menu className="h-5 w-5" />
               {pendingApprovals > 0 && (

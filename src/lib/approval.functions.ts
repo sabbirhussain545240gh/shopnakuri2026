@@ -105,5 +105,21 @@ export const setAccountStatus = createServerFn({ method: "POST" })
         throw new Error(roleErr.message);
       }
     }
+
+    if (data.status === "active") {
+      await supabaseAdmin.from("notifications").insert({
+        user_id: data.userId,
+        title: "অ্যাকাউন্ট অনুমোদিত",
+        body: "আপনার অ্যাকাউন্ট অনুমোদন করা হয়েছে। এখন আপনি অ্যাপের সব ফিচার ব্যবহার করতে পারবেন।",
+        kind: "success",
+      });
+    } else if (data.status === "rejected") {
+      await supabaseAdmin.from("notifications").insert({
+        user_id: data.userId,
+        title: "অ্যাকাউন্ট প্রত্যাখ্যাত",
+        body: "আপনার সাইনআপ অনুরোধটি প্রত্যাখ্যান করা হয়েছে। বিস্তারিত জানতে অ্যাডমিনের সাথে যোগাযোগ করুন।",
+        kind: "error",
+      });
+    }
     return { ok: true };
   });
