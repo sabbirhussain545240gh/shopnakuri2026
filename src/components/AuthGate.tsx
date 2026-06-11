@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
-import { LogOut, Loader2, CloudOff, CheckCircle2, AlertCircle, Cloud, Clock, ShieldAlert } from "lucide-react";
+import { LogOut, Loader2, CloudOff, CheckCircle2, AlertCircle, Cloud, Clock, ShieldAlert, Eye, EyeOff } from "lucide-react";
 import { toast } from "sonner";
 import { startCloudSync, stopCloudSync, subscribeCloudStatus, getCloudStatus, awaitInitialCloudLoad, useSamiti, DEFAULT_GOALS, DEFAULT_QUOTES, DEFAULT_MESSAGES } from "@/lib/samiti-store";
 import { getMyAccountStatus, type AccountStatus } from "@/lib/approval.functions";
