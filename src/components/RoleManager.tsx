@@ -94,6 +94,7 @@ export function RoleManager() {
   const [claiming, setClaiming] = useState(false);
   const [pwTarget, setPwTarget] = useState<UserRow | null>(null);
   const [pwValue, setPwValue] = useState("");
+  const [pwVisible, setPwVisible] = useState(false);
   const [pwBusy, setPwBusy] = useState(false);
   const [deletingId, setDeletingId] = useState<string | null>(null);
 
