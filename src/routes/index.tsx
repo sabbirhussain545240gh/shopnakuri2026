@@ -2964,16 +2964,61 @@ function SettingsTab() {
             </div>
             <Switch checked={splashEnabled} onCheckedChange={setSplashEnabled} />
           </div>
-          <div className="grid gap-3 sm:grid-cols-[100px_1fr]">
-            <div>
-              <Label className="text-xs">হেডার আইকন</Label>
-              <Input value={splashIcon} onChange={(e) => setSplashIcon(e.target.value)} placeholder="🌾" />
-            </div>
-            <div>
-              <Label className="text-xs">সমিতির নাম (শিরোনাম)</Label>
-              <Input value={splashTitle} onChange={(e) => setSplashTitle(e.target.value)} placeholder="স্বপ্ন কুড়ি বন্ধন সমিতি" />
+
+          <div className="rounded-md border p-3 space-y-3">
+            <Label className="text-sm">হেডার লোগো / আইকন</Label>
+            <div className="flex items-start gap-4">
+              <div
+                className="shrink-0 rounded-full bg-gradient-to-br from-emerald-500 to-sky-600 text-white shadow-md overflow-hidden flex items-center justify-center"
+                style={{ height: splashImageSize, width: splashImageSize, fontSize: Math.round(splashImageSize * 0.42) }}
+              >
+                {splashImage ? (
+                  <img src={splashImage} alt="" className="h-full w-full object-cover" />
+                ) : (
+                  <span>{splashIcon || "🌾"}</span>
+                )}
+              </div>
+              <div className="flex-1 space-y-2">
+                <Input
+                  type="file"
+                  accept="image/*"
+                  onChange={(e) => {
+                    const f = e.target.files?.[0];
+                    if (!f) return;
+                    if (f.size > 2 * 1024 * 1024) { toast.error("ছবি ২ MB এর কম হতে হবে"); return; }
+                    const r = new FileReader();
+                    r.onload = () => setSplashImage(String(r.result || ""));
+                    r.readAsDataURL(f);
+                  }}
+                />
+                {splashImage && (
+                  <Button type="button" variant="ghost" size="sm" onClick={() => setSplashImage("")}>লোগো সরান (ইমোজি ব্যবহার হবে)</Button>
+                )}
+                <div>
+                  <Label className="text-xs">ইমোজি আইকন (লোগো না থাকলে)</Label>
+                  <Input value={splashIcon} onChange={(e) => setSplashIcon(e.target.value)} placeholder="🌾" />
+                </div>
+                <div>
+                  <Label className="text-xs">আকার (পিক্সেল): {splashImageSize}px</Label>
+                  <input
+                    type="range"
+                    min={48}
+                    max={240}
+                    step={4}
+                    value={splashImageSize}
+                    onChange={(e) => setSplashImageSize(Number(e.target.value))}
+                    className="w-full accent-emerald-600"
+                  />
+                </div>
+              </div>
             </div>
           </div>
+
+          <div>
+            <Label className="text-xs">সমিতির নাম (শিরোনাম)</Label>
+            <Input value={splashTitle} onChange={(e) => setSplashTitle(e.target.value)} placeholder="স্বপ্ন কুড়ি বন্ধন সমিতি" />
+          </div>
+
           <div>
             <Label className="text-xs">সাবটাইটেল (স্থাপিত · স্লোগান)</Label>
             <Input value={splashSubtitle} onChange={(e) => setSplashSubtitle(e.target.value)} placeholder="স্থাপিত: ডিসেম্বর ২০২৫ · একতাই শক্তি, একতাই বল" />
