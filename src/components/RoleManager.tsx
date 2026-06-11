@@ -14,7 +14,7 @@ import {
 } from "@/components/ui/table";
 import {
   Loader2, Trash2, ShieldCheck, UserPlus, Mail, X, Crown, Users as UsersIcon,
-  Search, ChevronLeft, ChevronRight, RefreshCw, KeyRound, Check, Ban, BellRing,
+  Search, ChevronLeft, ChevronRight, RefreshCw, KeyRound, Check, Ban, BellRing, Eye, EyeOff,
 } from "lucide-react";
 import { toast } from "sonner";
 import {
