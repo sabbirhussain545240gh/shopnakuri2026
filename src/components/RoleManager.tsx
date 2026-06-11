@@ -113,6 +113,7 @@ export function RoleManager() {
   type UserRow = {
     id: string; email: string; createdAt: string; lastSignInAt: string | null;
     roles: { id: string; role: AppRole; createdAt: string }[];
+    displayName: string | null; memberRef: string | null; status: string | null;
   };
   const [users, setUsers] = useState<UserRow[]>([]);
   const [loadingUsers, setLoadingUsers] = useState(false);
