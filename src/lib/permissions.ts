@@ -23,7 +23,7 @@ export type TabKey =
 const TAB_PERMISSIONS: Record<AppRole, TabKey[]> = {
   admin: [
     "dashboard", "members", "savings", "loans", "installments",
-    "receipts", "deposits", "cashbook", "reports", "settings",
+    "receipts", "deposits", "cashbook", "reports", "settings", "admin",
   ],
   treasurer: [
     "dashboard", "members", "savings", "loans", "installments",
