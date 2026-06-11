@@ -18,6 +18,7 @@ export function AuthGate({ children }: { children: (session: Session) => ReactNo
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [submitting, setSubmitting] = useState(false);
+  const [showLogin, setShowLogin] = useState(false);
 
   useEffect(() => {
     const beginSync = async (userId: string) => {
