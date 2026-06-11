@@ -2864,6 +2864,8 @@ function SettingsTab() {
       defaultInterestRate: Number(rate) || 0,
       defaultDurationMonths: Number(dur) || 12,
       notice: notice.trim(),
+      goals: goals.map((g) => ({ icon: g.icon.trim(), title: g.title.trim(), desc: g.desc.trim() })).filter((g) => g.title || g.desc),
+      quotes: quotes.map((q) => ({ bn: q.bn.trim(), en: q.en.trim() })).filter((q) => q.bn || q.en),
     });
     toast.success("সেটিংস সংরক্ষিত হয়েছে");
   };
