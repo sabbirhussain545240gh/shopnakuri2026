@@ -590,10 +590,6 @@ export function RoleManager() {
 
           {/* ===== Users ===== */}
           <TabsContent value="users" className="space-y-4 pt-4">
-            <form onSubmit={onCreateAccount} className="rounded-md border bg-muted/30 p-3">
-              <div className="grid gap-3 sm:grid-cols-[1fr_180px_160px_auto] sm:items-end">
-                <div className="space-y-1.5">
-                  <Label htmlFor="managed-identifier">মোবাইল / ইমেইল</Label>
             <form onSubmit={onCreateAccount} className="rounded-md border bg-muted/30 p-3 space-y-3">
               <div className="grid gap-3 sm:grid-cols-2">
                 <div className="space-y-1.5">
