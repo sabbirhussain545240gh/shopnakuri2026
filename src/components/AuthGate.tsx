@@ -5,19 +5,15 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { LogOut, Loader2, Cloud, CloudOff, CheckCircle2, AlertCircle } from "lucide-react";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+import { LogOut, Loader2, CloudOff, CheckCircle2, AlertCircle, Cloud } from "lucide-react";
 import { toast } from "sonner";
 import { startCloudSync, stopCloudSync, subscribeCloudStatus, getCloudStatus, awaitInitialCloudLoad, useSamiti, DEFAULT_GOALS, DEFAULT_QUOTES, DEFAULT_MESSAGES } from "@/lib/samiti-store";
-
-const ALLOWED_EMAIL = "sabbirhussain545240@gmail.com";
 
 export function AuthGate({ children }: { children: (session: Session) => ReactNode }) {
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
   const [hydrating, setHydrating] = useState(false);
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [submitting, setSubmitting] = useState(false);
   const [showLogin, setShowLogin] = useState(false);
 
   useEffect(() => {
@@ -27,103 +23,20 @@ export function AuthGate({ children }: { children: (session: Session) => ReactNo
       try { await awaitInitialCloudLoad(); } finally { setHydrating(false); }
     };
     const { data: sub } = supabase.auth.onAuthStateChange((event, sess) => {
-      const ok = sess?.user?.email?.toLowerCase() === ALLOWED_EMAIL;
-      if (sess && !ok) {
-        supabase.auth.signOut();
-        setSession(null);
-        stopCloudSync();
-        toast.error("এই অ্যাকাউন্টের অ্যাক্সেস নেই");
-        return;
-      }
       setSession(sess);
-      if (sess && ok && (event === "SIGNED_IN" || event === "INITIAL_SESSION")) {
+      if (sess && (event === "SIGNED_IN" || event === "INITIAL_SESSION")) {
         beginSync(sess.user.id);
       }
-      if (event === "SIGNED_OUT") {
-        stopCloudSync();
-      }
+      if (event === "SIGNED_OUT") stopCloudSync();
     });
     supabase.auth.getSession().then(({ data }) => {
       const sess = data.session;
-      const ok = sess?.user?.email?.toLowerCase() === ALLOWED_EMAIL;
-      if (sess && !ok) {
-        supabase.auth.signOut();
-        setSession(null);
-      } else {
-        setSession(sess);
-        if (sess && ok) beginSync(sess.user.id);
-      }
+      setSession(sess);
+      if (sess) beginSync(sess.user.id);
       setLoading(false);
     });
     return () => sub.subscription.unsubscribe();
   }, []);
-
-  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-  const [emailError, setEmailError] = useState<string | null>(null);
-  const [passwordError, setPasswordError] = useState<string | null>(null);
-
-  const validate = () => {
-    let ok = true;
-    const trimmed = email.trim();
-    if (!trimmed) {
-      setEmailError("ইমেইল লিখুন");
-      ok = false;
-    } else if (!emailRegex.test(trimmed)) {
-      setEmailError("সঠিক ইমেইল ঠিকানা দিন (যেমন: name@example.com)");
-      ok = false;
-    } else {
-      setEmailError(null);
-    }
-    if (!password) {
-      setPasswordError("পাসওয়ার্ড লিখুন");
-      ok = false;
-    } else if (password.length < 6) {
-      setPasswordError("পাসওয়ার্ড কমপক্ষে ৬ অক্ষরের হতে হবে");
-      ok = false;
-    } else {
-      setPasswordError(null);
-    }
-    return ok;
-  };
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!validate()) return;
-    if (email.trim().toLowerCase() !== ALLOWED_EMAIL) {
-      setEmailError("এই ইমেইলের অ্যাক্সেস নেই");
-      toast.error("এই অ্যাকাউন্টের অ্যাক্সেস নেই");
-      return;
-    }
-    setSubmitting(true);
-    try {
-      const { error } = await supabase.auth.signInWithPassword({
-        email: email.trim(),
-        password,
-      });
-      if (error) {
-        const msg = (error.message || "").toLowerCase();
-        if (msg.includes("invalid login") || msg.includes("invalid credentials") || msg.includes("invalid email or password")) {
-          setPasswordError("ইমেইল অথবা পাসওয়ার্ড ভুল");
-          toast.error("ইমেইল অথবা পাসওয়ার্ড ভুল");
-        } else if (msg.includes("email not confirmed")) {
-          setEmailError("ইমেইল এখনো নিশ্চিত করা হয়নি");
-          toast.error("ইমেইল এখনো নিশ্চিত করা হয়নি");
-        } else if (msg.includes("rate") || msg.includes("too many")) {
-          toast.error("অনেক বেশি চেষ্টা হয়েছে, কিছুক্ষণ পরে আবার চেষ্টা করুন");
-        } else if (msg.includes("network") || msg.includes("fetch")) {
-          toast.error("নেটওয়ার্ক সমস্যা, ইন্টারনেট সংযোগ পরীক্ষা করুন");
-        } else {
-          toast.error(error.message);
-        }
-        return;
-      }
-      toast.success("সফলভাবে লগইন হয়েছে");
-    } catch (err: any) {
-      toast.error(err?.message ?? "ত্রুটি ঘটেছে");
-    } finally {
-      setSubmitting(false);
-    }
-  };
 
   if (loading || (session && hydrating)) {
     return (
@@ -141,67 +54,15 @@ export function AuthGate({ children }: { children: (session: Session) => ReactNo
       return <IntroSplash onEnter={() => setShowLogin(true)} onSkipIfDisabled={() => setShowLogin(true)} />;
     }
     return (
-      <div className="flex min-h-screen items-center justify-center bg-muted/30 px-4">
+      <div className="flex min-h-screen items-center justify-center bg-muted/30 px-4 py-8">
         <Card className="w-full max-w-md">
           <CardHeader className="text-center">
             <CardTitle className="text-2xl">স্বপ্ন কুড়ি বন্ধন সমিতি</CardTitle>
-            <CardDescription>অ্যাকাউন্টে লগইন করুন</CardDescription>
+            <CardDescription>লগইন করুন অথবা নতুন অ্যাকাউন্ট তৈরি করুন</CardDescription>
           </CardHeader>
           <CardContent>
             <Button type="button" variant="ghost" size="sm" className="mb-2" onClick={() => setShowLogin(false)}>← পরিচিতি পেজে ফিরে যান</Button>
-            <form onSubmit={handleSubmit} className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="email">ইমেইল</Label>
-                <Input
-                  id="email"
-                  type="email"
-                  autoComplete="email"
-                  value={email}
-                  onChange={(e) => {
-                    setEmail(e.target.value);
-                    if (emailError) setEmailError(null);
-                  }}
-                  onBlur={() => {
-                    const trimmed = email.trim();
-                    if (trimmed && !emailRegex.test(trimmed)) {
-                      setEmailError("সঠিক ইমেইল ঠিকানা দিন (যেমন: name@example.com)");
-                    }
-                  }}
-                  placeholder="you@example.com"
-                  aria-invalid={!!emailError}
-                  aria-describedby={emailError ? "email-error" : undefined}
-                  required
-                />
-                {emailError && (
-                  <p id="email-error" className="text-sm text-destructive">{emailError}</p>
-                )}
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="password">পাসওয়ার্ড</Label>
-                <Input
-                  id="password"
-                  type="password"
-                  autoComplete="current-password"
-                  value={password}
-                  onChange={(e) => {
-                    setPassword(e.target.value);
-                    if (passwordError) setPasswordError(null);
-                  }}
-                  placeholder="••••••••"
-                  minLength={6}
-                  aria-invalid={!!passwordError}
-                  aria-describedby={passwordError ? "password-error" : undefined}
-                  required
-                />
-                {passwordError && (
-                  <p id="password-error" className="text-sm text-destructive">{passwordError}</p>
-                )}
-              </div>
-              <Button type="submit" className="w-full" disabled={submitting}>
-                {submitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                লগইন
-              </Button>
-            </form>
+            <AuthTabs />
           </CardContent>
         </Card>
       </div>
@@ -209,6 +70,158 @@ export function AuthGate({ children }: { children: (session: Session) => ReactNo
   }
 
   return <>{children(session)}</>;
+}
+
+function AuthTabs() {
+  return (
+    <Tabs defaultValue="login" className="w-full">
+      <TabsList className="grid w-full grid-cols-2">
+        <TabsTrigger value="login">লগইন</TabsTrigger>
+        <TabsTrigger value="signup">নতুন অ্যাকাউন্ট</TabsTrigger>
+      </TabsList>
+      <TabsContent value="login" className="mt-4"><LoginForm /></TabsContent>
+      <TabsContent value="signup" className="mt-4"><SignupForm /></TabsContent>
+    </Tabs>
+  );
+}
+
+function LoginForm() {
+  const [mode, setMode] = useState<"email" | "phone">("email");
+  const [identifier, setIdentifier] = useState("");
+  const [password, setPassword] = useState("");
+  const [otp, setOtp] = useState("");
+  const [otpSent, setOtpSent] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+
+  const sendOtp = async () => {
+    if (!identifier.trim()) return toast.error("মোবাইল নম্বর লিখুন");
+    setSubmitting(true);
+    try {
+      const { error } = await supabase.auth.signInWithOtp({ phone: identifier.trim() });
+      if (error) throw error;
+      setOtpSent(true);
+      toast.success("OTP পাঠানো হয়েছে");
+    } catch (e: any) {
+      toast.error(e?.message ?? "OTP পাঠানো যায়নি");
+    } finally { setSubmitting(false); }
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setSubmitting(true);
+    try {
+      if (mode === "email") {
+        const { error } = await supabase.auth.signInWithPassword({ email: identifier.trim(), password });
+        if (error) throw error;
+        toast.success("সফলভাবে লগইন হয়েছে");
+      } else {
+        const { error } = await supabase.auth.verifyOtp({ phone: identifier.trim(), token: otp.trim(), type: "sms" });
+        if (error) throw error;
+        toast.success("সফলভাবে লগইন হয়েছে");
+      }
+    } catch (err: any) {
+      toast.error(err?.message ?? "ত্রুটি");
+    } finally { setSubmitting(false); }
+  };
+
+  return (
+    <form onSubmit={handleSubmit} className="space-y-4">
+      <div className="flex gap-2">
+        <Button type="button" variant={mode === "email" ? "default" : "outline"} size="sm" className="flex-1" onClick={() => { setMode("email"); setOtpSent(false); }}>ইমেইল</Button>
+        <Button type="button" variant={mode === "phone" ? "default" : "outline"} size="sm" className="flex-1" onClick={() => { setMode("phone"); setOtpSent(false); }}>মোবাইল</Button>
+      </div>
+      <div className="space-y-2">
+        <Label>{mode === "email" ? "ইমেইল" : "মোবাইল (+8801...)"}</Label>
+        <Input type={mode === "email" ? "email" : "tel"} value={identifier} onChange={(e) => setIdentifier(e.target.value)} placeholder={mode === "email" ? "you@example.com" : "+8801XXXXXXXXX"} required />
+      </div>
+      {mode === "email" ? (
+        <div className="space-y-2">
+          <Label>পাসওয়ার্ড</Label>
+          <Input type="password" value={password} onChange={(e) => setPassword(e.target.value)} minLength={6} required />
+        </div>
+      ) : otpSent ? (
+        <div className="space-y-2">
+          <Label>OTP কোড</Label>
+          <Input type="text" inputMode="numeric" value={otp} onChange={(e) => setOtp(e.target.value)} required />
+        </div>
+      ) : null}
+      {mode === "phone" && !otpSent ? (
+        <Button type="button" className="w-full" onClick={sendOtp} disabled={submitting}>
+          {submitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}OTP পাঠান
+        </Button>
+      ) : (
+        <Button type="submit" className="w-full" disabled={submitting}>
+          {submitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}লগইন
+        </Button>
+      )}
+    </form>
+  );
+}
+
+function SignupForm() {
+  const [mode, setMode] = useState<"email" | "phone">("email");
+  const [identifier, setIdentifier] = useState("");
+  const [password, setPassword] = useState("");
+  const [otp, setOtp] = useState("");
+  const [otpSent, setOtpSent] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setSubmitting(true);
+    try {
+      if (mode === "email") {
+        const { error } = await supabase.auth.signUp({
+          email: identifier.trim(),
+          password,
+          options: { emailRedirectTo: `${window.location.origin}/` },
+        });
+        if (error) throw error;
+        toast.success("অ্যাকাউন্ট তৈরি হয়েছে। ইমেইলে কনফার্মেশন লিংক পাঠানো হয়েছে।");
+      } else {
+        if (!otpSent) {
+          const { error } = await supabase.auth.signUp({ phone: identifier.trim(), password });
+          if (error) throw error;
+          setOtpSent(true);
+          toast.success("OTP পাঠানো হয়েছে");
+        } else {
+          const { error } = await supabase.auth.verifyOtp({ phone: identifier.trim(), token: otp.trim(), type: "sms" });
+          if (error) throw error;
+          toast.success("অ্যাকাউন্ট তৈরি হয়েছে");
+        }
+      }
+    } catch (err: any) {
+      toast.error(err?.message ?? "ত্রুটি");
+    } finally { setSubmitting(false); }
+  };
+
+  return (
+    <form onSubmit={handleSubmit} className="space-y-4">
+      <div className="flex gap-2">
+        <Button type="button" variant={mode === "email" ? "default" : "outline"} size="sm" className="flex-1" onClick={() => { setMode("email"); setOtpSent(false); }}>ইমেইল</Button>
+        <Button type="button" variant={mode === "phone" ? "default" : "outline"} size="sm" className="flex-1" onClick={() => { setMode("phone"); setOtpSent(false); }}>মোবাইল</Button>
+      </div>
+      <div className="space-y-2">
+        <Label>{mode === "email" ? "ইমেইল" : "মোবাইল (+8801...)"}</Label>
+        <Input type={mode === "email" ? "email" : "tel"} value={identifier} onChange={(e) => setIdentifier(e.target.value)} placeholder={mode === "email" ? "you@example.com" : "+8801XXXXXXXXX"} required disabled={otpSent} />
+      </div>
+      <div className="space-y-2">
+        <Label>পাসওয়ার্ড</Label>
+        <Input type="password" value={password} onChange={(e) => setPassword(e.target.value)} minLength={6} required disabled={otpSent} />
+      </div>
+      {mode === "phone" && otpSent && (
+        <div className="space-y-2">
+          <Label>OTP কোড</Label>
+          <Input type="text" inputMode="numeric" value={otp} onChange={(e) => setOtp(e.target.value)} required />
+        </div>
+      )}
+      <Button type="submit" className="w-full" disabled={submitting}>
+        {submitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+        {mode === "phone" && !otpSent ? "OTP পাঠান" : "অ্যাকাউন্ট তৈরি করুন"}
+      </Button>
+      <p className="text-xs text-muted-foreground text-center">নতুন অ্যাকাউন্ট তৈরি হলে সুপার এডমিন ভূমিকা বরাদ্দ করবেন।</p>
+    </form>
+  );
 }
 
 export function SignOutButton() {
@@ -343,7 +356,7 @@ function IntroSplash({ onEnter, onSkipIfDisabled }: { onEnter: () => void; onSki
                     <div className="mt-3 font-semibold text-foreground">{m.name || "—"}</div>
                     <div className="text-xs text-emerald-700 dark:text-emerald-400 font-medium">{m.role}</div>
                     {m.message && (
-                      <p className="mt-2 text-sm text-muted-foreground italic">“{m.message}”</p>
+                      <p className="mt-2 text-sm text-muted-foreground italic">"{m.message}"</p>
                     )}
                   </div>
                 ))}
@@ -364,7 +377,7 @@ function IntroSplash({ onEnter, onSkipIfDisabled }: { onEnter: () => void; onSki
                     key={i}
                     className="rounded-lg border-l-4 border-emerald-500 bg-emerald-50/70 dark:bg-emerald-950/30 p-4"
                   >
-                    <p className="font-serif text-base md:text-lg text-foreground">“{q.bn}”</p>
+                    <p className="font-serif text-base md:text-lg text-foreground">"{q.bn}"</p>
                     {q.en && <p className="mt-1 text-xs text-muted-foreground italic">{q.en}</p>}
                   </div>
                 ))}
