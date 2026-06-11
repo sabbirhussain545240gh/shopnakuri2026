@@ -454,6 +454,22 @@ function InstallmentReceiptsSection({ data, onView }: { data: MemberViewResponse
                             amount: r.p.amount, date: r.p.date, paidAfter: r.paidAfter, remainingAfter: r.remainingAfter,
                             receiptNo: r.receiptNo, note: r.p.note, loanNo: r.loanNo,
                           }, dataUrl);
+                          onView("কিস্তি রিসিপ্ট", html);
+                        }}>
+                          <Eye className="h-4 w-4" />
+                        </Button>
+                        <Button size="sm" variant="outline" onClick={async () => {
+                          if (!r.loan || !data.member) return;
+                          const { dataUrl } = await buildReceiptQr({
+                            t: "installment", s: data.samitiName, n: r.receiptNo, m: data.member.name,
+                            a: r.p.amount, d: r.p.date, pa: r.paidAfter, ra: r.remainingAfter, ln: r.loanNo,
+                          });
+                          const html = buildInstallmentHtml({
+                            samitiName: data.samitiName, logo: data.samitiLogo, memberName: data.member.name,
+                            loanAmount: r.loan.amount, durationMonths: r.loan.durationMonths,
+                            amount: r.p.amount, date: r.p.date, paidAfter: r.paidAfter, remainingAfter: r.remainingAfter,
+                            receiptNo: r.receiptNo, note: r.p.note, loanNo: r.loanNo,
+                          }, dataUrl);
                           printHtml("কিস্তি রিসিপ্ট", html);
                         }}>
                           <Printer className="h-4 w-4" />
