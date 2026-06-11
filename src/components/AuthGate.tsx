@@ -324,6 +324,34 @@ function IntroSplash({ onEnter, onSkipIfDisabled }: { onEnter: () => void; onSki
           </Card>
         )}
 
+        {messages.length > 0 && (
+          <Card className="mt-8">
+            <CardHeader>
+              <CardTitle className="text-xl md:text-2xl">{messagesTitle}</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="grid gap-4 md:grid-cols-3">
+                {messages.map((m, i) => (
+                  <div key={i} className="rounded-lg border bg-card p-4 flex flex-col items-center text-center">
+                    {m.photo ? (
+                      <img src={m.photo} alt={m.name} className="h-24 w-24 rounded-full object-cover ring-2 ring-emerald-200/60 dark:ring-emerald-900/40" />
+                    ) : (
+                      <div className="h-24 w-24 rounded-full bg-gradient-to-br from-emerald-500 to-sky-600 text-white flex items-center justify-center text-3xl">
+                        {(m.name?.trim()?.[0]) || "👤"}
+                      </div>
+                    )}
+                    <div className="mt-3 font-semibold text-foreground">{m.name || "—"}</div>
+                    <div className="text-xs text-emerald-700 dark:text-emerald-400 font-medium">{m.role}</div>
+                    {m.message && (
+                      <p className="mt-2 text-sm text-muted-foreground italic">“{m.message}”</p>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
         {quotes.length > 0 && (
           <Card className="mt-8">
             <CardHeader>
