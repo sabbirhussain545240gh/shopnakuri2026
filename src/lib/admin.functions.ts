@@ -163,6 +163,12 @@ export const createManagedUser = createServerFn({ method: "POST" })
       throw new Error(roleError.message);
     }
 
+    // Admin-created accounts are active immediately
+    await supabaseAdmin.from("profiles").upsert(
+      { user_id: userId, identifier, status: "active", approved_at: new Date().toISOString(), approved_by: context.userId },
+      { onConflict: "user_id" },
+    );
+
     return { ok: true, created, userId, identifier };
   });
 
