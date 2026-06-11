@@ -59,11 +59,33 @@ export type Transaction = {
   note?: string;
 };
 
+export type Goal = { icon: string; title: string; desc: string };
+export type Quote = { bn: string; en: string };
+
 export type Settings = {
   defaultInterestRate: number;
   defaultDurationMonths: number;
   notice?: string;
+  goals?: Goal[];
+  quotes?: Quote[];
 };
+
+export const DEFAULT_GOALS: Goal[] = [
+  { icon: "🤝", title: "পারস্পরিক সহযোগিতা", desc: "সদস্যদের মাঝে আর্থিক সহযোগিতা ও বন্ধন গড়ে তোলা।" },
+  { icon: "💰", title: "সঞ্চয়ের অভ্যাস", desc: "নিয়মিত সঞ্চয়ের মাধ্যমে আর্থিক ভিত্তি মজবুত করা।" },
+  { icon: "🏦", title: "সহজ ঋণ সুবিধা", desc: "প্রয়োজনের সময় সদস্যদের সহজ শর্তে ঋণ প্রদান।" },
+  { icon: "📈", title: "আর্থিক উন্নয়ন", desc: "সদস্যদের ও সমাজের সার্বিক আর্থিক উন্নয়ন নিশ্চিত করা।" },
+  { icon: "🎯", title: "স্বচ্ছ ব্যবস্থাপনা", desc: "প্রতিটি লেনদেনের স্বচ্ছ ও নির্ভুল হিসাব রাখা।" },
+  { icon: "🌱", title: "সামাজিক কল্যাণ", desc: "সদস্যদের পরিবার ও সমাজের কল্যাণে কাজ করা।" },
+];
+
+export const DEFAULT_QUOTES: Quote[] = [
+  { bn: "একতাই শক্তি, একতাই বল।", en: "Unity is strength." },
+  { bn: "আজকের সঞ্চয়, আগামীর নিরাপত্তা।", en: "Today's savings, tomorrow's security." },
+  { bn: "ছোট ছোট সঞ্চয় গড়ে তোলে বড় স্বপ্ন।", en: "Small savings build great dreams." },
+  { bn: "সততা ও স্বচ্ছতাই আমাদের ভিত্তি।", en: "Honesty and transparency are our foundation." },
+  { bn: "সকলের জন্য, সকলের পাশে।", en: "For all, with all." },
+];
 
 export type SamitiData = {
   members: Member[];
