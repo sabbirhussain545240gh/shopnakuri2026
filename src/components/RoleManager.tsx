@@ -14,7 +14,7 @@ import {
 } from "@/components/ui/table";
 import {
   Loader2, Trash2, ShieldCheck, UserPlus, Mail, X, Crown, Users as UsersIcon,
-  Search, ChevronLeft, ChevronRight, RefreshCw, KeyRound,
+  Search, ChevronLeft, ChevronRight, RefreshCw, KeyRound, Check, Ban, BellRing,
 } from "lucide-react";
 import { toast } from "sonner";
 import {
@@ -32,6 +32,11 @@ import {
   listInvites,
   revokeInvite,
 } from "@/lib/admin.functions";
+import {
+  listPendingAccounts,
+  setAccountStatus,
+  type AccountStatus,
+} from "@/lib/approval.functions";
 import { roleLabel } from "@/lib/permissions";
 
 type Row = { id: string; userId: string; email: string; role: AppRole; createdAt: string };
