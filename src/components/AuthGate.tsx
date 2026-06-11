@@ -7,7 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { LogOut, Loader2, Cloud, CloudOff, CheckCircle2, AlertCircle } from "lucide-react";
 import { toast } from "sonner";
-import { startCloudSync, stopCloudSync, subscribeCloudStatus, getCloudStatus, awaitInitialCloudLoad, useSamiti, DEFAULT_GOALS, DEFAULT_QUOTES } from "@/lib/samiti-store";
+import { startCloudSync, stopCloudSync, subscribeCloudStatus, getCloudStatus, awaitInitialCloudLoad, useSamiti, DEFAULT_GOALS, DEFAULT_QUOTES, DEFAULT_MESSAGES } from "@/lib/samiti-store";
 
 const ALLOWED_EMAIL = "sabbirhussain545240@gmail.com";
 
@@ -260,6 +260,8 @@ function IntroSplash({ onEnter, onSkipIfDisabled }: { onEnter: () => void; onSki
   if (!enabled) return null;
   const quotes = (s.quotes && s.quotes.length > 0) ? s.quotes : DEFAULT_QUOTES;
   const goals = (s.goals && s.goals.length > 0) ? s.goals : DEFAULT_GOALS;
+  const messagesRaw = (s.messages && s.messages.length > 0) ? s.messages : DEFAULT_MESSAGES;
+  const messages = messagesRaw.filter((m) => (m.name?.trim() || m.message?.trim()));
   const title = s.splashTitle?.trim() || data.samitiName || "স্বপ্ন কুড়ি বন্ধন সমিতি";
   const subtitle = s.splashSubtitle?.trim() || `স্থাপিত: ${data.establishedDate || "ডিসেম্বর ২০২৫"} · একতাই শক্তি, একতাই বল`;
   const icon = s.splashIcon?.trim() || "🌾";
@@ -269,6 +271,7 @@ function IntroSplash({ onEnter, onSkipIfDisabled }: { onEnter: () => void; onSki
   const goalsTitle = s.goalsSectionTitle?.trim() || "আমাদের লক্ষ্য ও উদ্দেশ্য";
   const goalsSubtitle = s.goalsSectionSubtitle?.trim() || "সদস্যদের কল্যাণ ও আর্থিক স্বনির্ভরতাই আমাদের মূল লক্ষ্য";
   const quotesTitle = s.quotesSectionTitle?.trim() || "অনুপ্রেরণামূলক বাণী";
+  const messagesTitle = s.messagesSectionTitle?.trim() || "প্রতিষ্ঠাতা, সভাপতি ও সাধারণ সম্পাদকের বাণী";
   return (
     <div className="min-h-screen bg-gradient-to-br from-emerald-50 via-background to-sky-50 dark:from-emerald-950/30 dark:via-background dark:to-sky-950/30">
       <div className="mx-auto max-w-5xl px-4 py-10 md:py-16">
@@ -314,6 +317,34 @@ function IntroSplash({ onEnter, onSkipIfDisabled }: { onEnter: () => void; onSki
                     <div className="text-3xl">{g.icon}</div>
                     <div className="mt-2 font-semibold text-foreground">{g.title}</div>
                     <div className="mt-1 text-sm text-muted-foreground">{g.desc}</div>
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
+        {messages.length > 0 && (
+          <Card className="mt-8">
+            <CardHeader>
+              <CardTitle className="text-xl md:text-2xl">{messagesTitle}</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="grid gap-4 md:grid-cols-3">
+                {messages.map((m, i) => (
+                  <div key={i} className="rounded-lg border bg-card p-4 flex flex-col items-center text-center">
+                    {m.photo ? (
+                      <img src={m.photo} alt={m.name} className="h-24 w-24 rounded-full object-cover ring-2 ring-emerald-200/60 dark:ring-emerald-900/40" />
+                    ) : (
+                      <div className="h-24 w-24 rounded-full bg-gradient-to-br from-emerald-500 to-sky-600 text-white flex items-center justify-center text-3xl">
+                        {(m.name?.trim()?.[0]) || "👤"}
+                      </div>
+                    )}
+                    <div className="mt-3 font-semibold text-foreground">{m.name || "—"}</div>
+                    <div className="text-xs text-emerald-700 dark:text-emerald-400 font-medium">{m.role}</div>
+                    {m.message && (
+                      <p className="mt-2 text-sm text-muted-foreground italic">“{m.message}”</p>
+                    )}
                   </div>
                 ))}
               </div>

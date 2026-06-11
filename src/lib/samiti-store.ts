@@ -61,6 +61,7 @@ export type Transaction = {
 
 export type Goal = { icon: string; title: string; desc: string };
 export type Quote = { bn: string; en: string };
+export type Message = { role: string; name: string; photo: string; message: string };
 
 export type Settings = {
   defaultInterestRate: number;
@@ -68,6 +69,7 @@ export type Settings = {
   notice?: string;
   goals?: Goal[];
   quotes?: Quote[];
+  messages?: Message[];
   splashEnabled?: boolean;
   splashTitle?: string;
   splashSubtitle?: string;
@@ -78,7 +80,9 @@ export type Settings = {
   goalsSectionTitle?: string;
   goalsSectionSubtitle?: string;
   quotesSectionTitle?: string;
+  messagesSectionTitle?: string;
 };
+
 
 export const DEFAULT_GOALS: Goal[] = [
   { icon: "🤝", title: "পারস্পরিক সহযোগিতা", desc: "সদস্যদের মাঝে আর্থিক সহযোগিতা ও বন্ধন গড়ে তোলা।" },
@@ -95,6 +99,12 @@ export const DEFAULT_QUOTES: Quote[] = [
   { bn: "ছোট ছোট সঞ্চয় গড়ে তোলে বড় স্বপ্ন।", en: "Small savings build great dreams." },
   { bn: "সততা ও স্বচ্ছতাই আমাদের ভিত্তি।", en: "Honesty and transparency are our foundation." },
   { bn: "সকলের জন্য, সকলের পাশে।", en: "For all, with all." },
+];
+
+export const DEFAULT_MESSAGES: Message[] = [
+  { role: "প্রতিষ্ঠাতা", name: "", photo: "", message: "" },
+  { role: "সভাপতি", name: "", photo: "", message: "" },
+  { role: "সাধারণ সম্পাদক", name: "", photo: "", message: "" },
 ];
 
 export type SamitiData = {
