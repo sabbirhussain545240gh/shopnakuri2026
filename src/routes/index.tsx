@@ -25,6 +25,8 @@ import { Users, PiggyBank, HandCoins, LayoutDashboard, Trash2, Plus, CheckCircle
 import { toast, Toaster } from "sonner";
 import { AuthGate, SignOutButton, CloudStatusBadge } from "@/components/AuthGate";
 import { buildReceiptQr, type VerifyPayload } from "@/lib/receipt-qr";
+import { useMyRoles, allowedTabs, isSuperAdmin, roleLabel, type TabKey } from "@/lib/permissions";
+import { RoleManager } from "@/components/RoleManager";
 
 function ReceiptQrPreview({ payload }: { payload: VerifyPayload }) {
   const [src, setSrc] = useState<string>("");
@@ -115,8 +117,20 @@ const navItems = [
 function SamitiApp() {
   const s = useSamiti();
   const { data } = s;
+  const { roles, loading: rolesLoading } = useMyRoles();
+  const allowed = useMemo<TabKey[]>(() => allowedTabs(roles) as TabKey[], [roles]);
+  const visibleNav = useMemo(
+    () => navItems.filter((n) => allowed.includes(n.value as TabKey)),
+    [allowed],
+  );
   const [tab, setTab] = useState("dashboard");
+  useEffect(() => {
+    if (!rolesLoading && !allowed.includes(tab as TabKey)) {
+      setTab(allowed[0] ?? "dashboard");
+    }
+  }, [allowed, rolesLoading, tab]);
   const [mobileOpen, setMobileOpen] = useState(false);
+  const myRoleLabel = roles.length > 0 ? roles.map(roleLabel).join(", ") : "";
 
   const totals = useMemo(() => {
     const totalDeposit = data.deposits.reduce((a, d) => a + d.amount, 0);
@@ -151,7 +165,7 @@ function SamitiApp() {
         </div>
 
         <nav className="flex-1 p-3 space-y-1 overflow-y-auto">
-          {navItems.map((item) => {
+          {visibleNav.map((item) => {
             const Icon = item.icon;
             const active = tab === item.value;
             return (
@@ -172,9 +186,15 @@ function SamitiApp() {
           })}
         </nav>
         <div className="p-3 border-t space-y-2">
+          {myRoleLabel && (
+            <div className="text-[11px] text-center text-muted-foreground truncate" title={myRoleLabel}>
+              ভূমিকা: <span className="font-medium text-foreground">{myRoleLabel}</span>
+            </div>
+          )}
           <div className="flex items-center justify-center"><CloudStatusBadge /></div>
           <SignOutButton />
         </div>
+
 
       </aside>
 
@@ -203,7 +223,7 @@ function SamitiApp() {
         </header>
         {mobileOpen && (
           <div className="md:hidden border-b bg-card p-3 space-y-1">
-            {navItems.map((item) => {
+            {visibleNav.map((item) => {
               const Icon = item.icon;
               const active = tab === item.value;
               return (
@@ -222,8 +242,14 @@ function SamitiApp() {
                 </button>
               );
             })}
+            {myRoleLabel && (
+              <div className="pt-2 text-[11px] text-center text-muted-foreground">
+                ভূমিকা: <span className="font-medium text-foreground">{myRoleLabel}</span>
+              </div>
+            )}
           </div>
         )}
+
 
         <main className="flex-1 container mx-auto px-4 py-6">
           {tab === "dashboard" && <Dashboard totals={totals} memberCount={data.members.length} data={data} />}
@@ -2834,6 +2860,8 @@ function CashbookTab() {
 
 // ===== Settings =====
 function SettingsTab() {
+  const { roles } = useMyRoles();
+  const showRoleManager = isSuperAdmin(roles);
   const { data, updateSamitiInfo, updateSettings, resetAll, importData } = useSamiti();
   const [name, setName] = useState(data.samitiName);
   const [address, setAddress] = useState(data.samitiAddress || "");
@@ -2925,6 +2953,11 @@ function SettingsTab() {
 
   return (
     <div className="grid gap-6 md:grid-cols-2">
+      {showRoleManager && (
+        <div className="md:col-span-2">
+          <RoleManager />
+        </div>
+      )}
       <Card>
         <CardHeader>
           <CardTitle>সমিতির তথ্য</CardTitle>
