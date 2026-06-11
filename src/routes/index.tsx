@@ -246,6 +246,7 @@ function SamitiApp() {
 
           <div className="flex items-center gap-2">
             <CloudStatusBadge />
+            <NotificationBell />
             <Button variant="ghost" size="icon" onClick={() => setMobileOpen((o) => !o)} className="relative">
               <Menu className="h-5 w-5" />
               {pendingApprovals > 0 && (
