@@ -98,7 +98,7 @@ export function RoleManager() {
   const [pwBusy, setPwBusy] = useState(false);
   const [deletingId, setDeletingId] = useState<string | null>(null);
 
-  type PendingRow = { user_id: string; identifier: string; status: AccountStatus; created_at: string; approved_at: string | null };
+  type PendingRow = { user_id: string; identifier: string; display_name: string | null; member_ref: string | null; status: AccountStatus; created_at: string; approved_at: string | null };
   const [pending, setPending] = useState<PendingRow[]>([]);
   const [loadingPending, setLoadingPending] = useState(false);
   const [statusBusyId, setStatusBusyId] = useState<string | null>(null);
@@ -207,7 +207,7 @@ export function RoleManager() {
     setApproveTarget(p);
     setApproveRole("member");
     setApproveMemberId("none");
-    setApproveName("");
+    setApproveName(p.display_name ?? "");
   };
   const submitApprove = async () => {
     if (!approveTarget) return;
@@ -219,6 +219,20 @@ export function RoleManager() {
       memberRef: selected ? selected.id : undefined,
     });
     setApproveTarget(null);
+  };
+
+  const cancelRequest = async (p: PendingRow) => {
+    if (!window.confirm(`"${p.display_name || p.identifier}" এর সাইনআপ অনুরোধটি স্থায়ীভাবে মুছে ফেলবেন?`)) return;
+    setStatusBusyId(p.user_id);
+    try {
+      await deleteUser({ data: { userId: p.user_id } });
+      toast.success("অনুরোধ বাতিল ও মুছে ফেলা হয়েছে");
+      await Promise.all([loadPending(), loadUsers(), loadRoles()]);
+    } catch (e: any) {
+      toast.error(e?.message ?? "বাতিল করা যায়নি");
+    } finally {
+      setStatusBusyId(null);
+    }
   };
 
   useEffect(() => { refreshInfo(); }, []);
@@ -453,8 +467,8 @@ export function RoleManager() {
                   ) : pending.map((p) => (
                     <TableRow key={p.user_id}>
                       <TableCell className="font-medium">
-                        <div className="truncate max-w-[240px]">{p.identifier || "—"}</div>
-                        <div className="text-xs text-muted-foreground truncate max-w-[240px]">{p.user_id}</div>
+                        <div className="truncate max-w-[240px]">{p.display_name || "—"}</div>
+                        <div className="text-xs text-muted-foreground truncate max-w-[240px]">{p.identifier || p.user_id}</div>
                       </TableCell>
                       <TableCell>
                         <Badge variant={p.status === "active" ? "default" : p.status === "pending" ? "secondary" : "destructive"}>
@@ -465,7 +479,7 @@ export function RoleManager() {
                         {new Date(p.created_at).toLocaleString("bn-BD")}
                       </TableCell>
                       <TableCell className="text-right">
-                        <div className="inline-flex gap-1">
+                        <div className="inline-flex gap-1 flex-wrap justify-end">
                           {p.status !== "active" && (
                             <Button size="sm" variant="default" disabled={statusBusyId === p.user_id}
                               onClick={() => openApprove(p)}>
@@ -484,6 +498,10 @@ export function RoleManager() {
                               পুনঃচালু
                             </Button>
                           )}
+                          <Button size="sm" variant="destructive" disabled={statusBusyId === p.user_id}
+                            onClick={() => cancelRequest(p)}>
+                            <Trash2 className="h-3.5 w-3.5 mr-1" />অনুরোধ বাতিল
+                          </Button>
                         </div>
                       </TableCell>
                     </TableRow>
@@ -497,7 +515,7 @@ export function RoleManager() {
                 <DialogHeader>
                   <DialogTitle>অ্যাকাউন্ট অনুমোদন</DialogTitle>
                   <DialogDescription className="break-all">
-                    {approveTarget?.identifier}
+                    {approveTarget?.display_name ? `${approveTarget.display_name} · ` : ""}{approveTarget?.identifier}
                   </DialogDescription>
                 </DialogHeader>
                 <div className="space-y-3">

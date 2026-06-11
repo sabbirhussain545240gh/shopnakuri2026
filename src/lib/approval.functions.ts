@@ -48,7 +48,7 @@ export const listPendingAccounts = createServerFn({ method: "GET" })
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const { data, error } = await supabaseAdmin
       .from("profiles")
-      .select("user_id, identifier, status, created_at, approved_at")
+      .select("user_id, identifier, display_name, member_ref, status, created_at, approved_at")
       .order("created_at", { ascending: false });
     if (error) throw new Error(error.message);
     return { profiles: data ?? [] };
