@@ -27,6 +27,27 @@ import { AuthGate, SignOutButton, CloudStatusBadge } from "@/components/AuthGate
 import { buildReceiptQr, type VerifyPayload } from "@/lib/receipt-qr";
 import { useMyRoles, allowedTabs, roleLabel, type TabKey } from "@/lib/permissions";
 import { RoleManager } from "@/components/RoleManager";
+import { useServerFn } from "@tanstack/react-start";
+import { listPendingAccounts } from "@/lib/approval.functions";
+
+function usePendingApprovalCount(isAdmin: boolean) {
+  const fetchPending = useServerFn(listPendingAccounts);
+  const [count, setCount] = useState(0);
+  useEffect(() => {
+    if (!isAdmin) { setCount(0); return; }
+    let cancelled = false;
+    const tick = async () => {
+      try {
+        const r = await fetchPending();
+        if (!cancelled) setCount((r.profiles ?? []).filter((p: any) => p.status === "pending").length);
+      } catch { /* ignore */ }
+    };
+    tick();
+    const id = setInterval(tick, 20000);
+    return () => { cancelled = true; clearInterval(id); };
+  }, [isAdmin, fetchPending]);
+  return count;
+}
 
 function ReceiptQrPreview({ payload }: { payload: VerifyPayload }) {
   const [src, setSrc] = useState<string>("");
