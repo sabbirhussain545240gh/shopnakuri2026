@@ -85,16 +85,39 @@ function AuthTabs() {
   );
 }
 
+function normalizeIdentifier(raw: string): { email?: string; phone?: string } | null {
+  const v = raw.trim();
+  if (!v) return null;
+  if (v.includes("@")) return { email: v };
+  const digits = v.replace(/[^\d+]/g, "");
+  if (!digits) return null;
+  let phone = digits;
+  if (phone.startsWith("+")) {
+    phone = "+" + phone.slice(1).replace(/\D/g, "");
+  } else if (phone.startsWith("00")) {
+    phone = "+" + phone.slice(2);
+  } else if (phone.startsWith("880")) {
+    phone = "+" + phone;
+  } else if (phone.startsWith("0")) {
+    phone = "+880" + phone.slice(1);
+  } else {
+    phone = "+880" + phone;
+  }
+  return { phone };
+}
+
 function LoginForm() {
-  const [email, setEmail] = useState("");
+  const [identifier, setIdentifier] = useState("");
   const [password, setPassword] = useState("");
   const [submitting, setSubmitting] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    const creds = normalizeIdentifier(identifier);
+    if (!creds) { toast.error("সঠিক ইমেইল বা মোবাইল নম্বর দিন"); return; }
     setSubmitting(true);
     try {
-      const { error } = await supabase.auth.signInWithPassword({ email: email.trim(), password });
+      const { error } = await supabase.auth.signInWithPassword({ ...creds, password } as any);
       if (error) throw error;
       toast.success("সফলভাবে লগইন হয়েছে");
     } catch (err: any) {
@@ -105,8 +128,8 @@ function LoginForm() {
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
       <div className="space-y-2">
-        <Label>ইমেইল</Label>
-        <Input type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="you@example.com" required />
+        <Label>ইমেইল অথবা মোবাইল</Label>
+        <Input type="text" value={identifier} onChange={(e) => setIdentifier(e.target.value)} placeholder="you@example.com অথবা 01XXXXXXXXX" required />
       </div>
       <div className="space-y-2">
         <Label>পাসওয়ার্ড</Label>
@@ -120,21 +143,25 @@ function LoginForm() {
 }
 
 function SignupForm() {
-  const [email, setEmail] = useState("");
+  const [identifier, setIdentifier] = useState("");
   const [password, setPassword] = useState("");
   const [submitting, setSubmitting] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    const creds = normalizeIdentifier(identifier);
+    if (!creds) { toast.error("সঠিক ইমেইল বা মোবাইল নম্বর দিন"); return; }
     setSubmitting(true);
     try {
       const { error } = await supabase.auth.signUp({
-        email: email.trim(),
+        ...creds,
         password,
-        options: { emailRedirectTo: `${window.location.origin}/` },
-      });
+        options: creds.email ? { emailRedirectTo: `${window.location.origin}/` } : undefined,
+      } as any);
       if (error) throw error;
-      toast.success("অ্যাকাউন্ট তৈরি হয়েছে। ইমেইলে কনফার্মেশন লিংক পাঠানো হয়েছে।");
+      toast.success(creds.email
+        ? "অ্যাকাউন্ট তৈরি হয়েছে। ইমেইল কনফার্ম করে লগইন করুন।"
+        : "অ্যাকাউন্ট তৈরি হয়েছে। এখন লগইন করুন।");
     } catch (err: any) {
       toast.error(err?.message ?? "ত্রুটি");
     } finally { setSubmitting(false); }
@@ -143,8 +170,8 @@ function SignupForm() {
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
       <div className="space-y-2">
-        <Label>ইমেইল</Label>
-        <Input type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="you@example.com" required />
+        <Label>ইমেইল অথবা মোবাইল</Label>
+        <Input type="text" value={identifier} onChange={(e) => setIdentifier(e.target.value)} placeholder="you@example.com অথবা 01XXXXXXXXX" required />
       </div>
       <div className="space-y-2">
         <Label>পাসওয়ার্ড</Label>
