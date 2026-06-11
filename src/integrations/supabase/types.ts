@@ -44,6 +44,36 @@ export type Database = {
         }
         Relationships: []
       }
+      profiles: {
+        Row: {
+          approved_at: string | null
+          approved_by: string | null
+          created_at: string
+          identifier: string
+          status: Database["public"]["Enums"]["account_status"]
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          approved_at?: string | null
+          approved_by?: string | null
+          created_at?: string
+          identifier?: string
+          status?: Database["public"]["Enums"]["account_status"]
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          approved_at?: string | null
+          approved_by?: string | null
+          created_at?: string
+          identifier?: string
+          status?: Database["public"]["Enums"]["account_status"]
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       samiti_cloud_data: {
         Row: {
           data: Json
@@ -97,6 +127,7 @@ export type Database = {
       }
     }
     Enums: {
+      account_status: "pending" | "active" | "rejected"
       app_role: "admin" | "treasurer" | "president" | "secretary" | "member"
     }
     CompositeTypes: {
@@ -225,6 +256,7 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
+      account_status: ["pending", "active", "rejected"],
       app_role: ["admin", "treasurer", "president", "secretary", "member"],
     },
   },
