@@ -128,10 +128,59 @@ export function RoleManager() {
     } finally { setLoadingInvites(false); }
   };
 
+  const loadUsers = async () => {
+    setLoadingUsers(true);
+    try {
+      const r = await fetchUsers();
+      setUsers(r.users as UserRow[]);
+    } catch (e: any) {
+      toast.error(e?.message ?? "ইউজার লোড করা যায়নি");
+    } finally { setLoadingUsers(false); }
+  };
+
   useEffect(() => { refreshInfo(); }, []);
   useEffect(() => {
-    if (info?.isAdmin) { loadRoles(); loadInvites(); }
+    if (info?.isAdmin) { loadRoles(); loadInvites(); loadUsers(); }
   }, [info?.isAdmin]);
+
+  // Filtered + paginated users
+  const filteredUsers = useMemo(() => {
+    const q = search.trim().toLowerCase();
+    return users.filter((u) => {
+      if (q && !u.email.toLowerCase().includes(q) && !u.id.toLowerCase().includes(q)) return false;
+      if (filterRole === "all") return true;
+      if (filterRole === "none") return u.roles.length === 0;
+      return u.roles.some((r) => r.role === filterRole);
+    });
+  }, [users, search, filterRole]);
+
+  useEffect(() => { setPage(1); }, [search, filterRole, pageSize]);
+
+  const totalPages = Math.max(1, Math.ceil(filteredUsers.length / pageSize));
+  const pageStart = (page - 1) * pageSize;
+  const pageUsers = filteredUsers.slice(pageStart, pageStart + pageSize);
+
+  const assignToUser = async (userEmail: string, userId: string) => {
+    if (!userEmail) { toast.error("এই ইউজারের ইমেইল নেই"); return; }
+    setAssigningUserId(userId);
+    try {
+      await assign({ data: { email: userEmail, role: quickRole } });
+      toast.success(`${roleLabel(quickRole)} ভূমিকা যোগ হয়েছে`);
+      await Promise.all([loadRoles(), loadUsers()]);
+    } catch (err: any) {
+      toast.error(err?.message ?? "ভূমিকা বরাদ্দ করা যায়নি");
+    } finally { setAssigningUserId(null); }
+  };
+
+  const removeRoleRow = async (id: string) => {
+    try {
+      await remove({ data: { id } });
+      toast.success("ভূমিকা সরানো হয়েছে");
+      await Promise.all([loadRoles(), loadUsers()]);
+    } catch (err: any) {
+      toast.error(err?.message ?? "সরানো যায়নি");
+    }
+  };
 
   const handleClaim = async () => {
     setClaiming(true);
