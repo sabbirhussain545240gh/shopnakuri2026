@@ -562,6 +562,22 @@ function DepositReceiptsSection({ data, onView }: { data: MemberViewResponse; on
                             amount: r.d.amount, date: r.d.date, totalAfter: r.totalAfter,
                             receiptNo: r.receiptNo, note: r.d.note,
                           }, dataUrl);
+                          onView("জমা রিসিপ্ট", html);
+                        }}>
+                          <Eye className="h-4 w-4" />
+                        </Button>
+                        <Button size="sm" variant="outline" onClick={async () => {
+                          if (!data.member) return;
+                          const { dataUrl } = await buildReceiptQr({
+                            t: "deposit", s: data.samitiName, n: r.receiptNo, m: data.member.name,
+                            a: r.d.amount, d: r.d.date, ms: data.member.serial, ta: r.totalAfter,
+                          });
+                          const html = buildDepositHtml({
+                            samitiName: data.samitiName, logo: data.samitiLogo,
+                            memberName: data.member.name, memberSerial: data.member.serial,
+                            amount: r.d.amount, date: r.d.date, totalAfter: r.totalAfter,
+                            receiptNo: r.receiptNo, note: r.d.note,
+                          }, dataUrl);
                           printHtml("জমা রিসিপ্ট", html);
                         }}>
                           <Printer className="h-4 w-4" />
