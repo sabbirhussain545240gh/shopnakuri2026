@@ -201,7 +201,7 @@ export function RoleManager() {
   };
   const submitApprove = async () => {
     if (!approveTarget) return;
-    const selected = approveMemberId !== "none" ? samiti.members.find((m) => m.id === approveMemberId) : null;
+    const selected = approveMemberId !== "none" ? samiti.data.members.find((m) => m.id === approveMemberId) : null;
     const displayName = (approveName.trim() || selected?.name || "").trim();
     await changeStatus(approveTarget.user_id, "active", {
       role: approveRole,
