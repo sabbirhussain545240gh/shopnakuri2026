@@ -140,7 +140,7 @@ function LoginForm() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     const creds = normalizeIdentifier(identifier);
-    if (!creds) { toast.error("সঠিক ইমেইল বা মোবাইল নম্বর দিন"); return; }
+    if (!creds) { toast.error("সঠিক ইমেইল ঠিকানা দিন"); return; }
     setSubmitting(true);
     try {
       const { error } = await supabase.auth.signInWithPassword({ ...creds, password } as any);
@@ -154,8 +154,8 @@ function LoginForm() {
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
       <div className="space-y-2">
-        <Label>ইমেইল অথবা মোবাইল</Label>
-        <Input type="text" value={identifier} onChange={(e) => setIdentifier(e.target.value)} placeholder="you@example.com অথবা 01XXXXXXXXX" required />
+        <Label>ইমেইল ঠিকানা</Label>
+        <Input type="text" value={identifier} onChange={(e) => setIdentifier(e.target.value)} placeholder="you@example.com" required />
       </div>
       <div className="space-y-2">
         <Label>পাসওয়ার্ড</Label>
@@ -176,7 +176,7 @@ function SignupForm() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     const creds = normalizeIdentifier(identifier);
-    if (!creds) { toast.error("সঠিক ইমেইল বা মোবাইল নম্বর দিন"); return; }
+    if (!creds) { toast.error("সঠিক ইমেইল ঠিকানা দিন"); return; }
     setSubmitting(true);
     try {
       const res = await fetch("/api/public/register", {
@@ -197,8 +197,8 @@ function SignupForm() {
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
       <div className="space-y-2">
-        <Label>ইমেইল অথবা মোবাইল</Label>
-        <Input type="text" value={identifier} onChange={(e) => setIdentifier(e.target.value)} placeholder="you@example.com অথবা 01XXXXXXXXX" required />
+        <Label>ইমেইল ঠিকানা</Label>
+        <Input type="text" value={identifier} onChange={(e) => setIdentifier(e.target.value)} placeholder="you@example.com" required />
       </div>
       <div className="space-y-2">
         <Label>পাসওয়ার্ড</Label>
