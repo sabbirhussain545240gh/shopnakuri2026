@@ -192,15 +192,16 @@ function SignupForm() {
     if (!creds) { toast.error("সঠিক ইমেইল বা মোবাইল নম্বর দিন"); return; }
     setSubmitting(true);
     try {
-      const { error } = await supabase.auth.signUp({
-        ...creds,
-        password,
-        options: creds.email ? { emailRedirectTo: `${window.location.origin}/` } : undefined,
-      } as any);
-      if (error) throw error;
-      toast.success(creds.email
-        ? "অ্যাকাউন্ট তৈরি হয়েছে। ইমেইল কনফার্ম করে লগইন করুন।"
-        : "অ্যাকাউন্ট তৈরি হয়েছে। এখন লগইন করুন।");
+      const res = await fetch("/api/public/register", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ identifier: identifier.trim(), password }),
+      });
+      const json = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(json?.error ?? "অ্যাকাউন্ট তৈরি ব্যর্থ");
+      toast.success("অ্যাকাউন্ট তৈরি হয়েছে। সুপার এডমিনের অনুমোদনের পরে লগইন করতে পারবেন।");
+      setIdentifier("");
+      setPassword("");
     } catch (err: any) {
       toast.error(err?.message ?? "ত্রুটি");
     } finally { setSubmitting(false); }
@@ -220,7 +221,7 @@ function SignupForm() {
         {submitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
         অ্যাকাউন্ট তৈরি করুন
       </Button>
-      <p className="text-xs text-muted-foreground text-center">নতুন অ্যাকাউন্ট তৈরি হলে সুপার এডমিন ভূমিকা বরাদ্দ করবেন।</p>
+      <p className="text-xs text-muted-foreground text-center">অ্যাকাউন্ট তৈরির পরে সুপার এডমিন অনুমোদন করলে আপনি লগইন করতে পারবেন।</p>
     </form>
   );
 }
