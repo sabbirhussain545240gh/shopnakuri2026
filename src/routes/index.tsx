@@ -2881,6 +2881,8 @@ function SettingsTab() {
       splashTitle: splashTitle.trim(),
       splashSubtitle: splashSubtitle.trim(),
       splashIcon: splashIcon.trim(),
+      splashImage: splashImage,
+      splashImageSize: splashImageSize,
       splashFooter: splashFooter.trim(),
       goalsSectionTitle: goalsSectionTitle.trim(),
       goalsSectionSubtitle: goalsSectionSubtitle.trim(),
