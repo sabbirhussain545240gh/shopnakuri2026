@@ -221,6 +221,20 @@ export function RoleManager() {
     setApproveTarget(null);
   };
 
+  const cancelRequest = async (p: PendingRow) => {
+    if (!window.confirm(`"${p.display_name || p.identifier}" এর সাইনআপ অনুরোধটি স্থায়ীভাবে মুছে ফেলবেন?`)) return;
+    setStatusBusyId(p.user_id);
+    try {
+      await deleteUser({ data: { userId: p.user_id } });
+      toast.success("অনুরোধ বাতিল ও মুছে ফেলা হয়েছে");
+      await Promise.all([loadPending(), loadUsers(), loadRoles()]);
+    } catch (e: any) {
+      toast.error(e?.message ?? "বাতিল করা যায়নি");
+    } finally {
+      setStatusBusyId(null);
+    }
+  };
+
   useEffect(() => { refreshInfo(); }, []);
   useEffect(() => {
     if (info?.isAdmin) { loadRoles(); loadInvites(); loadUsers(); loadPending(); }
