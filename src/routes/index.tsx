@@ -263,6 +263,7 @@ function SamitiApp() {
           {tab === "cashbook" && <CashbookTab />}
           {tab === "reports" && <ReportsTab />}
           {tab === "settings" && <SettingsTab />}
+          {tab === "admin" && <AdminTab />}
         </main>
 
         <footer className="container mx-auto px-4 py-6 text-center text-xs text-muted-foreground">
@@ -2953,9 +2954,6 @@ function SettingsTab() {
 
   return (
     <div className="grid gap-6 md:grid-cols-2">
-      <div className="md:col-span-2">
-        <RoleManager />
-      </div>
       <Card>
         <CardHeader>
           <CardTitle>সমিতির তথ্য</CardTitle>
