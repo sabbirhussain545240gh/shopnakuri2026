@@ -2860,9 +2860,8 @@ function CashbookTab() {
 
 // ===== Settings =====
 function SettingsTab() {
-  const { roles } = useMyRoles();
-  const showRoleManager = true; // RoleManager self-gates (bootstrap / admin / hidden)
-  void isSuperAdmin;
+  void useMyRoles; void isSuperAdmin; void roles;
+  // RoleManager self-gates: shows bootstrap, full panel, or nothing based on server state.
   const { data, updateSamitiInfo, updateSettings, resetAll, importData } = useSamiti();
   const [name, setName] = useState(data.samitiName);
   const [address, setAddress] = useState(data.samitiAddress || "");
