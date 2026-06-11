@@ -82,6 +82,19 @@ export const listUsersWithRoles = createServerFn({ method: "GET" })
       });
     }
 
+    // Pull profile metadata for display name + member reference + status
+    const { data: profRows } = await supabaseAdmin
+      .from("profiles")
+      .select("user_id, display_name, member_ref, status, identifier");
+    const profByUser: Record<string, { displayName: string | null; memberRef: string | null; status: string | null }> = {};
+    for (const p of profRows ?? []) {
+      profByUser[(p as any).user_id as string] = {
+        displayName: (p as any).display_name ?? null,
+        memberRef: (p as any).member_ref ?? null,
+        status: (p as any).status ?? null,
+      };
+    }
+
     // Pull all auth users (paginate up to ~2000)
     const users: { id: string; email: string; createdAt: string; lastSignInAt: string | null }[] = [];
     for (let page = 1; page <= 10; page++) {
@@ -102,6 +115,9 @@ export const listUsersWithRoles = createServerFn({ method: "GET" })
       users: users.map((u) => ({
         ...u,
         roles: byUser[u.id] ?? [],
+        displayName: profByUser[u.id]?.displayName ?? null,
+        memberRef: profByUser[u.id]?.memberRef ?? null,
+        status: profByUser[u.id]?.status ?? null,
       })),
     };
   });

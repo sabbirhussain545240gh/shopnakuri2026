@@ -31,6 +31,8 @@ import {
   inviteUser,
   listInvites,
   revokeInvite,
+  resetUserPassword,
+  deleteManagedUser,
 } from "@/lib/admin.functions";
 import {
   listPendingAccounts,
@@ -85,9 +87,15 @@ export function RoleManager() {
   const createUser = useServerFn(createManagedUser);
   const fetchPending = useServerFn(listPendingAccounts);
   const updateStatus = useServerFn(setAccountStatus);
+  const resetPassword = useServerFn(resetUserPassword);
+  const deleteUser = useServerFn(deleteManagedUser);
 
   const [info, setInfo] = useState<{ isAdmin: boolean; adminCount: number } | null>(null);
   const [claiming, setClaiming] = useState(false);
+  const [pwTarget, setPwTarget] = useState<UserRow | null>(null);
+  const [pwValue, setPwValue] = useState("");
+  const [pwBusy, setPwBusy] = useState(false);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
 
   type PendingRow = { user_id: string; identifier: string; status: AccountStatus; created_at: string; approved_at: string | null };
   const [pending, setPending] = useState<PendingRow[]>([]);
@@ -111,6 +119,7 @@ export function RoleManager() {
   type UserRow = {
     id: string; email: string; createdAt: string; lastSignInAt: string | null;
     roles: { id: string; role: AppRole; createdAt: string }[];
+    displayName: string | null; memberRef: string | null; status: string | null;
   };
   const [users, setUsers] = useState<UserRow[]>([]);
   const [loadingUsers, setLoadingUsers] = useState(false);
@@ -638,6 +647,7 @@ export function RoleManager() {
                 <TableHeader>
                   <TableRow>
                     <TableHead>ইমেইল</TableHead>
+                    <TableHead>সদস্য নাম + নং</TableHead>
                     <TableHead>ভূমিকা</TableHead>
                     <TableHead className="hidden md:table-cell">শেষ লগইন</TableHead>
                     <TableHead className="text-right">অ্যাকশন</TableHead>
@@ -645,18 +655,32 @@ export function RoleManager() {
                 </TableHeader>
                 <TableBody>
                   {loadingUsers ? (
-                    <TableRow><TableCell colSpan={4} className="text-center py-8">
+                    <TableRow><TableCell colSpan={5} className="text-center py-8">
                       <Loader2 className="h-5 w-5 animate-spin text-muted-foreground inline" />
                     </TableCell></TableRow>
                   ) : pageUsers.length === 0 ? (
-                    <TableRow><TableCell colSpan={4} className="text-center py-8 text-sm text-muted-foreground">
+                    <TableRow><TableCell colSpan={5} className="text-center py-8 text-sm text-muted-foreground">
                       কোনো ইউজার পাওয়া যায়নি
                     </TableCell></TableRow>
-                  ) : pageUsers.map((u) => (
+                  ) : pageUsers.map((u) => {
+                    const member = u.memberRef ? samiti.data.members.find((m) => m.id === u.memberRef) : null;
+                    return (
                     <TableRow key={u.id}>
                       <TableCell className="font-medium">
                         <div className="truncate max-w-[220px]" title={u.email}>{u.email || "—"}</div>
                         <div className="text-xs text-muted-foreground truncate max-w-[220px]" title={u.id}>{u.id}</div>
+                      </TableCell>
+                      <TableCell>
+                        {member ? (
+                          <div className="text-sm">
+                            <span className="font-medium">{member.name}</span>
+                            <span className="ml-1 text-xs text-muted-foreground">#{member.serial}</span>
+                          </div>
+                        ) : u.displayName ? (
+                          <span className="text-sm">{u.displayName}</span>
+                        ) : (
+                          <span className="text-xs text-muted-foreground">—</span>
+                        )}
                       </TableCell>
                       <TableCell>
                         {u.roles.length === 0 ? (
@@ -681,18 +705,75 @@ export function RoleManager() {
                         {u.lastSignInAt ? new Date(u.lastSignInAt).toLocaleString("bn-BD") : "—"}
                       </TableCell>
                       <TableCell className="text-right">
-                        <Button size="sm" variant="outline" disabled={assigningUserId === u.id || !u.email}
-                          onClick={() => assignToUser(u.email, u.id)}>
-                          {assigningUserId === u.id
-                            ? <Loader2 className="h-4 w-4 animate-spin" />
-                            : <><UserPlus className="h-3.5 w-3.5 mr-1" />{roleLabel(quickRole)} যোগ</>}
-                        </Button>
+                        <div className="inline-flex gap-1 flex-wrap justify-end">
+                          <Button size="sm" variant="outline" disabled={assigningUserId === u.id || !u.email}
+                            onClick={() => assignToUser(u.email, u.id)}>
+                            {assigningUserId === u.id
+                              ? <Loader2 className="h-4 w-4 animate-spin" />
+                              : <><UserPlus className="h-3.5 w-3.5 mr-1" />{roleLabel(quickRole)}</>}
+                          </Button>
+                          <Button size="sm" variant="ghost" title="পাসওয়ার্ড রিসেট"
+                            onClick={() => { setPwTarget(u); setPwValue(""); }}>
+                            <KeyRound className="h-3.5 w-3.5" />
+                          </Button>
+                          <Button size="sm" variant="ghost" className="text-destructive hover:text-destructive"
+                            title="ডিলিট" disabled={deletingId === u.id}
+                            onClick={async () => {
+                              if (!confirm(`এই অ্যাকাউন্ট স্থায়ীভাবে মুছে ফেলতে চান?\n\n${u.email || u.id}`)) return;
+                              setDeletingId(u.id);
+                              try {
+                                await deleteUser({ data: { userId: u.id } });
+                                toast.success("অ্যাকাউন্ট মুছে ফেলা হয়েছে");
+                                await Promise.all([loadUsers(), loadRoles(), loadPending()]);
+                              } catch (err: any) {
+                                toast.error(err?.message ?? "মুছা যায়নি");
+                              } finally { setDeletingId(null); }
+                            }}>
+                            {deletingId === u.id ? <Loader2 className="h-4 w-4 animate-spin" /> : <Trash2 className="h-3.5 w-3.5" />}
+                          </Button>
+                        </div>
                       </TableCell>
                     </TableRow>
-                  ))}
+                    );
+                  })}
                 </TableBody>
               </Table>
             </div>
+
+            <Dialog open={!!pwTarget} onOpenChange={(o) => !o && setPwTarget(null)}>
+              <DialogContent>
+                <DialogHeader>
+                  <DialogTitle>পাসওয়ার্ড রিসেট</DialogTitle>
+                  <DialogDescription className="break-all">
+                    {pwTarget?.email || pwTarget?.id}
+                  </DialogDescription>
+                </DialogHeader>
+                <div className="space-y-1.5">
+                  <Label htmlFor="reset-pw">নতুন পাসওয়ার্ড</Label>
+                  <Input id="reset-pw" type="text" value={pwValue}
+                    onChange={(e) => setPwValue(e.target.value)}
+                    placeholder="কমপক্ষে ৬ অক্ষর" minLength={6} />
+                </div>
+                <DialogFooter>
+                  <Button variant="outline" onClick={() => setPwTarget(null)}>বাতিল</Button>
+                  <Button disabled={pwBusy || pwValue.length < 6} onClick={async () => {
+                    if (!pwTarget) return;
+                    setPwBusy(true);
+                    try {
+                      await resetPassword({ data: { userId: pwTarget.id, password: pwValue } });
+                      toast.success("পাসওয়ার্ড পরিবর্তন হয়েছে");
+                      setPwTarget(null);
+                      setPwValue("");
+                    } catch (err: any) {
+                      toast.error(err?.message ?? "পরিবর্তন করা যায়নি");
+                    } finally { setPwBusy(false); }
+                  }}>
+                    {pwBusy ? <Loader2 className="h-4 w-4 animate-spin" /> : <><KeyRound className="h-3.5 w-3.5 mr-1" />সংরক্ষণ</>}
+                  </Button>
+                </DialogFooter>
+              </DialogContent>
+            </Dialog>
+
 
             {/* Pagination */}
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-sm">
