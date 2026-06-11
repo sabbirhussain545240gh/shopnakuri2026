@@ -249,3 +249,89 @@ export function CloudStatusBadge() {
     </span>
   );
 }
+
+function IntroSplash({ onEnter }: { onEnter: () => void }) {
+  const quotes = [
+    { bn: "একতাই শক্তি, একতাই বল।", en: "Unity is strength." },
+    { bn: "আজকের সঞ্চয়, আগামীর নিরাপত্তা।", en: "Today's savings, tomorrow's security." },
+    { bn: "ছোট ছোট সঞ্চয় গড়ে তোলে বড় স্বপ্ন।", en: "Small savings build great dreams." },
+    { bn: "সততা ও স্বচ্ছতাই আমাদের ভিত্তি।", en: "Honesty and transparency are our foundation." },
+    { bn: "সকলের জন্য, সকলের পাশে।", en: "For all, with all." },
+  ];
+  const goals = [
+    { icon: "🤝", title: "পারস্পরিক সহযোগিতা", desc: "সদস্যদের মাঝে আর্থিক সহযোগিতা ও বন্ধন গড়ে তোলা।" },
+    { icon: "💰", title: "সঞ্চয়ের অভ্যাস", desc: "নিয়মিত সঞ্চয়ের মাধ্যমে আর্থিক ভিত্তি মজবুত করা।" },
+    { icon: "🏦", title: "সহজ ঋণ সুবিধা", desc: "প্রয়োজনের সময় সদস্যদের সহজ শর্তে ঋণ প্রদান।" },
+    { icon: "📈", title: "আর্থিক উন্নয়ন", desc: "সদস্যদের ও সমাজের সার্বিক আর্থিক উন্নয়ন নিশ্চিত করা।" },
+    { icon: "🎯", title: "স্বচ্ছ ব্যবস্থাপনা", desc: "প্রতিটি লেনদেনের স্বচ্ছ ও নির্ভুল হিসাব রাখা।" },
+    { icon: "🌱", title: "সামাজিক কল্যাণ", desc: "সদস্যদের পরিবার ও সমাজের কল্যাণে কাজ করা।" },
+  ];
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-emerald-50 via-background to-sky-50 dark:from-emerald-950/30 dark:via-background dark:to-sky-950/30">
+      <div className="mx-auto max-w-5xl px-4 py-10 md:py-16">
+        <div className="text-center">
+          <div className="inline-flex h-20 w-20 items-center justify-center rounded-full bg-gradient-to-br from-emerald-500 to-sky-600 text-3xl text-white shadow-lg">
+            🌾
+          </div>
+          <h1 className="mt-5 font-serif text-3xl md:text-5xl font-bold tracking-tight text-foreground">
+            স্বপ্ন কুড়ি বন্ধন সমিতি
+          </h1>
+          <p className="mt-3 text-base md:text-lg text-muted-foreground">
+            স্থাপিত: ডিসেম্বর ২০২৫ · একতাই শক্তি, একতাই বল
+          </p>
+          <div className="mt-6">
+            <Button size="lg" onClick={onEnter} className="px-8">
+              প্রবেশ করুন →
+            </Button>
+          </div>
+        </div>
+
+        <Card className="mt-10 border-emerald-200/60 dark:border-emerald-900/40">
+          <CardHeader>
+            <CardTitle className="text-xl md:text-2xl">আমাদের লক্ষ্য ও উদ্দেশ্য</CardTitle>
+            <CardDescription>সদস্যদের কল্যাণ ও আর্থিক স্বনির্ভরতাই আমাদের মূল লক্ষ্য</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+              {goals.map((g) => (
+                <div key={g.title} className="rounded-lg border bg-card p-4 transition-shadow hover:shadow-md">
+                  <div className="text-3xl">{g.icon}</div>
+                  <div className="mt-2 font-semibold text-foreground">{g.title}</div>
+                  <div className="mt-1 text-sm text-muted-foreground">{g.desc}</div>
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card className="mt-8">
+          <CardHeader>
+            <CardTitle className="text-xl md:text-2xl">অনুপ্রেরণামূলক বাণী</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="grid gap-3 md:grid-cols-2">
+              {quotes.map((q, i) => (
+                <div
+                  key={i}
+                  className="rounded-lg border-l-4 border-emerald-500 bg-emerald-50/70 dark:bg-emerald-950/30 p-4"
+                >
+                  <p className="font-serif text-base md:text-lg text-foreground">“{q.bn}”</p>
+                  <p className="mt-1 text-xs text-muted-foreground italic">{q.en}</p>
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+
+        <div className="mt-10 text-center">
+          <Button size="lg" onClick={onEnter} className="px-8">
+            লগইন করে প্রবেশ করুন
+          </Button>
+          <p className="mt-3 text-xs text-muted-foreground">
+            © {new Date().getFullYear()} স্বপ্ন কুড়ি বন্ধন সমিতি
+          </p>
+        </div>
+      </div>
+    </div>
+  );
+}
