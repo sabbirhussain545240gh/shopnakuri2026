@@ -171,15 +171,44 @@ export function RoleManager() {
     } finally { setLoadingPending(false); }
   };
 
-  const changeStatus = async (userId: string, status: AccountStatus) => {
+  const changeStatus = async (
+    userId: string,
+    status: AccountStatus,
+    extra?: { role?: AppRole; displayName?: string; memberRef?: string },
+  ) => {
     setStatusBusyId(userId);
     try {
-      await updateStatus({ data: { userId, status } });
+      await updateStatus({ data: { userId, status, ...(extra ?? {}) } });
       toast.success(status === "active" ? "অ্যাকাউন্ট অনুমোদিত" : status === "rejected" ? "অ্যাকাউন্ট প্রত্যাখ্যাত" : "স্ট্যাটাস আপডেট হয়েছে");
-      await loadPending();
+      await Promise.all([loadPending(), loadRoles(), loadUsers()]);
     } catch (err: any) {
       toast.error(err?.message ?? "আপডেট করা যায়নি");
     } finally { setStatusBusyId(null); }
+  };
+
+  // Approval dialog state
+  const samiti = useSamiti();
+  const [approveTarget, setApproveTarget] = useState<PendingRow | null>(null);
+  const [approveRole, setApproveRole] = useState<AppRole>("member");
+  const [approveMemberId, setApproveMemberId] = useState<string>("none");
+  const [approveName, setApproveName] = useState("");
+
+  const openApprove = (p: PendingRow) => {
+    setApproveTarget(p);
+    setApproveRole("member");
+    setApproveMemberId("none");
+    setApproveName("");
+  };
+  const submitApprove = async () => {
+    if (!approveTarget) return;
+    const selected = approveMemberId !== "none" ? samiti.members.find((m) => m.id === approveMemberId) : null;
+    const displayName = (approveName.trim() || selected?.name || "").trim();
+    await changeStatus(approveTarget.user_id, "active", {
+      role: approveRole,
+      displayName: displayName || undefined,
+      memberRef: selected ? selected.id : undefined,
+    });
+    setApproveTarget(null);
   };
 
   useEffect(() => { refreshInfo(); }, []);
