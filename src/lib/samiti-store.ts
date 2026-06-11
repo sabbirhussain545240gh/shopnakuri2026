@@ -101,6 +101,12 @@ export const DEFAULT_QUOTES: Quote[] = [
   { bn: "সকলের জন্য, সকলের পাশে।", en: "For all, with all." },
 ];
 
+export const DEFAULT_MESSAGES: Message[] = [
+  { role: "প্রতিষ্ঠাতা", name: "", photo: "", message: "" },
+  { role: "সভাপতি", name: "", photo: "", message: "" },
+  { role: "সাধারণ সম্পাদক", name: "", photo: "", message: "" },
+];
+
 export type SamitiData = {
   members: Member[];
   deposits: Deposit[];
