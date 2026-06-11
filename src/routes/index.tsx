@@ -172,7 +172,7 @@ function SamitiApp() {
 
   return (
     <div className="min-h-screen flex">
-      <Toaster position="top-center" richColors />
+      
 
       {/* Desktop Sidebar */}
       <aside className="w-64 border-r bg-card hidden md:flex flex-col sticky top-0 h-screen">
