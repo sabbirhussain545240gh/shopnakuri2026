@@ -11,6 +11,7 @@ import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Switch } from "@/components/ui/switch";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -2843,6 +2844,14 @@ function SettingsTab() {
   const [notice, setNotice] = useState(data.settings.notice || "");
   const [goals, setGoals] = useState<Goal[]>(data.settings.goals && data.settings.goals.length > 0 ? data.settings.goals : DEFAULT_GOALS);
   const [quotes, setQuotes] = useState<Quote[]>(data.settings.quotes && data.settings.quotes.length > 0 ? data.settings.quotes : DEFAULT_QUOTES);
+  const [splashEnabled, setSplashEnabled] = useState<boolean>(data.settings.splashEnabled !== false);
+  const [splashTitle, setSplashTitle] = useState(data.settings.splashTitle || "");
+  const [splashSubtitle, setSplashSubtitle] = useState(data.settings.splashSubtitle || "");
+  const [splashIcon, setSplashIcon] = useState(data.settings.splashIcon || "");
+  const [splashFooter, setSplashFooter] = useState(data.settings.splashFooter || "");
+  const [goalsSectionTitle, setGoalsSectionTitle] = useState(data.settings.goalsSectionTitle || "");
+  const [goalsSectionSubtitle, setGoalsSectionSubtitle] = useState(data.settings.goalsSectionSubtitle || "");
+  const [quotesSectionTitle, setQuotesSectionTitle] = useState(data.settings.quotesSectionTitle || "");
   const [confirmReset, setConfirmReset] = useState(false);
 
   const onLogo = (file?: File) => {
@@ -2866,6 +2875,14 @@ function SettingsTab() {
       notice: notice.trim(),
       goals: goals.map((g) => ({ icon: g.icon.trim(), title: g.title.trim(), desc: g.desc.trim() })).filter((g) => g.title || g.desc),
       quotes: quotes.map((q) => ({ bn: q.bn.trim(), en: q.en.trim() })).filter((q) => q.bn || q.en),
+      splashEnabled,
+      splashTitle: splashTitle.trim(),
+      splashSubtitle: splashSubtitle.trim(),
+      splashIcon: splashIcon.trim(),
+      splashFooter: splashFooter.trim(),
+      goalsSectionTitle: goalsSectionTitle.trim(),
+      goalsSectionSubtitle: goalsSectionSubtitle.trim(),
+      quotesSectionTitle: quotesSectionTitle.trim(),
     });
     toast.success("সেটিংস সংরক্ষিত হয়েছে");
   };
@@ -2931,6 +2948,56 @@ function SettingsTab() {
       </Card>
 
       <Card className="md:col-span-2">
+        <CardHeader>
+          <CardTitle>ইন্ট্রো / পরিচিতি পেজ কন্ট্রোল</CardTitle>
+          <CardDescription>লগইন এর আগে দেখানো পরিচিতি পেজের সব টেক্সট ও আইকন এডিট করুন</CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="flex items-center justify-between rounded-md border p-3">
+            <div>
+              <Label className="text-sm">পরিচিতি পেজ চালু রাখুন</Label>
+              <p className="text-[11px] text-muted-foreground mt-1">বন্ধ করলে লগইন পেজ সরাসরি দেখাবে</p>
+            </div>
+            <Switch checked={splashEnabled} onCheckedChange={setSplashEnabled} />
+          </div>
+          <div className="grid gap-3 sm:grid-cols-[100px_1fr]">
+            <div>
+              <Label className="text-xs">হেডার আইকন</Label>
+              <Input value={splashIcon} onChange={(e) => setSplashIcon(e.target.value)} placeholder="🌾" />
+            </div>
+            <div>
+              <Label className="text-xs">সমিতির নাম (শিরোনাম)</Label>
+              <Input value={splashTitle} onChange={(e) => setSplashTitle(e.target.value)} placeholder="স্বপ্ন কুড়ি বন্ধন সমিতি" />
+            </div>
+          </div>
+          <div>
+            <Label className="text-xs">সাবটাইটেল (স্থাপিত · স্লোগান)</Label>
+            <Input value={splashSubtitle} onChange={(e) => setSplashSubtitle(e.target.value)} placeholder="স্থাপিত: ডিসেম্বর ২০২৫ · একতাই শক্তি, একতাই বল" />
+          </div>
+          <div className="grid gap-3 sm:grid-cols-2">
+            <div>
+              <Label className="text-xs">লক্ষ্য সেকশনের শিরোনাম</Label>
+              <Input value={goalsSectionTitle} onChange={(e) => setGoalsSectionTitle(e.target.value)} placeholder="আমাদের লক্ষ্য ও উদ্দেশ্য" />
+            </div>
+            <div>
+              <Label className="text-xs">বাণী সেকশনের শিরোনাম</Label>
+              <Input value={quotesSectionTitle} onChange={(e) => setQuotesSectionTitle(e.target.value)} placeholder="অনুপ্রেরণামূলক বাণী" />
+            </div>
+          </div>
+          <div>
+            <Label className="text-xs">লক্ষ্য সেকশনের সাব-বর্ণনা</Label>
+            <Input value={goalsSectionSubtitle} onChange={(e) => setGoalsSectionSubtitle(e.target.value)} placeholder="সদস্যদের কল্যাণ ও আর্থিক স্বনির্ভরতাই আমাদের মূল লক্ষ্য" />
+          </div>
+          <div>
+            <Label className="text-xs">ফুটার লেখা</Label>
+            <Input value={splashFooter} onChange={(e) => setSplashFooter(e.target.value)} placeholder={`© ${new Date().getFullYear()} স্বপ্ন কুড়ি বন্ধন সমিতি`} />
+          </div>
+          <Button onClick={saveGeneral} className="w-full">সংরক্ষণ</Button>
+        </CardContent>
+      </Card>
+
+      <Card className="md:col-span-2">
+
         <CardHeader>
           <CardTitle>লক্ষ্য ও উদ্দেশ্য (ইন্ট্রো পেজ)</CardTitle>
           <CardDescription>লগইন আগের পরিচিতি পেজে দেখানো লক্ষ্যসমূহ এডিট করুন</CardDescription>
