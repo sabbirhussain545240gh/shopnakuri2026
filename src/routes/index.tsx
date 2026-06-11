@@ -165,7 +165,7 @@ function SamitiApp() {
         </div>
 
         <nav className="flex-1 p-3 space-y-1 overflow-y-auto">
-          {navItems.map((item) => {
+          {visibleNav.map((item) => {
             const Icon = item.icon;
             const active = tab === item.value;
             return (
@@ -186,9 +186,15 @@ function SamitiApp() {
           })}
         </nav>
         <div className="p-3 border-t space-y-2">
+          {myRoleLabel && (
+            <div className="text-[11px] text-center text-muted-foreground truncate" title={myRoleLabel}>
+              ভূমিকা: <span className="font-medium text-foreground">{myRoleLabel}</span>
+            </div>
+          )}
           <div className="flex items-center justify-center"><CloudStatusBadge /></div>
           <SignOutButton />
         </div>
+
 
       </aside>
 
