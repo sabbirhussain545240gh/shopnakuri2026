@@ -207,7 +207,7 @@ export function RoleManager() {
     setApproveTarget(p);
     setApproveRole("member");
     setApproveMemberId("none");
-    setApproveName("");
+    setApproveName(p.display_name ?? "");
   };
   const submitApprove = async () => {
     if (!approveTarget) return;
