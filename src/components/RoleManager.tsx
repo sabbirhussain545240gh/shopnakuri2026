@@ -225,6 +225,27 @@ export function RoleManager() {
     } finally { setRemovingId(null); }
   };
 
+  const onCreateAccount = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!accountIdentifier.trim() || !accountPassword) return;
+    setCreatingAccount(true);
+    try {
+      const res = await createUser({
+        data: {
+          identifier: accountIdentifier.trim(),
+          password: accountPassword,
+          role: accountRole,
+        },
+      });
+      toast.success(res.created ? "নতুন অ্যাকাউন্ট তৈরি হয়েছে" : "আগের অ্যাকাউন্টে ভূমিকা যোগ হয়েছে");
+      setAccountIdentifier("");
+      setAccountPassword("");
+      await Promise.all([loadRoles(), loadUsers()]);
+    } catch (err: any) {
+      toast.error(err?.message ?? "অ্যাকাউন্ট তৈরি করা যায়নি");
+    } finally { setCreatingAccount(false); }
+  };
+
   const onInvite = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!invEmail.trim()) return;
