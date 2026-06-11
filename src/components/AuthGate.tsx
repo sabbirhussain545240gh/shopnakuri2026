@@ -147,11 +147,8 @@ export function AuthGate({ children }: { children: (session: Session) => ReactNo
             <CardTitle className="text-2xl">স্বপ্ন কুড়ি বন্ধন সমিতি</CardTitle>
             <CardDescription>অ্যাকাউন্টে লগইন করুন</CardDescription>
           </CardHeader>
-          <CardHeader className="text-center">
-            <CardTitle className="text-2xl">সমিতি ম্যানেজমেন্ট</CardTitle>
-            <CardDescription>অ্যাকাউন্টে লগইন করুন</CardDescription>
-          </CardHeader>
           <CardContent>
+            <Button type="button" variant="ghost" size="sm" className="mb-2" onClick={() => setShowLogin(false)}>← পরিচিতি পেজে ফিরে যান</Button>
             <form onSubmit={handleSubmit} className="space-y-4">
               <div className="space-y-2">
                 <Label htmlFor="email">ইমেইল</Label>
