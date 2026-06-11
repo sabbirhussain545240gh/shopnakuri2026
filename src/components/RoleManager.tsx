@@ -157,9 +157,30 @@ export function RoleManager() {
     } finally { setLoadingUsers(false); }
   };
 
+  const loadPending = async () => {
+    setLoadingPending(true);
+    try {
+      const r = await fetchPending();
+      setPending(r.profiles as PendingRow[]);
+    } catch (e: any) {
+      toast.error(e?.message ?? "অনুমোদন তালিকা লোড করা যায়নি");
+    } finally { setLoadingPending(false); }
+  };
+
+  const changeStatus = async (userId: string, status: AccountStatus) => {
+    setStatusBusyId(userId);
+    try {
+      await updateStatus({ data: { userId, status } });
+      toast.success(status === "active" ? "অ্যাকাউন্ট অনুমোদিত" : status === "rejected" ? "অ্যাকাউন্ট প্রত্যাখ্যাত" : "স্ট্যাটাস আপডেট হয়েছে");
+      await loadPending();
+    } catch (err: any) {
+      toast.error(err?.message ?? "আপডেট করা যায়নি");
+    } finally { setStatusBusyId(null); }
+  };
+
   useEffect(() => { refreshInfo(); }, []);
   useEffect(() => {
-    if (info?.isAdmin) { loadRoles(); loadInvites(); loadUsers(); }
+    if (info?.isAdmin) { loadRoles(); loadInvites(); loadUsers(); loadPending(); }
   }, [info?.isAdmin]);
 
   // Filtered + paginated users
