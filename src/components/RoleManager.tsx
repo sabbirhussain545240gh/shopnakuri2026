@@ -357,8 +357,16 @@ export function RoleManager() {
         </CardDescription>
       </CardHeader>
       <CardContent>
-        <Tabs defaultValue="users" className="w-full">
-          <TabsList className="grid w-full grid-cols-3">
+        <Tabs defaultValue={pending.some((p) => p.status === "pending") ? "pending" : "users"} className="w-full">
+          <TabsList className="grid w-full grid-cols-4">
+            <TabsTrigger value="pending" className="relative">
+              <BellRing className="mr-2 h-4 w-4" /> অনুমোদন
+              {pending.filter((p) => p.status === "pending").length > 0 && (
+                <span className="ml-2 inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-destructive px-1.5 text-[10px] font-semibold text-destructive-foreground">
+                  {pending.filter((p) => p.status === "pending").length}
+                </span>
+              )}
+            </TabsTrigger>
             <TabsTrigger value="users">
               <UsersIcon className="mr-2 h-4 w-4" /> ইউজার ({users.length})
             </TabsTrigger>
@@ -369,6 +377,79 @@ export function RoleManager() {
               <Mail className="mr-2 h-4 w-4" /> ইনভাইট ({invites.filter((i) => !i.used_at && !i.revoked_at && new Date(i.expires_at) > new Date()).length})
             </TabsTrigger>
           </TabsList>
+
+          {/* ===== Pending approvals ===== */}
+          <TabsContent value="pending" className="space-y-3 pt-4">
+            <div className="flex items-center justify-between">
+              <p className="text-sm text-muted-foreground">
+                নতুন সাইনআপ এবং অ্যাকাউন্ট স্ট্যাটাস ব্যবস্থাপনা। অনুমোদন না হওয়া পর্যন্ত ইউজার লগইন করতে পারবে না।
+              </p>
+              <Button variant="outline" size="sm" onClick={loadPending} disabled={loadingPending}>
+                {loadingPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <RefreshCw className="h-4 w-4" />}
+              </Button>
+            </div>
+            <div className="rounded-md border overflow-x-auto">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>ইউজার</TableHead>
+                    <TableHead>স্ট্যাটাস</TableHead>
+                    <TableHead className="hidden md:table-cell">সাইনআপ</TableHead>
+                    <TableHead className="text-right">অ্যাকশন</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {loadingPending ? (
+                    <TableRow><TableCell colSpan={4} className="text-center py-8">
+                      <Loader2 className="h-5 w-5 animate-spin text-muted-foreground inline" />
+                    </TableCell></TableRow>
+                  ) : pending.length === 0 ? (
+                    <TableRow><TableCell colSpan={4} className="text-center py-8 text-sm text-muted-foreground">
+                      কোনো অ্যাকাউন্ট নেই
+                    </TableCell></TableRow>
+                  ) : pending.map((p) => (
+                    <TableRow key={p.user_id}>
+                      <TableCell className="font-medium">
+                        <div className="truncate max-w-[240px]">{p.identifier || "—"}</div>
+                        <div className="text-xs text-muted-foreground truncate max-w-[240px]">{p.user_id}</div>
+                      </TableCell>
+                      <TableCell>
+                        <Badge variant={p.status === "active" ? "default" : p.status === "pending" ? "secondary" : "destructive"}>
+                          {p.status === "active" ? "সক্রিয়" : p.status === "pending" ? "অপেক্ষমাণ" : "প্রত্যাখ্যাত"}
+                        </Badge>
+                      </TableCell>
+                      <TableCell className="hidden md:table-cell text-xs text-muted-foreground">
+                        {new Date(p.created_at).toLocaleString("bn-BD")}
+                      </TableCell>
+                      <TableCell className="text-right">
+                        <div className="inline-flex gap-1">
+                          {p.status !== "active" && (
+                            <Button size="sm" variant="default" disabled={statusBusyId === p.user_id}
+                              onClick={() => changeStatus(p.user_id, "active")}>
+                              {statusBusyId === p.user_id ? <Loader2 className="h-4 w-4 animate-spin" /> : <><Check className="h-3.5 w-3.5 mr-1" />অনুমোদন</>}
+                            </Button>
+                          )}
+                          {p.status !== "rejected" && (
+                            <Button size="sm" variant="outline" disabled={statusBusyId === p.user_id}
+                              onClick={() => changeStatus(p.user_id, "rejected")}>
+                              <Ban className="h-3.5 w-3.5 mr-1" />ব্লক
+                            </Button>
+                          )}
+                          {p.status === "rejected" && (
+                            <Button size="sm" variant="ghost" disabled={statusBusyId === p.user_id}
+                              onClick={() => changeStatus(p.user_id, "pending")}>
+                              পুনঃচালু
+                            </Button>
+                          )}
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
+          </TabsContent>
+
 
           {/* ===== Users ===== */}
           <TabsContent value="users" className="space-y-4 pt-4">
