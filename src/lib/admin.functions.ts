@@ -121,12 +121,14 @@ export const inviteUser = createServerFn({ method: "POST" })
 
 export const createManagedUser = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d: { identifier: string; password: string; role: AppRole }) =>
+  .inputValidator((d: { identifier: string; password: string; role: AppRole; displayName?: string; memberRef?: string }) =>
     z
       .object({
         identifier: z.string().trim().min(3).max(255),
         password: z.string().min(6).max(72),
         role: z.enum(ROLE_VALUES as [AppRole, ...AppRole[]]),
+        displayName: z.string().trim().max(120).optional(),
+        memberRef: z.string().trim().max(120).optional(),
       })
       .parse(d),
   )
@@ -165,7 +167,15 @@ export const createManagedUser = createServerFn({ method: "POST" })
 
     // Admin-created accounts are active immediately
     await supabaseAdmin.from("profiles").upsert(
-      { user_id: userId, identifier, status: "active", approved_at: new Date().toISOString(), approved_by: context.userId },
+      {
+        user_id: userId,
+        identifier,
+        status: "active",
+        approved_at: new Date().toISOString(),
+        approved_by: context.userId,
+        ...(data.displayName !== undefined ? { display_name: data.displayName || null } : {}),
+        ...(data.memberRef !== undefined ? { member_ref: data.memberRef || null } : {}),
+      },
       { onConflict: "user_id" },
     );
 
