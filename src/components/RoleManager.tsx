@@ -458,7 +458,7 @@ export function RoleManager() {
                         <div className="inline-flex gap-1">
                           {p.status !== "active" && (
                             <Button size="sm" variant="default" disabled={statusBusyId === p.user_id}
-                              onClick={() => changeStatus(p.user_id, "active")}>
+                              onClick={() => openApprove(p)}>
                               {statusBusyId === p.user_id ? <Loader2 className="h-4 w-4 animate-spin" /> : <><Check className="h-3.5 w-3.5 mr-1" />অনুমোদন</>}
                             </Button>
                           )}
