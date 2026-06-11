@@ -117,8 +117,20 @@ const navItems = [
 function SamitiApp() {
   const s = useSamiti();
   const { data } = s;
+  const { roles, loading: rolesLoading } = useMyRoles();
+  const allowed = useMemo<TabKey[]>(() => allowedTabs(roles) as TabKey[], [roles]);
+  const visibleNav = useMemo(
+    () => navItems.filter((n) => allowed.includes(n.value as TabKey)),
+    [allowed],
+  );
   const [tab, setTab] = useState("dashboard");
+  useEffect(() => {
+    if (!rolesLoading && !allowed.includes(tab as TabKey)) {
+      setTab(allowed[0] ?? "dashboard");
+    }
+  }, [allowed, rolesLoading, tab]);
   const [mobileOpen, setMobileOpen] = useState(false);
+  const myRoleLabel = roles.length > 0 ? roles.map(roleLabel).join(", ") : "";
 
   const totals = useMemo(() => {
     const totalDeposit = data.deposits.reduce((a, d) => a + d.amount, 0);
