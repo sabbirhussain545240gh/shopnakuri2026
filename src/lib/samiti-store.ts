@@ -68,6 +68,14 @@ export type Settings = {
   notice?: string;
   goals?: Goal[];
   quotes?: Quote[];
+  splashEnabled?: boolean;
+  splashTitle?: string;
+  splashSubtitle?: string;
+  splashIcon?: string;
+  splashFooter?: string;
+  goalsSectionTitle?: string;
+  goalsSectionSubtitle?: string;
+  quotesSectionTitle?: string;
 };
 
 export const DEFAULT_GOALS: Goal[] = [
