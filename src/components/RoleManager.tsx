@@ -134,6 +134,8 @@ export function RoleManager() {
   const [accountIdentifier, setAccountIdentifier] = useState("");
   const [accountPassword, setAccountPassword] = useState("");
   const [accountRole, setAccountRole] = useState<AppRole>("member");
+  const [accountMemberId, setAccountMemberId] = useState<string>("none");
+  const [accountName, setAccountName] = useState("");
   const [creatingAccount, setCreatingAccount] = useState(false);
 
   const refreshInfo = async () => {
