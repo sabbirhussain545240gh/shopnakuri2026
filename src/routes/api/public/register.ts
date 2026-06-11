@@ -6,20 +6,16 @@ const Body = z.object({
   password: z.string().min(6).max(72),
 });
 
-function normalize(raw: string): { email?: string; phone?: string } | null {
+function normalize(raw: string): { email?: string } | null {
   const v = raw.trim();
   if (!v) return null;
-  if (v.includes("@")) return { email: v.toLowerCase() };
-  let p = v.replace(/[^\d+]/g, "");
-  if (!p) return null;
-  if (p.startsWith("+")) p = "+" + p.slice(1).replace(/\D/g, "");
-  else if (p.startsWith("00")) p = "+" + p.slice(2);
-  else if (p.startsWith("880")) p = "+" + p;
-  else if (p.startsWith("0")) p = "+880" + p.slice(1);
-  else p = "+880" + p;
-  if (!/^\+[1-9]\d{7,14}$/.test(p)) return null;
-  return { phone: p };
+  if (v.includes("@")) {
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v)) return null;
+    return { email: v.toLowerCase() };
+  }
+  return null;
 }
+
 
 export const Route = createFileRoute("/api/public/register")({
   server: {
