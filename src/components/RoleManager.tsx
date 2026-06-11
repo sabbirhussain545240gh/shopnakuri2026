@@ -14,7 +14,7 @@ import {
 } from "@/components/ui/table";
 import {
   Loader2, Trash2, ShieldCheck, UserPlus, Mail, X, Crown, Users as UsersIcon,
-  Search, ChevronLeft, ChevronRight, RefreshCw,
+  Search, ChevronLeft, ChevronRight, RefreshCw, KeyRound,
 } from "lucide-react";
 import { toast } from "sonner";
 import {
@@ -27,6 +27,7 @@ import {
 import {
   getRoleInfo,
   bootstrapAdmin,
+  createManagedUser,
   inviteUser,
   listInvites,
   revokeInvite,
@@ -72,6 +73,7 @@ export function RoleManager() {
   const fetchInvites = useServerFn(listInvites);
   const cancelInvite = useServerFn(revokeInvite);
   const fetchUsers = useServerFn(listUsersWithRoles);
+  const createUser = useServerFn(createManagedUser);
 
   const [info, setInfo] = useState<{ isAdmin: boolean; adminCount: number } | null>(null);
   const [claiming, setClaiming] = useState(false);
@@ -102,6 +104,11 @@ export function RoleManager() {
   const [pageSize, setPageSize] = useState(10);
   const [quickRole, setQuickRole] = useState<AppRole>("member");
   const [assigningUserId, setAssigningUserId] = useState<string | null>(null);
+
+  const [accountIdentifier, setAccountIdentifier] = useState("");
+  const [accountPassword, setAccountPassword] = useState("");
+  const [accountRole, setAccountRole] = useState<AppRole>("member");
+  const [creatingAccount, setCreatingAccount] = useState(false);
 
   const refreshInfo = async () => {
     try { setInfo(await fetchInfo()); }
