@@ -14,7 +14,7 @@ import {
 } from "@/components/ui/table";
 import {
   Loader2, Trash2, ShieldCheck, UserPlus, Mail, X, Crown, Users as UsersIcon,
-  Search, ChevronLeft, ChevronRight, RefreshCw, KeyRound, Check, Ban, BellRing,
+  Search, ChevronLeft, ChevronRight, RefreshCw, KeyRound, Check, Ban, BellRing, Eye, EyeOff,
 } from "lucide-react";
 import { toast } from "sonner";
 import {
@@ -94,6 +94,7 @@ export function RoleManager() {
   const [claiming, setClaiming] = useState(false);
   const [pwTarget, setPwTarget] = useState<UserRow | null>(null);
   const [pwValue, setPwValue] = useState("");
+  const [pwVisible, setPwVisible] = useState(false);
   const [pwBusy, setPwBusy] = useState(false);
   const [deletingId, setDeletingId] = useState<string | null>(null);
 
@@ -750,9 +751,16 @@ export function RoleManager() {
                 </DialogHeader>
                 <div className="space-y-1.5">
                   <Label htmlFor="reset-pw">নতুন পাসওয়ার্ড</Label>
-                  <Input id="reset-pw" type="text" value={pwValue}
-                    onChange={(e) => setPwValue(e.target.value)}
-                    placeholder="কমপক্ষে ৬ অক্ষর" minLength={6} />
+                  <div className="relative">
+                    <Input id="reset-pw" type={pwVisible ? "text" : "password"} value={pwValue}
+                      onChange={(e) => setPwValue(e.target.value)}
+                      placeholder="কমপক্ষে ৬ অক্ষর" minLength={6} className="pr-10" />
+                    <Button type="button" variant="ghost" size="sm"
+                      className="absolute right-0 top-0 h-full px-3"
+                      onClick={() => setPwVisible((v) => !v)}>
+                      {pwVisible ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                    </Button>
+                  </div>
                 </div>
                 <DialogFooter>
                   <Button variant="outline" onClick={() => setPwTarget(null)}>বাতিল</Button>
