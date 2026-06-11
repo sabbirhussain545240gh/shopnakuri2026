@@ -4,7 +4,8 @@ import html2canvas from "html2canvas";
 import * as XLSX from "xlsx";
 import {
   useSamiti, toBn, formatTk, memberTotalDeposit, loanPaid, loanTotalDue,
-  type Member, type Loan, type Deposit,
+  DEFAULT_GOALS, DEFAULT_QUOTES,
+  type Member, type Loan, type Deposit, type Goal, type Quote,
 } from "@/lib/samiti-store";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -2840,6 +2841,8 @@ function SettingsTab() {
   const [rate, setRate] = useState(String(data.settings.defaultInterestRate));
   const [dur, setDur] = useState(String(data.settings.defaultDurationMonths));
   const [notice, setNotice] = useState(data.settings.notice || "");
+  const [goals, setGoals] = useState<Goal[]>(data.settings.goals && data.settings.goals.length > 0 ? data.settings.goals : DEFAULT_GOALS);
+  const [quotes, setQuotes] = useState<Quote[]>(data.settings.quotes && data.settings.quotes.length > 0 ? data.settings.quotes : DEFAULT_QUOTES);
   const [confirmReset, setConfirmReset] = useState(false);
 
   const onLogo = (file?: File) => {
@@ -2861,6 +2864,8 @@ function SettingsTab() {
       defaultInterestRate: Number(rate) || 0,
       defaultDurationMonths: Number(dur) || 12,
       notice: notice.trim(),
+      goals: goals.map((g) => ({ icon: g.icon.trim(), title: g.title.trim(), desc: g.desc.trim() })).filter((g) => g.title || g.desc),
+      quotes: quotes.map((q) => ({ bn: q.bn.trim(), en: q.en.trim() })).filter((q) => q.bn || q.en),
     });
     toast.success("সেটিংস সংরক্ষিত হয়েছে");
   };
@@ -2920,6 +2925,72 @@ function SettingsTab() {
             <Label>ড্যাশবোর্ড নোটিশ (স্ক্রলিং)</Label>
             <Textarea value={notice} onChange={(e) => setNotice(e.target.value)} placeholder="যেমন: আগামী শনিবার মাসিক সভা — সবাইকে উপস্থিত থাকার অনুরোধ।" rows={3} />
             <p className="text-[11px] text-muted-foreground mt-1">খালি রাখলে ডিফল্ট স্বাগত বার্তা দেখাবে।</p>
+          </div>
+          <Button onClick={saveGeneral} className="w-full">সংরক্ষণ</Button>
+        </CardContent>
+      </Card>
+
+      <Card className="md:col-span-2">
+        <CardHeader>
+          <CardTitle>লক্ষ্য ও উদ্দেশ্য (ইন্ট্রো পেজ)</CardTitle>
+          <CardDescription>লগইন আগের পরিচিতি পেজে দেখানো লক্ষ্যসমূহ এডিট করুন</CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-3">
+          {goals.map((g, i) => (
+            <div key={i} className="grid gap-2 sm:grid-cols-[80px_1fr_2fr_auto] items-start border rounded-md p-3">
+              <div>
+                <Label className="text-xs">আইকন</Label>
+                <Input value={g.icon} onChange={(e) => setGoals(goals.map((x, j) => j === i ? { ...x, icon: e.target.value } : x))} placeholder="🤝" />
+              </div>
+              <div>
+                <Label className="text-xs">শিরোনাম</Label>
+                <Input value={g.title} onChange={(e) => setGoals(goals.map((x, j) => j === i ? { ...x, title: e.target.value } : x))} />
+              </div>
+              <div>
+                <Label className="text-xs">বর্ণনা</Label>
+                <Textarea rows={2} value={g.desc} onChange={(e) => setGoals(goals.map((x, j) => j === i ? { ...x, desc: e.target.value } : x))} />
+              </div>
+              <Button type="button" variant="ghost" size="icon" className="mt-5" onClick={() => setGoals(goals.filter((_, j) => j !== i))}>
+                <Trash2 className="h-4 w-4 text-destructive" />
+              </Button>
+            </div>
+          ))}
+          <div className="flex gap-2">
+            <Button type="button" variant="outline" size="sm" onClick={() => setGoals([...goals, { icon: "✨", title: "", desc: "" }])}>
+              <Plus className="h-4 w-4 mr-1" />নতুন লক্ষ্য
+            </Button>
+            <Button type="button" variant="ghost" size="sm" onClick={() => setGoals(DEFAULT_GOALS)}>ডিফল্টে ফিরিয়ে নিন</Button>
+          </div>
+          <Button onClick={saveGeneral} className="w-full">সংরক্ষণ</Button>
+        </CardContent>
+      </Card>
+
+      <Card className="md:col-span-2">
+        <CardHeader>
+          <CardTitle>অনুপ্রেরণামূলক বাণী (ইন্ট্রো পেজ)</CardTitle>
+          <CardDescription>লগইন আগের পরিচিতি পেজে দেখানো বাণীসমূহ এডিট করুন</CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-3">
+          {quotes.map((q, i) => (
+            <div key={i} className="grid gap-2 sm:grid-cols-[1fr_1fr_auto] items-start border rounded-md p-3">
+              <div>
+                <Label className="text-xs">বাণী (বাংলা)</Label>
+                <Textarea rows={2} value={q.bn} onChange={(e) => setQuotes(quotes.map((x, j) => j === i ? { ...x, bn: e.target.value } : x))} />
+              </div>
+              <div>
+                <Label className="text-xs">অনুবাদ (English) — ঐচ্ছিক</Label>
+                <Textarea rows={2} value={q.en} onChange={(e) => setQuotes(quotes.map((x, j) => j === i ? { ...x, en: e.target.value } : x))} />
+              </div>
+              <Button type="button" variant="ghost" size="icon" className="mt-5" onClick={() => setQuotes(quotes.filter((_, j) => j !== i))}>
+                <Trash2 className="h-4 w-4 text-destructive" />
+              </Button>
+            </div>
+          ))}
+          <div className="flex gap-2">
+            <Button type="button" variant="outline" size="sm" onClick={() => setQuotes([...quotes, { bn: "", en: "" }])}>
+              <Plus className="h-4 w-4 mr-1" />নতুন বাণী
+            </Button>
+            <Button type="button" variant="ghost" size="sm" onClick={() => setQuotes(DEFAULT_QUOTES)}>ডিফল্টে ফিরিয়ে নিন</Button>
           </div>
           <Button onClick={saveGeneral} className="w-full">সংরক্ষণ</Button>
         </CardContent>
