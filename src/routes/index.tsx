@@ -4,7 +4,8 @@ import html2canvas from "html2canvas";
 import * as XLSX from "xlsx";
 import {
   useSamiti, toBn, formatTk, memberTotalDeposit, loanPaid, loanTotalDue,
-  type Member, type Loan, type Deposit,
+  DEFAULT_GOALS, DEFAULT_QUOTES,
+  type Member, type Loan, type Deposit, type Goal, type Quote,
 } from "@/lib/samiti-store";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
