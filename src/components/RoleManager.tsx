@@ -87,9 +87,15 @@ export function RoleManager() {
   const createUser = useServerFn(createManagedUser);
   const fetchPending = useServerFn(listPendingAccounts);
   const updateStatus = useServerFn(setAccountStatus);
+  const resetPassword = useServerFn(resetUserPassword);
+  const deleteUser = useServerFn(deleteManagedUser);
 
   const [info, setInfo] = useState<{ isAdmin: boolean; adminCount: number } | null>(null);
   const [claiming, setClaiming] = useState(false);
+  const [pwTarget, setPwTarget] = useState<UserRow | null>(null);
+  const [pwValue, setPwValue] = useState("");
+  const [pwBusy, setPwBusy] = useState(false);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
 
   type PendingRow = { user_id: string; identifier: string; status: AccountStatus; created_at: string; approved_at: string | null };
   const [pending, setPending] = useState<PendingRow[]>([]);
