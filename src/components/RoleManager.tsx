@@ -296,8 +296,11 @@ export function RoleManager() {
         </CardDescription>
       </CardHeader>
       <CardContent>
-        <Tabs defaultValue="roles" className="w-full">
-          <TabsList className="grid w-full grid-cols-2">
+        <Tabs defaultValue="users" className="w-full">
+          <TabsList className="grid w-full grid-cols-3">
+            <TabsTrigger value="users">
+              <UsersIcon className="mr-2 h-4 w-4" /> ইউজার ({users.length})
+            </TabsTrigger>
             <TabsTrigger value="roles">
               <ShieldCheck className="mr-2 h-4 w-4" /> ভূমিকা ({rows.length})
             </TabsTrigger>
@@ -305,6 +308,135 @@ export function RoleManager() {
               <Mail className="mr-2 h-4 w-4" /> ইনভাইট ({invites.filter((i) => !i.used_at && !i.revoked_at && new Date(i.expires_at) > new Date()).length})
             </TabsTrigger>
           </TabsList>
+
+          {/* ===== Users ===== */}
+          <TabsContent value="users" className="space-y-4 pt-4">
+            <div className="grid gap-3 sm:grid-cols-[1fr_180px_180px_auto] sm:items-end">
+              <div className="space-y-1.5">
+                <Label htmlFor="user-search">সার্চ</Label>
+                <div className="relative">
+                  <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+                  <Input id="user-search" className="pl-8" value={search}
+                    onChange={(e) => setSearch(e.target.value)} placeholder="ইমেইল দিয়ে খুঁজুন" />
+                </div>
+              </div>
+              <div className="space-y-1.5">
+                <Label>ভূমিকা ফিল্টার</Label>
+                <Select value={filterRole} onValueChange={(v) => setFilterRole(v as any)}>
+                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">সব ইউজার</SelectItem>
+                    <SelectItem value="none">ভূমিকা নেই</SelectItem>
+                    {ASSIGNABLE.map((r) => (
+                      <SelectItem key={r} value={r}>{roleLabel(r)}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-1.5">
+                <Label>দ্রুত ভূমিকা বরাদ্দ</Label>
+                <Select value={quickRole} onValueChange={(v) => setQuickRole(v as AppRole)}>
+                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    {ASSIGNABLE.map((r) => (
+                      <SelectItem key={r} value={r}>{roleLabel(r)}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <Button variant="outline" onClick={loadUsers} disabled={loadingUsers}>
+                {loadingUsers ? <Loader2 className="h-4 w-4 animate-spin" /> : <RefreshCw className="h-4 w-4" />}
+              </Button>
+            </div>
+
+            <div className="rounded-md border overflow-x-auto">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>ইমেইল</TableHead>
+                    <TableHead>ভূমিকা</TableHead>
+                    <TableHead className="hidden md:table-cell">শেষ লগইন</TableHead>
+                    <TableHead className="text-right">অ্যাকশন</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {loadingUsers ? (
+                    <TableRow><TableCell colSpan={4} className="text-center py-8">
+                      <Loader2 className="h-5 w-5 animate-spin text-muted-foreground inline" />
+                    </TableCell></TableRow>
+                  ) : pageUsers.length === 0 ? (
+                    <TableRow><TableCell colSpan={4} className="text-center py-8 text-sm text-muted-foreground">
+                      কোনো ইউজার পাওয়া যায়নি
+                    </TableCell></TableRow>
+                  ) : pageUsers.map((u) => (
+                    <TableRow key={u.id}>
+                      <TableCell className="font-medium">
+                        <div className="truncate max-w-[220px]" title={u.email}>{u.email || "—"}</div>
+                        <div className="text-xs text-muted-foreground truncate max-w-[220px]" title={u.id}>{u.id}</div>
+                      </TableCell>
+                      <TableCell>
+                        {u.roles.length === 0 ? (
+                          <span className="text-xs text-muted-foreground">কোনো ভূমিকা নেই</span>
+                        ) : (
+                          <div className="flex flex-wrap gap-1">
+                            {u.roles.map((r) => (
+                              <Badge key={r.id} variant="secondary" className="gap-1">
+                                {roleLabel(r.role)}
+                                <button
+                                  onClick={() => removeRoleRow(r.id)}
+                                  className="ml-1 hover:text-destructive cursor-pointer"
+                                  title="সরান">
+                                  <X className="h-3 w-3" />
+                                </button>
+                              </Badge>
+                            ))}
+                          </div>
+                        )}
+                      </TableCell>
+                      <TableCell className="hidden md:table-cell text-xs text-muted-foreground">
+                        {u.lastSignInAt ? new Date(u.lastSignInAt).toLocaleString("bn-BD") : "—"}
+                      </TableCell>
+                      <TableCell className="text-right">
+                        <Button size="sm" variant="outline" disabled={assigningUserId === u.id || !u.email}
+                          onClick={() => assignToUser(u.email, u.id)}>
+                          {assigningUserId === u.id
+                            ? <Loader2 className="h-4 w-4 animate-spin" />
+                            : <><UserPlus className="h-3.5 w-3.5 mr-1" />{roleLabel(quickRole)} যোগ</>}
+                        </Button>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
+
+            {/* Pagination */}
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-sm">
+              <div className="text-muted-foreground">
+                মোট {filteredUsers.length} ইউজার {filteredUsers.length > 0 && `(${pageStart + 1}-${Math.min(pageStart + pageSize, filteredUsers.length)})`}
+              </div>
+              <div className="flex items-center gap-2">
+                <Select value={String(pageSize)} onValueChange={(v) => setPageSize(Number(v))}>
+                  <SelectTrigger className="w-[90px] h-8"><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    {[10, 25, 50, 100].map((n) => (
+                      <SelectItem key={n} value={String(n)}>{n}/পেজ</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <Button size="sm" variant="outline" disabled={page <= 1}
+                  onClick={() => setPage((p) => Math.max(1, p - 1))}>
+                  <ChevronLeft className="h-4 w-4" />
+                </Button>
+                <span className="px-2">{page} / {totalPages}</span>
+                <Button size="sm" variant="outline" disabled={page >= totalPages}
+                  onClick={() => setPage((p) => Math.min(totalPages, p + 1))}>
+                  <ChevronRight className="h-4 w-4" />
+                </Button>
+              </div>
+            </div>
+          </TabsContent>
+
 
           {/* ===== Roles ===== */}
           <TabsContent value="roles" className="space-y-4 pt-4">
