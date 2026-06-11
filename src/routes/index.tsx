@@ -2844,6 +2844,14 @@ function SettingsTab() {
   const [notice, setNotice] = useState(data.settings.notice || "");
   const [goals, setGoals] = useState<Goal[]>(data.settings.goals && data.settings.goals.length > 0 ? data.settings.goals : DEFAULT_GOALS);
   const [quotes, setQuotes] = useState<Quote[]>(data.settings.quotes && data.settings.quotes.length > 0 ? data.settings.quotes : DEFAULT_QUOTES);
+  const [splashEnabled, setSplashEnabled] = useState<boolean>(data.settings.splashEnabled !== false);
+  const [splashTitle, setSplashTitle] = useState(data.settings.splashTitle || "");
+  const [splashSubtitle, setSplashSubtitle] = useState(data.settings.splashSubtitle || "");
+  const [splashIcon, setSplashIcon] = useState(data.settings.splashIcon || "");
+  const [splashFooter, setSplashFooter] = useState(data.settings.splashFooter || "");
+  const [goalsSectionTitle, setGoalsSectionTitle] = useState(data.settings.goalsSectionTitle || "");
+  const [goalsSectionSubtitle, setGoalsSectionSubtitle] = useState(data.settings.goalsSectionSubtitle || "");
+  const [quotesSectionTitle, setQuotesSectionTitle] = useState(data.settings.quotesSectionTitle || "");
   const [confirmReset, setConfirmReset] = useState(false);
 
   const onLogo = (file?: File) => {
