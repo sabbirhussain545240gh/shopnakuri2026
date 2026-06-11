@@ -189,6 +189,7 @@ export function MemberPortal() {
 
         {data?.ok && (
           <>
+            {data.member && <MemberProfileCard member={data.member} />}
             <LoansSection data={data} />
             <InstallmentReceiptsSection data={data} />
             <DepositReceiptsSection data={data} />
