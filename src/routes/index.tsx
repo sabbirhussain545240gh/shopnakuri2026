@@ -86,9 +86,23 @@ export const Route = createFileRoute("/")({
 function GatedApp() {
   return (
     <AuthGate>
-      {() => <SamitiApp />}
+      {() => <RoleRouter />}
     </AuthGate>
   );
+}
+
+function RoleRouter() {
+  const { roles, loading } = useMyRoles();
+  if (loading) {
+    return (
+      <div className="flex min-h-screen items-center justify-center">
+        <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+      </div>
+    );
+  }
+  const isMemberOnly = roles.length > 0 && roles.every((r) => r === "member");
+  if (isMemberOnly) return <MemberPortal />;
+  return <SamitiApp />;
 }
 
 
