@@ -38,6 +38,10 @@ import {
   type AccountStatus,
 } from "@/lib/approval.functions";
 import { roleLabel } from "@/lib/permissions";
+import { useSamiti } from "@/lib/samiti-store";
+import {
+  Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter,
+} from "@/components/ui/dialog";
 
 type Row = { id: string; userId: string; email: string; role: AppRole; createdAt: string };
 type Invite = {
