@@ -223,7 +223,7 @@ function SamitiApp() {
         </header>
         {mobileOpen && (
           <div className="md:hidden border-b bg-card p-3 space-y-1">
-            {navItems.map((item) => {
+            {visibleNav.map((item) => {
               const Icon = item.icon;
               const active = tab === item.value;
               return (
@@ -242,8 +242,14 @@ function SamitiApp() {
                 </button>
               );
             })}
+            {myRoleLabel && (
+              <div className="pt-2 text-[11px] text-center text-muted-foreground">
+                ভূমিকা: <span className="font-medium text-foreground">{myRoleLabel}</span>
+              </div>
+            )}
           </div>
         )}
+
 
         <main className="flex-1 container mx-auto px-4 py-6">
           {tab === "dashboard" && <Dashboard totals={totals} memberCount={data.members.length} data={data} />}
