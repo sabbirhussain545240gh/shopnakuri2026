@@ -312,6 +312,24 @@ function MemberProfileCard({ member, data }: { member: NonNullable<MemberViewRes
             </div>
           </div>
         )}
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mt-4 pt-4 border-t">
+          <div className="rounded-md bg-green-500/10 p-2">
+            <div className="text-[11px] text-muted-foreground">আমার সঞ্চয়</div>
+            <div className="font-semibold text-green-700">{formatTk(myDeposits)}</div>
+          </div>
+          <div className="rounded-md bg-amber-500/10 p-2">
+            <div className="text-[11px] text-muted-foreground">আমার ঋণ ({toBn(data.loans.length)})</div>
+            <div className="font-semibold text-amber-700">{formatTk(myLoanDue)}</div>
+          </div>
+          <div className="rounded-md bg-emerald-500/10 p-2">
+            <div className="text-[11px] text-muted-foreground">পরিশোধিত</div>
+            <div className="font-semibold text-emerald-700">{formatTk(myPaid)}</div>
+          </div>
+          <div className="rounded-md bg-destructive/10 p-2">
+            <div className="text-[11px] text-muted-foreground">বকেয়া</div>
+            <div className="font-semibold text-destructive">{formatTk(myRemaining)}</div>
+          </div>
+        </div>
       </CardContent>
     </Card>
   );
