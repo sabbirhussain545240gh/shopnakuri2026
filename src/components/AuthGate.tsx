@@ -137,9 +137,16 @@ export function AuthGate({ children }: { children: (session: Session) => ReactNo
   }
 
   if (!session) {
+    if (!showLogin) {
+      return <IntroSplash onEnter={() => setShowLogin(true)} />;
+    }
     return (
       <div className="flex min-h-screen items-center justify-center bg-muted/30 px-4">
         <Card className="w-full max-w-md">
+          <CardHeader className="text-center">
+            <CardTitle className="text-2xl">স্বপ্ন কুড়ি বন্ধন সমিতি</CardTitle>
+            <CardDescription>অ্যাকাউন্টে লগইন করুন</CardDescription>
+          </CardHeader>
           <CardHeader className="text-center">
             <CardTitle className="text-2xl">সমিতি ম্যানেজমেন্ট</CardTitle>
             <CardDescription>অ্যাকাউন্টে লগইন করুন</CardDescription>
