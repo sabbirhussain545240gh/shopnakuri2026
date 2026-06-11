@@ -4,7 +4,8 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import { Loader2, HandCoins, PiggyBank, Receipt as ReceiptIcon, Printer, ImageDown, AlertTriangle, User, Phone, MapPin, Calendar, Hash } from "lucide-react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Loader2, HandCoins, PiggyBank, Receipt as ReceiptIcon, Printer, ImageDown, AlertTriangle, User, Phone, MapPin, Calendar, Hash, Eye, Users, TrendingUp, Wallet } from "lucide-react";
 import { SignOutButton, CloudStatusBadge } from "@/components/AuthGate";
 import { NotificationBell } from "@/components/NotificationBell";
 import { toBn, formatTk } from "@/lib/samiti-store";
@@ -125,6 +126,7 @@ export function MemberPortal() {
   const [data, setData] = useState<MemberViewResponse | null>(null);
   const [loading, setLoading] = useState(true);
   const [err, setErr] = useState<string | null>(null);
+  const [viewing, setViewing] = useState<{ title: string; html: string } | null>(null);
 
   useEffect(() => {
     let alive = true;
@@ -148,6 +150,10 @@ export function MemberPortal() {
       </div>
     );
   }
+
+  const srcDoc = viewing
+    ? `<!DOCTYPE html><html><head><meta charset="utf-8"><style>${receiptCss}</style></head><body>${viewing.html}</body></html>`
+    : "";
 
   return (
     <div className="min-h-screen bg-muted/20">
@@ -189,18 +195,66 @@ export function MemberPortal() {
 
         {data?.ok && (
           <>
-            {data.member && <MemberProfileCard member={data.member} />}
+            {data.summary && <SamitiSummaryCard summary={data.summary} member={data.member} />}
+            {data.member && <MemberProfileCard member={data.member} data={data} />}
             <LoansSection data={data} />
-            <InstallmentReceiptsSection data={data} />
-            <DepositReceiptsSection data={data} />
+            <InstallmentReceiptsSection data={data} onView={(title, html) => setViewing({ title, html })} />
+            <DepositReceiptsSection data={data} onView={(title, html) => setViewing({ title, html })} />
           </>
         )}
       </main>
+
+      <Dialog open={!!viewing} onOpenChange={(o) => !o && setViewing(null)}>
+        <DialogContent className="max-w-2xl p-0 overflow-hidden">
+          <DialogHeader className="p-4 pb-2">
+            <DialogTitle>{viewing?.title || "রিসিপ্ট"}</DialogTitle>
+          </DialogHeader>
+          <iframe title="receipt" srcDoc={srcDoc} className="w-full h-[70vh] bg-white border-0" />
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
 
-function MemberProfileCard({ member }: { member: NonNullable<MemberViewResponse["member"]> }) {
+function SamitiSummaryCard({ summary, member }: { summary: NonNullable<MemberViewResponse["summary"]>; member: MemberViewResponse["member"] }) {
+  const items = [
+    { icon: Users, label: "মোট সদস্য", value: toBn(summary.totalMembers), color: "text-blue-600" },
+    { icon: PiggyBank, label: "মোট সঞ্চয়", value: formatTk(summary.totalDeposits), color: "text-green-600" },
+    { icon: HandCoins, label: "মোট ঋণ বিতরণ", value: formatTk(summary.totalLoanAmount), color: "text-amber-600" },
+    { icon: TrendingUp, label: "চলমান/পরিশোধিত ঋণ", value: `${toBn(summary.activeLoans)} / ${toBn(summary.closedLoans)}`, color: "text-purple-600" },
+    { icon: Wallet, label: "মোট আদায়", value: formatTk(summary.totalPayments), color: "text-emerald-600" },
+    { icon: AlertTriangle, label: "মোট বকেয়া", value: formatTk(summary.totalRemaining), color: "text-destructive" },
+  ];
+  return (
+    <Card className="border-primary/30 bg-gradient-to-br from-primary/5 to-transparent">
+      <CardHeader className="pb-2">
+        <CardTitle className="flex items-center gap-2 text-base">
+          <TrendingUp className="h-5 w-5 text-primary" /> সমিতির সারাংশ
+        </CardTitle>
+        <CardDescription>সদস্য {member?.name || ""} হিসেবে সমিতির সামগ্রিক চিত্র</CardDescription>
+      </CardHeader>
+      <CardContent>
+        <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+          {items.map((it) => {
+            const Icon = it.icon;
+            return (
+              <div key={it.label} className="rounded-lg border bg-card p-3">
+                <div className="flex items-center gap-2 text-xs text-muted-foreground"><Icon className={`h-4 w-4 ${it.color}`} /> {it.label}</div>
+                <div className="font-semibold text-base mt-1">{it.value}</div>
+              </div>
+            );
+          })}
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
+
+function MemberProfileCard({ member, data }: { member: NonNullable<MemberViewResponse["member"]>; data: MemberViewResponse }) {
+  const myDeposits = data.deposits.reduce((s, d) => s + d.amount, 0);
+  const myPaid = data.payments.reduce((s, p) => s + p.amount, 0);
+  const myLoanDue = data.loans.reduce((s, l) => s + l.amount + (l.amount * l.interestRate * l.durationMonths) / 1200, 0);
+  const myRemaining = Math.max(0, myLoanDue - myPaid);
   const fields: { icon: any; label: string; value?: string }[] = [
     { icon: Hash, label: "সদস্য নং", value: member.serial ? toBn(member.serial) : undefined },
     { icon: Calendar, label: "যোগদান তারিখ", value: fmtDate(member.joinDate ?? "") },
@@ -258,6 +312,24 @@ function MemberProfileCard({ member }: { member: NonNullable<MemberViewResponse[
             </div>
           </div>
         )}
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mt-4 pt-4 border-t">
+          <div className="rounded-md bg-green-500/10 p-2">
+            <div className="text-[11px] text-muted-foreground">আমার সঞ্চয়</div>
+            <div className="font-semibold text-green-700">{formatTk(myDeposits)}</div>
+          </div>
+          <div className="rounded-md bg-amber-500/10 p-2">
+            <div className="text-[11px] text-muted-foreground">আমার ঋণ ({toBn(data.loans.length)})</div>
+            <div className="font-semibold text-amber-700">{formatTk(myLoanDue)}</div>
+          </div>
+          <div className="rounded-md bg-emerald-500/10 p-2">
+            <div className="text-[11px] text-muted-foreground">পরিশোধিত</div>
+            <div className="font-semibold text-emerald-700">{formatTk(myPaid)}</div>
+          </div>
+          <div className="rounded-md bg-destructive/10 p-2">
+            <div className="text-[11px] text-muted-foreground">বকেয়া</div>
+            <div className="font-semibold text-destructive">{formatTk(myRemaining)}</div>
+          </div>
+        </div>
       </CardContent>
     </Card>
   );
@@ -313,7 +385,7 @@ function LoansSection({ data }: { data: MemberViewResponse }) {
   );
 }
 
-function InstallmentReceiptsSection({ data }: { data: MemberViewResponse }) {
+function InstallmentReceiptsSection({ data, onView }: { data: MemberViewResponse; onView: (title: string, html: string) => void }) {
   const rows = useMemo(() => {
     const loanIndex = new Map(data.loans.map((l, i) => [l.id, i + 1]));
     const sorted = [...data.payments].sort((a, b) => b.date.localeCompare(a.date));
@@ -382,6 +454,22 @@ function InstallmentReceiptsSection({ data }: { data: MemberViewResponse }) {
                             amount: r.p.amount, date: r.p.date, paidAfter: r.paidAfter, remainingAfter: r.remainingAfter,
                             receiptNo: r.receiptNo, note: r.p.note, loanNo: r.loanNo,
                           }, dataUrl);
+                          onView("কিস্তি রিসিপ্ট", html);
+                        }}>
+                          <Eye className="h-4 w-4" />
+                        </Button>
+                        <Button size="sm" variant="outline" onClick={async () => {
+                          if (!r.loan || !data.member) return;
+                          const { dataUrl } = await buildReceiptQr({
+                            t: "installment", s: data.samitiName, n: r.receiptNo, m: data.member.name,
+                            a: r.p.amount, d: r.p.date, pa: r.paidAfter, ra: r.remainingAfter, ln: r.loanNo,
+                          });
+                          const html = buildInstallmentHtml({
+                            samitiName: data.samitiName, logo: data.samitiLogo, memberName: data.member.name,
+                            loanAmount: r.loan.amount, durationMonths: r.loan.durationMonths,
+                            amount: r.p.amount, date: r.p.date, paidAfter: r.paidAfter, remainingAfter: r.remainingAfter,
+                            receiptNo: r.receiptNo, note: r.p.note, loanNo: r.loanNo,
+                          }, dataUrl);
                           printHtml("কিস্তি রিসিপ্ট", html);
                         }}>
                           <Printer className="h-4 w-4" />
@@ -419,7 +507,7 @@ function InstallmentReceiptsSection({ data }: { data: MemberViewResponse }) {
   );
 }
 
-function DepositReceiptsSection({ data }: { data: MemberViewResponse }) {
+function DepositReceiptsSection({ data, onView }: { data: MemberViewResponse; onView: (title: string, html: string) => void }) {
   const rows = useMemo(() => {
     const chrono = [...data.deposits].sort((a, b) => a.date.localeCompare(b.date));
     const totalAfter = new Map<string, number>();
@@ -462,6 +550,22 @@ function DepositReceiptsSection({ data }: { data: MemberViewResponse }) {
                     <TableCell className="text-right">{formatTk(r.totalAfter)}</TableCell>
                     <TableCell className="text-right">
                       <div className="flex gap-2 justify-end">
+                        <Button size="sm" variant="outline" onClick={async () => {
+                          if (!data.member) return;
+                          const { dataUrl } = await buildReceiptQr({
+                            t: "deposit", s: data.samitiName, n: r.receiptNo, m: data.member.name,
+                            a: r.d.amount, d: r.d.date, ms: data.member.serial, ta: r.totalAfter,
+                          });
+                          const html = buildDepositHtml({
+                            samitiName: data.samitiName, logo: data.samitiLogo,
+                            memberName: data.member.name, memberSerial: data.member.serial,
+                            amount: r.d.amount, date: r.d.date, totalAfter: r.totalAfter,
+                            receiptNo: r.receiptNo, note: r.d.note,
+                          }, dataUrl);
+                          onView("জমা রিসিপ্ট", html);
+                        }}>
+                          <Eye className="h-4 w-4" />
+                        </Button>
                         <Button size="sm" variant="outline" onClick={async () => {
                           if (!data.member) return;
                           const { dataUrl } = await buildReceiptQr({

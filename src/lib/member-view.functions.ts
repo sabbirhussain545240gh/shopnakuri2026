@@ -44,6 +44,16 @@ export type MemberViewResponse = {
   loans: MemberViewLoan[];
   payments: MemberViewPayment[];
   deposits: MemberViewDeposit[];
+  summary?: {
+    totalMembers: number;
+    totalDeposits: number;
+    totalLoans: number;
+    activeLoans: number;
+    closedLoans: number;
+    totalLoanAmount: number;
+    totalPayments: number;
+    totalRemaining: number;
+  };
 };
 
 export const getMyMemberView = createServerFn({ method: "GET" })
@@ -146,6 +156,28 @@ export const getMyMemberView = createServerFn({ method: "GET" })
         loans,
         payments,
         deposits,
+        summary: (() => {
+          const allLoans: any[] = Array.isArray(d.loans) ? d.loans : [];
+          const allPayments: any[] = Array.isArray(d.payments) ? d.payments : [];
+          const allDeposits: any[] = Array.isArray(d.deposits) ? d.deposits : [];
+          const totalLoanAmount = allLoans.reduce((s, l) => s + (Number(l.amount) || 0), 0);
+          const totalPayments = allPayments.reduce((s, p) => s + (Number(p.amount) || 0), 0);
+          const totalDeposits = allDeposits.reduce((s, x) => s + (Number(x.amount) || 0), 0);
+          const totalDue = allLoans.reduce((s, l) => {
+            const amt = Number(l.amount) || 0; const rate = Number(l.interestRate) || 0; const mo = Number(l.durationMonths) || 0;
+            return s + amt + (amt * rate * mo) / (100 * 12);
+          }, 0);
+          return {
+            totalMembers: members.length,
+            totalDeposits,
+            totalLoans: allLoans.length,
+            activeLoans: allLoans.filter((l) => l.status !== "closed").length,
+            closedLoans: allLoans.filter((l) => l.status === "closed").length,
+            totalLoanAmount,
+            totalPayments,
+            totalRemaining: Math.max(0, totalDue - totalPayments),
+          };
+        })(),
       };
     }
     return { ...empty, error: "এই সদস্যের তথ্য সমিতির ডেটাবেইসে পাওয়া যায়নি।" };
