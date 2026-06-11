@@ -61,6 +61,7 @@ export type Transaction = {
 
 export type Goal = { icon: string; title: string; desc: string };
 export type Quote = { bn: string; en: string };
+export type Message = { role: string; name: string; photo: string; message: string };
 
 export type Settings = {
   defaultInterestRate: number;
@@ -68,6 +69,7 @@ export type Settings = {
   notice?: string;
   goals?: Goal[];
   quotes?: Quote[];
+  messages?: Message[];
   splashEnabled?: boolean;
   splashTitle?: string;
   splashSubtitle?: string;
@@ -78,7 +80,9 @@ export type Settings = {
   goalsSectionTitle?: string;
   goalsSectionSubtitle?: string;
   quotesSectionTitle?: string;
+  messagesSectionTitle?: string;
 };
+
 
 export const DEFAULT_GOALS: Goal[] = [
   { icon: "🤝", title: "পারস্পরিক সহযোগিতা", desc: "সদস্যদের মাঝে আর্থিক সহযোগিতা ও বন্ধন গড়ে তোলা।" },
