@@ -61,6 +61,52 @@ export const listAllRoles = createServerFn({ method: "GET" })
     };
   });
 
+export const listUsersWithRoles = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    await assertAdmin(context.userId);
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+
+    // Pull all role rows
+    const { data: roleRows, error: rErr } = await supabaseAdmin
+      .from("user_roles")
+      .select("id, user_id, role, created_at");
+    if (rErr) throw new Error(rErr.message);
+
+    const byUser: Record<string, { id: string; role: AppRole; createdAt: string }[]> = {};
+    for (const r of roleRows ?? []) {
+      (byUser[r.user_id as string] ||= []).push({
+        id: r.id as string,
+        role: r.role as AppRole,
+        createdAt: r.created_at as string,
+      });
+    }
+
+    // Pull all auth users (paginate up to ~2000)
+    const users: { id: string; email: string; createdAt: string; lastSignInAt: string | null }[] = [];
+    for (let page = 1; page <= 10; page++) {
+      const { data: list, error } = await supabaseAdmin.auth.admin.listUsers({ page, perPage: 200 });
+      if (error) throw new Error(error.message);
+      for (const u of list.users) {
+        users.push({
+          id: u.id,
+          email: u.email ?? "",
+          createdAt: u.created_at ?? "",
+          lastSignInAt: u.last_sign_in_at ?? null,
+        });
+      }
+      if (list.users.length < 200) break;
+    }
+
+    return {
+      users: users.map((u) => ({
+        ...u,
+        roles: byUser[u.id] ?? [],
+      })),
+    };
+  });
+
+
 export const assignRoleByEmail = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d: { email: string; role: AppRole }) =>
