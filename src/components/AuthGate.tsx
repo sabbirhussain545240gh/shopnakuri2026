@@ -169,6 +169,7 @@ function LoginForm() {
 }
 
 function SignupForm() {
+  const [displayName, setDisplayName] = useState("");
   const [identifier, setIdentifier] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -178,6 +179,7 @@ function SignupForm() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!displayName.trim()) { toast.error("নাম দিন"); return; }
     const creds = normalizeIdentifier(identifier);
     if (!creds) { toast.error("সঠিক ইমেইল ঠিকানা দিন"); return; }
     if (password !== confirmPassword) { toast.error("পাসওয়ার্ড মিলছে না"); return; }
@@ -187,11 +189,12 @@ function SignupForm() {
       const res = await fetch("/api/public/register", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ identifier: identifier.trim(), password }),
+        body: JSON.stringify({ identifier: identifier.trim(), password, displayName: displayName.trim() }),
       });
       const json = await res.json().catch(() => ({}));
       if (!res.ok) throw new Error(json?.error ?? "অ্যাকাউন্ট তৈরি ব্যর্থ");
       toast.success("অ্যাকাউন্ট তৈরি হয়েছে। সুপার এডমিনের অনুমোদনের পরে লগইন করতে পারবেন।");
+      setDisplayName("");
       setIdentifier("");
       setPassword("");
       setConfirmPassword("");
@@ -202,6 +205,10 @@ function SignupForm() {
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
+      <div className="space-y-2">
+        <Label>নাম</Label>
+        <Input type="text" value={displayName} onChange={(e) => setDisplayName(e.target.value)} placeholder="আপনার পূর্ণ নাম" required />
+      </div>
       <div className="space-y-2">
         <Label>ইমেইল ঠিকানা</Label>
         <Input type="text" value={identifier} onChange={(e) => setIdentifier(e.target.value)} placeholder="you@example.com" required />

@@ -4,6 +4,7 @@ import { z } from "zod";
 const Body = z.object({
   identifier: z.string().trim().min(3).max(255),
   password: z.string().min(6).max(72),
+  displayName: z.string().trim().min(1).max(120).optional(),
 });
 
 function normalize(raw: string): { email?: string } | null {
@@ -46,6 +47,7 @@ export const Route = createFileRoute("/api/public/register")({
         await supabaseAdmin.from("profiles").upsert({
           user_id: created.user.id,
           identifier: ident,
+          display_name: parsed.displayName ?? null,
           status: "pending",
         });
         return new Response(JSON.stringify({ ok: true }), {
