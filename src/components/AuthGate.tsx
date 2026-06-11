@@ -86,39 +86,17 @@ function AuthTabs() {
 }
 
 function LoginForm() {
-  const [mode, setMode] = useState<"email" | "phone">("email");
-  const [identifier, setIdentifier] = useState("");
+  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [otp, setOtp] = useState("");
-  const [otpSent, setOtpSent] = useState(false);
   const [submitting, setSubmitting] = useState(false);
-
-  const sendOtp = async () => {
-    if (!identifier.trim()) return toast.error("মোবাইল নম্বর লিখুন");
-    setSubmitting(true);
-    try {
-      const { error } = await supabase.auth.signInWithOtp({ phone: identifier.trim() });
-      if (error) throw error;
-      setOtpSent(true);
-      toast.success("OTP পাঠানো হয়েছে");
-    } catch (e: any) {
-      toast.error(e?.message ?? "OTP পাঠানো যায়নি");
-    } finally { setSubmitting(false); }
-  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setSubmitting(true);
     try {
-      if (mode === "email") {
-        const { error } = await supabase.auth.signInWithPassword({ email: identifier.trim(), password });
-        if (error) throw error;
-        toast.success("সফলভাবে লগইন হয়েছে");
-      } else {
-        const { error } = await supabase.auth.verifyOtp({ phone: identifier.trim(), token: otp.trim(), type: "sms" });
-        if (error) throw error;
-        toast.success("সফলভাবে লগইন হয়েছে");
-      }
+      const { error } = await supabase.auth.signInWithPassword({ email: email.trim(), password });
+      if (error) throw error;
+      toast.success("সফলভাবে লগইন হয়েছে");
     } catch (err: any) {
       toast.error(err?.message ?? "ত্রুটি");
     } finally { setSubmitting(false); }
@@ -126,70 +104,37 @@ function LoginForm() {
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
-      <div className="flex gap-2">
-        <Button type="button" variant={mode === "email" ? "default" : "outline"} size="sm" className="flex-1" onClick={() => { setMode("email"); setOtpSent(false); }}>ইমেইল</Button>
-        <Button type="button" variant={mode === "phone" ? "default" : "outline"} size="sm" className="flex-1" onClick={() => { setMode("phone"); setOtpSent(false); }}>মোবাইল</Button>
+      <div className="space-y-2">
+        <Label>ইমেইল</Label>
+        <Input type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="you@example.com" required />
       </div>
       <div className="space-y-2">
-        <Label>{mode === "email" ? "ইমেইল" : "মোবাইল (+8801...)"}</Label>
-        <Input type={mode === "email" ? "email" : "tel"} value={identifier} onChange={(e) => setIdentifier(e.target.value)} placeholder={mode === "email" ? "you@example.com" : "+8801XXXXXXXXX"} required />
+        <Label>পাসওয়ার্ড</Label>
+        <Input type="password" value={password} onChange={(e) => setPassword(e.target.value)} minLength={6} required />
       </div>
-      {mode === "email" ? (
-        <div className="space-y-2">
-          <Label>পাসওয়ার্ড</Label>
-          <Input type="password" value={password} onChange={(e) => setPassword(e.target.value)} minLength={6} required />
-        </div>
-      ) : otpSent ? (
-        <div className="space-y-2">
-          <Label>OTP কোড</Label>
-          <Input type="text" inputMode="numeric" value={otp} onChange={(e) => setOtp(e.target.value)} required />
-        </div>
-      ) : null}
-      {mode === "phone" && !otpSent ? (
-        <Button type="button" className="w-full" onClick={sendOtp} disabled={submitting}>
-          {submitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}OTP পাঠান
-        </Button>
-      ) : (
-        <Button type="submit" className="w-full" disabled={submitting}>
-          {submitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}লগইন
-        </Button>
-      )}
+      <Button type="submit" className="w-full" disabled={submitting}>
+        {submitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}লগইন
+      </Button>
     </form>
   );
 }
 
 function SignupForm() {
-  const [mode, setMode] = useState<"email" | "phone">("email");
-  const [identifier, setIdentifier] = useState("");
+  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [otp, setOtp] = useState("");
-  const [otpSent, setOtpSent] = useState(false);
   const [submitting, setSubmitting] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setSubmitting(true);
     try {
-      if (mode === "email") {
-        const { error } = await supabase.auth.signUp({
-          email: identifier.trim(),
-          password,
-          options: { emailRedirectTo: `${window.location.origin}/` },
-        });
-        if (error) throw error;
-        toast.success("অ্যাকাউন্ট তৈরি হয়েছে। ইমেইলে কনফার্মেশন লিংক পাঠানো হয়েছে।");
-      } else {
-        if (!otpSent) {
-          const { error } = await supabase.auth.signUp({ phone: identifier.trim(), password });
-          if (error) throw error;
-          setOtpSent(true);
-          toast.success("OTP পাঠানো হয়েছে");
-        } else {
-          const { error } = await supabase.auth.verifyOtp({ phone: identifier.trim(), token: otp.trim(), type: "sms" });
-          if (error) throw error;
-          toast.success("অ্যাকাউন্ট তৈরি হয়েছে");
-        }
-      }
+      const { error } = await supabase.auth.signUp({
+        email: email.trim(),
+        password,
+        options: { emailRedirectTo: `${window.location.origin}/` },
+      });
+      if (error) throw error;
+      toast.success("অ্যাকাউন্ট তৈরি হয়েছে। ইমেইলে কনফার্মেশন লিংক পাঠানো হয়েছে।");
     } catch (err: any) {
       toast.error(err?.message ?? "ত্রুটি");
     } finally { setSubmitting(false); }
@@ -197,27 +142,17 @@ function SignupForm() {
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
-      <div className="flex gap-2">
-        <Button type="button" variant={mode === "email" ? "default" : "outline"} size="sm" className="flex-1" onClick={() => { setMode("email"); setOtpSent(false); }}>ইমেইল</Button>
-        <Button type="button" variant={mode === "phone" ? "default" : "outline"} size="sm" className="flex-1" onClick={() => { setMode("phone"); setOtpSent(false); }}>মোবাইল</Button>
-      </div>
       <div className="space-y-2">
-        <Label>{mode === "email" ? "ইমেইল" : "মোবাইল (+8801...)"}</Label>
-        <Input type={mode === "email" ? "email" : "tel"} value={identifier} onChange={(e) => setIdentifier(e.target.value)} placeholder={mode === "email" ? "you@example.com" : "+8801XXXXXXXXX"} required disabled={otpSent} />
+        <Label>ইমেইল</Label>
+        <Input type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="you@example.com" required />
       </div>
       <div className="space-y-2">
         <Label>পাসওয়ার্ড</Label>
-        <Input type="password" value={password} onChange={(e) => setPassword(e.target.value)} minLength={6} required disabled={otpSent} />
+        <Input type="password" value={password} onChange={(e) => setPassword(e.target.value)} minLength={6} required />
       </div>
-      {mode === "phone" && otpSent && (
-        <div className="space-y-2">
-          <Label>OTP কোড</Label>
-          <Input type="text" inputMode="numeric" value={otp} onChange={(e) => setOtp(e.target.value)} required />
-        </div>
-      )}
       <Button type="submit" className="w-full" disabled={submitting}>
         {submitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-        {mode === "phone" && !otpSent ? "OTP পাঠান" : "অ্যাকাউন্ট তৈরি করুন"}
+        অ্যাকাউন্ট তৈরি করুন
       </Button>
       <p className="text-xs text-muted-foreground text-center">নতুন অ্যাকাউন্ট তৈরি হলে সুপার এডমিন ভূমিকা বরাদ্দ করবেন।</p>
     </form>
