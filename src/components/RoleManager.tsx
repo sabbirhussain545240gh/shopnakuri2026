@@ -339,6 +339,47 @@ export function RoleManager() {
 
           {/* ===== Users ===== */}
           <TabsContent value="users" className="space-y-4 pt-4">
+            <form onSubmit={onCreateAccount} className="rounded-md border bg-muted/30 p-3">
+              <div className="grid gap-3 sm:grid-cols-[1fr_180px_160px_auto] sm:items-end">
+                <div className="space-y-1.5">
+                  <Label htmlFor="managed-identifier">মোবাইল / ইমেইল</Label>
+                  <Input
+                    id="managed-identifier"
+                    value={accountIdentifier}
+                    onChange={(e) => setAccountIdentifier(e.target.value)}
+                    placeholder="user@example.com বা +8801XXXXXXXXX"
+                    required
+                  />
+                </div>
+                <div className="space-y-1.5">
+                  <Label htmlFor="managed-password">পাসওয়ার্ড</Label>
+                  <Input
+                    id="managed-password"
+                    type="password"
+                    value={accountPassword}
+                    onChange={(e) => setAccountPassword(e.target.value)}
+                    minLength={6}
+                    required
+                  />
+                </div>
+                <div className="space-y-1.5">
+                  <Label>ভূমিকা</Label>
+                  <Select value={accountRole} onValueChange={(v) => setAccountRole(v as AppRole)}>
+                    <SelectTrigger><SelectValue /></SelectTrigger>
+                    <SelectContent>
+                      {ASSIGNABLE.map((r) => (
+                        <SelectItem key={r} value={r}>{roleLabel(r)}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <Button type="submit" disabled={creatingAccount}>
+                  {creatingAccount ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <KeyRound className="mr-2 h-4 w-4" />}
+                  অ্যাকাউন্ট তৈরি
+                </Button>
+              </div>
+            </form>
+
             <div className="grid gap-3 sm:grid-cols-[1fr_180px_180px_auto] sm:items-end">
               <div className="space-y-1.5">
                 <Label htmlFor="user-search">সার্চ</Label>
