@@ -3120,6 +3120,72 @@ function SettingsTab() {
         </CardContent>
       </Card>
 
+      <Card className="md:col-span-2">
+        <CardHeader>
+          <CardTitle>প্রতিষ্ঠাতা / সভাপতি / সাধারণ সম্পাদকের বাণী</CardTitle>
+          <CardDescription>পরিচিতি পেজে দেখানো পদাধিকারীদের নাম, ছবি ও বাণী যোগ/এডিট করুন</CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-3">
+          {messages.map((m, i) => (
+            <div key={i} className="grid gap-3 sm:grid-cols-[96px_1fr_auto] items-start border rounded-md p-3">
+              <div className="space-y-2">
+                <div className="h-24 w-24 rounded-full border bg-muted overflow-hidden flex items-center justify-center">
+                  {m.photo ? (
+                    <img src={m.photo} alt="" className="h-full w-full object-cover" />
+                  ) : (
+                    <span className="text-2xl text-muted-foreground">👤</span>
+                  )}
+                </div>
+                <Input
+                  type="file"
+                  accept="image/*"
+                  className="text-xs"
+                  onChange={(e) => {
+                    const f = e.target.files?.[0];
+                    if (!f) return;
+                    if (f.size > 2 * 1024 * 1024) { toast.error("ছবি ২ MB এর কম হতে হবে"); return; }
+                    const r = new FileReader();
+                    r.onload = () => setMessages(messages.map((x, j) => j === i ? { ...x, photo: String(r.result || "") } : x));
+                    r.readAsDataURL(f);
+                  }}
+                />
+                {m.photo && (
+                  <Button type="button" variant="ghost" size="sm" onClick={() => setMessages(messages.map((x, j) => j === i ? { ...x, photo: "" } : x))}>ছবি সরান</Button>
+                )}
+              </div>
+              <div className="space-y-2">
+                <div className="grid gap-2 sm:grid-cols-2">
+                  <div>
+                    <Label className="text-xs">পদবি</Label>
+                    <Input value={m.role} onChange={(e) => setMessages(messages.map((x, j) => j === i ? { ...x, role: e.target.value } : x))} placeholder="প্রতিষ্ঠাতা" />
+                  </div>
+                  <div>
+                    <Label className="text-xs">নাম</Label>
+                    <Input value={m.name} onChange={(e) => setMessages(messages.map((x, j) => j === i ? { ...x, name: e.target.value } : x))} placeholder="পুরো নাম" />
+                  </div>
+                </div>
+                <div>
+                  <Label className="text-xs">বাণী</Label>
+                  <Textarea rows={3} value={m.message} onChange={(e) => setMessages(messages.map((x, j) => j === i ? { ...x, message: e.target.value } : x))} placeholder="অনুপ্রেরণামূলক বার্তা লিখুন..." />
+                </div>
+              </div>
+              <Button type="button" variant="ghost" size="icon" onClick={() => setMessages(messages.filter((_, j) => j !== i))}>
+                <Trash2 className="h-4 w-4 text-destructive" />
+              </Button>
+            </div>
+          ))}
+          <div className="flex gap-2">
+            <Button type="button" variant="outline" size="sm" onClick={() => setMessages([...messages, { role: "", name: "", photo: "", message: "" }])}>
+              <Plus className="h-4 w-4 mr-1" />নতুন বাণী যোগ করুন
+            </Button>
+            <Button type="button" variant="ghost" size="sm" onClick={() => setMessages(DEFAULT_MESSAGES)}>ডিফল্টে ফিরিয়ে নিন</Button>
+          </div>
+          <Button onClick={saveGeneral} className="w-full">সংরক্ষণ</Button>
+        </CardContent>
+      </Card>
+
+
+
 
       <Card>
         <CardHeader>
