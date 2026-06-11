@@ -3250,6 +3250,11 @@ function SettingsTab() {
   );
 }
 
+// ===== Admin =====
+function AdminTab() {
+  return <RoleManager />;
+}
+
 // ===== Reports =====
 function ReportsTab() {
   const { data } = useSamiti();
