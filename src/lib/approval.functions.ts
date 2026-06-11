@@ -79,7 +79,13 @@ export const setAccountStatus = createServerFn({ method: "POST" })
   .handler(async ({ data, context }) => {
     await assertAdmin(context.userId);
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const patch: Record<string, unknown> =
+    const patch: {
+      status: AccountStatus;
+      approved_at: string | null;
+      approved_by: string | null;
+      display_name?: string | null;
+      member_ref?: string | null;
+    } =
       data.status === "active"
         ? { status: data.status, approved_at: new Date().toISOString(), approved_by: context.userId }
         : { status: data.status, approved_at: null, approved_by: null };
