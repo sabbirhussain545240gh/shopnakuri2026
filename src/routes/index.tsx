@@ -2875,6 +2875,14 @@ function SettingsTab() {
       notice: notice.trim(),
       goals: goals.map((g) => ({ icon: g.icon.trim(), title: g.title.trim(), desc: g.desc.trim() })).filter((g) => g.title || g.desc),
       quotes: quotes.map((q) => ({ bn: q.bn.trim(), en: q.en.trim() })).filter((q) => q.bn || q.en),
+      splashEnabled,
+      splashTitle: splashTitle.trim(),
+      splashSubtitle: splashSubtitle.trim(),
+      splashIcon: splashIcon.trim(),
+      splashFooter: splashFooter.trim(),
+      goalsSectionTitle: goalsSectionTitle.trim(),
+      goalsSectionSubtitle: goalsSectionSubtitle.trim(),
+      quotesSectionTitle: quotesSectionTitle.trim(),
     });
     toast.success("সেটিংস সংরক্ষিত হয়েছে");
   };
