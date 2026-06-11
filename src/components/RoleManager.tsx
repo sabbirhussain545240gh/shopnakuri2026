@@ -71,6 +71,7 @@ export function RoleManager() {
   const sendInvite = useServerFn(inviteUser);
   const fetchInvites = useServerFn(listInvites);
   const cancelInvite = useServerFn(revokeInvite);
+  const fetchUsers = useServerFn(listUsersWithRoles);
 
   const [info, setInfo] = useState<{ isAdmin: boolean; adminCount: number } | null>(null);
   const [claiming, setClaiming] = useState(false);
