@@ -89,6 +89,20 @@ export function RoleManager() {
   const [loadingInvites, setLoadingInvites] = useState(false);
   const [revokingId, setRevokingId] = useState<string | null>(null);
 
+  // Users table
+  type UserRow = {
+    id: string; email: string; createdAt: string; lastSignInAt: string | null;
+    roles: { id: string; role: AppRole; createdAt: string }[];
+  };
+  const [users, setUsers] = useState<UserRow[]>([]);
+  const [loadingUsers, setLoadingUsers] = useState(false);
+  const [search, setSearch] = useState("");
+  const [filterRole, setFilterRole] = useState<"all" | AppRole | "none">("all");
+  const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
+  const [quickRole, setQuickRole] = useState<AppRole>("member");
+  const [assigningUserId, setAssigningUserId] = useState<string | null>(null);
+
   const refreshInfo = async () => {
     try { setInfo(await fetchInfo()); }
     catch { setInfo({ isAdmin: false, adminCount: 0 }); }
