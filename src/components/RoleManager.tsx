@@ -79,9 +79,16 @@ export function RoleManager() {
   const cancelInvite = useServerFn(revokeInvite);
   const fetchUsers = useServerFn(listUsersWithRoles);
   const createUser = useServerFn(createManagedUser);
+  const fetchPending = useServerFn(listPendingAccounts);
+  const updateStatus = useServerFn(setAccountStatus);
 
   const [info, setInfo] = useState<{ isAdmin: boolean; adminCount: number } | null>(null);
   const [claiming, setClaiming] = useState(false);
+
+  type PendingRow = { user_id: string; identifier: string; status: AccountStatus; created_at: string; approved_at: string | null };
+  const [pending, setPending] = useState<PendingRow[]>([]);
+  const [loadingPending, setLoadingPending] = useState(false);
+  const [statusBusyId, setStatusBusyId] = useState<string | null>(null);
 
   const [rows, setRows] = useState<Row[]>([]);
   const [loadingRows, setLoadingRows] = useState(false);
