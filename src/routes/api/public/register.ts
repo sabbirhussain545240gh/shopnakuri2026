@@ -47,6 +47,7 @@ export const Route = createFileRoute("/api/public/register")({
         await supabaseAdmin.from("profiles").upsert({
           user_id: created.user.id,
           identifier: ident,
+          display_name: parsed.displayName ?? null,
           status: "pending",
         });
         return new Response(JSON.stringify({ ok: true }), {
