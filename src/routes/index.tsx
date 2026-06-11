@@ -2930,6 +2930,72 @@ function SettingsTab() {
         </CardContent>
       </Card>
 
+      <Card className="md:col-span-2">
+        <CardHeader>
+          <CardTitle>লক্ষ্য ও উদ্দেশ্য (ইন্ট্রো পেজ)</CardTitle>
+          <CardDescription>লগইন আগের পরিচিতি পেজে দেখানো লক্ষ্যসমূহ এডিট করুন</CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-3">
+          {goals.map((g, i) => (
+            <div key={i} className="grid gap-2 sm:grid-cols-[80px_1fr_2fr_auto] items-start border rounded-md p-3">
+              <div>
+                <Label className="text-xs">আইকন</Label>
+                <Input value={g.icon} onChange={(e) => setGoals(goals.map((x, j) => j === i ? { ...x, icon: e.target.value } : x))} placeholder="🤝" />
+              </div>
+              <div>
+                <Label className="text-xs">শিরোনাম</Label>
+                <Input value={g.title} onChange={(e) => setGoals(goals.map((x, j) => j === i ? { ...x, title: e.target.value } : x))} />
+              </div>
+              <div>
+                <Label className="text-xs">বর্ণনা</Label>
+                <Textarea rows={2} value={g.desc} onChange={(e) => setGoals(goals.map((x, j) => j === i ? { ...x, desc: e.target.value } : x))} />
+              </div>
+              <Button type="button" variant="ghost" size="icon" className="mt-5" onClick={() => setGoals(goals.filter((_, j) => j !== i))}>
+                <Trash2 className="h-4 w-4 text-destructive" />
+              </Button>
+            </div>
+          ))}
+          <div className="flex gap-2">
+            <Button type="button" variant="outline" size="sm" onClick={() => setGoals([...goals, { icon: "✨", title: "", desc: "" }])}>
+              <Plus className="h-4 w-4 mr-1" />নতুন লক্ষ্য
+            </Button>
+            <Button type="button" variant="ghost" size="sm" onClick={() => setGoals(DEFAULT_GOALS)}>ডিফল্টে ফিরিয়ে নিন</Button>
+          </div>
+          <Button onClick={saveGeneral} className="w-full">সংরক্ষণ</Button>
+        </CardContent>
+      </Card>
+
+      <Card className="md:col-span-2">
+        <CardHeader>
+          <CardTitle>অনুপ্রেরণামূলক বাণী (ইন্ট্রো পেজ)</CardTitle>
+          <CardDescription>লগইন আগের পরিচিতি পেজে দেখানো বাণীসমূহ এডিট করুন</CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-3">
+          {quotes.map((q, i) => (
+            <div key={i} className="grid gap-2 sm:grid-cols-[1fr_1fr_auto] items-start border rounded-md p-3">
+              <div>
+                <Label className="text-xs">বাণী (বাংলা)</Label>
+                <Textarea rows={2} value={q.bn} onChange={(e) => setQuotes(quotes.map((x, j) => j === i ? { ...x, bn: e.target.value } : x))} />
+              </div>
+              <div>
+                <Label className="text-xs">অনুবাদ (English) — ঐচ্ছিক</Label>
+                <Textarea rows={2} value={q.en} onChange={(e) => setQuotes(quotes.map((x, j) => j === i ? { ...x, en: e.target.value } : x))} />
+              </div>
+              <Button type="button" variant="ghost" size="icon" className="mt-5" onClick={() => setQuotes(quotes.filter((_, j) => j !== i))}>
+                <Trash2 className="h-4 w-4 text-destructive" />
+              </Button>
+            </div>
+          ))}
+          <div className="flex gap-2">
+            <Button type="button" variant="outline" size="sm" onClick={() => setQuotes([...quotes, { bn: "", en: "" }])}>
+              <Plus className="h-4 w-4 mr-1" />নতুন বাণী
+            </Button>
+            <Button type="button" variant="ghost" size="sm" onClick={() => setQuotes(DEFAULT_QUOTES)}>ডিফল্টে ফিরিয়ে নিন</Button>
+          </div>
+          <Button onClick={saveGeneral} className="w-full">সংরক্ষণ</Button>
+        </CardContent>
+      </Card>
+
 
       <Card>
         <CardHeader>
