@@ -27,6 +27,7 @@ import { AuthGate, SignOutButton, CloudStatusBadge } from "@/components/AuthGate
 import { buildReceiptQr, type VerifyPayload } from "@/lib/receipt-qr";
 import { useMyRoles, allowedTabs, roleLabel, type TabKey } from "@/lib/permissions";
 import { RoleManager } from "@/components/RoleManager";
+import { NotificationBell } from "@/components/NotificationBell";
 import { useServerFn } from "@tanstack/react-start";
 import { listPendingAccounts } from "@/lib/approval.functions";
 
