@@ -67,11 +67,10 @@ export const setAccountStatus = createServerFn({ method: "POST" })
   .handler(async ({ data, context }) => {
     await assertAdmin(context.userId);
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const patch: Record<string, unknown> = { status: data.status };
-    if (data.status === "active") {
-      patch.approved_at = new Date().toISOString();
-      patch.approved_by = context.userId;
-    }
+    const patch =
+      data.status === "active"
+        ? { status: data.status, approved_at: new Date().toISOString(), approved_by: context.userId }
+        : { status: data.status, approved_at: null, approved_by: null };
     const { error } = await supabaseAdmin
       .from("profiles")
       .update(patch)
