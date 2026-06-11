@@ -221,8 +221,9 @@ function SamitiApp() {
               ভূমিকা: <span className="font-medium text-foreground">{myRoleLabel}</span>
             </div>
           )}
-          <div className="flex items-center justify-center"><CloudStatusBadge /></div>
+          <div className="flex items-center justify-center gap-2"><CloudStatusBadge /><NotificationBell /></div>
           <SignOutButton />
+
         </div>
 
 
