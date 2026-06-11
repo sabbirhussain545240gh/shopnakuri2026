@@ -44,6 +44,16 @@ export type MemberViewResponse = {
   loans: MemberViewLoan[];
   payments: MemberViewPayment[];
   deposits: MemberViewDeposit[];
+  summary?: {
+    totalMembers: number;
+    totalDeposits: number;
+    totalLoans: number;
+    activeLoans: number;
+    closedLoans: number;
+    totalLoanAmount: number;
+    totalPayments: number;
+    totalRemaining: number;
+  };
 };
 
 export const getMyMemberView = createServerFn({ method: "GET" })
