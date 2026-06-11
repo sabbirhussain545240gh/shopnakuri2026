@@ -38,6 +38,10 @@ import {
   type AccountStatus,
 } from "@/lib/approval.functions";
 import { roleLabel } from "@/lib/permissions";
+import { useSamiti } from "@/lib/samiti-store";
+import {
+  Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter,
+} from "@/components/ui/dialog";
 
 type Row = { id: string; userId: string; email: string; role: AppRole; createdAt: string };
 type Invite = {
@@ -167,15 +171,44 @@ export function RoleManager() {
     } finally { setLoadingPending(false); }
   };
 
-  const changeStatus = async (userId: string, status: AccountStatus) => {
+  const changeStatus = async (
+    userId: string,
+    status: AccountStatus,
+    extra?: { role?: AppRole; displayName?: string; memberRef?: string },
+  ) => {
     setStatusBusyId(userId);
     try {
-      await updateStatus({ data: { userId, status } });
+      await updateStatus({ data: { userId, status, ...(extra ?? {}) } });
       toast.success(status === "active" ? "অ্যাকাউন্ট অনুমোদিত" : status === "rejected" ? "অ্যাকাউন্ট প্রত্যাখ্যাত" : "স্ট্যাটাস আপডেট হয়েছে");
-      await loadPending();
+      await Promise.all([loadPending(), loadRoles(), loadUsers()]);
     } catch (err: any) {
       toast.error(err?.message ?? "আপডেট করা যায়নি");
     } finally { setStatusBusyId(null); }
+  };
+
+  // Approval dialog state
+  const samiti = useSamiti();
+  const [approveTarget, setApproveTarget] = useState<PendingRow | null>(null);
+  const [approveRole, setApproveRole] = useState<AppRole>("member");
+  const [approveMemberId, setApproveMemberId] = useState<string>("none");
+  const [approveName, setApproveName] = useState("");
+
+  const openApprove = (p: PendingRow) => {
+    setApproveTarget(p);
+    setApproveRole("member");
+    setApproveMemberId("none");
+    setApproveName("");
+  };
+  const submitApprove = async () => {
+    if (!approveTarget) return;
+    const selected = approveMemberId !== "none" ? samiti.data.members.find((m) => m.id === approveMemberId) : null;
+    const displayName = (approveName.trim() || selected?.name || "").trim();
+    await changeStatus(approveTarget.user_id, "active", {
+      role: approveRole,
+      displayName: displayName || undefined,
+      memberRef: selected ? selected.id : undefined,
+    });
+    setApproveTarget(null);
   };
 
   useEffect(() => { refreshInfo(); }, []);
@@ -425,7 +458,7 @@ export function RoleManager() {
                         <div className="inline-flex gap-1">
                           {p.status !== "active" && (
                             <Button size="sm" variant="default" disabled={statusBusyId === p.user_id}
-                              onClick={() => changeStatus(p.user_id, "active")}>
+                              onClick={() => openApprove(p)}>
                               {statusBusyId === p.user_id ? <Loader2 className="h-4 w-4 animate-spin" /> : <><Check className="h-3.5 w-3.5 mr-1" />অনুমোদন</>}
                             </Button>
                           )}
@@ -448,6 +481,74 @@ export function RoleManager() {
                 </TableBody>
               </Table>
             </div>
+
+            <Dialog open={!!approveTarget} onOpenChange={(o) => !o && setApproveTarget(null)}>
+              <DialogContent>
+                <DialogHeader>
+                  <DialogTitle>অ্যাকাউন্ট অনুমোদন</DialogTitle>
+                  <DialogDescription className="break-all">
+                    {approveTarget?.identifier}
+                  </DialogDescription>
+                </DialogHeader>
+                <div className="space-y-3">
+                  <div className="space-y-1.5">
+                    <Label>ক্যাটাগরি / ভূমিকা</Label>
+                    <Select value={approveRole} onValueChange={(v) => setApproveRole(v as AppRole)}>
+                      <SelectTrigger><SelectValue /></SelectTrigger>
+                      <SelectContent>
+                        {ASSIGNABLE.map((r) => (
+                          <SelectItem key={r} value={r}>{roleLabel(r)}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="space-y-1.5">
+                    <Label>সদস্য নির্বাচন (ঐচ্ছিক)</Label>
+                    <Select
+                      value={approveMemberId}
+                      onValueChange={(v) => {
+                        setApproveMemberId(v);
+                        if (v !== "none") {
+                          const m = samiti.data.members.find((x) => x.id === v);
+                          if (m && !approveName) setApproveName(m.name);
+                        }
+                      }}
+                    >
+                      <SelectTrigger><SelectValue placeholder="সদস্য সিলেক্ট করুন" /></SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="none">— কোনো সদস্য সংযুক্ত নয় —</SelectItem>
+                        {samiti.data.members.map((m) => (
+                          <SelectItem key={m.id} value={m.id}>
+                            #{m.serial} — {m.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="space-y-1.5">
+                    <Label>প্রদর্শিত নাম</Label>
+                    <Input
+                      value={approveName}
+                      onChange={(e) => setApproveName(e.target.value)}
+                      placeholder="পুরো নাম"
+                    />
+                  </div>
+                </div>
+                <DialogFooter>
+                  <Button variant="outline" onClick={() => setApproveTarget(null)}>বাতিল</Button>
+                  <Button
+                    onClick={submitApprove}
+                    disabled={!!approveTarget && statusBusyId === approveTarget.user_id}
+                  >
+                    {approveTarget && statusBusyId === approveTarget.user_id ? (
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                    ) : (
+                      <><Check className="h-3.5 w-3.5 mr-1" />অনুমোদন করুন</>
+                    )}
+                  </Button>
+                </DialogFooter>
+              </DialogContent>
+            </Dialog>
           </TabsContent>
 
 

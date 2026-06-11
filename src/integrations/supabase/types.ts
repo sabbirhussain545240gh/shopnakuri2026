@@ -49,7 +49,9 @@ export type Database = {
           approved_at: string | null
           approved_by: string | null
           created_at: string
+          display_name: string | null
           identifier: string
+          member_ref: string | null
           status: Database["public"]["Enums"]["account_status"]
           updated_at: string
           user_id: string
@@ -58,7 +60,9 @@ export type Database = {
           approved_at?: string | null
           approved_by?: string | null
           created_at?: string
+          display_name?: string | null
           identifier?: string
+          member_ref?: string | null
           status?: Database["public"]["Enums"]["account_status"]
           updated_at?: string
           user_id: string
@@ -67,7 +71,9 @@ export type Database = {
           approved_at?: string | null
           approved_by?: string | null
           created_at?: string
+          display_name?: string | null
           identifier?: string
+          member_ref?: string | null
           status?: Database["public"]["Enums"]["account_status"]
           updated_at?: string
           user_id?: string
