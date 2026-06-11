@@ -385,7 +385,7 @@ function LoansSection({ data }: { data: MemberViewResponse }) {
   );
 }
 
-function InstallmentReceiptsSection({ data }: { data: MemberViewResponse }) {
+function InstallmentReceiptsSection({ data, onView }: { data: MemberViewResponse; onView: (title: string, html: string) => void }) {
   const rows = useMemo(() => {
     const loanIndex = new Map(data.loans.map((l, i) => [l.id, i + 1]));
     const sorted = [...data.payments].sort((a, b) => b.date.localeCompare(a.date));
