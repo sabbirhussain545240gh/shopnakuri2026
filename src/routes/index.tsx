@@ -2844,6 +2844,8 @@ function SettingsTab() {
   const [notice, setNotice] = useState(data.settings.notice || "");
   const [goals, setGoals] = useState<Goal[]>(data.settings.goals && data.settings.goals.length > 0 ? data.settings.goals : DEFAULT_GOALS);
   const [quotes, setQuotes] = useState<Quote[]>(data.settings.quotes && data.settings.quotes.length > 0 ? data.settings.quotes : DEFAULT_QUOTES);
+  const [messages, setMessages] = useState<Message[]>(data.settings.messages && data.settings.messages.length > 0 ? data.settings.messages : DEFAULT_MESSAGES);
+  const [messagesSectionTitle, setMessagesSectionTitle] = useState(data.settings.messagesSectionTitle || "");
   const [splashEnabled, setSplashEnabled] = useState<boolean>(data.settings.splashEnabled !== false);
   const [splashTitle, setSplashTitle] = useState(data.settings.splashTitle || "");
   const [splashSubtitle, setSplashSubtitle] = useState(data.settings.splashSubtitle || "");
