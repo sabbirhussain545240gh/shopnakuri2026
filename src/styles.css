@@ -6,8 +6,14 @@
 
 /* Fonts are loaded via <link> in src/routes/__root.tsx (Lightning CSS does not resolve remote @import) */
 
+@font-face {
+  font-family: 'BNNum';
+  src: local('Noto Sans Bengali');
+  unicode-range: U+0030-0039, U+09E6-09EF;
+}
+
 @theme inline {
-  --font-sans: 'Hind Siliguri', system-ui, sans-serif;
+  --font-sans: 'BNNum', 'Hind Siliguri', system-ui, sans-serif;
   --font-display: 'Noto Serif Bengali', serif;
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);
