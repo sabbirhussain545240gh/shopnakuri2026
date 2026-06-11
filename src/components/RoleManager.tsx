@@ -98,7 +98,7 @@ export function RoleManager() {
   const [pwBusy, setPwBusy] = useState(false);
   const [deletingId, setDeletingId] = useState<string | null>(null);
 
-  type PendingRow = { user_id: string; identifier: string; status: AccountStatus; created_at: string; approved_at: string | null };
+  type PendingRow = { user_id: string; identifier: string; display_name: string | null; member_ref: string | null; status: AccountStatus; created_at: string; approved_at: string | null };
   const [pending, setPending] = useState<PendingRow[]>([]);
   const [loadingPending, setLoadingPending] = useState(false);
   const [statusBusyId, setStatusBusyId] = useState<string | null>(null);
