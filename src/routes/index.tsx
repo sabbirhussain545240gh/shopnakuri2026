@@ -3045,6 +3045,7 @@ function SettingsTab() {
             <Label className="text-xs">বাণী (প্রতিষ্ঠাতা/সভাপতি/সম্পাদক) সেকশনের শিরোনাম</Label>
             <Input value={messagesSectionTitle} onChange={(e) => setMessagesSectionTitle(e.target.value)} placeholder="প্রতিষ্ঠাতা, সভাপতি ও সাধারণ সম্পাদকের বাণী" />
           </div>
+          <div>
             <Label className="text-xs">ফুটার লেখা</Label>
             <Input value={splashFooter} onChange={(e) => setSplashFooter(e.target.value)} placeholder={`© ${new Date().getFullYear()} স্বপ্ন কুড়ি বন্ধন সমিতি`} />
           </div>
