@@ -263,6 +263,8 @@ function IntroSplash({ onEnter, onSkipIfDisabled }: { onEnter: () => void; onSki
   const title = s.splashTitle?.trim() || data.samitiName || "স্বপ্ন কুড়ি বন্ধন সমিতি";
   const subtitle = s.splashSubtitle?.trim() || `স্থাপিত: ${data.establishedDate || "ডিসেম্বর ২০২৫"} · একতাই শক্তি, একতাই বল`;
   const icon = s.splashIcon?.trim() || "🌾";
+  const image = s.splashImage?.trim() || "";
+  const imageSize = Math.max(48, Math.min(320, s.splashImageSize || 80));
   const footer = s.splashFooter?.trim() || `© ${new Date().getFullYear()} ${title}`;
   const goalsTitle = s.goalsSectionTitle?.trim() || "আমাদের লক্ষ্য ও উদ্দেশ্য";
   const goalsSubtitle = s.goalsSectionSubtitle?.trim() || "সদস্যদের কল্যাণ ও আর্থিক স্বনির্ভরতাই আমাদের মূল লক্ষ্য";
@@ -271,9 +273,21 @@ function IntroSplash({ onEnter, onSkipIfDisabled }: { onEnter: () => void; onSki
     <div className="min-h-screen bg-gradient-to-br from-emerald-50 via-background to-sky-50 dark:from-emerald-950/30 dark:via-background dark:to-sky-950/30">
       <div className="mx-auto max-w-5xl px-4 py-10 md:py-16">
         <div className="text-center">
-          <div className="inline-flex h-20 w-20 items-center justify-center rounded-full bg-gradient-to-br from-emerald-500 to-sky-600 text-3xl text-white shadow-lg">
-            {icon}
-          </div>
+          {image ? (
+            <img
+              src={image}
+              alt="logo"
+              style={{ height: imageSize, width: imageSize }}
+              className="inline-block rounded-full object-cover shadow-lg ring-2 ring-emerald-200/60 dark:ring-emerald-900/40"
+            />
+          ) : (
+            <div
+              style={{ height: imageSize, width: imageSize, fontSize: Math.round(imageSize * 0.42) }}
+              className="inline-flex items-center justify-center rounded-full bg-gradient-to-br from-emerald-500 to-sky-600 text-white shadow-lg"
+            >
+              {icon}
+            </div>
+          )}
           <h1 className="mt-5 font-serif text-3xl md:text-5xl font-bold tracking-tight text-foreground">
             {title}
           </h1>
