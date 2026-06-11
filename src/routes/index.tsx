@@ -21,7 +21,7 @@ import { Badge } from "@/components/ui/badge";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Textarea } from "@/components/ui/textarea";
-import { Users, PiggyBank, HandCoins, LayoutDashboard, Trash2, Plus, CheckCircle2, Pencil, Settings as SettingsIcon, Wallet, Download, Upload, AlertTriangle, TrendingUp, TrendingDown, Menu, Printer, FileText, Receipt, Search, Eye, Share, ImageDown, Check, ChevronsUpDown } from "lucide-react";
+import { Users, PiggyBank, HandCoins, LayoutDashboard, Trash2, Plus, CheckCircle2, Pencil, Settings as SettingsIcon, Wallet, Download, Upload, AlertTriangle, TrendingUp, TrendingDown, Menu, Printer, FileText, Receipt, Search, Eye, Share, ImageDown, Check, ChevronsUpDown, ShieldCheck } from "lucide-react";
 import { toast, Toaster } from "sonner";
 import { AuthGate, SignOutButton, CloudStatusBadge } from "@/components/AuthGate";
 import { buildReceiptQr, type VerifyPayload } from "@/lib/receipt-qr";
@@ -112,6 +112,7 @@ const navItems = [
   { value: "cashbook", label: "আয়-ব্যয়", icon: Wallet },
   { value: "reports", label: "রিপোর্ট", icon: FileText },
   { value: "settings", label: "সেটিংস", icon: SettingsIcon },
+  { value: "admin", label: "সুপার এডমিন", icon: ShieldCheck },
 ];
 
 function SamitiApp() {
@@ -262,6 +263,7 @@ function SamitiApp() {
           {tab === "cashbook" && <CashbookTab />}
           {tab === "reports" && <ReportsTab />}
           {tab === "settings" && <SettingsTab />}
+          {tab === "admin" && <AdminTab />}
         </main>
 
         <footer className="container mx-auto px-4 py-6 text-center text-xs text-muted-foreground">
@@ -2952,9 +2954,6 @@ function SettingsTab() {
 
   return (
     <div className="grid gap-6 md:grid-cols-2">
-      <div className="md:col-span-2">
-        <RoleManager />
-      </div>
       <Card>
         <CardHeader>
           <CardTitle>সমিতির তথ্য</CardTitle>
@@ -3249,6 +3248,11 @@ function SettingsTab() {
       </Card>
     </div>
   );
+}
+
+// ===== Admin =====
+function AdminTab() {
+  return <RoleManager />;
 }
 
 // ===== Reports =====

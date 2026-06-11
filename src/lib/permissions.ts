@@ -16,13 +16,14 @@ export type TabKey =
   | "deposits"
   | "cashbook"
   | "reports"
-  | "settings";
+  | "settings"
+  | "admin";
 
 // What each role is allowed to SEE
 const TAB_PERMISSIONS: Record<AppRole, TabKey[]> = {
   admin: [
     "dashboard", "members", "savings", "loans", "installments",
-    "receipts", "deposits", "cashbook", "reports", "settings",
+    "receipts", "deposits", "cashbook", "reports", "settings", "admin",
   ],
   treasurer: [
     "dashboard", "members", "savings", "loans", "installments",
