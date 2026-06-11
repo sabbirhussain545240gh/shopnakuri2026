@@ -31,6 +31,8 @@ import {
   inviteUser,
   listInvites,
   revokeInvite,
+  resetUserPassword,
+  deleteManagedUser,
 } from "@/lib/admin.functions";
 import {
   listPendingAccounts,
