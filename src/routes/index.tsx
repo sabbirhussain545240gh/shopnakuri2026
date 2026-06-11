@@ -267,7 +267,12 @@ function SamitiApp() {
                   )}
                 >
                   <Icon className="h-5 w-5 shrink-0" />
-                  {item.label}
+                  <span className="flex-1 text-left">{item.label}</span>
+                  {item.value === "admin" && pendingApprovals > 0 && (
+                    <span className="inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-destructive px-1.5 text-[10px] font-semibold text-destructive-foreground">
+                      {pendingApprovals}
+                    </span>
+                  )}
                 </button>
               );
             })}
