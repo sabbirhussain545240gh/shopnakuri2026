@@ -25,7 +25,7 @@ import { Users, PiggyBank, HandCoins, LayoutDashboard, Trash2, Plus, CheckCircle
 import { toast, Toaster } from "sonner";
 import { AuthGate, SignOutButton, CloudStatusBadge } from "@/components/AuthGate";
 import { buildReceiptQr, type VerifyPayload } from "@/lib/receipt-qr";
-import { useMyRoles, allowedTabs, isSuperAdmin, roleLabel, type TabKey } from "@/lib/permissions";
+import { useMyRoles, allowedTabs, roleLabel, type TabKey } from "@/lib/permissions";
 import { RoleManager } from "@/components/RoleManager";
 
 function ReceiptQrPreview({ payload }: { payload: VerifyPayload }) {
@@ -2860,8 +2860,7 @@ function CashbookTab() {
 
 // ===== Settings =====
 function SettingsTab() {
-  const { roles } = useMyRoles();
-  const showRoleManager = isSuperAdmin(roles);
+  // RoleManager self-gates: shows bootstrap, full panel, or nothing based on server state.
   const { data, updateSamitiInfo, updateSettings, resetAll, importData } = useSamiti();
   const [name, setName] = useState(data.samitiName);
   const [address, setAddress] = useState(data.samitiAddress || "");
@@ -2953,11 +2952,9 @@ function SettingsTab() {
 
   return (
     <div className="grid gap-6 md:grid-cols-2">
-      {showRoleManager && (
-        <div className="md:col-span-2">
-          <RoleManager />
-        </div>
-      )}
+      <div className="md:col-span-2">
+        <RoleManager />
+      </div>
       <Card>
         <CardHeader>
           <CardTitle>সমিতির তথ্য</CardTitle>
