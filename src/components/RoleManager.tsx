@@ -594,8 +594,10 @@ export function RoleManager() {
           <TabsContent value="users" className="space-y-4 pt-4">
             <form onSubmit={onCreateAccount} className="rounded-md border bg-muted/30 p-3 space-y-3">
               <div className="grid gap-3 sm:grid-cols-2">
-                <div className="space-y-1.5">
-                  <Label>সদস্য নির্বাচন (ঐচ্ছিক)</Label>
+                <div className="space-y-1.5 rounded-md border border-primary/30 bg-primary/5 p-3">
+                  <Label className="flex items-center gap-1.5 text-primary font-medium">
+                    <UsersIcon className="h-3.5 w-3.5" /> সদস্য নির্বাচন (ঐচ্ছিক)
+                  </Label>
                   <Select
                     value={accountMemberId}
                     onValueChange={(v) => {
@@ -606,7 +608,7 @@ export function RoleManager() {
                       }
                     }}
                   >
-                    <SelectTrigger><SelectValue placeholder="সদস্য সিলেক্ট করুন" /></SelectTrigger>
+                    <SelectTrigger className="bg-background ring-2 ring-primary/20"><SelectValue placeholder="সদস্য সিলেক্ট করুন" /></SelectTrigger>
                     <SelectContent>
                       <SelectItem value="none">— কোনো সদস্য সংযুক্ত নয় —</SelectItem>
                       {samiti.data.members.map((m) => (
