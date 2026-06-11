@@ -491,7 +491,7 @@ function InstallmentReceiptsSection({ data, onView }: { data: MemberViewResponse
   );
 }
 
-function DepositReceiptsSection({ data }: { data: MemberViewResponse }) {
+function DepositReceiptsSection({ data, onView }: { data: MemberViewResponse; onView: (title: string, html: string) => void }) {
   const rows = useMemo(() => {
     const chrono = [...data.deposits].sort((a, b) => a.date.localeCompare(b.date));
     const totalAfter = new Map<string, number>();
