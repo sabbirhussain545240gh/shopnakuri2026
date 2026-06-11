@@ -1,20 +1,25 @@
 import { useEffect, useState, type ReactNode } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import type { Session } from "@supabase/supabase-js";
+import { useServerFn } from "@tanstack/react-start";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
-import { LogOut, Loader2, CloudOff, CheckCircle2, AlertCircle, Cloud } from "lucide-react";
+import { LogOut, Loader2, CloudOff, CheckCircle2, AlertCircle, Cloud, Clock, ShieldAlert } from "lucide-react";
 import { toast } from "sonner";
 import { startCloudSync, stopCloudSync, subscribeCloudStatus, getCloudStatus, awaitInitialCloudLoad, useSamiti, DEFAULT_GOALS, DEFAULT_QUOTES, DEFAULT_MESSAGES } from "@/lib/samiti-store";
+import { getMyAccountStatus, type AccountStatus } from "@/lib/approval.functions";
 
 export function AuthGate({ children }: { children: (session: Session) => ReactNode }) {
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
   const [hydrating, setHydrating] = useState(false);
   const [showLogin, setShowLogin] = useState(false);
+  const [acctStatus, setAcctStatus] = useState<AccountStatus | null>(null);
+  const [checkingStatus, setCheckingStatus] = useState(false);
+  const fetchStatus = useServerFn(getMyAccountStatus);
 
   useEffect(() => {
     const beginSync = async (userId: string) => {
@@ -22,29 +27,37 @@ export function AuthGate({ children }: { children: (session: Session) => ReactNo
       startCloudSync(userId);
       try { await awaitInitialCloudLoad(); } finally { setHydrating(false); }
     };
+    const checkStatus = async () => {
+      setCheckingStatus(true);
+      try {
+        const r = await fetchStatus();
+        setAcctStatus(r.status);
+      } catch {
+        setAcctStatus("pending");
+      } finally { setCheckingStatus(false); }
+    };
     const { data: sub } = supabase.auth.onAuthStateChange((event, sess) => {
       setSession(sess);
       if (sess && (event === "SIGNED_IN" || event === "INITIAL_SESSION")) {
-        beginSync(sess.user.id);
+        checkStatus().then(() => beginSync(sess.user.id));
       }
-      if (event === "SIGNED_OUT") stopCloudSync();
+      if (event === "SIGNED_OUT") { stopCloudSync(); setAcctStatus(null); }
     });
     supabase.auth.getSession().then(({ data }) => {
       const sess = data.session;
       setSession(sess);
-      if (sess) beginSync(sess.user.id);
+      if (sess) { checkStatus().then(() => beginSync(sess.user.id)); }
       setLoading(false);
     });
     return () => sub.subscription.unsubscribe();
-  }, []);
+  }, [fetchStatus]);
 
-  if (loading || (session && hydrating)) {
+  if (loading || (session && (hydrating || checkingStatus))) {
     return (
       <div className="flex min-h-screen flex-col items-center justify-center gap-3">
         <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
-        {hydrating && (
-          <p className="text-sm text-muted-foreground">ক্লাউড থেকে ডেটা লোড হচ্ছে...</p>
-        )}
+        {hydrating && <p className="text-sm text-muted-foreground">ক্লাউড থেকে ডেটা লোড হচ্ছে...</p>}
+        {checkingStatus && <p className="text-sm text-muted-foreground">অ্যাকাউন্ট যাচাই হচ্ছে...</p>}
       </div>
     );
   }
@@ -63,6 +76,32 @@ export function AuthGate({ children }: { children: (session: Session) => ReactNo
           <CardContent>
             <Button type="button" variant="ghost" size="sm" className="mb-2" onClick={() => setShowLogin(false)}>← পরিচিতি পেজে ফিরে যান</Button>
             <AuthTabs />
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
+  if (acctStatus && acctStatus !== "active") {
+    const pending = acctStatus === "pending";
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-muted/30 px-4 py-8">
+        <Card className="w-full max-w-md">
+          <CardHeader className="text-center">
+            <div className="mx-auto mb-2 flex h-12 w-12 items-center justify-center rounded-full bg-muted">
+              {pending ? <Clock className="h-6 w-6 text-amber-600" /> : <ShieldAlert className="h-6 w-6 text-destructive" />}
+            </div>
+            <CardTitle>{pending ? "অনুমোদনের অপেক্ষায়" : "অ্যাকাউন্ট নিষ্ক্রিয়"}</CardTitle>
+            <CardDescription>
+              {pending
+                ? "আপনার অ্যাকাউন্টটি সুপার এডমিনের অনুমোদনের অপেক্ষায় রয়েছে। অনুমোদনের পরে লগইন করতে পারবেন।"
+                : "আপনার অ্যাকাউন্টে প্রবেশের অনুমতি নেই। অনুগ্রহ করে এডমিনের সাথে যোগাযোগ করুন।"}
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="flex justify-center">
+            <Button variant="outline" onClick={async () => { await supabase.auth.signOut(); }}>
+              <LogOut className="mr-2 h-4 w-4" /> লগআউট
+            </Button>
           </CardContent>
         </Card>
       </div>
