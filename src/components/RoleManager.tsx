@@ -751,9 +751,16 @@ export function RoleManager() {
                 </DialogHeader>
                 <div className="space-y-1.5">
                   <Label htmlFor="reset-pw">নতুন পাসওয়ার্ড</Label>
-                  <Input id="reset-pw" type="text" value={pwValue}
-                    onChange={(e) => setPwValue(e.target.value)}
-                    placeholder="কমপক্ষে ৬ অক্ষর" minLength={6} />
+                  <div className="relative">
+                    <Input id="reset-pw" type={pwVisible ? "text" : "password"} value={pwValue}
+                      onChange={(e) => setPwValue(e.target.value)}
+                      placeholder="কমপক্ষে ৬ অক্ষর" minLength={6} className="pr-10" />
+                    <Button type="button" variant="ghost" size="sm"
+                      className="absolute right-0 top-0 h-full px-3"
+                      onClick={() => setPwVisible((v) => !v)}>
+                      {pwVisible ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                    </Button>
+                  </div>
                 </div>
                 <DialogFooter>
                   <Button variant="outline" onClick={() => setPwTarget(null)}>বাতিল</Button>
