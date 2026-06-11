@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
-import { LogOut, Loader2, CloudOff, CheckCircle2, AlertCircle, Cloud, Clock, ShieldAlert } from "lucide-react";
+import { LogOut, Loader2, CloudOff, CheckCircle2, AlertCircle, Cloud, Clock, ShieldAlert, Eye, EyeOff } from "lucide-react";
 import { toast } from "sonner";
 import { startCloudSync, stopCloudSync, subscribeCloudStatus, getCloudStatus, awaitInitialCloudLoad, useSamiti, DEFAULT_GOALS, DEFAULT_QUOTES, DEFAULT_MESSAGES } from "@/lib/samiti-store";
 import { getMyAccountStatus, type AccountStatus } from "@/lib/approval.functions";
@@ -171,12 +171,17 @@ function LoginForm() {
 function SignupForm() {
   const [identifier, setIdentifier] = useState("");
   const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [pwVisible, setPwVisible] = useState(false);
+  const [cpwVisible, setCpwVisible] = useState(false);
   const [submitting, setSubmitting] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     const creds = normalizeIdentifier(identifier);
     if (!creds) { toast.error("সঠিক ইমেইল ঠিকানা দিন"); return; }
+    if (password !== confirmPassword) { toast.error("পাসওয়ার্ড মিলছে না"); return; }
+    if (password.length < 6) { toast.error("পাসওয়ার্ড কমপক্ষে ৬ অক্ষরের হতে হবে"); return; }
     setSubmitting(true);
     try {
       const res = await fetch("/api/public/register", {
@@ -189,6 +194,7 @@ function SignupForm() {
       toast.success("অ্যাকাউন্ট তৈরি হয়েছে। সুপার এডমিনের অনুমোদনের পরে লগইন করতে পারবেন।");
       setIdentifier("");
       setPassword("");
+      setConfirmPassword("");
     } catch (err: any) {
       toast.error(err?.message ?? "ত্রুটি");
     } finally { setSubmitting(false); }
@@ -202,7 +208,47 @@ function SignupForm() {
       </div>
       <div className="space-y-2">
         <Label>পাসওয়ার্ড</Label>
-        <Input type="password" value={password} onChange={(e) => setPassword(e.target.value)} minLength={6} required />
+        <div className="relative">
+          <Input
+            type={pwVisible ? "text" : "password"}
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            minLength={6}
+            required
+            className="pr-10"
+          />
+          <button
+            type="button"
+            tabIndex={-1}
+            onClick={() => setPwVisible((v) => !v)}
+            className="absolute right-0 top-0 h-full px-3 text-muted-foreground hover:text-foreground"
+            aria-label={pwVisible ? "লুকান" : "দেখুন"}
+          >
+            {pwVisible ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+          </button>
+        </div>
+      </div>
+      <div className="space-y-2">
+        <Label>কনফার্ম পাসওয়ার্ড</Label>
+        <div className="relative">
+          <Input
+            type={cpwVisible ? "text" : "password"}
+            value={confirmPassword}
+            onChange={(e) => setConfirmPassword(e.target.value)}
+            minLength={6}
+            required
+            className="pr-10"
+          />
+          <button
+            type="button"
+            tabIndex={-1}
+            onClick={() => setCpwVisible((v) => !v)}
+            className="absolute right-0 top-0 h-full px-3 text-muted-foreground hover:text-foreground"
+            aria-label={cpwVisible ? "লুকান" : "দেখুন"}
+          >
+            {cpwVisible ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+          </button>
+        </div>
       </div>
       <Button type="submit" className="w-full" disabled={submitting}>
         {submitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
