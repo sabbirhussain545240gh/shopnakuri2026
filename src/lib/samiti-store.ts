@@ -72,6 +72,8 @@ export type Settings = {
   splashTitle?: string;
   splashSubtitle?: string;
   splashIcon?: string;
+  splashImage?: string; // data URL or asset URL
+  splashImageSize?: number; // pixels, height/width of circle
   splashFooter?: string;
   goalsSectionTitle?: string;
   goalsSectionSubtitle?: string;
