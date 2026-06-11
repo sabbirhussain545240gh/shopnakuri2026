@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import { Loader2, HandCoins, PiggyBank, Receipt as ReceiptIcon, Printer, ImageDown, AlertTriangle } from "lucide-react";
+import { Loader2, HandCoins, PiggyBank, Receipt as ReceiptIcon, Printer, ImageDown, AlertTriangle, User, Phone, MapPin, Calendar, Hash } from "lucide-react";
 import { SignOutButton, CloudStatusBadge } from "@/components/AuthGate";
 import { NotificationBell } from "@/components/NotificationBell";
 import { toBn, formatTk } from "@/lib/samiti-store";
@@ -189,6 +189,7 @@ export function MemberPortal() {
 
         {data?.ok && (
           <>
+            {data.member && <MemberProfileCard member={data.member} />}
             <LoansSection data={data} />
             <InstallmentReceiptsSection data={data} />
             <DepositReceiptsSection data={data} />
@@ -196,6 +197,69 @@ export function MemberPortal() {
         )}
       </main>
     </div>
+  );
+}
+
+function MemberProfileCard({ member }: { member: NonNullable<MemberViewResponse["member"]> }) {
+  const fields: { icon: any; label: string; value?: string }[] = [
+    { icon: Hash, label: "সদস্য নং", value: member.serial ? toBn(member.serial) : undefined },
+    { icon: Calendar, label: "যোগদান তারিখ", value: fmtDate(member.joinDate ?? "") },
+    { icon: Calendar, label: "জন্ম তারিখ", value: fmtDate(member.birthDate ?? "") },
+    { icon: Phone, label: "মোবাইল", value: member.phone },
+    { icon: MapPin, label: "ঠিকানা", value: member.address },
+  ];
+  return (
+    <Card>
+      <CardHeader className="pb-2">
+        <CardTitle className="flex items-center gap-2 text-base">
+          <User className="h-5 w-5 text-primary" /> সদস্য প্রোফাইল
+        </CardTitle>
+      </CardHeader>
+      <CardContent>
+        <div className="flex items-start gap-4">
+          {member.photo ? (
+            <img src={member.photo} alt={member.name} className="h-20 w-20 rounded-xl object-cover ring-1 ring-border bg-white shrink-0" />
+          ) : (
+            <div className="h-20 w-20 rounded-xl bg-primary/10 text-primary flex items-center justify-center font-bold text-2xl shrink-0">
+              {member.name.charAt(0) || "স"}
+            </div>
+          )}
+          <div className="min-w-0 flex-1">
+            <div className="font-semibold text-lg truncate">{member.name}</div>
+            <div className="text-sm text-muted-foreground mt-0.5 grid grid-cols-1 sm:grid-cols-2 gap-y-1 gap-x-4">
+              {member.fatherName && <div>পিতা: {member.fatherName}</div>}
+              {member.motherName && <div>মাতা: {member.motherName}</div>}
+              {member.nid && <div>জাতীয় পরিচয়পত্র: {toBn(member.nid)}</div>}
+            </div>
+          </div>
+        </div>
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3 mt-4 pt-4 border-t">
+          {fields.filter((f) => f.value && f.value !== "—").map((f) => {
+            const Icon = f.icon;
+            return (
+              <div key={f.label} className="flex items-start gap-2">
+                <Icon className="h-4 w-4 text-muted-foreground mt-0.5 shrink-0" />
+                <div>
+                  <div className="text-[11px] text-muted-foreground">{f.label}</div>
+                  <div className="text-sm font-medium">{f.value}</div>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+        {member.nominee && (
+          <div className="mt-4 pt-4 border-t">
+            <div className="text-sm font-medium mb-2">নমিনি তথ্য</div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-2 text-sm">
+              <div><span className="text-muted-foreground text-xs">নাম:</span> {member.nominee.name}</div>
+              <div><span className="text-muted-foreground text-xs">সম্পর্ক:</span> {member.nominee.relation}</div>
+              <div><span className="text-muted-foreground text-xs">মোবাইল:</span> {member.nominee.phone}</div>
+              <div><span className="text-muted-foreground text-xs">জাতীয় পরিচয়পত্র:</span> {member.nominee.nid}</div>
+            </div>
+          </div>
+        )}
+      </CardContent>
+    </Card>
   );
 }
 

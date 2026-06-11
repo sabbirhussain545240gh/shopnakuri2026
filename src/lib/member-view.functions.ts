@@ -27,7 +27,20 @@ export type MemberViewResponse = {
   error?: string;
   samitiName: string;
   samitiLogo: string;
-  member: { id: string; serial?: number; name: string } | null;
+  member: {
+    id: string;
+    serial?: number;
+    name: string;
+    fatherName?: string;
+    motherName?: string;
+    phone?: string;
+    birthDate?: string;
+    nid?: string;
+    address?: string;
+    photo?: string;
+    joinDate?: string;
+    nominee?: { name: string; relation: string; phone: string; nid: string } | null;
+  } | null;
   loans: MemberViewLoan[];
   payments: MemberViewPayment[];
   deposits: MemberViewDeposit[];
@@ -104,11 +117,32 @@ export const getMyMemberView = createServerFn({ method: "GET" })
           date: String(x.date ?? ""),
           note: x.note ? String(x.note) : undefined,
         })) as MemberViewDeposit[];
+      const nominee = m.nominee && typeof m.nominee === "object"
+        ? {
+            name: String(m.nominee.name ?? ""),
+            relation: String(m.nominee.relation ?? ""),
+            phone: String(m.nominee.phone ?? ""),
+            nid: String(m.nominee.nid ?? ""),
+          }
+        : null;
       return {
         ok: true,
         samitiName: String(d.samitiName ?? "সমিতি"),
         samitiLogo: String(d.samitiLogo ?? ""),
-        member: { id: m.id, serial: typeof m.serial === "number" ? m.serial : undefined, name: String(m.name ?? "") },
+        member: {
+          id: m.id,
+          serial: typeof m.serial === "number" ? m.serial : undefined,
+          name: String(m.name ?? ""),
+          fatherName: m.fatherName ? String(m.fatherName) : undefined,
+          motherName: m.motherName ? String(m.motherName) : undefined,
+          phone: m.phone ? String(m.phone) : undefined,
+          birthDate: m.birthDate ? String(m.birthDate) : undefined,
+          nid: m.nid ? String(m.nid) : undefined,
+          address: m.address ? String(m.address) : undefined,
+          photo: m.photo ? String(m.photo) : undefined,
+          joinDate: m.joinDate ? String(m.joinDate) : undefined,
+          nominee,
+        },
         loans,
         payments,
         deposits,
