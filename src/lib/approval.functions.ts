@@ -54,27 +54,50 @@ export const listPendingAccounts = createServerFn({ method: "GET" })
     return { profiles: data ?? [] };
   });
 
+const ROLE_VALUES = ["admin", "treasurer", "president", "secretary", "member"] as const;
+export type ApprovalRole = (typeof ROLE_VALUES)[number];
+
 export const setAccountStatus = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d: { userId: string; status: AccountStatus }) =>
+  .inputValidator((d: {
+    userId: string;
+    status: AccountStatus;
+    role?: ApprovalRole;
+    displayName?: string;
+    memberRef?: string;
+  }) =>
     z
       .object({
         userId: z.string().uuid(),
         status: z.enum(["pending", "active", "rejected"]),
+        role: z.enum(ROLE_VALUES).optional(),
+        displayName: z.string().trim().max(120).optional(),
+        memberRef: z.string().trim().max(120).optional(),
       })
       .parse(d),
   )
   .handler(async ({ data, context }) => {
     await assertAdmin(context.userId);
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const patch =
+    const patch: Record<string, unknown> =
       data.status === "active"
         ? { status: data.status, approved_at: new Date().toISOString(), approved_by: context.userId }
         : { status: data.status, approved_at: null, approved_by: null };
+    if (data.displayName !== undefined) patch.display_name = data.displayName || null;
+    if (data.memberRef !== undefined) patch.member_ref = data.memberRef || null;
     const { error } = await supabaseAdmin
       .from("profiles")
       .update(patch)
       .eq("user_id", data.userId);
     if (error) throw new Error(error.message);
+
+    if (data.status === "active" && data.role) {
+      const { error: roleErr } = await supabaseAdmin
+        .from("user_roles")
+        .insert({ user_id: data.userId, role: data.role });
+      if (roleErr && !roleErr.message.toLowerCase().includes("duplicate")) {
+        throw new Error(roleErr.message);
+      }
+    }
     return { ok: true };
   });
