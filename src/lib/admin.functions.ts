@@ -247,8 +247,6 @@ export const consumeMyInvite = createServerFn({ method: "POST" })
       .is("revoked_at", null);
     if (error) throw new Error(error.message);
     return { ok: true };
-    if (error) throw new Error(error.message);
-    return { ok: true };
   });
 
 export const resetUserPassword = createServerFn({ method: "POST" })
