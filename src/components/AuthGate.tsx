@@ -124,26 +124,13 @@ function AuthTabs() {
   );
 }
 
-function normalizeIdentifier(raw: string): { email?: string; phone?: string } | null {
+function normalizeIdentifier(raw: string): { email?: string } | null {
   const v = raw.trim();
-  if (!v) return null;
-  if (v.includes("@")) return { email: v };
-  const digits = v.replace(/[^\d+]/g, "");
-  if (!digits) return null;
-  let phone = digits;
-  if (phone.startsWith("+")) {
-    phone = "+" + phone.slice(1).replace(/\D/g, "");
-  } else if (phone.startsWith("00")) {
-    phone = "+" + phone.slice(2);
-  } else if (phone.startsWith("880")) {
-    phone = "+" + phone;
-  } else if (phone.startsWith("0")) {
-    phone = "+880" + phone.slice(1);
-  } else {
-    phone = "+880" + phone;
-  }
-  return { phone };
+  if (!v || !v.includes("@")) return null;
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v)) return null;
+  return { email: v.toLowerCase() };
 }
+
 
 function LoginForm() {
   const [identifier, setIdentifier] = useState("");
