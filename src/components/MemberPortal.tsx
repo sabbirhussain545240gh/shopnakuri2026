@@ -250,7 +250,11 @@ function SamitiSummaryCard({ summary, member }: { summary: NonNullable<MemberVie
   );
 }
 
-function MemberProfileCard({ member }: { member: NonNullable<MemberViewResponse["member"]> }) {
+function MemberProfileCard({ member, data }: { member: NonNullable<MemberViewResponse["member"]>; data: MemberViewResponse }) {
+  const myDeposits = data.deposits.reduce((s, d) => s + d.amount, 0);
+  const myPaid = data.payments.reduce((s, p) => s + p.amount, 0);
+  const myLoanDue = data.loans.reduce((s, l) => s + l.amount + (l.amount * l.interestRate * l.durationMonths) / 1200, 0);
+  const myRemaining = Math.max(0, myLoanDue - myPaid);
   const fields: { icon: any; label: string; value?: string }[] = [
     { icon: Hash, label: "সদস্য নং", value: member.serial ? toBn(member.serial) : undefined },
     { icon: Calendar, label: "যোগদান তারিখ", value: fmtDate(member.joinDate ?? "") },
