@@ -2848,6 +2848,8 @@ function SettingsTab() {
   const [splashTitle, setSplashTitle] = useState(data.settings.splashTitle || "");
   const [splashSubtitle, setSplashSubtitle] = useState(data.settings.splashSubtitle || "");
   const [splashIcon, setSplashIcon] = useState(data.settings.splashIcon || "");
+  const [splashImage, setSplashImage] = useState(data.settings.splashImage || "");
+  const [splashImageSize, setSplashImageSize] = useState<number>(data.settings.splashImageSize || 96);
   const [splashFooter, setSplashFooter] = useState(data.settings.splashFooter || "");
   const [goalsSectionTitle, setGoalsSectionTitle] = useState(data.settings.goalsSectionTitle || "");
   const [goalsSectionSubtitle, setGoalsSectionSubtitle] = useState(data.settings.goalsSectionSubtitle || "");
