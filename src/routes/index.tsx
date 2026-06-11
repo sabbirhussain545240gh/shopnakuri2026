@@ -152,6 +152,8 @@ function SamitiApp() {
     }
   }, [allowed, rolesLoading, tab]);
   const [mobileOpen, setMobileOpen] = useState(false);
+  const isAdmin = roles.includes("admin");
+  const pendingApprovals = usePendingApprovalCount(isAdmin);
   const myRoleLabel = roles.length > 0 ? roles.map(roleLabel).join(", ") : "";
 
   const totals = useMemo(() => {
