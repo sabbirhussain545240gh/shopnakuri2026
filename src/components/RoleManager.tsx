@@ -594,6 +594,44 @@ export function RoleManager() {
               <div className="grid gap-3 sm:grid-cols-[1fr_180px_160px_auto] sm:items-end">
                 <div className="space-y-1.5">
                   <Label htmlFor="managed-identifier">মোবাইল / ইমেইল</Label>
+            <form onSubmit={onCreateAccount} className="rounded-md border bg-muted/30 p-3 space-y-3">
+              <div className="grid gap-3 sm:grid-cols-2">
+                <div className="space-y-1.5">
+                  <Label>সদস্য নির্বাচন (ঐচ্ছিক)</Label>
+                  <Select
+                    value={accountMemberId}
+                    onValueChange={(v) => {
+                      setAccountMemberId(v);
+                      if (v !== "none") {
+                        const m = samiti.data.members.find((x) => x.id === v);
+                        if (m && !accountName) setAccountName(m.name);
+                      }
+                    }}
+                  >
+                    <SelectTrigger><SelectValue placeholder="সদস্য সিলেক্ট করুন" /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="none">— কোনো সদস্য সংযুক্ত নয় —</SelectItem>
+                      {samiti.data.members.map((m) => (
+                        <SelectItem key={m.id} value={m.id}>
+                          #{m.serial} — {m.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="space-y-1.5">
+                  <Label htmlFor="managed-name">প্রদর্শিত নাম</Label>
+                  <Input
+                    id="managed-name"
+                    value={accountName}
+                    onChange={(e) => setAccountName(e.target.value)}
+                    placeholder="পুরো নাম"
+                  />
+                </div>
+              </div>
+              <div className="grid gap-3 sm:grid-cols-[1fr_180px_160px_auto] sm:items-end">
+                <div className="space-y-1.5">
+                  <Label htmlFor="managed-identifier">মোবাইল / ইমেইল</Label>
                   <Input
                     id="managed-identifier"
                     value={accountIdentifier}
@@ -630,6 +668,7 @@ export function RoleManager() {
                 </Button>
               </div>
             </form>
+
 
             <div className="grid gap-3 sm:grid-cols-[1fr_180px_180px_auto] sm:items-end">
               <div className="space-y-1.5">
