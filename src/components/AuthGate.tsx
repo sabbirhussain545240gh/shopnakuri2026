@@ -260,6 +260,8 @@ function IntroSplash({ onEnter, onSkipIfDisabled }: { onEnter: () => void; onSki
   if (!enabled) return null;
   const quotes = (s.quotes && s.quotes.length > 0) ? s.quotes : DEFAULT_QUOTES;
   const goals = (s.goals && s.goals.length > 0) ? s.goals : DEFAULT_GOALS;
+  const messagesRaw = (s.messages && s.messages.length > 0) ? s.messages : DEFAULT_MESSAGES;
+  const messages = messagesRaw.filter((m) => (m.name?.trim() || m.message?.trim()));
   const title = s.splashTitle?.trim() || data.samitiName || "স্বপ্ন কুড়ি বন্ধন সমিতি";
   const subtitle = s.splashSubtitle?.trim() || `স্থাপিত: ${data.establishedDate || "ডিসেম্বর ২০২৫"} · একতাই শক্তি, একতাই বল`;
   const icon = s.splashIcon?.trim() || "🌾";
@@ -269,6 +271,7 @@ function IntroSplash({ onEnter, onSkipIfDisabled }: { onEnter: () => void; onSki
   const goalsTitle = s.goalsSectionTitle?.trim() || "আমাদের লক্ষ্য ও উদ্দেশ্য";
   const goalsSubtitle = s.goalsSectionSubtitle?.trim() || "সদস্যদের কল্যাণ ও আর্থিক স্বনির্ভরতাই আমাদের মূল লক্ষ্য";
   const quotesTitle = s.quotesSectionTitle?.trim() || "অনুপ্রেরণামূলক বাণী";
+  const messagesTitle = s.messagesSectionTitle?.trim() || "প্রতিষ্ঠাতা, সভাপতি ও সাধারণ সম্পাদকের বাণী";
   return (
     <div className="min-h-screen bg-gradient-to-br from-emerald-50 via-background to-sky-50 dark:from-emerald-950/30 dark:via-background dark:to-sky-950/30">
       <div className="mx-auto max-w-5xl px-4 py-10 md:py-16">
