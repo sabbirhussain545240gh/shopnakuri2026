@@ -481,6 +481,74 @@ export function RoleManager() {
                 </TableBody>
               </Table>
             </div>
+
+            <Dialog open={!!approveTarget} onOpenChange={(o) => !o && setApproveTarget(null)}>
+              <DialogContent>
+                <DialogHeader>
+                  <DialogTitle>অ্যাকাউন্ট অনুমোদন</DialogTitle>
+                  <DialogDescription className="break-all">
+                    {approveTarget?.identifier}
+                  </DialogDescription>
+                </DialogHeader>
+                <div className="space-y-3">
+                  <div className="space-y-1.5">
+                    <Label>ক্যাটাগরি / ভূমিকা</Label>
+                    <Select value={approveRole} onValueChange={(v) => setApproveRole(v as AppRole)}>
+                      <SelectTrigger><SelectValue /></SelectTrigger>
+                      <SelectContent>
+                        {ASSIGNABLE.map((r) => (
+                          <SelectItem key={r} value={r}>{roleLabel(r)}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="space-y-1.5">
+                    <Label>সদস্য নির্বাচন (ঐচ্ছিক)</Label>
+                    <Select
+                      value={approveMemberId}
+                      onValueChange={(v) => {
+                        setApproveMemberId(v);
+                        if (v !== "none") {
+                          const m = samiti.data.members.find((x) => x.id === v);
+                          if (m && !approveName) setApproveName(m.name);
+                        }
+                      }}
+                    >
+                      <SelectTrigger><SelectValue placeholder="সদস্য সিলেক্ট করুন" /></SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="none">— কোনো সদস্য সংযুক্ত নয় —</SelectItem>
+                        {samiti.data.members.map((m) => (
+                          <SelectItem key={m.id} value={m.id}>
+                            #{m.serial} — {m.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="space-y-1.5">
+                    <Label>প্রদর্শিত নাম</Label>
+                    <Input
+                      value={approveName}
+                      onChange={(e) => setApproveName(e.target.value)}
+                      placeholder="পুরো নাম"
+                    />
+                  </div>
+                </div>
+                <DialogFooter>
+                  <Button variant="outline" onClick={() => setApproveTarget(null)}>বাতিল</Button>
+                  <Button
+                    onClick={submitApprove}
+                    disabled={!!approveTarget && statusBusyId === approveTarget.user_id}
+                  >
+                    {approveTarget && statusBusyId === approveTarget.user_id ? (
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                    ) : (
+                      <><Check className="h-3.5 w-3.5 mr-1" />অনুমোদন করুন</>
+                    )}
+                  </Button>
+                </DialogFooter>
+              </DialogContent>
+            </Dialog>
           </TabsContent>
 
 
