@@ -8,7 +8,8 @@
 
 @font-face {
   font-family: 'BNNum';
-  src: local('Noto Sans Bengali');
+  src: local('Tiro Bangla'), url('https://fonts.gstatic.com/s/tirobangla/v6/IFSgHe1Tm95E3O8b5i2V8MG9-UPeuz4i.woff2') format('woff2');
+  font-weight: 400 700;
   unicode-range: U+0030-0039, U+09E6-09EF;
 }
 
