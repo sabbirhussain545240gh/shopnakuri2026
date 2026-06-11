@@ -1,8 +1,35 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
+import type { AppRole } from "@/lib/roles.functions";
 
 const INVITE_TTL_HOURS = 48;
+const ROLE_VALUES: AppRole[] = ["admin", "treasurer", "president", "secretary", "member"];
+
+function normalizePhone(input: string) {
+  const compact = input.replace(/[\s().-]/g, "");
+  if (compact.startsWith("+")) return compact;
+  if (compact.startsWith("880")) return `+${compact}`;
+  if (compact.startsWith("01")) return `+880${compact.slice(1)}`;
+  return compact;
+}
+
+async function findUserByIdentifier(identifier: string) {
+  const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+  const needle = identifier.toLowerCase();
+  for (let page = 1; page <= 10; page++) {
+    const { data, error } = await supabaseAdmin.auth.admin.listUsers({ page, perPage: 200 });
+    if (error) throw new Error(error.message);
+    const hit = data.users.find((u) => {
+      const email = (u.email ?? "").toLowerCase();
+      const phone = normalizePhone(u.phone ?? "");
+      return email === needle || phone === identifier;
+    });
+    if (hit) return hit.id;
+    if (data.users.length < 200) break;
+  }
+  return null;
+}
 
 async function assertAdmin(userId: string) {
   const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
@@ -90,6 +117,53 @@ export const inviteUser = createServerFn({ method: "POST" })
     if (insErr) throw new Error(insErr.message);
 
     return { ok: true, userId: invited.user?.id ?? null, expiresAt };
+  });
+
+export const createManagedUser = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: { identifier: string; password: string; role: AppRole }) =>
+    z
+      .object({
+        identifier: z.string().trim().min(3).max(255),
+        password: z.string().min(6).max(72),
+        role: z.enum(ROLE_VALUES as [AppRole, ...AppRole[]]),
+      })
+      .parse(d),
+  )
+  .handler(async ({ data, context }) => {
+    await assertAdmin(context.userId);
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+
+    const rawIdentifier = data.identifier.trim();
+    const emailCheck = z.string().email().safeParse(rawIdentifier.toLowerCase());
+    const isEmail = emailCheck.success;
+    const identifier = isEmail ? emailCheck.data : normalizePhone(rawIdentifier);
+    if (!isEmail && !/^\+[1-9]\d{7,14}$/.test(identifier)) {
+      throw new Error("মোবাইল নম্বরটি আন্তর্জাতিক ফরম্যাটে দিন, যেমন +8801XXXXXXXXX");
+    }
+
+    let userId = await findUserByIdentifier(identifier);
+    let created = false;
+
+    if (!userId) {
+      const { data: createdUser, error } = await supabaseAdmin.auth.admin.createUser({
+        ...(isEmail ? { email: identifier, email_confirm: true } : { phone: identifier, phone_confirm: true }),
+        password: data.password,
+      });
+      if (error) throw new Error(error.message);
+      userId = createdUser.user?.id ?? null;
+      created = true;
+    }
+
+    if (!userId) throw new Error("ইউজার তৈরি করা যায়নি");
+    const { error: roleError } = await supabaseAdmin
+      .from("user_roles")
+      .insert({ user_id: userId, role: data.role });
+    if (roleError && !roleError.message.toLowerCase().includes("duplicate")) {
+      throw new Error(roleError.message);
+    }
+
+    return { ok: true, created, userId, identifier };
   });
 
 export const listInvites = createServerFn({ method: "GET" })

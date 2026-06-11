@@ -14,7 +14,7 @@ import {
 } from "@/components/ui/table";
 import {
   Loader2, Trash2, ShieldCheck, UserPlus, Mail, X, Crown, Users as UsersIcon,
-  Search, ChevronLeft, ChevronRight, RefreshCw,
+  Search, ChevronLeft, ChevronRight, RefreshCw, KeyRound,
 } from "lucide-react";
 import { toast } from "sonner";
 import {
@@ -27,6 +27,7 @@ import {
 import {
   getRoleInfo,
   bootstrapAdmin,
+  createManagedUser,
   inviteUser,
   listInvites,
   revokeInvite,
@@ -72,6 +73,7 @@ export function RoleManager() {
   const fetchInvites = useServerFn(listInvites);
   const cancelInvite = useServerFn(revokeInvite);
   const fetchUsers = useServerFn(listUsersWithRoles);
+  const createUser = useServerFn(createManagedUser);
 
   const [info, setInfo] = useState<{ isAdmin: boolean; adminCount: number } | null>(null);
   const [claiming, setClaiming] = useState(false);
@@ -102,6 +104,11 @@ export function RoleManager() {
   const [pageSize, setPageSize] = useState(10);
   const [quickRole, setQuickRole] = useState<AppRole>("member");
   const [assigningUserId, setAssigningUserId] = useState<string | null>(null);
+
+  const [accountIdentifier, setAccountIdentifier] = useState("");
+  const [accountPassword, setAccountPassword] = useState("");
+  const [accountRole, setAccountRole] = useState<AppRole>("member");
+  const [creatingAccount, setCreatingAccount] = useState(false);
 
   const refreshInfo = async () => {
     try { setInfo(await fetchInfo()); }
@@ -218,6 +225,27 @@ export function RoleManager() {
     } finally { setRemovingId(null); }
   };
 
+  const onCreateAccount = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!accountIdentifier.trim() || !accountPassword) return;
+    setCreatingAccount(true);
+    try {
+      const res = await createUser({
+        data: {
+          identifier: accountIdentifier.trim(),
+          password: accountPassword,
+          role: accountRole,
+        },
+      });
+      toast.success(res.created ? "নতুন অ্যাকাউন্ট তৈরি হয়েছে" : "আগের অ্যাকাউন্টে ভূমিকা যোগ হয়েছে");
+      setAccountIdentifier("");
+      setAccountPassword("");
+      await Promise.all([loadRoles(), loadUsers()]);
+    } catch (err: any) {
+      toast.error(err?.message ?? "অ্যাকাউন্ট তৈরি করা যায়নি");
+    } finally { setCreatingAccount(false); }
+  };
+
   const onInvite = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!invEmail.trim()) return;
@@ -311,6 +339,47 @@ export function RoleManager() {
 
           {/* ===== Users ===== */}
           <TabsContent value="users" className="space-y-4 pt-4">
+            <form onSubmit={onCreateAccount} className="rounded-md border bg-muted/30 p-3">
+              <div className="grid gap-3 sm:grid-cols-[1fr_180px_160px_auto] sm:items-end">
+                <div className="space-y-1.5">
+                  <Label htmlFor="managed-identifier">মোবাইল / ইমেইল</Label>
+                  <Input
+                    id="managed-identifier"
+                    value={accountIdentifier}
+                    onChange={(e) => setAccountIdentifier(e.target.value)}
+                    placeholder="user@example.com বা +8801XXXXXXXXX"
+                    required
+                  />
+                </div>
+                <div className="space-y-1.5">
+                  <Label htmlFor="managed-password">পাসওয়ার্ড</Label>
+                  <Input
+                    id="managed-password"
+                    type="password"
+                    value={accountPassword}
+                    onChange={(e) => setAccountPassword(e.target.value)}
+                    minLength={6}
+                    required
+                  />
+                </div>
+                <div className="space-y-1.5">
+                  <Label>ভূমিকা</Label>
+                  <Select value={accountRole} onValueChange={(v) => setAccountRole(v as AppRole)}>
+                    <SelectTrigger><SelectValue /></SelectTrigger>
+                    <SelectContent>
+                      {ASSIGNABLE.map((r) => (
+                        <SelectItem key={r} value={r}>{roleLabel(r)}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <Button type="submit" disabled={creatingAccount}>
+                  {creatingAccount ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <KeyRound className="mr-2 h-4 w-4" />}
+                  অ্যাকাউন্ট তৈরি
+                </Button>
+              </div>
+            </form>
+
             <div className="grid gap-3 sm:grid-cols-[1fr_180px_180px_auto] sm:items-end">
               <div className="space-y-1.5">
                 <Label htmlFor="user-search">সার্চ</Label>
