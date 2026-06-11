@@ -2841,6 +2841,8 @@ function SettingsTab() {
   const [rate, setRate] = useState(String(data.settings.defaultInterestRate));
   const [dur, setDur] = useState(String(data.settings.defaultDurationMonths));
   const [notice, setNotice] = useState(data.settings.notice || "");
+  const [goals, setGoals] = useState<Goal[]>(data.settings.goals && data.settings.goals.length > 0 ? data.settings.goals : DEFAULT_GOALS);
+  const [quotes, setQuotes] = useState<Quote[]>(data.settings.quotes && data.settings.quotes.length > 0 ? data.settings.quotes : DEFAULT_QUOTES);
   const [confirmReset, setConfirmReset] = useState(false);
 
   const onLogo = (file?: File) => {
