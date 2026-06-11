@@ -137,10 +137,10 @@ export function AuthGate({ children }: { children: (session: Session) => ReactNo
   }
 
   if (!session) {
-    if (!showLogin) {
-      return <IntroSplash onEnter={() => setShowLogin(true)} />;
-    }
-    return (
+    const splashEnabled = (state => state)(undefined); // noop guard
+    // Read settings to know whether to show splash
+    return <UnauthedView showLogin={showLogin} setShowLogin={setShowLogin} email={email} setEmail={setEmail} password={password} setPassword={setPassword} emailError={emailError} setEmailError={setEmailError} passwordError={passwordError} emailRegex={emailRegex} submitting={submitting} handleSubmit={handleSubmit} />;
+  }
       <div className="flex min-h-screen items-center justify-center bg-muted/30 px-4">
         <Card className="w-full max-w-md">
           <CardHeader className="text-center">
