@@ -27,6 +27,27 @@ import { AuthGate, SignOutButton, CloudStatusBadge } from "@/components/AuthGate
 import { buildReceiptQr, type VerifyPayload } from "@/lib/receipt-qr";
 import { useMyRoles, allowedTabs, roleLabel, type TabKey } from "@/lib/permissions";
 import { RoleManager } from "@/components/RoleManager";
+import { useServerFn } from "@tanstack/react-start";
+import { listPendingAccounts } from "@/lib/approval.functions";
+
+function usePendingApprovalCount(isAdmin: boolean) {
+  const fetchPending = useServerFn(listPendingAccounts);
+  const [count, setCount] = useState(0);
+  useEffect(() => {
+    if (!isAdmin) { setCount(0); return; }
+    let cancelled = false;
+    const tick = async () => {
+      try {
+        const r = await fetchPending();
+        if (!cancelled) setCount((r.profiles ?? []).filter((p: any) => p.status === "pending").length);
+      } catch { /* ignore */ }
+    };
+    tick();
+    const id = setInterval(tick, 20000);
+    return () => { cancelled = true; clearInterval(id); };
+  }, [isAdmin, fetchPending]);
+  return count;
+}
 
 function ReceiptQrPreview({ payload }: { payload: VerifyPayload }) {
   const [src, setSrc] = useState<string>("");
@@ -131,6 +152,8 @@ function SamitiApp() {
     }
   }, [allowed, rolesLoading, tab]);
   const [mobileOpen, setMobileOpen] = useState(false);
+  const isAdmin = roles.includes("admin");
+  const pendingApprovals = usePendingApprovalCount(isAdmin);
   const myRoleLabel = roles.length > 0 ? roles.map(roleLabel).join(", ") : "";
 
   const totals = useMemo(() => {
@@ -181,7 +204,12 @@ function SamitiApp() {
                 )}
               >
                 <Icon className="h-5 w-5 shrink-0" />
-                {item.label}
+                <span className="flex-1 text-left">{item.label}</span>
+                {item.value === "admin" && pendingApprovals > 0 && (
+                  <span className="inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-destructive px-1.5 text-[10px] font-semibold text-destructive-foreground">
+                    {pendingApprovals}
+                  </span>
+                )}
               </button>
             );
           })}
@@ -216,8 +244,13 @@ function SamitiApp() {
 
           <div className="flex items-center gap-2">
             <CloudStatusBadge />
-            <Button variant="ghost" size="icon" onClick={() => setMobileOpen((o) => !o)}>
+            <Button variant="ghost" size="icon" onClick={() => setMobileOpen((o) => !o)} className="relative">
               <Menu className="h-5 w-5" />
+              {pendingApprovals > 0 && (
+                <span className="absolute -top-1 -right-1 inline-flex h-4 min-w-4 items-center justify-center rounded-full bg-destructive px-1 text-[10px] font-semibold text-destructive-foreground">
+                  {pendingApprovals}
+                </span>
+              )}
             </Button>
           </div>
 
@@ -239,7 +272,12 @@ function SamitiApp() {
                   )}
                 >
                   <Icon className="h-5 w-5 shrink-0" />
-                  {item.label}
+                  <span className="flex-1 text-left">{item.label}</span>
+                  {item.value === "admin" && pendingApprovals > 0 && (
+                    <span className="inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-destructive px-1.5 text-[10px] font-semibold text-destructive-foreground">
+                      {pendingApprovals}
+                    </span>
+                  )}
                 </button>
               );
             })}
