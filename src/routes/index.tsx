@@ -230,7 +230,7 @@ function SamitiApp() {
           {data.samitiLogo ? (
             <img src={data.samitiLogo} alt="logo" className="h-10 w-10 rounded-xl object-cover ring-1 ring-border shadow-sm shrink-0 bg-white" />
           ) : (
-            <div className="h-10 w-10 rounded-xl bg-primary text-primary-foreground flex items-center justify-center font-display font-bold text-xl shadow-sm shrink-0">স</div>
+            <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-emerald-500 via-teal-400 to-amber-400 text-white flex items-center justify-center font-display font-bold text-xl shadow-sm shrink-0">স</div>
           )}
           <div className="min-w-0">
             <h1 className="text-base font-bold text-foreground leading-tight truncate">{data.samitiName}</h1>
