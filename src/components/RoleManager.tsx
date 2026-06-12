@@ -350,6 +350,12 @@ export function RoleManager() {
         },
       });
       toast.success(res.created ? "নতুন অ্যাকাউন্ট তৈরি হয়েছে" : "আগের অ্যাকাউন্টে ভূমিকা যোগ হয়েছে");
+      setLastCreated({
+        role: accountRole,
+        name: displayName || accountIdentifier.trim(),
+        memberSerial: selectedMember ? selectedMember.serial : null,
+        identifier: accountIdentifier.trim(),
+      });
       setAccountIdentifier("");
       setAccountPassword("");
       setAccountMemberId("none");
