@@ -25,7 +25,7 @@ import { Users, PiggyBank, HandCoins, LayoutDashboard, Trash2, Plus, CheckCircle
 import { toast } from "sonner";
 import { AuthGate, SignOutButton, CloudStatusBadge } from "@/components/AuthGate";
 import { makeQrDataUrl } from "@/lib/receipt-qr";
-import { useMyRoles, allowedTabs, roleLabel, canWrite, type TabKey } from "@/lib/permissions";
+import { useMyRoles, allowedTabs, roleLabel, roleBadgeClass, canWrite, type TabKey } from "@/lib/permissions";
 import { RoleManager } from "@/components/RoleManager";
 import { NotificationBell } from "@/components/NotificationBell";
 import { MemberPortal } from "@/components/MemberPortal";
@@ -182,7 +182,7 @@ function SamitiApp() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const isAdmin = roles.includes("admin");
   const pendingApprovals = usePendingApprovalCount(isAdmin);
-  const myRoleLabel = roles.length > 0 ? roles.map(roleLabel).join(", ") : "";
+  
 
   const totals = useMemo(() => {
     const totalDeposit = data.deposits.reduce((a, d) => a + d.amount, 0);
@@ -243,9 +243,13 @@ function SamitiApp() {
           })}
         </nav>
         <div className="p-3 border-t space-y-2">
-          {myRoleLabel && (
-            <div className="text-[11px] text-center text-muted-foreground truncate" title={myRoleLabel}>
-              ভূমিকা: <span className="font-medium text-foreground">{myRoleLabel}</span>
+          {roles.length > 0 && (
+            <div className="flex flex-wrap justify-center gap-1">
+              {roles.map((r) => (
+                <Badge key={r} variant="outline" className={`text-[11px] px-1.5 py-0.5 ${roleBadgeClass(r)}`}>
+                  {roleLabel(r)}
+                </Badge>
+              ))}
             </div>
           )}
           <div className="flex items-center justify-center gap-2"><CloudStatusBadge /><NotificationBell /></div>
@@ -311,9 +315,13 @@ function SamitiApp() {
                 </button>
               );
             })}
-            {myRoleLabel && (
-              <div className="pt-2 text-[11px] text-center text-muted-foreground">
-                ভূমিকা: <span className="font-medium text-foreground">{myRoleLabel}</span>
+            {roles.length > 0 && (
+              <div className="pt-2 flex flex-wrap justify-center gap-1">
+                {roles.map((r) => (
+                  <Badge key={r} variant="outline" className={`text-[11px] px-1.5 py-0.5 ${roleBadgeClass(r)}`}>
+                    {roleLabel(r)}
+                  </Badge>
+                ))}
               </div>
             )}
           </div>
