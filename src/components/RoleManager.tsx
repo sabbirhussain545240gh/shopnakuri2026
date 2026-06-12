@@ -737,11 +737,11 @@ export function RoleManager() {
                 </TableHeader>
                 <TableBody>
                   {loadingUsers ? (
-                    <TableRow><TableCell colSpan={5} className="text-center py-8">
+                    <TableRow><TableCell colSpan={6} className="text-center py-8">
                       <Loader2 className="h-5 w-5 animate-spin text-muted-foreground inline" />
                     </TableCell></TableRow>
                   ) : pageUsers.length === 0 ? (
-                    <TableRow><TableCell colSpan={5} className="text-center py-8 text-sm text-muted-foreground">
+                    <TableRow><TableCell colSpan={6} className="text-center py-8 text-sm text-muted-foreground">
                       কোনো ইউজার পাওয়া যায়নি
                     </TableCell></TableRow>
                   ) : pageUsers.map((u) => {
