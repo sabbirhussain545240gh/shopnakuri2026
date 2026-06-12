@@ -218,7 +218,8 @@ function SamitiApp() {
     const totalExpense = data.transactions.filter((t) => t.type === "expense").reduce((a, t) => a + t.amount, 0);
     const cashInHand = totalDeposit - totalLoanGiven + totalRepaid + totalIncome - totalExpense;
     const totalLoanIncome = data.loans.reduce((a, l) => a + (loanTotalDue(l) - l.amount), 0);
-    return { totalDeposit, totalLoanGiven, totalRepaid, activeLoans, outstanding, totalIncome, totalExpense, cashInHand, totalLoanIncome };
+    const closedLoanIncome = data.loans.filter((l) => l.status === "closed").reduce((a, l) => a + (loanTotalDue(l) - l.amount), 0);
+    return { totalDeposit, totalLoanGiven, totalRepaid, activeLoans, outstanding, totalIncome, totalExpense, cashInHand, totalLoanIncome, closedLoanIncome };
   }, [data]);
 
   return (
