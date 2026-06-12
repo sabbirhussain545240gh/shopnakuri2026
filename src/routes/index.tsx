@@ -217,7 +217,8 @@ function SamitiApp() {
     const totalIncome = data.transactions.filter((t) => t.type === "income").reduce((a, t) => a + t.amount, 0);
     const totalExpense = data.transactions.filter((t) => t.type === "expense").reduce((a, t) => a + t.amount, 0);
     const cashInHand = totalDeposit - totalLoanGiven + totalRepaid + totalIncome - totalExpense;
-    return { totalDeposit, totalLoanGiven, totalRepaid, activeLoans, outstanding, totalIncome, totalExpense, cashInHand };
+    const totalLoanIncome = data.loans.reduce((a, l) => a + (loanTotalDue(l) - l.amount), 0);
+    return { totalDeposit, totalLoanGiven, totalRepaid, activeLoans, outstanding, totalIncome, totalExpense, cashInHand, totalLoanIncome };
   }, [data]);
 
   return (
@@ -585,11 +586,12 @@ function Dashboard({ totals, memberCount, data, onNavigate }: any) {
       {/* Loans */}
       <div>
         <h2 className="text-xs sm:text-sm font-semibold text-muted-foreground uppercase tracking-wide mb-3">ঋণ কার্যক্রম</h2>
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+        <div className="grid grid-cols-2 lg:grid-cols-5 gap-3 sm:gap-4">
           <StatCard delay={340} label="মোট ঋণ প্রদান" value={formatTk(totals.totalLoanGiven)} accent="bg-warning" icon={HandCoins} hint={`${toBn(data.loans.length)}টি ঋণ`} rightHint={`${toBn(closedLoanCount)}টি ঋণ শেষ`} />
           <StatCard delay={400} label="মোট ঋণ আদায়" value={formatTk(totals.totalRepaid)} accent="bg-chart-2" icon={Receipt} hint={`${toBn(data.payments.length)}টি কিস্তি`} />
-          <StatCard delay={460} label="অন্যান্য আয়" value={formatTk(totals.totalIncome)} accent="bg-success" icon={TrendingUp} />
-          <StatCard delay={520} label="অন্যান্য ব্যয়" value={formatTk(totals.totalExpense)} accent="bg-destructive" icon={TrendingDown} />
+          <StatCard delay={460} label="ঋণ থেকে আয়" value={formatTk(totals.totalLoanIncome)} accent="bg-chart-3" icon={Banknote} hint="মোট সুদ আয়" />
+          <StatCard delay={520} label="অন্যান্য আয়" value={formatTk(totals.totalIncome)} accent="bg-success" icon={TrendingUp} />
+          <StatCard delay={580} label="অন্যান্য ব্যয়" value={formatTk(totals.totalExpense)} accent="bg-destructive" icon={TrendingDown} />
         </div>
       </div>
 
