@@ -392,7 +392,7 @@ function EditSamitiName({ name, onSave }: { name: string; onSave: (n: string) =>
   );
 }
 
-function StatCard({ label, value, accent, icon: Icon, hint, delay = 0 }: { label: string; value: string; accent?: string; icon?: any; hint?: string; delay?: number }) {
+function StatCard({ label, value, accent, icon: Icon, hint, rightHint, delay = 0 }: { label: string; value: string; accent?: string; icon?: any; hint?: string; rightHint?: string; delay?: number }) {
   return (
     <Card
       className="overflow-hidden relative group transition-all duration-300 ease-out hover:-translate-y-1 hover:shadow-xl animate-in fade-in slide-in-from-bottom-2"
@@ -409,7 +409,12 @@ function StatCard({ label, value, accent, icon: Icon, hint, delay = 0 }: { label
           )}
         </div>
         <p className="text-2xl md:text-3xl font-bold mt-2 text-foreground tracking-tight tabular-nums">{value}</p>
-        {hint && <p className="text-xs text-muted-foreground mt-1">{hint}</p>}
+        {(hint || rightHint) && (
+          <div className="flex items-center justify-between gap-2 mt-1">
+            {hint && <p className="text-xs text-muted-foreground">{hint}</p>}
+            {rightHint && <p className="text-xs font-medium text-success">{rightHint}</p>}
+          </div>
+        )}
       </CardContent>
     </Card>
   );
