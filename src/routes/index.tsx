@@ -590,7 +590,7 @@ function Dashboard({ totals, memberCount, data, onNavigate }: any) {
         <div className="grid grid-cols-2 lg:grid-cols-5 gap-3 sm:gap-4">
           <StatCard delay={340} label="মোট ঋণ প্রদান" value={formatTk(totals.totalLoanGiven)} accent="bg-warning" icon={HandCoins} hint={`${toBn(data.loans.length)}টি ঋণ`} rightHint={`${toBn(closedLoanCount)}টি ঋণ শেষ`} />
           <StatCard delay={400} label="মোট ঋণ আদায়" value={formatTk(totals.totalRepaid)} accent="bg-chart-2" icon={Receipt} hint={`${toBn(data.payments.length)}টি কিস্তি`} />
-          <StatCard delay={460} label="ঋণ থেকে আয়" value={formatTk(totals.totalLoanIncome)} accent="bg-chart-3" icon={Banknote} hint="মোট সুদ আয়" />
+          <StatCard delay={460} label="ঋণ থেকে আয়" value={formatTk(totals.closedLoanIncome)} accent="bg-chart-3" icon={Banknote} hint="শেষ হওয়া ঋণের সুদ আয়" />
           <StatCard delay={520} label="অন্যান্য আয়" value={formatTk(totals.totalIncome)} accent="bg-success" icon={TrendingUp} />
           <StatCard delay={580} label="অন্যান্য ব্যয়" value={formatTk(totals.totalExpense)} accent="bg-destructive" icon={TrendingDown} />
         </div>
