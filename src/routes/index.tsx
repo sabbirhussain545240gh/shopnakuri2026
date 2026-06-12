@@ -130,6 +130,15 @@ const fmtMonthYearBn = (s: string) => {
   const [y, m] = s.split("-");
   return `${bnMonths[+m - 1] || m} ${toBnDigits(y)}`;
 };
+function buildQrText(fields: { memberName: string; memberSerial?: number; loanNo?: number; date: string; amount: number }) {
+  const lines: string[] = [`সদস্য: ${fields.memberName}`];
+  if (fields.memberSerial) lines.push(`সদস্য নং: ${toBn(fields.memberSerial)}`);
+  if (fields.loanNo) lines.push(`ঋণ নং: ${toBn(fields.loanNo)}`);
+  const [y, m, d] = fields.date.split("-");
+  if (y && m && d) lines.push(`জমার তারিখ: ${toBn(d)} ${bnMonths[+m - 1] || m} ${toBn(y)}`);
+  lines.push(`জমার পরিমাণ: ${formatTk(fields.amount)}`);
+  return lines.join("\n");
+}
 const addMonths = (s: string, n: number) => {
   if (!s) return "";
   const [y, m, d] = s.split("-").map(Number);
