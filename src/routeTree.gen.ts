@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as WelcomeRouteImport } from './routes/welcome'
 import { Route as VerifyRouteImport } from './routes/verify'
+import { Route as IntroRouteImport } from './routes/intro'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as ApiPublicRegisterRouteImport } from './routes/api/public/register'
 
@@ -22,6 +23,11 @@ const WelcomeRoute = WelcomeRouteImport.update({
 const VerifyRoute = VerifyRouteImport.update({
   id: '/verify',
   path: '/verify',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const IntroRoute = IntroRouteImport.update({
+  id: '/intro',
+  path: '/intro',
   getParentRoute: () => rootRouteImport,
 } as any)
 const IndexRoute = IndexRouteImport.update({
@@ -37,12 +43,14 @@ const ApiPublicRegisterRoute = ApiPublicRegisterRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/intro': typeof IntroRoute
   '/verify': typeof VerifyRoute
   '/welcome': typeof WelcomeRoute
   '/api/public/register': typeof ApiPublicRegisterRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/intro': typeof IntroRoute
   '/verify': typeof VerifyRoute
   '/welcome': typeof WelcomeRoute
   '/api/public/register': typeof ApiPublicRegisterRoute
@@ -50,20 +58,28 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/intro': typeof IntroRoute
   '/verify': typeof VerifyRoute
   '/welcome': typeof WelcomeRoute
   '/api/public/register': typeof ApiPublicRegisterRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/verify' | '/welcome' | '/api/public/register'
+  fullPaths: '/' | '/intro' | '/verify' | '/welcome' | '/api/public/register'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/verify' | '/welcome' | '/api/public/register'
-  id: '__root__' | '/' | '/verify' | '/welcome' | '/api/public/register'
+  to: '/' | '/intro' | '/verify' | '/welcome' | '/api/public/register'
+  id:
+    | '__root__'
+    | '/'
+    | '/intro'
+    | '/verify'
+    | '/welcome'
+    | '/api/public/register'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  IntroRoute: typeof IntroRoute
   VerifyRoute: typeof VerifyRoute
   WelcomeRoute: typeof WelcomeRoute
   ApiPublicRegisterRoute: typeof ApiPublicRegisterRoute
@@ -85,6 +101,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof VerifyRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/intro': {
+      id: '/intro'
+      path: '/intro'
+      fullPath: '/intro'
+      preLoaderRoute: typeof IntroRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
@@ -104,6 +127,7 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  IntroRoute: IntroRoute,
   VerifyRoute: VerifyRoute,
   WelcomeRoute: WelcomeRoute,
   ApiPublicRegisterRoute: ApiPublicRegisterRoute,
