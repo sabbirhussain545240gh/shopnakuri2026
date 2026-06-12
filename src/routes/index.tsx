@@ -430,6 +430,7 @@ function Dashboard({ totals, memberCount, data, onNavigate }: any) {
   const memberById = new Map(data.members.map((m: Member) => [m.id, m]));
   const loanById = new Map(data.loans.map((l: Loan) => [l.id, l]));
   const activeLoanCount = data.loans.filter((l: Loan) => l.status === "active").length;
+  const closedLoanCount = data.loans.filter((l: Loan) => l.status === "closed").length;
   const netSurplus = totals.cashInHand;
 
   return (
