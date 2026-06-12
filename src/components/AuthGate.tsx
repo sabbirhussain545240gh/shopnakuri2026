@@ -305,13 +305,13 @@ export function CloudStatusBadge() {
   );
 }
 
-function IntroSplash({ onEnter, onSkipIfDisabled }: { onEnter: () => void; onSkipIfDisabled?: () => void }) {
+export function IntroSplash({ onEnter, onSkipIfDisabled, enterLabel, forceShow }: { onEnter: () => void; onSkipIfDisabled?: () => void; enterLabel?: string; forceShow?: boolean }) {
   const { data } = useSamiti();
   const s = data.settings;
-  const enabled = s.splashEnabled !== false;
+  const enabled = forceShow || s.splashEnabled !== false;
   useEffect(() => {
-    if (!enabled && onSkipIfDisabled) onSkipIfDisabled();
-  }, [enabled, onSkipIfDisabled]);
+    if (!forceShow && !enabled && onSkipIfDisabled) onSkipIfDisabled();
+  }, [enabled, onSkipIfDisabled, forceShow]);
   if (!enabled) return null;
   const quotes = (s.quotes && s.quotes.length > 0) ? s.quotes : DEFAULT_QUOTES;
   const goals = (s.goals && s.goals.length > 0) ? s.goals : DEFAULT_GOALS;
@@ -430,7 +430,7 @@ function IntroSplash({ onEnter, onSkipIfDisabled }: { onEnter: () => void; onSki
 
         <div className="mt-10 text-center">
           <Button size="lg" onClick={onEnter} className="px-8">
-            লগইন করে প্রবেশ করুন
+            {enterLabel || "লগইন করে প্রবেশ করুন"}
           </Button>
           <p className="mt-3 text-xs text-muted-foreground">
             {footer}

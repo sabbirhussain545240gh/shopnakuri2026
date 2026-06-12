@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useMemo, useState, useEffect, useRef } from "react";
 import html2canvas from "html2canvas";
 import * as XLSX from "xlsx";
@@ -626,38 +626,24 @@ function Dashboard({ totals, memberCount, data, onNavigate }: any) {
         </Card>
       </div>
 
-      {/* Committee */}
-      {data.settings.messages && data.settings.messages.filter((m: Message) => m.name || m.role).length > 0 && (
-        <div className="animate-in fade-in slide-in-from-bottom-2 duration-500" style={{ animationDelay: "640ms", animationFillMode: "both" }}>
-          <h2 className="text-xs sm:text-sm font-semibold text-muted-foreground uppercase tracking-wide mb-3">
-            {data.settings.messagesSectionTitle || "বর্তমান কমিটি"}
-          </h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            {data.settings.messages
-              .filter((m: Message) => m.name || m.role)
-              .map((m: Message, i: number) => (
-                <Card key={i} className="overflow-hidden transition-all duration-300 hover:-translate-y-1 hover:shadow-lg">
-                  <CardContent className="p-4 flex items-start gap-4">
-                    {m.photo ? (
-                      <img src={m.photo} alt={m.name} className="h-16 w-16 rounded-xl object-cover ring-1 ring-border shadow-sm shrink-0" />
-                    ) : (
-                      <div className="h-16 w-16 rounded-xl bg-primary/10 text-primary flex items-center justify-center font-display font-bold text-xl shrink-0 ring-1 ring-border">
-                        {m.name ? m.name.charAt(0) : "ক"}
-                      </div>
-                    )}
-                    <div className="min-w-0 flex-1">
-                      <p className="text-xs font-semibold text-primary uppercase tracking-wide">{m.role}</p>
-                      <p className="text-sm font-bold text-foreground mt-0.5 truncate">{m.name}</p>
-                      {m.message && (
-                        <p className="text-xs text-muted-foreground mt-1.5 leading-relaxed line-clamp-3">{m.message}</p>
-                      )}
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
-          </div>
-        </div>
-      )}
+      {/* Intro page button */}
+      <div className="animate-in fade-in slide-in-from-bottom-2 duration-500" style={{ animationDelay: "640ms", animationFillMode: "both" }}>
+        <Link to="/intro" className="block">
+          <Card className="overflow-hidden transition-all duration-300 hover:-translate-y-0.5 hover:shadow-lg border-l-4 border-l-primary bg-gradient-to-r from-primary/5 via-background to-background">
+            <CardContent className="p-4 sm:p-5 flex items-center gap-4">
+              <div className="h-12 w-12 rounded-xl bg-primary/10 text-primary flex items-center justify-center shrink-0">
+                <Users className="h-6 w-6" />
+              </div>
+              <div className="min-w-0 flex-1">
+                <p className="text-sm sm:text-base font-bold text-foreground">পরিচিতি ও বর্তমান কমিটি</p>
+                <p className="text-xs sm:text-sm text-muted-foreground mt-0.5">সমিতির লক্ষ্য, বাণী ও কমিটি সদস্যদের তথ্য দেখুন</p>
+              </div>
+              <ArrowRight className="h-5 w-5 text-muted-foreground shrink-0" />
+            </CardContent>
+          </Card>
+        </Link>
+      </div>
+
     </div>
   );
 }
