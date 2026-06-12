@@ -392,7 +392,7 @@ function EditSamitiName({ name, onSave }: { name: string; onSave: (n: string) =>
   );
 }
 
-function StatCard({ label, value, accent, icon: Icon, hint, delay = 0 }: { label: string; value: string; accent?: string; icon?: any; hint?: string; delay?: number }) {
+function StatCard({ label, value, accent, icon: Icon, hint, rightHint, delay = 0 }: { label: string; value: string; accent?: string; icon?: any; hint?: string; rightHint?: string; delay?: number }) {
   return (
     <Card
       className="overflow-hidden relative group transition-all duration-300 ease-out hover:-translate-y-1 hover:shadow-xl animate-in fade-in slide-in-from-bottom-2"
@@ -409,7 +409,12 @@ function StatCard({ label, value, accent, icon: Icon, hint, delay = 0 }: { label
           )}
         </div>
         <p className="text-2xl md:text-3xl font-bold mt-2 text-foreground tracking-tight tabular-nums">{value}</p>
-        {hint && <p className="text-xs text-muted-foreground mt-1">{hint}</p>}
+        {(hint || rightHint) && (
+          <div className="flex items-center justify-between gap-2 mt-1">
+            {hint && <p className="text-xs text-muted-foreground">{hint}</p>}
+            {rightHint && <p className="text-xs font-medium text-success">{rightHint}</p>}
+          </div>
+        )}
       </CardContent>
     </Card>
   );
@@ -425,6 +430,7 @@ function Dashboard({ totals, memberCount, data, onNavigate }: any) {
   const memberById = new Map(data.members.map((m: Member) => [m.id, m]));
   const loanById = new Map(data.loans.map((l: Loan) => [l.id, l]));
   const activeLoanCount = data.loans.filter((l: Loan) => l.status === "active").length;
+  const closedLoanCount = data.loans.filter((l: Loan) => l.status === "closed").length;
   const netSurplus = totals.cashInHand;
 
   return (
@@ -580,7 +586,7 @@ function Dashboard({ totals, memberCount, data, onNavigate }: any) {
       <div>
         <h2 className="text-xs sm:text-sm font-semibold text-muted-foreground uppercase tracking-wide mb-3">ঋণ কার্যক্রম</h2>
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
-          <StatCard delay={340} label="মোট ঋণ প্রদান" value={formatTk(totals.totalLoanGiven)} accent="bg-warning" icon={HandCoins} hint={`${toBn(data.loans.length)}টি ঋণ`} />
+          <StatCard delay={340} label="মোট ঋণ প্রদান" value={formatTk(totals.totalLoanGiven)} accent="bg-warning" icon={HandCoins} hint={`${toBn(data.loans.length)}টি ঋণ`} rightHint={`${toBn(closedLoanCount)}টি ঋণ শেষ`} />
           <StatCard delay={400} label="মোট ঋণ আদায়" value={formatTk(totals.totalRepaid)} accent="bg-chart-2" icon={Receipt} hint={`${toBn(data.payments.length)}টি কিস্তি`} />
           <StatCard delay={460} label="অন্যান্য আয়" value={formatTk(totals.totalIncome)} accent="bg-success" icon={TrendingUp} />
           <StatCard delay={520} label="অন্যান্য ব্যয়" value={formatTk(totals.totalExpense)} accent="bg-destructive" icon={TrendingDown} />
