@@ -158,6 +158,51 @@ export const assignRoleByEmail = createServerFn({ method: "POST" })
     return { ok: true, userId: foundId };
   });
 
+export const setUserRole = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: { userId: string; role: AppRole }) =>
+    z
+      .object({
+        userId: z.string().uuid(),
+        role: z.enum(ROLE_VALUES as [AppRole, ...AppRole[]]),
+      })
+      .parse(d),
+  )
+  .handler(async ({ data, context }) => {
+    await assertAdmin(context.userId);
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+
+    // Block downgrading the last admin
+    const { data: existing, error: ee } = await supabaseAdmin
+      .from("user_roles")
+      .select("role")
+      .eq("user_id", data.userId);
+    if (ee) throw new Error(ee.message);
+    const wasAdmin = (existing ?? []).some((r: any) => r.role === "admin");
+    if (wasAdmin && data.role !== "admin") {
+      const { count, error: ce } = await supabaseAdmin
+        .from("user_roles")
+        .select("id", { count: "exact", head: true })
+        .eq("role", "admin");
+      if (ce) throw new Error(ce.message);
+      if ((count ?? 0) <= 1) throw new Error("শেষ সুপার এডমিন পরিবর্তন করা যাবে না");
+    }
+
+    // Replace all existing roles with the single new role
+    const { error: delErr } = await supabaseAdmin
+      .from("user_roles")
+      .delete()
+      .eq("user_id", data.userId);
+    if (delErr) throw new Error(delErr.message);
+
+    const { error: insErr } = await supabaseAdmin
+      .from("user_roles")
+      .insert({ user_id: data.userId, role: data.role });
+    if (insErr) throw new Error(insErr.message);
+
+    return { ok: true };
+  });
+
 export const removeRoleAssignment = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d: { id: string }) => z.object({ id: z.string().uuid() }).parse(d))
