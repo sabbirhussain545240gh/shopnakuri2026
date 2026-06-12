@@ -4128,13 +4128,13 @@ function buildReceiptHtml(r: { loan: Loan; memberName: string; amount: number; d
   </div>`;
 }
 
-async function buildInstallmentQr(r: { memberName: string; amount: number; date: string; paidAfter: number; remainingAfter: number; receiptNo: string; loanNo?: number }, samitiName: string): Promise<string> {
-  const { buildReceiptQr } = await import("@/lib/receipt-qr");
-  const { dataUrl } = await buildReceiptQr({
-    t: "installment", s: samitiName, n: r.receiptNo, m: r.memberName,
-    a: r.amount, d: r.date, pa: r.paidAfter, ra: r.remainingAfter, ln: r.loanNo,
+async function buildInstallmentQr(r: { memberName: string; memberSerial?: number; amount: number; date: string; paidAfter: number; remainingAfter: number; receiptNo: string; loanNo?: number }, samitiName: string): Promise<string> {
+  const { makeQrDataUrl } = await import("@/lib/receipt-qr");
+  const text = buildQrText({
+    memberName: r.memberName, memberSerial: r.memberSerial,
+    loanNo: r.loanNo, date: r.date, amount: r.amount,
   });
-  return dataUrl;
+  return makeQrDataUrl(text);
 }
 
 async function renderReceiptCanvas(r: { loan: Loan; memberName: string; amount: number; date: string; paidAfter: number; remainingAfter: number; receiptNo: string; note?: string; logo?: string; loanNo?: number }, samitiName: string): Promise<HTMLCanvasElement> {
