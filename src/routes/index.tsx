@@ -21,7 +21,7 @@ import { Badge } from "@/components/ui/badge";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Textarea } from "@/components/ui/textarea";
-import { Users, PiggyBank, HandCoins, LayoutDashboard, Trash2, Plus, CheckCircle2, Pencil, Settings as SettingsIcon, Wallet, Download, Upload, AlertTriangle, TrendingUp, TrendingDown, Menu, Printer, FileText, Receipt, Search, Eye, Share, ImageDown, Check, ChevronsUpDown, ShieldCheck, Loader2, ArrowRight, Banknote } from "lucide-react";
+import { Users, PiggyBank, HandCoins, LayoutDashboard, Trash2, Plus, CheckCircle2, Pencil, Settings as SettingsIcon, Wallet, Download, Upload, AlertTriangle, TrendingUp, TrendingDown, Menu, Printer, FileText, Receipt, Search, Eye, Share, ImageDown, Check, ChevronsUpDown, ShieldCheck, Loader2, ArrowRight, Banknote, QrCode } from "lucide-react";
 import { toast } from "sonner";
 import { AuthGate, SignOutButton, CloudStatusBadge } from "@/components/AuthGate";
 import { buildReceiptQr, type VerifyPayload } from "@/lib/receipt-qr";
@@ -62,15 +62,25 @@ function ReceiptQrPreview({ payload }: { payload: VerifyPayload }) {
   }, [key]);
   if (!src) return null;
   return (
-    <div className="mt-4 pt-3 border-t border-dashed flex items-center gap-3">
-      <img src={src} alt="QR" className="h-24 w-24" />
-      <div className="text-xs text-muted-foreground leading-relaxed">
-        <div className="text-foreground font-semibold mb-0.5">যাচাই করুন</div>
-        এই QR কোড স্ক্যান করে রিসিপ্টের তথ্য যাচাই করতে পারবেন।
+    <div className="mt-4 p-3 rounded-lg border bg-gradient-to-br from-muted/40 to-background flex items-center gap-3">
+      <div className="relative p-2 bg-white rounded-md shadow-sm">
+        <span className="absolute -top-0.5 -left-0.5 w-3 h-3 border-t-2 border-l-2 border-foreground rounded-tl-sm" />
+        <span className="absolute -top-0.5 -right-0.5 w-3 h-3 border-t-2 border-r-2 border-foreground rounded-tr-sm" />
+        <span className="absolute -bottom-0.5 -left-0.5 w-3 h-3 border-b-2 border-l-2 border-foreground rounded-bl-sm" />
+        <span className="absolute -bottom-0.5 -right-0.5 w-3 h-3 border-b-2 border-r-2 border-foreground rounded-br-sm" />
+        <img src={src} alt="QR" className="h-24 w-24 block" />
+      </div>
+      <div className="text-xs text-muted-foreground leading-relaxed flex-1">
+        <div className="text-foreground font-semibold mb-0.5 flex items-center gap-1.5">
+          <QrCode className="h-3.5 w-3.5" /> যাচাইকৃত ডিজিটাল রিসিপ্ট
+        </div>
+        মোবাইল ক্যামেরা দিয়ে স্ক্যান করে রিসিপ্টের তথ্য তাৎক্ষণিক যাচাই করুন।
+        <div className="inline-block mt-1.5 text-[9px] tracking-wider bg-foreground text-background px-1.5 py-0.5 rounded">SECURE • VERIFY</div>
       </div>
     </div>
   );
 }
+
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -4052,23 +4062,38 @@ const receiptCss = `
   .totals{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px;font-size:13px;}
   .due{color:#b91c1c;font-weight:600;}
   .sign{display:flex;justify-content:space-between;margin-top:32px;font-size:12px;color:#666;}
-  .qr{margin-top:14px;padding-top:10px;border-top:1px dashed #ccc;display:flex;align-items:center;gap:12px;}
-  .qr img{width:110px;height:110px;}
-  .qr .qr-text{font-size:11px;color:#555;line-height:1.5;}
-  .qr .qr-text b{color:#111;font-size:12px;}
+  .qr{margin-top:16px;padding:12px;border:1px solid #e5e7eb;border-radius:10px;display:flex;align-items:center;gap:14px;background:linear-gradient(135deg,#f8fafc 0%,#ffffff 60%);}
+  .qr-frame{position:relative;padding:8px;background:#fff;border-radius:8px;box-shadow:0 1px 3px rgba(15,23,42,0.08);}
+  .qr-frame::before,.qr-frame::after,.qr-frame > .c1,.qr-frame > .c2{content:"";position:absolute;width:14px;height:14px;border:2px solid #0f172a;}
+  .qr-frame::before{top:-2px;left:-2px;border-right:none;border-bottom:none;border-top-left-radius:4px;}
+  .qr-frame::after{top:-2px;right:-2px;border-left:none;border-bottom:none;border-top-right-radius:4px;}
+  .qr-frame .c1{bottom:-2px;left:-2px;border-right:none;border-top:none;border-bottom-left-radius:4px;}
+  .qr-frame .c2{bottom:-2px;right:-2px;border-left:none;border-top:none;border-bottom-right-radius:4px;}
+  .qr-frame img{width:110px;height:110px;display:block;}
+  .qr-info{flex:1;font-size:11px;color:#475569;line-height:1.55;}
+  .qr-info .qr-title{display:inline-flex;align-items:center;gap:6px;color:#0f172a;font-size:12px;font-weight:700;margin-bottom:4px;}
+  .qr-info .qr-badge{display:inline-block;background:#0f172a;color:#fff;font-size:9px;padding:2px 6px;border-radius:3px;letter-spacing:0.5px;margin-top:6px;}
   @media print{body{padding:0;} .no-print{display:none;}}
 `;
 
 const qrBlockHtml = (qrDataUrl?: string) =>
   qrDataUrl
     ? `<div class="qr">
-        <img src="${qrDataUrl}" alt="QR" />
-        <div class="qr-text">
-          <b>যাচাই করুন</b><br/>
-          এই QR কোডটি স্ক্যান করে রিসিপ্টের তথ্য যাচাই করতে পারবেন।
+        <div class="qr-frame">
+          <span class="c1"></span><span class="c2"></span>
+          <img src="${qrDataUrl}" alt="QR" />
+        </div>
+        <div class="qr-info">
+          <div class="qr-title">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><path d="M14 14h3v3h-3zM20 14h1M14 20h3M20 20h1"/></svg>
+            যাচাইকৃত ডিজিটাল রিসিপ্ট
+          </div>
+          মোবাইল ক্যামেরা দিয়ে এই QR কোডটি স্ক্যান করে রিসিপ্টের তথ্য তাৎক্ষণিক যাচাই করুন।
+          <div class="qr-badge">SECURE • VERIFY</div>
         </div>
       </div>`
     : "";
+
 
 function buildReceiptHtml(r: { loan: Loan; memberName: string; amount: number; date: string; paidAfter: number; remainingAfter: number; receiptNo: string; note?: string; logo?: string; loanNo?: number }, samitiName: string, qrDataUrl?: string) {
   return `<div class="r" id="r">
