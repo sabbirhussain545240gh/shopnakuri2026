@@ -51,15 +51,13 @@ function usePendingApprovalCount(isAdmin: boolean) {
   return count;
 }
 
-function ReceiptQrPreview({ payload }: { payload: VerifyPayload }) {
+function ReceiptQrPreview({ text }: { text: string }) {
   const [src, setSrc] = useState<string>("");
-  const key = JSON.stringify(payload);
   useEffect(() => {
     let cancel = false;
-    buildReceiptQr(payload).then(({ dataUrl }) => { if (!cancel) setSrc(dataUrl); });
+    makeQrDataUrl(text).then((dataUrl) => { if (!cancel) setSrc(dataUrl); });
     return () => { cancel = true; };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [key]);
+  }, [text]);
   if (!src) return null;
   return (
     <div className="mt-4 p-3 rounded-lg border bg-gradient-to-br from-muted/40 to-background flex items-center gap-3">
@@ -72,10 +70,9 @@ function ReceiptQrPreview({ payload }: { payload: VerifyPayload }) {
       </div>
       <div className="text-xs text-muted-foreground leading-relaxed flex-1">
         <div className="text-foreground font-semibold mb-0.5 flex items-center gap-1.5">
-          <QrCode className="h-3.5 w-3.5" /> যাচাইকৃত ডিজিটাল রিসিপ্ট
+          <QrCode className="h-3.5 w-3.5" /> ডিজিটাল রিসিপ্ট
         </div>
-        মোবাইল ক্যামেরা দিয়ে স্ক্যান করে রিসিপ্টের তথ্য তাৎক্ষণিক যাচাই করুন।
-        <div className="inline-block mt-1.5 text-[9px] tracking-wider bg-foreground text-background px-1.5 py-0.5 rounded">SECURE • VERIFY</div>
+        মোবাইল ক্যামেরা দিয়ে স্ক্যান করে রিসিপ্টের তথ্য দেখুন।
       </div>
     </div>
   );
