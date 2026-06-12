@@ -165,6 +165,27 @@ const navItems = [
   { value: "admin", label: "সুপার এডমিন", icon: ShieldCheck },
 ];
 
+function SidebarUserInfo() {
+  const fetchProfile = useServerFn(getMyProfile);
+  const [profile, setProfile] = useState<{ displayName: string | null; memberRef: string | null; memberSerial: number | null } | null>(null);
+  useEffect(() => {
+    let alive = true;
+    fetchProfile().then((r) => { if (alive) setProfile(r); }).catch(() => {});
+    return () => { alive = false; };
+  }, [fetchProfile]);
+  if (!profile || (!profile.displayName && !profile.memberSerial)) return null;
+  return (
+    <div className="text-center space-y-0.5">
+      {profile.displayName && (
+        <div className="text-sm font-medium text-foreground truncate">{profile.displayName}</div>
+      )}
+      {profile.memberSerial && (
+        <div className="text-xs text-muted-foreground">সদস্য নং {toBn(profile.memberSerial)}</div>
+      )}
+    </div>
+  );
+}
+
 function SamitiApp() {
   const s = useSamiti();
   const { data } = s;
