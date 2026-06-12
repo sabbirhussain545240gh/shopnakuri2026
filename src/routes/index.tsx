@@ -24,7 +24,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Users, PiggyBank, HandCoins, LayoutDashboard, Trash2, Plus, CheckCircle2, Pencil, Settings as SettingsIcon, Wallet, Download, Upload, AlertTriangle, TrendingUp, TrendingDown, Menu, Printer, FileText, Receipt, Search, Eye, Share, ImageDown, Check, ChevronsUpDown, ShieldCheck, Loader2, ArrowRight, Banknote, QrCode } from "lucide-react";
 import { toast } from "sonner";
 import { AuthGate, SignOutButton, CloudStatusBadge } from "@/components/AuthGate";
-import { buildReceiptQr, type VerifyPayload } from "@/lib/receipt-qr";
+import { makeQrDataUrl } from "@/lib/receipt-qr";
 import { useMyRoles, allowedTabs, roleLabel, canWrite, type TabKey } from "@/lib/permissions";
 import { RoleManager } from "@/components/RoleManager";
 import { NotificationBell } from "@/components/NotificationBell";
@@ -51,15 +51,13 @@ function usePendingApprovalCount(isAdmin: boolean) {
   return count;
 }
 
-function ReceiptQrPreview({ payload }: { payload: VerifyPayload }) {
+function ReceiptQrPreview({ text }: { text: string }) {
   const [src, setSrc] = useState<string>("");
-  const key = JSON.stringify(payload);
   useEffect(() => {
     let cancel = false;
-    buildReceiptQr(payload).then(({ dataUrl }) => { if (!cancel) setSrc(dataUrl); });
+    makeQrDataUrl(text).then((dataUrl) => { if (!cancel) setSrc(dataUrl); });
     return () => { cancel = true; };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [key]);
+  }, [text]);
   if (!src) return null;
   return (
     <div className="mt-4 p-3 rounded-lg border bg-gradient-to-br from-muted/40 to-background flex items-center gap-3">
@@ -72,10 +70,9 @@ function ReceiptQrPreview({ payload }: { payload: VerifyPayload }) {
       </div>
       <div className="text-xs text-muted-foreground leading-relaxed flex-1">
         <div className="text-foreground font-semibold mb-0.5 flex items-center gap-1.5">
-          <QrCode className="h-3.5 w-3.5" /> যাচাইকৃত ডিজিটাল রিসিপ্ট
+          <QrCode className="h-3.5 w-3.5" /> ডিজিটাল রিসিপ্ট
         </div>
-        মোবাইল ক্যামেরা দিয়ে স্ক্যান করে রিসিপ্টের তথ্য তাৎক্ষণিক যাচাই করুন।
-        <div className="inline-block mt-1.5 text-[9px] tracking-wider bg-foreground text-background px-1.5 py-0.5 rounded">SECURE • VERIFY</div>
+        মোবাইল ক্যামেরা দিয়ে স্ক্যান করে রিসিপ্টের তথ্য দেখুন।
       </div>
     </div>
   );
@@ -133,6 +130,15 @@ const fmtMonthYearBn = (s: string) => {
   const [y, m] = s.split("-");
   return `${bnMonths[+m - 1] || m} ${toBnDigits(y)}`;
 };
+function buildQrText(fields: { memberName: string; memberSerial?: number; loanNo?: number; date: string; amount: number }) {
+  const lines: string[] = [`সদস্য: ${fields.memberName}`];
+  if (fields.memberSerial) lines.push(`সদস্য নং: ${toBn(fields.memberSerial)}`);
+  if (fields.loanNo) lines.push(`ঋণ নং: ${toBn(fields.loanNo)}`);
+  const [y, m, d] = fields.date.split("-");
+  if (y && m && d) lines.push(`জমার তারিখ: ${toBn(d)} ${bnMonths[+m - 1] || m} ${toBn(y)}`);
+  lines.push(`জমার পরিমাণ: ${formatTk(fields.amount)}`);
+  return lines.join("\n");
+}
 const addMonths = (s: string, n: number) => {
   if (!s) return "";
   const [y, m, d] = s.split("-").map(Number);
@@ -1457,10 +1463,10 @@ function SavingsTab() {
                 <span className="text-muted-foreground">নোট:</span> <span className="font-medium whitespace-pre-wrap">{receipt.note}</span>
               </div>
             )}
-            <ReceiptQrPreview payload={{
-              t: "deposit", s: data.samitiName || "সমিতি", n: receipt.receiptNo, m: receipt.memberName,
-              a: receipt.amount, d: receipt.date, ms: receipt.memberSerial, ta: receipt.totalAfter,
-            }} />
+            <ReceiptQrPreview text={buildQrText({
+              memberName: receipt.memberName, memberSerial: receipt.memberSerial,
+              date: receipt.date, amount: receipt.amount,
+            })} />
             <div className="mt-6 flex justify-between text-xs text-muted-foreground">
               <div>—————————<br />গ্রহীতা</div>
               <div className="text-right">—————————<br />কোষাধ্যক্ষ</div>
@@ -1545,7 +1551,7 @@ function LoansTab() {
   const [editForm, setEditForm] = useState({ memberId: "", amount: "", interestRate: "", durationMonths: "", date: "" });
   const [form, setForm] = useState({ memberId: "", amount: "", interestRate: String(data.settings.defaultInterestRate), durationMonths: String(data.settings.defaultDurationMonths), date: today(), memberGuarantorId: "", familyGuarantorName: "", familyGuarantorRelation: "", familyGuarantorCustomRelation: "", familyGuarantorPhone: "" });
   const [payForm, setPayForm] = useState({ amount: "", date: today(), note: "" });
-  const [receipt, setReceipt] = useState<null | { loan: Loan; memberName: string; amount: number; date: string; paidAfter: number; remainingAfter: number; receiptNo: string; note?: string; logo?: string; loanNo?: number }>(null);
+  const [receipt, setReceipt] = useState<null | { loan: Loan; memberName: string; memberSerial?: number; amount: number; date: string; paidAfter: number; remainingAfter: number; receiptNo: string; note?: string; logo?: string; loanNo?: number }>(null);
   const [errors, setErrors] = useState<Record<string, string>>({});
 
   const setField = (key: string, value: string) => {
@@ -1600,6 +1606,7 @@ function LoansTab() {
     setReceipt({
       loan: payFor,
       memberName: mem?.name ?? "—",
+      memberSerial: mem?.serial,
       amount: amt,
       date: payForm.date,
       paidAfter,
@@ -1875,10 +1882,10 @@ function LoansTab() {
                   <span className="text-muted-foreground">নোট:</span> <span className="font-medium whitespace-pre-wrap">{receipt.note}</span>
                 </div>
               )}
-              <ReceiptQrPreview payload={{
-                t: "installment", s: data.samitiName || "সমিতি", n: receipt.receiptNo, m: receipt.memberName,
-                a: receipt.amount, d: receipt.date, pa: receipt.paidAfter, ra: receipt.remainingAfter, ln: receipt.loanNo,
-              }} />
+              <ReceiptQrPreview text={buildQrText({
+                memberName: receipt.memberName, memberSerial: receipt.memberSerial,
+                loanNo: receipt.loanNo, date: receipt.date, amount: receipt.amount,
+              })} />
               <div className="mt-6 flex justify-between text-xs text-muted-foreground">
                 <div>—————————<br />গ্রহীতা</div>
                 <div className="text-right">—————————<br />কোষাধ্যক্ষ</div>
@@ -2290,7 +2297,7 @@ function InstallmentsTab() {
 function ReceiptsHistoryTab() {
   const { data, updatePayment, deletePayment } = useSamiti();
   const [q, setQ] = useState("");
-  const [receipt, setReceipt] = useState<null | { loan: Loan; memberName: string; amount: number; date: string; paidAfter: number; remainingAfter: number; receiptNo: string; note?: string; logo?: string; loanNo?: number }>(null);
+  const [receipt, setReceipt] = useState<null | { loan: Loan; memberName: string; memberSerial?: number; amount: number; date: string; paidAfter: number; remainingAfter: number; receiptNo: string; note?: string; logo?: string; loanNo?: number }>(null);
   const [editId, setEditId] = useState<string | null>(null);
   const [editForm, setEditForm] = useState({ amount: "", date: today(), note: "" });
   const [deleteId, setDeleteId] = useState<string | null>(null);
@@ -2311,6 +2318,7 @@ function ReceiptsHistoryTab() {
           loan,
           date: p.date,
           memberName: member?.name ?? "—",
+          memberSerial: member?.serial ?? 0,
           loanNo: loanIndexById.get(p.loanId) ?? 0,
           amount: p.amount,
           note: p.note ?? "",
@@ -2340,6 +2348,7 @@ function ReceiptsHistoryTab() {
     setReceipt({
       loan: r.loan,
       memberName: r.memberName,
+      memberSerial: r.memberSerial,
       amount: r.amount,
       date: r.date,
       paidAfter,
@@ -2451,10 +2460,10 @@ function ReceiptsHistoryTab() {
                   <span className="text-muted-foreground">নোট:</span> <span className="font-medium whitespace-pre-wrap">{receipt.note}</span>
                 </div>
               )}
-              <ReceiptQrPreview payload={{
-                t: "installment", s: data.samitiName || "সমিতি", n: receipt.receiptNo, m: receipt.memberName,
-                a: receipt.amount, d: receipt.date, pa: receipt.paidAfter, ra: receipt.remainingAfter, ln: receipt.loanNo,
-              }} />
+              <ReceiptQrPreview text={buildQrText({
+                memberName: receipt.memberName, memberSerial: receipt.memberSerial,
+                loanNo: receipt.loanNo, date: receipt.date, amount: receipt.amount,
+              })} />
               <div className="mt-6 flex justify-between text-xs text-muted-foreground">
                 <div>—————————<br />গ্রহীতা</div>
                 <div className="text-right">—————————<br />কোষাধ্যক্ষ</div>
@@ -2823,10 +2832,10 @@ function DepositsHistoryTab() {
                   <span className="text-muted-foreground">নোট:</span> <span className="font-medium whitespace-pre-wrap">{receipt.note}</span>
                 </div>
               )}
-              <ReceiptQrPreview payload={{
-                t: "deposit", s: data.samitiName || "সমিতি", n: receipt.receiptNo, m: receipt.memberName,
-                a: receipt.amount, d: receipt.date, ms: receipt.memberSerial, ta: receipt.totalAfter,
-              }} />
+              <ReceiptQrPreview text={buildQrText({
+                memberName: receipt.memberName, memberSerial: receipt.memberSerial,
+                date: receipt.date, amount: receipt.amount,
+              })} />
               <div className="mt-6 flex justify-between text-xs text-muted-foreground">
                 <div>—————————<br />গ্রহীতা</div>
                 <div className="text-right">—————————<br />কোষাধ্যক্ষ</div>
@@ -4119,16 +4128,16 @@ function buildReceiptHtml(r: { loan: Loan; memberName: string; amount: number; d
   </div>`;
 }
 
-async function buildInstallmentQr(r: { memberName: string; amount: number; date: string; paidAfter: number; remainingAfter: number; receiptNo: string; loanNo?: number }, samitiName: string): Promise<string> {
-  const { buildReceiptQr } = await import("@/lib/receipt-qr");
-  const { dataUrl } = await buildReceiptQr({
-    t: "installment", s: samitiName, n: r.receiptNo, m: r.memberName,
-    a: r.amount, d: r.date, pa: r.paidAfter, ra: r.remainingAfter, ln: r.loanNo,
+async function buildInstallmentQr(r: { memberName: string; memberSerial?: number; amount: number; date: string; paidAfter: number; remainingAfter: number; receiptNo: string; loanNo?: number }, samitiName: string): Promise<string> {
+  const { makeQrDataUrl } = await import("@/lib/receipt-qr");
+  const text = buildQrText({
+    memberName: r.memberName, memberSerial: r.memberSerial,
+    loanNo: r.loanNo, date: r.date, amount: r.amount,
   });
-  return dataUrl;
+  return makeQrDataUrl(text);
 }
 
-async function renderReceiptCanvas(r: { loan: Loan; memberName: string; amount: number; date: string; paidAfter: number; remainingAfter: number; receiptNo: string; note?: string; logo?: string; loanNo?: number }, samitiName: string): Promise<HTMLCanvasElement> {
+async function renderReceiptCanvas(r: { loan: Loan; memberName: string; memberSerial?: number; amount: number; date: string; paidAfter: number; remainingAfter: number; receiptNo: string; note?: string; logo?: string; loanNo?: number }, samitiName: string): Promise<HTMLCanvasElement> {
   const qrDataUrl = await buildInstallmentQr(r, samitiName);
   const { default: html2canvas } = await import("html2canvas");
   const iframe = document.createElement("iframe");
@@ -4181,12 +4190,12 @@ function buildDepositReceiptHtml(r: DepositReceiptData, samitiName: string, qrDa
 }
 
 async function buildDepositQr(r: DepositReceiptData, samitiName: string): Promise<string> {
-  const { buildReceiptQr } = await import("@/lib/receipt-qr");
-  const { dataUrl } = await buildReceiptQr({
-    t: "deposit", s: samitiName, n: r.receiptNo, m: r.memberName,
-    a: r.amount, d: r.date, ms: r.memberSerial, ta: r.totalAfter,
+  const { makeQrDataUrl } = await import("@/lib/receipt-qr");
+  const text = buildQrText({
+    memberName: r.memberName, memberSerial: r.memberSerial,
+    date: r.date, amount: r.amount,
   });
-  return dataUrl;
+  return makeQrDataUrl(text);
 }
 
 async function renderDepositReceiptCanvas(r: DepositReceiptData, samitiName: string): Promise<HTMLCanvasElement> {
