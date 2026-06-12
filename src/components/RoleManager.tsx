@@ -768,7 +768,7 @@ export function RoleManager() {
                         ) : (
                           <div className="flex flex-wrap gap-1">
                             {u.roles.map((r) => (
-                              <Badge key={r.id} variant="secondary" className="gap-1">
+                              <Badge key={r.id} variant="outline" className={`gap-1 ${roleBadgeClass(r.role)}`}>
                                 {roleLabel(r.role)}
                                 <button
                                   onClick={() => removeRoleRow(r.id)}
