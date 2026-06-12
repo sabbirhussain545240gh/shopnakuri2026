@@ -1606,6 +1606,7 @@ function LoansTab() {
     setReceipt({
       loan: payFor,
       memberName: mem?.name ?? "—",
+      memberSerial: mem?.serial,
       amount: amt,
       date: payForm.date,
       paidAfter,
