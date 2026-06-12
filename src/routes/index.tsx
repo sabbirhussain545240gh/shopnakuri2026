@@ -2829,10 +2829,10 @@ function DepositsHistoryTab() {
                   <span className="text-muted-foreground">নোট:</span> <span className="font-medium whitespace-pre-wrap">{receipt.note}</span>
                 </div>
               )}
-              <ReceiptQrPreview payload={{
-                t: "deposit", s: data.samitiName || "সমিতি", n: receipt.receiptNo, m: receipt.memberName,
-                a: receipt.amount, d: receipt.date, ms: receipt.memberSerial, ta: receipt.totalAfter,
-              }} />
+              <ReceiptQrPreview text={buildQrText({
+                memberName: receipt.memberName, memberSerial: receipt.memberSerial,
+                date: receipt.date, amount: receipt.amount,
+              })} />
               <div className="mt-6 flex justify-between text-xs text-muted-foreground">
                 <div>—————————<br />গ্রহীতা</div>
                 <div className="text-right">—————————<br />কোষাধ্যক্ষ</div>
