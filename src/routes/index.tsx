@@ -62,15 +62,25 @@ function ReceiptQrPreview({ payload }: { payload: VerifyPayload }) {
   }, [key]);
   if (!src) return null;
   return (
-    <div className="mt-4 pt-3 border-t border-dashed flex items-center gap-3">
-      <img src={src} alt="QR" className="h-24 w-24" />
-      <div className="text-xs text-muted-foreground leading-relaxed">
-        <div className="text-foreground font-semibold mb-0.5">যাচাই করুন</div>
-        এই QR কোড স্ক্যান করে রিসিপ্টের তথ্য যাচাই করতে পারবেন।
+    <div className="mt-4 p-3 rounded-lg border bg-gradient-to-br from-muted/40 to-background flex items-center gap-3">
+      <div className="relative p-2 bg-white rounded-md shadow-sm">
+        <span className="absolute -top-0.5 -left-0.5 w-3 h-3 border-t-2 border-l-2 border-foreground rounded-tl-sm" />
+        <span className="absolute -top-0.5 -right-0.5 w-3 h-3 border-t-2 border-r-2 border-foreground rounded-tr-sm" />
+        <span className="absolute -bottom-0.5 -left-0.5 w-3 h-3 border-b-2 border-l-2 border-foreground rounded-bl-sm" />
+        <span className="absolute -bottom-0.5 -right-0.5 w-3 h-3 border-b-2 border-r-2 border-foreground rounded-br-sm" />
+        <img src={src} alt="QR" className="h-24 w-24 block" />
+      </div>
+      <div className="text-xs text-muted-foreground leading-relaxed flex-1">
+        <div className="text-foreground font-semibold mb-0.5 flex items-center gap-1.5">
+          <QrCode className="h-3.5 w-3.5" /> যাচাইকৃত ডিজিটাল রিসিপ্ট
+        </div>
+        মোবাইল ক্যামেরা দিয়ে স্ক্যান করে রিসিপ্টের তথ্য তাৎক্ষণিক যাচাই করুন।
+        <div className="inline-block mt-1.5 text-[9px] tracking-wider bg-foreground text-background px-1.5 py-0.5 rounded">SECURE • VERIFY</div>
       </div>
     </div>
   );
 }
+
 
 export const Route = createFileRoute("/")({
   head: () => ({
