@@ -189,7 +189,7 @@ export function awaitInitialCloudLoad(): Promise<void> {
 }
 
 async function pushToCloud() {
-  if (!cloudUserId) return;
+  if (!cloudUserId || readOnlyMode) return;
   const { supabase } = await import("@/integrations/supabase/client");
   setCloudStatus("saving");
   const { error } = await supabase
@@ -199,7 +199,7 @@ async function pushToCloud() {
 }
 
 function scheduleCloudSave() {
-  if (!cloudUserId || suppressCloudSave) return;
+  if (!cloudUserId || suppressCloudSave || readOnlyMode) return;
   if (saveTimer) clearTimeout(saveTimer);
   saveTimer = setTimeout(() => {
     pushToCloud().catch(() => setCloudStatus("error"));
