@@ -308,10 +308,10 @@ export function CloudStatusBadge() {
 export function IntroSplash({ onEnter, onSkipIfDisabled, enterLabel, forceShow }: { onEnter: () => void; onSkipIfDisabled?: () => void; enterLabel?: string; forceShow?: boolean }) {
   const { data } = useSamiti();
   const s = data.settings;
-  const enabled = s.splashEnabled !== false;
+  const enabled = forceShow || s.splashEnabled !== false;
   useEffect(() => {
-    if (!enabled && onSkipIfDisabled) onSkipIfDisabled();
-  }, [enabled, onSkipIfDisabled]);
+    if (!forceShow && !enabled && onSkipIfDisabled) onSkipIfDisabled();
+  }, [enabled, onSkipIfDisabled, forceShow]);
   if (!enabled) return null;
   const quotes = (s.quotes && s.quotes.length > 0) ? s.quotes : DEFAULT_QUOTES;
   const goals = (s.goals && s.goals.length > 0) ? s.goals : DEFAULT_GOALS;
