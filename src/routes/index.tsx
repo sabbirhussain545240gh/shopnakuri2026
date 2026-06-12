@@ -24,7 +24,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Users, PiggyBank, HandCoins, LayoutDashboard, Trash2, Plus, CheckCircle2, Pencil, Settings as SettingsIcon, Wallet, Download, Upload, AlertTriangle, TrendingUp, TrendingDown, Menu, Printer, FileText, Receipt, Search, Eye, Share, ImageDown, Check, ChevronsUpDown, ShieldCheck, Loader2, ArrowRight, Banknote, QrCode } from "lucide-react";
 import { toast } from "sonner";
 import { AuthGate, SignOutButton, CloudStatusBadge } from "@/components/AuthGate";
-import { buildReceiptQr, type VerifyPayload } from "@/lib/receipt-qr";
+import { makeQrDataUrl } from "@/lib/receipt-qr";
 import { useMyRoles, allowedTabs, roleLabel, canWrite, type TabKey } from "@/lib/permissions";
 import { RoleManager } from "@/components/RoleManager";
 import { NotificationBell } from "@/components/NotificationBell";
