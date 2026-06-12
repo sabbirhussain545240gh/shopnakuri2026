@@ -4137,7 +4137,7 @@ async function buildInstallmentQr(r: { memberName: string; memberSerial?: number
   return makeQrDataUrl(text);
 }
 
-async function renderReceiptCanvas(r: { loan: Loan; memberName: string; amount: number; date: string; paidAfter: number; remainingAfter: number; receiptNo: string; note?: string; logo?: string; loanNo?: number }, samitiName: string): Promise<HTMLCanvasElement> {
+async function renderReceiptCanvas(r: { loan: Loan; memberName: string; memberSerial?: number; amount: number; date: string; paidAfter: number; remainingAfter: number; receiptNo: string; note?: string; logo?: string; loanNo?: number }, samitiName: string): Promise<HTMLCanvasElement> {
   const qrDataUrl = await buildInstallmentQr(r, samitiName);
   const { default: html2canvas } = await import("html2canvas");
   const iframe = document.createElement("iframe");
