@@ -309,7 +309,7 @@ function SamitiApp() {
 
 
         <main className="flex-1 container mx-auto px-4 py-6">
-          {tab === "dashboard" && <Dashboard totals={totals} memberCount={data.members.length} data={data} />}
+          {tab === "dashboard" && <Dashboard totals={totals} memberCount={data.members.length} data={data} onNavigate={setTab} />}
           {tab === "members" && <MembersTab />}
           {tab === "savings" && <SavingsTab />}
           {tab === "loans" && <LoansTab />}
