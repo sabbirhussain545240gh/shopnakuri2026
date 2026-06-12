@@ -305,7 +305,7 @@ export function CloudStatusBadge() {
   );
 }
 
-function IntroSplash({ onEnter, onSkipIfDisabled }: { onEnter: () => void; onSkipIfDisabled?: () => void }) {
+export function IntroSplash({ onEnter, onSkipIfDisabled, enterLabel, forceShow }: { onEnter: () => void; onSkipIfDisabled?: () => void; enterLabel?: string; forceShow?: boolean }) {
   const { data } = useSamiti();
   const s = data.settings;
   const enabled = s.splashEnabled !== false;
