@@ -571,25 +571,7 @@ function Dashboard({ totals, memberCount, data, onNavigate }: any) {
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
           <StatCard delay={100} label="মোট সদস্য" value={toBn(memberCount)} accent="bg-chart-4" icon={Users} hint="নিবন্ধিত সদস্য" />
           <StatCard delay={160} label="মোট সঞ্চয়/চাদা" value={formatTk(totals.totalDeposit)} accent="bg-success" icon={PiggyBank} hint={`${toBn(data.deposits.length)}টি জমা`} />
-          <Card
-            className="overflow-hidden relative group transition-all duration-300 ease-out hover:-translate-y-1 hover:shadow-xl animate-in fade-in slide-in-from-bottom-2 col-span-2 bg-gradient-to-br from-red-50 to-orange-50 border-red-200 dark:from-red-950/30 dark:to-orange-950/30"
-            style={{ animationDelay: "220ms", animationDuration: "500ms", animationFillMode: "both" }}
-          >
-            <div className="absolute inset-x-0 top-0 h-1.5 bg-gradient-to-r from-red-500 to-orange-500 transition-all duration-300 group-hover:h-2" />
-            <CardContent className="pt-5">
-              <div className="flex items-start justify-between gap-2">
-                <p className="text-sm text-red-700 dark:text-red-300 font-semibold">বকেয়া ঋণ</p>
-                <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-red-500 to-orange-500 flex items-center justify-center shrink-0 shadow-md transition-transform duration-300 group-hover:scale-110 group-hover:rotate-3">
-                  <AlertTriangle className="h-5 w-5 text-white" />
-                </div>
-              </div>
-              <p className="text-2xl md:text-3xl font-bold mt-2 text-foreground tracking-tight tabular-nums">{formatTk(totals.outstanding)}</p>
-              <div className="mt-2 inline-flex items-center gap-2 rounded-full bg-red-100 dark:bg-red-900/40 px-3 py-1 text-sm font-bold text-red-700 dark:text-red-300 border border-red-200 dark:border-red-800">
-                <span className="text-lg tabular-nums">{toBn(activeLoanCount)}</span>
-                <span>টি চলমান ঋণ</span>
-              </div>
-            </CardContent>
-          </Card>
+          <StatCard delay={220} label="বকেয়া ঋণ" value={formatTk(totals.outstanding)} accent="bg-destructive" icon={AlertTriangle} hint={`${toBn(activeLoanCount)}টি চলমান ঋণ`} />
           <StatCard delay={280} label="হাতে নগদ" value={formatTk(totals.cashInHand)} accent="bg-primary" icon={Wallet} hint="বর্তমান তহবিল" />
         </div>
       </div>
