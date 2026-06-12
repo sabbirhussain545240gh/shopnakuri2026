@@ -132,6 +132,18 @@ export function RoleManager() {
   const [pageSize, setPageSize] = useState(10);
   const [quickRole, setQuickRole] = useState<AppRole>("member");
   const [assigningUserId, setAssigningUserId] = useState<string | null>(null);
+  const [changingRoleUserId, setChangingRoleUserId] = useState<string | null>(null);
+
+  const onChangeRole = async (userId: string, newRole: AppRole) => {
+    setChangingRoleUserId(userId);
+    try {
+      await changeUserRole({ data: { userId, role: newRole } });
+      toast.success(`ভূমিকা পরিবর্তিত হয়েছে — ${roleLabel(newRole)}`);
+      await Promise.all([loadUsers(), loadRoles()]);
+    } catch (err: any) {
+      toast.error(err?.message ?? "ভূমিকা পরিবর্তন করা যায়নি");
+    } finally { setChangingRoleUserId(null); }
+  };
 
   const [accountIdentifier, setAccountIdentifier] = useState("");
   const [accountPassword, setAccountPassword] = useState("");
