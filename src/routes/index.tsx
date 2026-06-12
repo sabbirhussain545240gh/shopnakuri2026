@@ -60,13 +60,9 @@ function ReceiptQrPreview({ text }: { text: string }) {
   }, [text]);
   if (!src) return null;
   return (
-    <div className="mt-4 p-3 rounded-lg border bg-gradient-to-br from-muted/40 to-background flex items-center gap-3">
-      <div className="relative p-2 bg-white rounded-md shadow-sm">
-        <span className="absolute -top-0.5 -left-0.5 w-3 h-3 border-t-2 border-l-2 border-foreground rounded-tl-sm" />
-        <span className="absolute -top-0.5 -right-0.5 w-3 h-3 border-t-2 border-r-2 border-foreground rounded-tr-sm" />
-        <span className="absolute -bottom-0.5 -left-0.5 w-3 h-3 border-b-2 border-l-2 border-foreground rounded-bl-sm" />
-        <span className="absolute -bottom-0.5 -right-0.5 w-3 h-3 border-b-2 border-r-2 border-foreground rounded-br-sm" />
-        <img src={src} alt="QR" className="h-24 w-24 block" />
+    <div className="mt-4 p-3 rounded-lg border bg-background flex items-center gap-3">
+      <div className="p-2 bg-white rounded-md border shadow-sm">
+        <img src={src} alt="QR" className="h-32 w-32 block [image-rendering:pixelated]" />
       </div>
       <div className="text-xs text-muted-foreground leading-relaxed flex-1">
         <div className="text-foreground font-semibold mb-0.5 flex items-center gap-1.5">
@@ -4071,14 +4067,9 @@ const receiptCss = `
   .totals{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px;font-size:13px;}
   .due{color:#b91c1c;font-weight:600;}
   .sign{display:flex;justify-content:space-between;margin-top:32px;font-size:12px;color:#666;}
-  .qr{margin-top:16px;padding:12px;border:1px solid #e5e7eb;border-radius:10px;display:flex;align-items:center;gap:14px;background:linear-gradient(135deg,#f8fafc 0%,#ffffff 60%);}
-  .qr-frame{position:relative;padding:8px;background:#fff;border-radius:8px;box-shadow:0 1px 3px rgba(15,23,42,0.08);}
-  .qr-frame::before,.qr-frame::after,.qr-frame > .c1,.qr-frame > .c2{content:"";position:absolute;width:14px;height:14px;border:2px solid #0f172a;}
-  .qr-frame::before{top:-2px;left:-2px;border-right:none;border-bottom:none;border-top-left-radius:4px;}
-  .qr-frame::after{top:-2px;right:-2px;border-left:none;border-bottom:none;border-top-right-radius:4px;}
-  .qr-frame .c1{bottom:-2px;left:-2px;border-right:none;border-top:none;border-bottom-left-radius:4px;}
-  .qr-frame .c2{bottom:-2px;right:-2px;border-left:none;border-top:none;border-bottom-right-radius:4px;}
-  .qr-frame img{width:110px;height:110px;display:block;}
+  .qr{margin-top:16px;padding:12px;border:1px solid #e5e7eb;border-radius:8px;display:flex;align-items:center;gap:14px;background:#fff;break-inside:avoid;}
+  .qr-frame{padding:10px;background:#fff;border:1px solid #e5e7eb;border-radius:6px;}
+  .qr-frame img{width:145px;height:145px;display:block;image-rendering:pixelated;}
   .qr-info{flex:1;font-size:11px;color:#475569;line-height:1.55;}
   .qr-info .qr-title{display:inline-flex;align-items:center;gap:6px;color:#0f172a;font-size:12px;font-weight:700;margin-bottom:4px;}
   .qr-info .qr-badge{display:inline-block;background:#0f172a;color:#fff;font-size:9px;padding:2px 6px;border-radius:3px;letter-spacing:0.5px;margin-top:6px;}
@@ -4089,7 +4080,6 @@ const qrBlockHtml = (qrDataUrl?: string) =>
   qrDataUrl
     ? `<div class="qr">
         <div class="qr-frame">
-          <span class="c1"></span><span class="c2"></span>
           <img src="${qrDataUrl}" alt="QR" />
         </div>
         <div class="qr-info">

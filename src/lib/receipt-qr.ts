@@ -39,10 +39,11 @@ export function buildVerifyUrl(payload: VerifyPayload): string {
 
 export async function makeQrDataUrl(text: string): Promise<string> {
   return QRCode.toDataURL(text, {
-    errorCorrectionLevel: "H",
-    margin: 2,
-    width: 480,
-    color: { dark: "#0f172a", light: "#ffffff" },
+    errorCorrectionLevel: "Q",
+    margin: 4,
+    width: 900,
+    scale: 12,
+    color: { dark: "#000000", light: "#ffffff" },
   });
 }
 
