@@ -2296,7 +2296,7 @@ function InstallmentsTab() {
 function ReceiptsHistoryTab() {
   const { data, updatePayment, deletePayment } = useSamiti();
   const [q, setQ] = useState("");
-  const [receipt, setReceipt] = useState<null | { loan: Loan; memberName: string; amount: number; date: string; paidAfter: number; remainingAfter: number; receiptNo: string; note?: string; logo?: string; loanNo?: number }>(null);
+  const [receipt, setReceipt] = useState<null | { loan: Loan; memberName: string; memberSerial?: number; amount: number; date: string; paidAfter: number; remainingAfter: number; receiptNo: string; note?: string; logo?: string; loanNo?: number }>(null);
   const [editId, setEditId] = useState<string | null>(null);
   const [editForm, setEditForm] = useState({ amount: "", date: today(), note: "" });
   const [deleteId, setDeleteId] = useState<string | null>(null);
