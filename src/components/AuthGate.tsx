@@ -430,7 +430,7 @@ export function IntroSplash({ onEnter, onSkipIfDisabled, enterLabel, forceShow }
 
         <div className="mt-10 text-center">
           <Button size="lg" onClick={onEnter} className="px-8">
-            লগইন করে প্রবেশ করুন
+            {enterLabel || "লগইন করে প্রবেশ করুন"}
           </Button>
           <p className="mt-3 text-xs text-muted-foreground">
             {footer}
