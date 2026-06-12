@@ -728,6 +728,7 @@ export function RoleManager() {
                 <TableHeader>
                   <TableRow>
                     <TableHead>ইমেইল</TableHead>
+                    <TableHead>নাম</TableHead>
                     <TableHead>সদস্য নাম + নং</TableHead>
                     <TableHead>ভূমিকা</TableHead>
                     <TableHead className="hidden md:table-cell">শেষ লগইন</TableHead>
