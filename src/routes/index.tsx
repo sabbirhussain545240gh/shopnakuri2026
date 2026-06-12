@@ -625,6 +625,39 @@ function Dashboard({ totals, memberCount, data, onNavigate }: any) {
           </CardContent>
         </Card>
       </div>
+
+      {/* Committee */}
+      {data.settings.messages && data.settings.messages.filter((m: Message) => m.name || m.role).length > 0 && (
+        <div className="animate-in fade-in slide-in-from-bottom-2 duration-500" style={{ animationDelay: "640ms", animationFillMode: "both" }}>
+          <h2 className="text-xs sm:text-sm font-semibold text-muted-foreground uppercase tracking-wide mb-3">
+            {data.settings.messagesSectionTitle || "বর্তমান কমিটি"}
+          </h2>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            {data.settings.messages
+              .filter((m: Message) => m.name || m.role)
+              .map((m: Message, i: number) => (
+                <Card key={i} className="overflow-hidden transition-all duration-300 hover:-translate-y-1 hover:shadow-lg">
+                  <CardContent className="p-4 flex items-start gap-4">
+                    {m.photo ? (
+                      <img src={m.photo} alt={m.name} className="h-16 w-16 rounded-xl object-cover ring-1 ring-border shadow-sm shrink-0" />
+                    ) : (
+                      <div className="h-16 w-16 rounded-xl bg-primary/10 text-primary flex items-center justify-center font-display font-bold text-xl shrink-0 ring-1 ring-border">
+                        {m.name ? m.name.charAt(0) : "ক"}
+                      </div>
+                    )}
+                    <div className="min-w-0 flex-1">
+                      <p className="text-xs font-semibold text-primary uppercase tracking-wide">{m.role}</p>
+                      <p className="text-sm font-bold text-foreground mt-0.5 truncate">{m.name}</p>
+                      {m.message && (
+                        <p className="text-xs text-muted-foreground mt-1.5 leading-relaxed line-clamp-3">{m.message}</p>
+                      )}
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+          </div>
+        </div>
+      )}
     </div>
   );
 }
