@@ -949,7 +949,7 @@ export function RoleManager() {
                     <li key={r.id} className="flex items-center justify-between gap-2 p-3 text-sm">
                       <div className="min-w-0 flex-1">
                         <div className="truncate font-medium">{r.email || r.userId}</div>
-                        <div className="text-xs text-muted-foreground">{roleLabel(r.role)}</div>
+                        <Badge variant="outline" className={`text-[10px] px-1.5 py-0 mt-0.5 ${roleBadgeClass(r.role)}`}>{roleLabel(r.role)}</Badge>
                       </div>
                       <Button variant="ghost" size="sm" onClick={() => onRemove(r.id)}
                         disabled={removingId === r.id}>
