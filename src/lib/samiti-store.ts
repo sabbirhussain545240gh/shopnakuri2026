@@ -159,11 +159,14 @@ let state: SamitiData | null = null;
 // ---- Cloud sync ----
 let cloudUserId: string | null = null;
 let suppressCloudSave = false;
+let readOnlyMode = false; // true for non-admin viewers (president/secretary)
 let saveTimer: ReturnType<typeof setTimeout> | null = null;
 let cloudStatus: "idle" | "loading" | "saving" | "saved" | "error" = "idle";
 const statusListeners: Array<() => void> = [];
 let initialLoadPromise: Promise<void> | null = null;
 let initialLoadResolve: (() => void) | null = null;
+
+export function isReadOnlyMode() { return readOnlyMode; }
 
 export function getCloudStatus() {
   return cloudStatus;
