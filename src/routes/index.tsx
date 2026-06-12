@@ -682,7 +682,9 @@ function MembersTab() {
   const submit = () => {
     if (!form.name.trim()) { toast.error("নাম দিন"); return; }
     const serialNum = form.serial ? parseInt(form.serial, 10) : 0;
-    addMember({ ...form, serial: serialNum });
+    const { nomineeCustomRelation, ...rest } = form;
+    const finalRelation = form.nominee.relation === "অন্যান্য" ? nomineeCustomRelation.trim() : form.nominee.relation;
+    addMember({ ...rest, serial: serialNum, nominee: { ...form.nominee, relation: finalRelation || "" } });
     setForm(emptyForm);
     setOpen(false);
     toast.success("সদস্য যোগ হয়েছে");
