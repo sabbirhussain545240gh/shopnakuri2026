@@ -260,7 +260,8 @@ export function RoleManager() {
   const filteredUsers = useMemo(() => {
     const q = search.trim().toLowerCase();
     return users.filter((u) => {
-      if (q && !u.email.toLowerCase().includes(q) && !u.id.toLowerCase().includes(q)) return false;
+      const nameMatch = (u.displayName ?? "").toLowerCase().includes(q);
+      if (q && !u.email.toLowerCase().includes(q) && !u.id.toLowerCase().includes(q) && !nameMatch) return false;
       if (filterRole === "all") return true;
       if (filterRole === "none") return u.roles.length === 0;
       return u.roles.some((r) => r.role === filterRole);
