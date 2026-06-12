@@ -81,6 +81,7 @@ export function RoleManager() {
   const fetchAll = useServerFn(listAllRoles);
   const assign = useServerFn(assignRoleByEmail);
   const remove = useServerFn(removeRoleAssignment);
+  const changeUserRole = useServerFn(setUserRole);
   const sendInvite = useServerFn(inviteUser);
   const fetchInvites = useServerFn(listInvites);
   const cancelInvite = useServerFn(revokeInvite);
