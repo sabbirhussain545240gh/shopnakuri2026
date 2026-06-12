@@ -209,8 +209,8 @@ function scheduleCloudSave() {
 export async function startCloudSync(userId: string) {
   if (cloudUserId === userId) return;
   cloudUserId = userId;
+  readOnlyMode = false;
   setCloudStatus("loading");
-  // Create a fresh promise so callers can gate UI on initial cloud fetch
   initialLoadPromise = new Promise<void>((resolve) => {
     initialLoadResolve = resolve;
   });
@@ -221,21 +221,23 @@ export async function startCloudSync(userId: string) {
     }
   };
   try {
-    const { supabase } = await import("@/integrations/supabase/client");
-    const { data, error } = await supabase
-      .from("samiti_cloud_data")
-      .select("data")
-      .eq("user_id", userId)
-      .maybeSingle();
-    if (error) throw error;
-    if (data?.data && typeof data.data === "object" && Object.keys(data.data as object).length > 0) {
+    // Use the shared loader so non-admin staff see the same samiti data
+    const { getSharedSamitiData } = await import("@/lib/samiti-shared.functions");
+    const res = await getSharedSamitiData();
+    if (!res.isAdmin) {
+      // president/secretary/treasurer/member viewing admin's data — never write back
+      readOnlyMode = true;
+    }
+    if (res.data && typeof res.data === "object" && Object.keys(res.data as object).length > 0) {
       suppressCloudSave = true;
-      // setState also writes to localStorage so the cache is fresh for next load
-      setState({ ...empty, ...(data.data as SamitiData) });
+      setState({ ...empty, ...(res.data as SamitiData) });
       suppressCloudSave = false;
       setCloudStatus("saved");
-    } else {
+    } else if (res.isAdmin) {
+      // Admin with no data yet — push current local state
       await pushToCloud();
+    } else {
+      setCloudStatus("idle");
     }
   } catch {
     setCloudStatus("error");
@@ -246,6 +248,7 @@ export async function startCloudSync(userId: string) {
 
 export function stopCloudSync() {
   cloudUserId = null;
+  readOnlyMode = false;
   if (saveTimer) { clearTimeout(saveTimer); saveTimer = null; }
   if (initialLoadResolve) { initialLoadResolve(); initialLoadResolve = null; }
   initialLoadPromise = null;
