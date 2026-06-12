@@ -2348,6 +2348,7 @@ function ReceiptsHistoryTab() {
     setReceipt({
       loan: r.loan,
       memberName: r.memberName,
+      memberSerial: r.memberSerial,
       amount: r.amount,
       date: r.date,
       paidAfter,
