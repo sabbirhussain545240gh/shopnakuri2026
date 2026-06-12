@@ -230,3 +230,49 @@ export const removeRoleAssignment = createServerFn({ method: "POST" })
     if (error) throw new Error(error.message);
     return { ok: true };
   });
+
+export const getMyProfile = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+
+    const { data: prof } = await supabaseAdmin
+      .from("profiles")
+      .select("display_name, member_ref")
+      .eq("user_id", context.userId)
+      .maybeSingle();
+
+    let memberSerial: number | null = null;
+    const memberRef = (prof?.member_ref ?? "").trim();
+
+    if (memberRef) {
+      const { data: adminRows } = await supabaseAdmin
+        .from("user_roles")
+        .select("user_id, created_at")
+        .eq("role", "admin")
+        .order("created_at", { ascending: true });
+      const adminIds = (adminRows ?? []).map((r: any) => r.user_id as string);
+
+      for (const adminId of adminIds) {
+        const { data: row } = await supabaseAdmin
+          .from("samiti_cloud_data")
+          .select("data")
+          .eq("user_id", adminId)
+          .maybeSingle();
+        const d: any = row?.data;
+        if (!d || typeof d !== "object") continue;
+        const members: any[] = Array.isArray(d.members) ? d.members : [];
+        const m = members.find((x) => x?.id === memberRef);
+        if (m && typeof m.serial === "number") {
+          memberSerial = m.serial;
+          break;
+        }
+      }
+    }
+
+    return {
+      displayName: (prof?.display_name ?? "").trim() || null,
+      memberRef: memberRef || null,
+      memberSerial,
+    };
+  });
