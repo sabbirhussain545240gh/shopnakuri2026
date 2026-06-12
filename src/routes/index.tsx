@@ -25,7 +25,7 @@ import { Users, PiggyBank, HandCoins, LayoutDashboard, Trash2, Plus, CheckCircle
 import { toast } from "sonner";
 import { AuthGate, SignOutButton, CloudStatusBadge } from "@/components/AuthGate";
 import { buildReceiptQr, type VerifyPayload } from "@/lib/receipt-qr";
-import { useMyRoles, allowedTabs, roleLabel, type TabKey } from "@/lib/permissions";
+import { useMyRoles, allowedTabs, roleLabel, canWrite, type TabKey } from "@/lib/permissions";
 import { RoleManager } from "@/components/RoleManager";
 import { NotificationBell } from "@/components/NotificationBell";
 import { MemberPortal } from "@/components/MemberPortal";
