@@ -79,6 +79,21 @@ export function roleLabel(r: AppRole): string {
   }[r];
 }
 
+export function roleBadgeClass(r: AppRole): string {
+  switch (r) {
+    case "admin":
+      return "bg-red-100 text-red-700 border-red-200 dark:bg-red-950/40 dark:text-red-300 dark:border-red-900/50";
+    case "treasurer":
+      return "bg-emerald-100 text-emerald-700 border-emerald-200 dark:bg-emerald-950/40 dark:text-emerald-300 dark:border-emerald-900/50";
+    case "president":
+      return "bg-sky-100 text-sky-700 border-sky-200 dark:bg-sky-950/40 dark:text-sky-300 dark:border-sky-900/50";
+    case "secretary":
+      return "bg-violet-100 text-violet-700 border-violet-200 dark:bg-violet-950/40 dark:text-violet-300 dark:border-violet-900/50";
+    case "member":
+      return "bg-slate-100 text-slate-700 border-slate-200 dark:bg-slate-950/40 dark:text-slate-300 dark:border-slate-900/50";
+  }
+}
+
 export function useMyRoles() {
   const fetchRoles = useServerFn(getMyRoles);
   const [roles, setRoles] = useState<AppRole[]>([]);
