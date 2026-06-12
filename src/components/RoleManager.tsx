@@ -22,6 +22,7 @@ import {
   listUsersWithRoles,
   assignRoleByEmail,
   removeRoleAssignment,
+  setUserRole,
   type AppRole,
 } from "@/lib/roles.functions";
 import {
@@ -80,6 +81,7 @@ export function RoleManager() {
   const fetchAll = useServerFn(listAllRoles);
   const assign = useServerFn(assignRoleByEmail);
   const remove = useServerFn(removeRoleAssignment);
+  const changeUserRole = useServerFn(setUserRole);
   const sendInvite = useServerFn(inviteUser);
   const fetchInvites = useServerFn(listInvites);
   const cancelInvite = useServerFn(revokeInvite);
@@ -130,6 +132,18 @@ export function RoleManager() {
   const [pageSize, setPageSize] = useState(10);
   const [quickRole, setQuickRole] = useState<AppRole>("member");
   const [assigningUserId, setAssigningUserId] = useState<string | null>(null);
+  const [changingRoleUserId, setChangingRoleUserId] = useState<string | null>(null);
+
+  const onChangeRole = async (userId: string, newRole: AppRole) => {
+    setChangingRoleUserId(userId);
+    try {
+      await changeUserRole({ data: { userId, role: newRole } });
+      toast.success(`ভূমিকা পরিবর্তিত হয়েছে — ${roleLabel(newRole)}`);
+      await Promise.all([loadUsers(), loadRoles()]);
+    } catch (err: any) {
+      toast.error(err?.message ?? "ভূমিকা পরিবর্তন করা যায়নি");
+    } finally { setChangingRoleUserId(null); }
+  };
 
   const [accountIdentifier, setAccountIdentifier] = useState("");
   const [accountPassword, setAccountPassword] = useState("");
@@ -771,12 +785,30 @@ export function RoleManager() {
                         {u.lastSignInAt ? new Date(u.lastSignInAt).toLocaleString("bn-BD") : "—"}
                       </TableCell>
                       <TableCell className="text-right">
-                        <div className="inline-flex gap-1 flex-wrap justify-end">
+                        <div className="inline-flex gap-1 flex-wrap justify-end items-center">
+                          <Select
+                            value={u.roles[0]?.role ?? ""}
+                            onValueChange={(v) => onChangeRole(u.id, v as AppRole)}
+                            disabled={changingRoleUserId === u.id}
+                          >
+                            <SelectTrigger className="h-8 w-[130px]">
+                              {changingRoleUserId === u.id ? (
+                                <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                              ) : (
+                                <SelectValue placeholder="ভূমিকা সেট" />
+                              )}
+                            </SelectTrigger>
+                            <SelectContent>
+                              {ASSIGNABLE.map((r) => (
+                                <SelectItem key={r} value={r}>{roleLabel(r)}</SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
                           <Button size="sm" variant="outline" disabled={assigningUserId === u.id || !u.email}
-                            onClick={() => assignToUser(u.email, u.id)}>
+                            onClick={() => assignToUser(u.email, u.id)} title="অতিরিক্ত ভূমিকা যোগ">
                             {assigningUserId === u.id
                               ? <Loader2 className="h-4 w-4 animate-spin" />
-                              : <><UserPlus className="h-3.5 w-3.5 mr-1" />{roleLabel(quickRole)}</>}
+                              : <UserPlus className="h-3.5 w-3.5" />}
                           </Button>
                           <Button size="sm" variant="ghost" title="পাসওয়ার্ড রিসেট"
                             onClick={() => { setPwTarget(u); setPwValue(""); }}>
