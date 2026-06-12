@@ -40,7 +40,7 @@ import {
   setAccountStatus,
   type AccountStatus,
 } from "@/lib/approval.functions";
-import { roleLabel } from "@/lib/permissions";
+import { roleLabel, roleBadgeClass } from "@/lib/permissions";
 import { useSamiti } from "@/lib/samiti-store";
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter,
