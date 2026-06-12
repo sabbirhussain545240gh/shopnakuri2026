@@ -659,6 +659,7 @@ function MembersTab() {
     name: "", fatherName: "", motherName: "", phone: "",
     birthDate: "", nid: "", address: "", photo: "",
     nominee: { name: "", relation: "", phone: "", nid: "" },
+    nomineeCustomRelation: "",
     joinDate: today(),
   };
   const [form, setForm] = useState(emptyForm);
