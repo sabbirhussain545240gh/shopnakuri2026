@@ -261,8 +261,7 @@ export function RoleManager() {
   const filteredUsers = useMemo(() => {
     const q = search.trim().toLowerCase();
     return users.filter((u) => {
-      const nameMatch = (u.displayName ?? "").toLowerCase().includes(q);
-      if (q && !u.email.toLowerCase().includes(q) && !u.id.toLowerCase().includes(q) && !nameMatch) return false;
+      if (q && !u.email.toLowerCase().includes(q) && !u.id.toLowerCase().includes(q)) return false;
       if (filterRole === "all") return true;
       if (filterRole === "none") return u.roles.length === 0;
       return u.roles.some((r) => r.role === filterRole);
@@ -723,7 +722,7 @@ export function RoleManager() {
                 <div className="relative">
                   <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
                   <Input id="user-search" className="pl-8" value={search}
-                    onChange={(e) => setSearch(e.target.value)} placeholder="ইমেইল বা নাম দিয়ে খুঁজুন" />
+                    onChange={(e) => setSearch(e.target.value)} placeholder="ইমেইল দিয়ে খুঁজুন" />
                 </div>
               </div>
               <div className="space-y-1.5">
@@ -760,7 +759,6 @@ export function RoleManager() {
                 <TableHeader>
                   <TableRow>
                     <TableHead>ইমেইল</TableHead>
-                    <TableHead>নাম</TableHead>
                     <TableHead>সদস্য নাম + নং</TableHead>
                     <TableHead>ভূমিকা</TableHead>
                     <TableHead className="hidden md:table-cell">শেষ লগইন</TableHead>
@@ -769,11 +767,11 @@ export function RoleManager() {
                 </TableHeader>
                 <TableBody>
                   {loadingUsers ? (
-                    <TableRow><TableCell colSpan={6} className="text-center py-8">
+                    <TableRow><TableCell colSpan={5} className="text-center py-8">
                       <Loader2 className="h-5 w-5 animate-spin text-muted-foreground inline" />
                     </TableCell></TableRow>
                   ) : pageUsers.length === 0 ? (
-                    <TableRow><TableCell colSpan={6} className="text-center py-8 text-sm text-muted-foreground">
+                    <TableRow><TableCell colSpan={5} className="text-center py-8 text-sm text-muted-foreground">
                       কোনো ইউজার পাওয়া যায়নি
                     </TableCell></TableRow>
                   ) : pageUsers.map((u) => {
@@ -783,13 +781,6 @@ export function RoleManager() {
                       <TableCell className="font-medium">
                         <div className="truncate max-w-[220px]" title={u.email}>{u.email || "—"}</div>
                         <div className="text-xs text-muted-foreground truncate max-w-[220px]" title={u.id}>{u.id}</div>
-                      </TableCell>
-                      <TableCell>
-                        {u.displayName ? (
-                          <span className="text-sm font-medium">{u.displayName}</span>
-                        ) : (
-                          <span className="text-xs text-muted-foreground">—</span>
-                        )}
                       </TableCell>
                       <TableCell>
                         {member ? (
