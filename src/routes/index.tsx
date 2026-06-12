@@ -372,7 +372,9 @@ function StatCard({ label, value, accent, icon: Icon, hint, delay = 0 }: { label
   );
 }
 
-function Dashboard({ totals, memberCount, data }: any) {
+function Dashboard({ totals, memberCount, data, onNavigate }: any) {
+  const { roles } = useMyRoles();
+  const writeAllowed = canWrite(roles);
   const recentDeposits = [...data.deposits].sort((a: any, b: any) => b.date.localeCompare(a.date)).slice(0, 5);
   const recentPayments = [...data.payments].sort((a: any, b: any) => b.date.localeCompare(a.date)).slice(0, 5);
   const today = new Date();
