@@ -691,7 +691,7 @@ export function RoleManager() {
                 <div className="relative">
                   <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
                   <Input id="user-search" className="pl-8" value={search}
-                    onChange={(e) => setSearch(e.target.value)} placeholder="ইমেইল দিয়ে খুঁজুন" />
+                    onChange={(e) => setSearch(e.target.value)} placeholder="ইমেইল বা নাম দিয়ে খুঁজুন" />
                 </div>
               </div>
               <div className="space-y-1.5">
