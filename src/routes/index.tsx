@@ -27,6 +27,7 @@ import { AuthGate, SignOutButton, CloudStatusBadge } from "@/components/AuthGate
 import { makeQrDataUrl } from "@/lib/receipt-qr";
 import { useMyRoles, allowedTabs, roleLabel, roleBadgeClass, canWrite, type TabKey } from "@/lib/permissions";
 import { RoleManager } from "@/components/RoleManager";
+import { getMyProfile } from "@/lib/roles.functions";
 import { NotificationBell } from "@/components/NotificationBell";
 import { MemberPortal } from "@/components/MemberPortal";
 import { useServerFn } from "@tanstack/react-start";
