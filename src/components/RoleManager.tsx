@@ -22,6 +22,7 @@ import {
   listUsersWithRoles,
   assignRoleByEmail,
   removeRoleAssignment,
+  setUserRole,
   type AppRole,
 } from "@/lib/roles.functions";
 import {
