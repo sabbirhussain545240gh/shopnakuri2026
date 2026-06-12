@@ -1129,7 +1129,9 @@ function EditMemberForm({ member, onSave, onCancel }: { member: Member; onSave: 
   const submit = () => {
     if (!form.name.trim()) { toast.error("নাম দিন"); return; }
     const serialNum = form.serial ? parseInt(form.serial, 10) : 0;
-    onSave({ ...form, serial: serialNum });
+    const finalRelation = form.nominee.relation === "অন্যান্য" ? form.nomineeCustomRelation.trim() : form.nominee.relation;
+    const { nomineeCustomRelation, ...rest } = form;
+    onSave({ ...rest, serial: serialNum, nominee: { ...form.nominee, relation: finalRelation || "" } });
   };
 
   return (
