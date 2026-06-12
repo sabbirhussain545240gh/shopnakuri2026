@@ -753,13 +753,18 @@ export function RoleManager() {
                         <div className="text-xs text-muted-foreground truncate max-w-[220px]" title={u.id}>{u.id}</div>
                       </TableCell>
                       <TableCell>
+                        {u.displayName ? (
+                          <span className="text-sm font-medium">{u.displayName}</span>
+                        ) : (
+                          <span className="text-xs text-muted-foreground">—</span>
+                        )}
+                      </TableCell>
+                      <TableCell>
                         {member ? (
                           <div className="text-sm">
                             <span className="font-medium">{member.name}</span>
                             <span className="ml-1 text-xs text-muted-foreground">#{member.serial}</span>
                           </div>
-                        ) : u.displayName ? (
-                          <span className="text-sm">{u.displayName}</span>
                         ) : (
                           <span className="text-xs text-muted-foreground">—</span>
                         )}
