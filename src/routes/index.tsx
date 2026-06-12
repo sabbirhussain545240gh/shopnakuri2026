@@ -441,6 +441,87 @@ function Dashboard({ totals, memberCount, data, onNavigate }: any) {
       </Card>
 
 
+      {/* Quick Actions */}
+      {writeAllowed && (
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4 animate-in fade-in slide-in-from-top-2 duration-500" style={{ animationDelay: "120ms", animationFillMode: "both" }}>
+          <button
+            onClick={() => onNavigate?.("savings")}
+            className="group relative overflow-hidden rounded-xl border bg-card p-4 text-left shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-md hover:border-success/50 focus:outline-none focus-visible:ring-2 focus-visible:ring-success"
+          >
+            <div className="absolute inset-x-0 top-0 h-1 bg-success transition-all duration-300 group-hover:h-1.5" />
+            <div className="flex items-center justify-between gap-3">
+              <div className="flex items-center gap-3 min-w-0">
+                <div className="h-10 w-10 rounded-xl bg-success/10 text-success flex items-center justify-center shrink-0 transition-transform duration-300 group-hover:scale-110">
+                  <PiggyBank className="h-5 w-5" />
+                </div>
+                <div className="min-w-0">
+                  <p className="text-sm font-semibold text-foreground truncate">নতুন জমা</p>
+                  <p className="text-xs text-muted-foreground truncate">সঞ্চয়/চাদা জমা করুন</p>
+                </div>
+              </div>
+              <ArrowRight className="h-4 w-4 text-muted-foreground transition-all duration-300 group-hover:text-success group-hover:translate-x-0.5 shrink-0" />
+            </div>
+          </button>
+
+          <button
+            onClick={() => onNavigate?.("installments")}
+            className="group relative overflow-hidden rounded-xl border bg-card p-4 text-left shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-md hover:border-primary/50 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+          >
+            <div className="absolute inset-x-0 top-0 h-1 bg-primary transition-all duration-300 group-hover:h-1.5" />
+            <div className="flex items-center justify-between gap-3">
+              <div className="flex items-center gap-3 min-w-0">
+                <div className="h-10 w-10 rounded-xl bg-primary/10 text-primary flex items-center justify-center shrink-0 transition-transform duration-300 group-hover:scale-110">
+                  <Receipt className="h-5 w-5" />
+                </div>
+                <div className="min-w-0">
+                  <p className="text-sm font-semibold text-foreground truncate">নতুন কিস্তি</p>
+                  <p className="text-xs text-muted-foreground truncate">ঋণের কিস্তি আদায়</p>
+                </div>
+              </div>
+              <ArrowRight className="h-4 w-4 text-muted-foreground transition-all duration-300 group-hover:text-primary group-hover:translate-x-0.5 shrink-0" />
+            </div>
+          </button>
+
+          <button
+            onClick={() => onNavigate?.("loans")}
+            className="group relative overflow-hidden rounded-xl border bg-card p-4 text-left shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-md hover:border-warning/50 focus:outline-none focus-visible:ring-2 focus-visible:ring-warning"
+          >
+            <div className="absolute inset-x-0 top-0 h-1 bg-warning transition-all duration-300 group-hover:h-1.5" />
+            <div className="flex items-center justify-between gap-3">
+              <div className="flex items-center gap-3 min-w-0">
+                <div className="h-10 w-10 rounded-xl bg-warning/10 text-warning flex items-center justify-center shrink-0 transition-transform duration-300 group-hover:scale-110">
+                  <HandCoins className="h-5 w-5" />
+                </div>
+                <div className="min-w-0">
+                  <p className="text-sm font-semibold text-foreground truncate">নতুন ঋণ</p>
+                  <p className="text-xs text-muted-foreground truncate">সদস্যকে ঋণ দিন</p>
+                </div>
+              </div>
+              <ArrowRight className="h-4 w-4 text-muted-foreground transition-all duration-300 group-hover:text-warning group-hover:translate-x-0.5 shrink-0" />
+            </div>
+          </button>
+
+          <button
+            onClick={() => onNavigate?.("members")}
+            className="group relative overflow-hidden rounded-xl border bg-card p-4 text-left shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-md hover:border-chart-4/50 focus:outline-none focus-visible:ring-2 focus-visible:ring-chart-4"
+          >
+            <div className="absolute inset-x-0 top-0 h-1 bg-chart-4 transition-all duration-300 group-hover:h-1.5" />
+            <div className="flex items-center justify-between gap-3">
+              <div className="flex items-center gap-3 min-w-0">
+                <div className="h-10 w-10 rounded-xl bg-chart-4/10 text-chart-4 flex items-center justify-center shrink-0 transition-transform duration-300 group-hover:scale-110">
+                  <Users className="h-5 w-5" />
+                </div>
+                <div className="min-w-0">
+                  <p className="text-sm font-semibold text-foreground truncate">নতুন সদস্য</p>
+                  <p className="text-xs text-muted-foreground truncate">সদস্য নিবন্ধন করুন</p>
+                </div>
+              </div>
+              <ArrowRight className="h-4 w-4 text-muted-foreground transition-all duration-300 group-hover:text-chart-4 group-hover:translate-x-0.5 shrink-0" />
+            </div>
+          </button>
+        </div>
+      )}
+
       {/* Overview */}
       <div>
         <h2 className="text-xs sm:text-sm font-semibold text-muted-foreground uppercase tracking-wide mb-3">সংক্ষিপ্ত পরিসংখ্যান</h2>
