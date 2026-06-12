@@ -5,7 +5,7 @@ export type SharedSamitiResponse = {
   ok: boolean;
   isAdmin: boolean;
   canWrite: boolean;
-  data: Record<string, unknown> | null;
+  data: any;
   ownerUserId: string | null;
   error?: string;
 };
