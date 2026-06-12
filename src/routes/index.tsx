@@ -1163,7 +1163,26 @@ function EditMemberForm({ member, onSave, onCancel }: { member: Member; onSave: 
         <h4 className="font-semibold mb-2 text-foreground">নমিনি তথ্য</h4>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
           <div><Label>নমিনির নাম</Label><Input value={form.nominee.name} onChange={(e) => setForm({ ...form, nominee: { ...form.nominee, name: e.target.value } })} /></div>
-          <div><Label>সম্পর্ক</Label><Input value={form.nominee.relation} onChange={(e) => setForm({ ...form, nominee: { ...form.nominee, relation: e.target.value } })} /></div>
+          <div>
+            <Label>সম্পর্ক</Label>
+            <Select value={form.nominee.relation} onValueChange={(v) => setForm({ ...form, nominee: { ...form.nominee, relation: v } })}>
+              <SelectTrigger><SelectValue placeholder="সম্পর্ক নির্বাচন করুন" /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="বাবা">বাবা</SelectItem>
+                <SelectItem value="মা">মা</SelectItem>
+                <SelectItem value="ভাই">ভাই</SelectItem>
+                <SelectItem value="বোন">বোন</SelectItem>
+                <SelectItem value="স্বামী">স্বামী</SelectItem>
+                <SelectItem value="স্ত্রী">স্ত্রী</SelectItem>
+                <SelectItem value="পুত্র">পুত্র</SelectItem>
+                <SelectItem value="কন্যা">কন্যা</SelectItem>
+                <SelectItem value="অন্যান্য">অন্যান্য</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+          {form.nominee.relation === "অন্যান্য" && (
+            <div><Label>কাস্টম সম্পর্ক</Label><Input value={form.nomineeCustomRelation} onChange={(e) => setForm({ ...form, nomineeCustomRelation: e.target.value })} placeholder="সম্পর্ক লিখুন" /></div>
+          )}
           <div><Label>মোবাইল</Label><Input value={form.nominee.phone} onChange={(e) => setForm({ ...form, nominee: { ...form.nominee, phone: e.target.value } })} /></div>
           <div><Label>NID / জন্ম সনদ</Label><Input value={form.nominee.nid} onChange={(e) => setForm({ ...form, nominee: { ...form.nominee, nid: e.target.value } })} /></div>
         </div>
