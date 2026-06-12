@@ -182,7 +182,7 @@ function SamitiApp() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const isAdmin = roles.includes("admin");
   const pendingApprovals = usePendingApprovalCount(isAdmin);
-  const myRoleLabel = roles.length > 0 ? roles.map(roleLabel).join(", ") : "";
+  
 
   const totals = useMemo(() => {
     const totalDeposit = data.deposits.reduce((a, d) => a + d.amount, 0);
