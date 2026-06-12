@@ -659,6 +659,7 @@ function MembersTab() {
     name: "", fatherName: "", motherName: "", phone: "",
     birthDate: "", nid: "", address: "", photo: "",
     nominee: { name: "", relation: "", phone: "", nid: "" },
+    nomineeCustomRelation: "",
     joinDate: today(),
   };
   const [form, setForm] = useState(emptyForm);
@@ -681,7 +682,9 @@ function MembersTab() {
   const submit = () => {
     if (!form.name.trim()) { toast.error("নাম দিন"); return; }
     const serialNum = form.serial ? parseInt(form.serial, 10) : 0;
-    addMember({ ...form, serial: serialNum });
+    const { nomineeCustomRelation, ...rest } = form;
+    const finalRelation = form.nominee.relation === "অন্যান্য" ? nomineeCustomRelation.trim() : form.nominee.relation;
+    addMember({ ...rest, serial: serialNum, nominee: { ...form.nominee, relation: finalRelation || "" } });
     setForm(emptyForm);
     setOpen(false);
     toast.success("সদস্য যোগ হয়েছে");
@@ -845,7 +848,26 @@ function MembersTab() {
                 <h4 className="font-semibold mb-2 text-foreground">নমিনি তথ্য</h4>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                   <div><Label>নমিনির নাম</Label><Input value={form.nominee.name} onChange={(e) => setForm({ ...form, nominee: { ...form.nominee, name: e.target.value } })} /></div>
-                  <div><Label>সম্পর্ক</Label><Input value={form.nominee.relation} onChange={(e) => setForm({ ...form, nominee: { ...form.nominee, relation: e.target.value } })} /></div>
+                  <div>
+                    <Label>সম্পর্ক</Label>
+                    <Select value={form.nominee.relation} onValueChange={(v) => setForm({ ...form, nominee: { ...form.nominee, relation: v } })}>
+                      <SelectTrigger><SelectValue placeholder="সম্পর্ক নির্বাচন করুন" /></SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="বাবা">বাবা</SelectItem>
+                        <SelectItem value="মা">মা</SelectItem>
+                        <SelectItem value="ভাই">ভাই</SelectItem>
+                        <SelectItem value="বোন">বোন</SelectItem>
+                        <SelectItem value="স্বামী">স্বামী</SelectItem>
+                        <SelectItem value="স্ত্রী">স্ত্রী</SelectItem>
+                        <SelectItem value="পুত্র">পুত্র</SelectItem>
+                        <SelectItem value="কন্যা">কন্যা</SelectItem>
+                        <SelectItem value="অন্যান্য">অন্যান্য</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  {form.nominee.relation === "অন্যান্য" && (
+                    <div><Label>কাস্টম সম্পর্ক</Label><Input value={form.nomineeCustomRelation} onChange={(e) => setForm({ ...form, nomineeCustomRelation: e.target.value })} placeholder="সম্পর্ক লিখুন" /></div>
+                  )}
                   <div><Label>মোবাইল</Label><Input value={form.nominee.phone} onChange={(e) => setForm({ ...form, nominee: { ...form.nominee, phone: e.target.value } })} /></div>
                   <div><Label>NID / জন্ম সনদ</Label><Input value={form.nominee.nid} onChange={(e) => setForm({ ...form, nominee: { ...form.nominee, nid: e.target.value } })} /></div>
                 </div>
@@ -1077,7 +1099,10 @@ function MembersTab() {
   );
 }
 
+const NOMINEE_RELATIONS = ["বাবা", "মা", "ভাই", "বোন", "স্বামী", "স্ত্রী", "পুত্র", "কন্যা"];
+
 function EditMemberForm({ member, onSave, onCancel }: { member: Member; onSave: (u: Partial<Omit<Member, "id">>) => void; onCancel: () => void }) {
+  const isCustomRelation = member.nominee?.relation && !NOMINEE_RELATIONS.includes(member.nominee.relation);
   const [form, setForm] = useState({
     serial: String(member.serial || ""),
     name: member.name,
@@ -1088,7 +1113,8 @@ function EditMemberForm({ member, onSave, onCancel }: { member: Member; onSave: 
     nid: member.nid,
     address: member.address,
     photo: member.photo,
-    nominee: { ...member.nominee },
+    nominee: { ...member.nominee, relation: isCustomRelation ? "অন্যান্য" : member.nominee?.relation || "" },
+    nomineeCustomRelation: isCustomRelation ? member.nominee.relation : "",
     joinDate: member.joinDate,
   });
 
@@ -1103,7 +1129,9 @@ function EditMemberForm({ member, onSave, onCancel }: { member: Member; onSave: 
   const submit = () => {
     if (!form.name.trim()) { toast.error("নাম দিন"); return; }
     const serialNum = form.serial ? parseInt(form.serial, 10) : 0;
-    onSave({ ...form, serial: serialNum });
+    const finalRelation = form.nominee.relation === "অন্যান্য" ? form.nomineeCustomRelation.trim() : form.nominee.relation;
+    const { nomineeCustomRelation, ...rest } = form;
+    onSave({ ...rest, serial: serialNum, nominee: { ...form.nominee, relation: finalRelation || "" } });
   };
 
   return (
@@ -1135,7 +1163,26 @@ function EditMemberForm({ member, onSave, onCancel }: { member: Member; onSave: 
         <h4 className="font-semibold mb-2 text-foreground">নমিনি তথ্য</h4>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
           <div><Label>নমিনির নাম</Label><Input value={form.nominee.name} onChange={(e) => setForm({ ...form, nominee: { ...form.nominee, name: e.target.value } })} /></div>
-          <div><Label>সম্পর্ক</Label><Input value={form.nominee.relation} onChange={(e) => setForm({ ...form, nominee: { ...form.nominee, relation: e.target.value } })} /></div>
+          <div>
+            <Label>সম্পর্ক</Label>
+            <Select value={form.nominee.relation} onValueChange={(v) => setForm({ ...form, nominee: { ...form.nominee, relation: v } })}>
+              <SelectTrigger><SelectValue placeholder="সম্পর্ক নির্বাচন করুন" /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="বাবা">বাবা</SelectItem>
+                <SelectItem value="মা">মা</SelectItem>
+                <SelectItem value="ভাই">ভাই</SelectItem>
+                <SelectItem value="বোন">বোন</SelectItem>
+                <SelectItem value="স্বামী">স্বামী</SelectItem>
+                <SelectItem value="স্ত্রী">স্ত্রী</SelectItem>
+                <SelectItem value="পুত্র">পুত্র</SelectItem>
+                <SelectItem value="কন্যা">কন্যা</SelectItem>
+                <SelectItem value="অন্যান্য">অন্যান্য</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+          {form.nominee.relation === "অন্যান্য" && (
+            <div><Label>কাস্টম সম্পর্ক</Label><Input value={form.nomineeCustomRelation} onChange={(e) => setForm({ ...form, nomineeCustomRelation: e.target.value })} placeholder="সম্পর্ক লিখুন" /></div>
+          )}
           <div><Label>মোবাইল</Label><Input value={form.nominee.phone} onChange={(e) => setForm({ ...form, nominee: { ...form.nominee, phone: e.target.value } })} /></div>
           <div><Label>NID / জন্ম সনদ</Label><Input value={form.nominee.nid} onChange={(e) => setForm({ ...form, nominee: { ...form.nominee, nid: e.target.value } })} /></div>
         </div>
