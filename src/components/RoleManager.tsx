@@ -691,6 +691,31 @@ export function RoleManager() {
               </div>
             </form>
 
+            {lastCreated && (
+              <div className="rounded-lg border bg-emerald-50/60 dark:bg-emerald-950/20 border-emerald-200 dark:border-emerald-900/40 p-4 space-y-2">
+                <div className="flex items-start justify-between gap-2">
+                  <div className="flex items-center gap-2">
+                    <Check className="h-5 w-5 text-emerald-600 dark:text-emerald-400" />
+                    <span className="font-semibold text-emerald-800 dark:text-emerald-300">অ্যাকাউন্ট সফলভাবে তৈরি হয়েছে</span>
+                  </div>
+                  <Button variant="ghost" size="sm" className="h-7 w-7 p-0" onClick={() => setLastCreated(null)}>
+                    <X className="h-4 w-4" />
+                  </Button>
+                </div>
+                <div className="flex flex-wrap items-center gap-2">
+                  <Badge variant="outline" className={`text-sm px-2.5 py-0.5 ${roleBadgeClass(lastCreated.role)}`}>
+                    {roleLabel(lastCreated.role)}
+                  </Badge>
+                </div>
+                <div className="text-sm space-y-0.5">
+                  <div><span className="text-muted-foreground">নাম:</span> <span className="font-medium">{lastCreated.name}</span></div>
+                  {lastCreated.memberSerial !== null && (
+                    <div><span className="text-muted-foreground">সদস্য নং:</span> <span className="font-medium">#{lastCreated.memberSerial}</span></div>
+                  )}
+                  <div><span className="text-muted-foreground">আইডি:</span> <span className="font-medium">{lastCreated.identifier}</span></div>
+                </div>
+              </div>
+            )}
 
             <div className="grid gap-3 sm:grid-cols-[1fr_180px_180px_auto] sm:items-end">
               <div className="space-y-1.5">
