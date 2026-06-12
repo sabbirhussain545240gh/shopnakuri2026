@@ -158,8 +158,11 @@ let state: SamitiData | null = null;
 
 // ---- Cloud sync ----
 let cloudUserId: string | null = null;
+let cloudOwnerId: string | null = null; // admin's user_id (where data is stored)
+let cloudIsAdmin = false;
+let cloudCanWrite = false;
 let suppressCloudSave = false;
-let readOnlyMode = false; // true for non-admin viewers (president/secretary)
+let readOnlyMode = false; // true for president/secretary/member viewers
 let saveTimer: ReturnType<typeof setTimeout> | null = null;
 let cloudStatus: "idle" | "loading" | "saving" | "saved" | "error" = "idle";
 const statusListeners: Array<() => void> = [];
@@ -189,17 +192,28 @@ export function awaitInitialCloudLoad(): Promise<void> {
 }
 
 async function pushToCloud() {
-  if (!cloudUserId || readOnlyMode) return;
-  const { supabase } = await import("@/integrations/supabase/client");
+  if (!cloudUserId || readOnlyMode || !cloudCanWrite) return;
   setCloudStatus("saving");
-  const { error } = await supabase
-    .from("samiti_cloud_data")
-    .upsert({ user_id: cloudUserId, data: getState() as any, updated_at: new Date().toISOString() });
-  setCloudStatus(error ? "error" : "saved");
+  try {
+    if (cloudIsAdmin) {
+      const { supabase } = await import("@/integrations/supabase/client");
+      const { error } = await supabase
+        .from("samiti_cloud_data")
+        .upsert({ user_id: cloudUserId, data: getState() as any, updated_at: new Date().toISOString() });
+      if (error) throw error;
+    } else {
+      // treasurer writes to admin-owned row via server fn
+      const { writeSharedSamitiData } = await import("@/lib/samiti-shared.functions");
+      await writeSharedSamitiData({ data: { data: getState() } });
+    }
+    setCloudStatus("saved");
+  } catch {
+    setCloudStatus("error");
+  }
 }
 
 function scheduleCloudSave() {
-  if (!cloudUserId || suppressCloudSave || readOnlyMode) return;
+  if (!cloudUserId || suppressCloudSave || readOnlyMode || !cloudCanWrite) return;
   if (saveTimer) clearTimeout(saveTimer);
   saveTimer = setTimeout(() => {
     pushToCloud().catch(() => setCloudStatus("error"));
@@ -210,6 +224,9 @@ export async function startCloudSync(userId: string) {
   if (cloudUserId === userId) return;
   cloudUserId = userId;
   readOnlyMode = false;
+  cloudIsAdmin = false;
+  cloudCanWrite = false;
+  cloudOwnerId = null;
   setCloudStatus("loading");
   initialLoadPromise = new Promise<void>((resolve) => {
     initialLoadResolve = resolve;
@@ -221,20 +238,20 @@ export async function startCloudSync(userId: string) {
     }
   };
   try {
-    // Use the shared loader so non-admin staff see the same samiti data
     const { getSharedSamitiData } = await import("@/lib/samiti-shared.functions");
     const res = await getSharedSamitiData();
-    if (!res.isAdmin) {
-      // president/secretary/treasurer/member viewing admin's data — never write back
-      readOnlyMode = true;
-    }
+    cloudIsAdmin = res.isAdmin;
+    cloudCanWrite = res.canWrite;
+    cloudOwnerId = res.ownerUserId;
+    // president/secretary/member = read-only; treasurer & admin can write
+    readOnlyMode = !res.canWrite;
     if (res.data && typeof res.data === "object" && Object.keys(res.data as object).length > 0) {
       suppressCloudSave = true;
       setState({ ...empty, ...(res.data as SamitiData) });
       suppressCloudSave = false;
       setCloudStatus("saved");
-    } else if (res.isAdmin) {
-      // Admin with no data yet — push current local state
+    } else if (cloudCanWrite) {
+      // Admin/treasurer with no data yet — push current local state
       await pushToCloud();
     } else {
       setCloudStatus("idle");
@@ -248,6 +265,9 @@ export async function startCloudSync(userId: string) {
 
 export function stopCloudSync() {
   cloudUserId = null;
+  cloudOwnerId = null;
+  cloudIsAdmin = false;
+  cloudCanWrite = false;
   readOnlyMode = false;
   if (saveTimer) { clearTimeout(saveTimer); saveTimer = null; }
   if (initialLoadResolve) { initialLoadResolve(); initialLoadResolve = null; }
