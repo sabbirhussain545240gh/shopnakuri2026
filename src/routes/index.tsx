@@ -253,6 +253,7 @@ function SamitiApp() {
               ))}
             </div>
           )}
+          <SidebarUserInfo />
           <div className="flex items-center justify-center gap-2"><CloudStatusBadge /><NotificationBell /></div>
           <SignOutButton />
 
