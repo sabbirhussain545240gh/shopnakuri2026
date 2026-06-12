@@ -1099,7 +1099,10 @@ function MembersTab() {
   );
 }
 
+const NOMINEE_RELATIONS = ["বাবা", "মা", "ভাই", "বোন", "স্বামী", "স্ত্রী", "পুত্র", "কন্যা"];
+
 function EditMemberForm({ member, onSave, onCancel }: { member: Member; onSave: (u: Partial<Omit<Member, "id">>) => void; onCancel: () => void }) {
+  const isCustomRelation = member.nominee?.relation && !NOMINEE_RELATIONS.includes(member.nominee.relation);
   const [form, setForm] = useState({
     serial: String(member.serial || ""),
     name: member.name,
@@ -1110,7 +1113,8 @@ function EditMemberForm({ member, onSave, onCancel }: { member: Member; onSave: 
     nid: member.nid,
     address: member.address,
     photo: member.photo,
-    nominee: { ...member.nominee },
+    nominee: { ...member.nominee, relation: isCustomRelation ? "অন্যান্য" : member.nominee?.relation || "" },
+    nomineeCustomRelation: isCustomRelation ? member.nominee.relation : "",
     joinDate: member.joinDate,
   });
 
