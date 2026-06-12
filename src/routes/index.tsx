@@ -2318,6 +2318,7 @@ function ReceiptsHistoryTab() {
           loan,
           date: p.date,
           memberName: member?.name ?? "—",
+          memberSerial: member?.serial ?? 0,
           loanNo: loanIndexById.get(p.loanId) ?? 0,
           amount: p.amount,
           note: p.note ?? "",
