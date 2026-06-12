@@ -933,6 +933,105 @@ function MembersTab() {
                   <Info label="NID / জন্ম সনদ" value={viewMember.nominee?.nid ? toBn(viewMember.nominee.nid) : ""} />
                 </div>
               </div>
+              {(() => {
+                const memberDeposits = data.deposits.filter((d) => d.memberId === viewMember.id);
+                const totalDeposit = memberDeposits.reduce((s, d) => s + d.amount, 0);
+                const memberLoans = data.loans
+                  .map((l, idx) => ({ loan: l, no: idx + 1 }))
+                  .filter((x) => x.loan.memberId === viewMember.id);
+                const totalLoanAmt = memberLoans.reduce((s, x) => s + x.loan.amount, 0);
+                const totalDue = memberLoans.reduce((s, x) => s + loanTotalDue(x.loan), 0);
+                const totalPaid = memberLoans.reduce((s, x) => s + loanPaid(data.payments, x.loan.id), 0);
+                return (
+                  <>
+                    <div className="border-t pt-3">
+                      <h4 className="font-semibold mb-2">আর্থিক সারাংশ</h4>
+                      <div className="grid grid-cols-2 gap-2 text-sm">
+                        <div className="rounded-md border p-2"><div className="text-xs text-muted-foreground">মোট জমা</div><div className="font-semibold">{formatTk(totalDeposit)}</div></div>
+                        <div className="rounded-md border p-2"><div className="text-xs text-muted-foreground">মোট ঋণ</div><div className="font-semibold">{formatTk(totalLoanAmt)}</div></div>
+                        <div className="rounded-md border p-2"><div className="text-xs text-muted-foreground">মোট পরিশোধিত</div><div className="font-semibold">{formatTk(totalPaid)}</div></div>
+                        <div className="rounded-md border p-2"><div className="text-xs text-muted-foreground">মোট বাকি</div><div className="font-semibold">{formatTk(Math.max(0, totalDue - totalPaid))}</div></div>
+                      </div>
+                    </div>
+
+                    <div className="border-t pt-3">
+                      <h4 className="font-semibold mb-2">জমার ইতিহাস ({toBn(memberDeposits.length)})</h4>
+                      {memberDeposits.length === 0 ? (
+                        <p className="text-sm text-muted-foreground">কোনো জমা নেই</p>
+                      ) : (
+                        <div className="max-h-48 overflow-y-auto rounded-md border">
+                          <table className="w-full text-sm">
+                            <thead className="bg-muted/50 sticky top-0">
+                              <tr><th className="text-left p-2">তারিখ</th><th className="text-right p-2">পরিমাণ</th><th className="text-left p-2">নোট</th></tr>
+                            </thead>
+                            <tbody>
+                              {[...memberDeposits].sort((a, b) => (b.date || "").localeCompare(a.date || "")).map((d) => (
+                                <tr key={d.id} className="border-t"><td className="p-2">{fmtDate(d.date)}</td><td className="p-2 text-right">{formatTk(d.amount)}</td><td className="p-2 text-muted-foreground">{d.note || "—"}</td></tr>
+                              ))}
+                            </tbody>
+                          </table>
+                        </div>
+                      )}
+                    </div>
+
+                    <div className="border-t pt-3">
+                      <h4 className="font-semibold mb-2">ঋণ ও কিস্তির ইতিহাস ({toBn(memberLoans.length)})</h4>
+                      {memberLoans.length === 0 ? (
+                        <p className="text-sm text-muted-foreground">কোনো ঋণ নেই</p>
+                      ) : (
+                        <div className="space-y-3">
+                          {memberLoans.map(({ loan, no }) => {
+                            const paid = loanPaid(data.payments, loan.id);
+                            const due = loanTotalDue(loan);
+                            const remaining = Math.max(0, due - paid);
+                            const insts = data.payments.filter((p) => p.loanId === loan.id)
+                              .sort((a, b) => (a.date || "").localeCompare(b.date || ""));
+                            return (
+                              <div key={loan.id} className="rounded-md border p-2">
+                                <div className="flex items-center justify-between flex-wrap gap-2 mb-2">
+                                  <div className="font-medium">ঋণ নং {toBn(no)} {loan.status === "closed" && <span className="text-xs text-green-600">(পরিশোধিত)</span>}</div>
+                                  <div className="text-xs text-muted-foreground">তারিখ: {fmtDate(loan.date)}</div>
+                                </div>
+                                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-xs mb-2">
+                                  <div><span className="text-muted-foreground">ঋণ:</span> <span className="font-medium">{formatTk(loan.amount)}</span></div>
+                                  <div><span className="text-muted-foreground">মোট দেয়:</span> <span className="font-medium">{formatTk(due)}</span></div>
+                                  <div><span className="text-muted-foreground">পরিশোধ:</span> <span className="font-medium">{formatTk(paid)}</span></div>
+                                  <div><span className="text-muted-foreground">বাকি:</span> <span className="font-medium">{formatTk(remaining)}</span></div>
+                                </div>
+                                {insts.length > 0 && (
+                                  <div className="max-h-40 overflow-y-auto rounded border">
+                                    <table className="w-full text-xs">
+                                      <thead className="bg-muted/50 sticky top-0">
+                                        <tr><th className="text-left p-1.5">#</th><th className="text-left p-1.5">তারিখ</th><th className="text-right p-1.5">কিস্তি</th><th className="text-right p-1.5">বাকি</th></tr>
+                                      </thead>
+                                      <tbody>
+                                        {(() => {
+                                          let running = 0;
+                                          return insts.map((p, i) => {
+                                            running += p.amount;
+                                            return (
+                                              <tr key={p.id} className="border-t">
+                                                <td className="p-1.5">{toBn(i + 1)}</td>
+                                                <td className="p-1.5">{fmtDate(p.date)}</td>
+                                                <td className="p-1.5 text-right">{formatTk(p.amount)}</td>
+                                                <td className="p-1.5 text-right">{formatTk(Math.max(0, due - running))}</td>
+                                              </tr>
+                                            );
+                                          });
+                                        })()}
+                                      </tbody>
+                                    </table>
+                                  </div>
+                                )}
+                              </div>
+                            );
+                          })}
+                        </div>
+                      )}
+                    </div>
+                  </>
+                );
+              })()}
             </div>
           )}
         </DialogContent>
