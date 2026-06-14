@@ -2391,11 +2391,43 @@ function LoansTab() {
                     </Table>
                   )}
                 </div>
-                {detailFor.status === "active" && (() => {
-                  const inst = monthlyInstallment(detailFor.amount, detailFor.interestRate, detailFor.durationMonths);
-                  const remaining = Math.max(0, due - paid);
-                  return (
-                    <div className="border-t pt-3 flex justify-end">
+                <div className="border-t pt-3 flex flex-wrap justify-end gap-2">
+                  <Button
+                    variant="outline"
+                    onClick={() => {
+                      const samiti: SamitiInfo = {
+                        samitiName: data.samitiName,
+                        samitiLogo: data.samitiLogo,
+                        samitiAddress: data.samitiAddress,
+                        establishedDate: data.establishedDate,
+                      };
+                      printLoanDetail(detailFor, idx + 1, m, gm, pays, samiti);
+                    }}
+                  >
+                    <Printer className="h-4 w-4" /> প্রিন্ট
+                  </Button>
+                  <Button
+                    variant="outline"
+                    onClick={async () => {
+                      const samiti: SamitiInfo = {
+                        samitiName: data.samitiName,
+                        samitiLogo: data.samitiLogo,
+                        samitiAddress: data.samitiAddress,
+                        establishedDate: data.establishedDate,
+                      };
+                      try {
+                        await exportLoanDetailPdf(detailFor, idx + 1, m, gm, pays, samiti);
+                      } catch (e) {
+                        toast.error("PDF ডাউনলোড ব্যর্থ হয়েছে");
+                      }
+                    }}
+                  >
+                    <Download className="h-4 w-4" /> PDF ডাউনলোড
+                  </Button>
+                  {detailFor.status === "active" && (() => {
+                    const inst = monthlyInstallment(detailFor.amount, detailFor.interestRate, detailFor.durationMonths);
+                    const remaining = Math.max(0, due - paid);
+                    return (
                       <Button
                         onClick={() => {
                           const target = Math.min(inst, remaining);
@@ -2406,9 +2438,10 @@ function LoansTab() {
                       >
                         ঋণ আদায়
                       </Button>
-                    </div>
-                  );
-                })()}
+                    );
+                  })()}
+                </div>
+
               </div>
             );
           })()}
