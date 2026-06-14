@@ -1381,6 +1381,152 @@ async function exportMemberCardPdf(member: Member, samiti: SamitiInfo) {
   pdf.save(`member-${member.serial || ""}-${member.name}.pdf`);
 }
 
+function buildLoanDetailHtml(
+  loan: Loan,
+  loanNo: number,
+  member: Member | undefined,
+  guarantor: Member | undefined,
+  payments: { id: string; date: string; amount: number }[],
+  samiti: SamitiInfo,
+) {
+  const due = loanTotalDue(loan);
+  const paid = payments.reduce((s, p) => s + p.amount, 0);
+  const remaining = Math.max(0, due - paid);
+  const inst = monthlyInstallment(loan.amount, loan.interestRate, loan.durationMonths);
+  const headerHtml = `
+    <div style="display:flex;align-items:center;gap:16px;border-bottom:2px solid #333;padding-bottom:10px;margin-bottom:16px;">
+      ${samiti.samitiLogo ? `<img src="${samiti.samitiLogo}" style="width:90px;height:90px;object-fit:contain;" crossorigin="anonymous" />` : ""}
+      <div style="flex:1;text-align:center;">
+        <h1 style="margin:0;font-size:26px;">${samiti.samitiName}</h1>
+        ${samiti.samitiAddress ? `<div style="font-size:14px;color:#444;margin-top:4px;">${samiti.samitiAddress}</div>` : ""}
+        ${samiti.establishedDate ? `<div style="font-size:13px;color:#666;margin-top:4px;">স্থাপিত: ${samiti.establishedDate}</div>` : ""}
+      </div>
+      ${samiti.samitiLogo ? `<div style="width:90px;"></div>` : ""}
+    </div>`;
+  const rows: [string, string][] = [
+    ["ঋণ নং", toBn(loanNo)],
+    ["তারিখ", fmtDate(loan.date)],
+    ["সদস্য", member?.name ?? "—"],
+    ["মোবাইল", member?.phone ? toBn(member.phone) : "—"],
+    ["মূল", formatTk(loan.amount)],
+    ["সুদের হার", `${toBn(loan.interestRate)}%`],
+    ["মেয়াদ", `${toBn(loan.durationMonths)} মাস`],
+    ["মাসিক কিস্তি", formatTk(inst)],
+    ["১ম কিস্তির তারিখ", fmtDate(addMonths(loan.date, 1))],
+    ["ঋণ শেষ", fmtDate(addMonths(loan.date, loan.durationMonths))],
+    ["মোট প্রদেয়", formatTk(due)],
+    ["পরিশোধ", formatTk(paid)],
+    ["বকেয়া", formatTk(remaining)],
+    ["অবস্থা", loan.status === "active" ? "চলমান" : "পরিশোধিত"],
+  ];
+  const guarantorRows: [string, string][] = [["সদস্য জামিনদার", guarantor?.name ?? "—"]];
+  if (loan.familyGuarantor) {
+    guarantorRows.push(["পারিবারিক জামিনদার", `${loan.familyGuarantor.name} (${loan.familyGuarantor.relation}) — ${loan.familyGuarantor.phone}`]);
+  }
+  const tableRows = (items: [string, string][]) =>
+    items.map(([k, v]) => `<tr><td style="padding:6px 10px;border:1px solid #ddd;background:#fafafa;font-weight:600;width:40%;">${k}</td><td style="padding:6px 10px;border:1px solid #ddd;">${v || "—"}</td></tr>`).join("");
+  const paymentRows = payments.length
+    ? `<table style="width:100%;border-collapse:collapse;font-size:13px;margin-top:6px;">
+        <thead><tr><th style="text-align:left;padding:6px 10px;border:1px solid #ddd;background:#f0f0f0;">তারিখ</th><th style="text-align:right;padding:6px 10px;border:1px solid #ddd;background:#f0f0f0;">পরিমাণ</th></tr></thead>
+        <tbody>${payments.map((p) => `<tr><td style="padding:6px 10px;border:1px solid #ddd;">${fmtDate(p.date)}</td><td style="padding:6px 10px;border:1px solid #ddd;text-align:right;">${formatTk(p.amount)}</td></tr>`).join("")}</tbody>
+      </table>`
+    : `<div style="color:#666;font-size:13px;">কোনও কিস্তি নেই।</div>`;
+
+  return `
+    <div style="max-width:720px;margin:auto;">
+      ${headerHtml}
+      <div style="border:2px solid #333;padding:18px;border-radius:8px;">
+        <h2 style="text-align:center;margin:0 0 14px 0;font-size:18px;border-bottom:2px solid #333;padding-bottom:6px;">ঋণের বিস্তারিত</h2>
+        <table style="width:100%;border-collapse:collapse;font-size:14px;">${tableRows(rows)}</table>
+        <h3 style="font-size:15px;border-bottom:1px solid #ccc;padding-bottom:4px;margin:14px 0 6px;">জামিনদার</h3>
+        <table style="width:100%;border-collapse:collapse;font-size:14px;">${tableRows(guarantorRows)}</table>
+        <h3 style="font-size:15px;border-bottom:1px solid #ccc;padding-bottom:4px;margin:14px 0 6px;">কিস্তি (${toBn(payments.length)})</h3>
+        ${paymentRows}
+      </div>
+    </div>`;
+}
+
+function printLoanDetail(
+  loan: Loan,
+  loanNo: number,
+  member: Member | undefined,
+  guarantor: Member | undefined,
+  payments: { id: string; date: string; amount: number }[],
+  samiti: SamitiInfo,
+) {
+  const w = window.open("", "_blank", "width=900,height=700");
+  if (!w) return;
+  const inner = buildLoanDetailHtml(loan, loanNo, member, guarantor, payments, samiti);
+  w.document.write(`
+    <!DOCTYPE html>
+    <html><head><meta charset="utf-8" /><title>ঋণের বিস্তারিত - ${member?.name ?? ""}</title>
+    <style>
+      body { font-family: "Segoe UI", "Noto Sans Bengali", sans-serif; margin: 0; padding: 24px; background: #fff; color: #111; }
+      @media print { body { padding: 0; } .no-print { display: none; } }
+    </style></head>
+    <body>
+      <div class="no-print" style="margin-bottom:16px;display:flex;gap:8px;">
+        <button onclick="window.print()" style="padding:8px 16px;font-size:14px;cursor:pointer;">প্রিন্ট করুন</button>
+      </div>
+      ${inner}
+      <script>setTimeout(()=>window.print(),400)</script>
+    </body></html>
+  `);
+  w.document.close();
+}
+
+async function exportLoanDetailPdf(
+  loan: Loan,
+  loanNo: number,
+  member: Member | undefined,
+  guarantor: Member | undefined,
+  payments: { id: string; date: string; amount: number }[],
+  samiti: SamitiInfo,
+) {
+  const { default: html2canvasLib } = await import("html2canvas");
+  const inner = buildLoanDetailHtml(loan, loanNo, member, guarantor, payments, samiti);
+  const iframe = document.createElement("iframe");
+  iframe.style.cssText = "position:fixed;left:-10000px;top:0;width:780px;height:10px;border:0;";
+  document.body.appendChild(iframe);
+  try {
+    const doc = iframe.contentDocument!;
+    doc.open();
+    doc.write(`<!DOCTYPE html><html><head><meta charset="utf-8"><style>
+      html,body{margin:0;padding:0;background:#ffffff;color:#111111;font-family:"Segoe UI","Noto Sans Bengali",Arial,sans-serif;}
+      *{box-sizing:border-box;} h1,h2,h3,p,td,th,div{color:#111111;}
+    </style></head><body><div id="r" style="width:740px;padding:20px;background:#fff;">${inner}</div></body></html>`);
+    doc.close();
+    const target = doc.getElementById("r")!;
+    const imgs = Array.from(target.querySelectorAll("img"));
+    await Promise.all(imgs.map((img) => img.complete ? Promise.resolve() : new Promise((res) => { img.onload = img.onerror = () => res(null); })));
+    await new Promise((r) => setTimeout(r, 50));
+    const canvas = await html2canvasLib(target, { scale: 2, backgroundColor: "#ffffff", useCORS: true, logging: false, windowWidth: 780, windowHeight: target.scrollHeight + 40 });
+    const { default: jsPDF } = await import("jspdf");
+    const pdf = new jsPDF({ unit: "pt", format: "a4", orientation: "portrait" });
+    const pageW = pdf.internal.pageSize.getWidth();
+    const pageH = pdf.internal.pageSize.getHeight();
+    const imgW = pageW;
+    const imgH = (canvas.height * imgW) / canvas.width;
+    const imgData = canvas.toDataURL("image/jpeg", 0.95);
+    if (imgH <= pageH) {
+      pdf.addImage(imgData, "JPEG", 0, 0, imgW, imgH);
+    } else {
+      let position = 0;
+      let remaining = imgH;
+      while (remaining > 0) {
+        pdf.addImage(imgData, "JPEG", 0, position, imgW, imgH);
+        remaining -= pageH;
+        if (remaining > 0) { position -= pageH; pdf.addPage(); }
+      }
+    }
+    pdf.save(`loan-${toBn(loanNo)}-${member?.name ?? ""}.pdf`);
+  } finally {
+    document.body.removeChild(iframe);
+  }
+}
+
+
+
 
 // ===== Savings =====
 function SavingsTab() {
@@ -2245,11 +2391,43 @@ function LoansTab() {
                     </Table>
                   )}
                 </div>
-                {detailFor.status === "active" && (() => {
-                  const inst = monthlyInstallment(detailFor.amount, detailFor.interestRate, detailFor.durationMonths);
-                  const remaining = Math.max(0, due - paid);
-                  return (
-                    <div className="border-t pt-3 flex justify-end">
+                <div className="border-t pt-3 flex flex-wrap justify-end gap-2">
+                  <Button
+                    variant="outline"
+                    onClick={() => {
+                      const samiti: SamitiInfo = {
+                        samitiName: data.samitiName,
+                        samitiLogo: data.samitiLogo,
+                        samitiAddress: data.samitiAddress,
+                        establishedDate: data.establishedDate,
+                      };
+                      printLoanDetail(detailFor, idx + 1, m, gm, pays, samiti);
+                    }}
+                  >
+                    <Printer className="h-4 w-4" /> প্রিন্ট
+                  </Button>
+                  <Button
+                    variant="outline"
+                    onClick={async () => {
+                      const samiti: SamitiInfo = {
+                        samitiName: data.samitiName,
+                        samitiLogo: data.samitiLogo,
+                        samitiAddress: data.samitiAddress,
+                        establishedDate: data.establishedDate,
+                      };
+                      try {
+                        await exportLoanDetailPdf(detailFor, idx + 1, m, gm, pays, samiti);
+                      } catch (e) {
+                        toast.error("PDF ডাউনলোড ব্যর্থ হয়েছে");
+                      }
+                    }}
+                  >
+                    <Download className="h-4 w-4" /> PDF ডাউনলোড
+                  </Button>
+                  {detailFor.status === "active" && (() => {
+                    const inst = monthlyInstallment(detailFor.amount, detailFor.interestRate, detailFor.durationMonths);
+                    const remaining = Math.max(0, due - paid);
+                    return (
                       <Button
                         onClick={() => {
                           const target = Math.min(inst, remaining);
@@ -2260,9 +2438,10 @@ function LoansTab() {
                       >
                         ঋণ আদায়
                       </Button>
-                    </div>
-                  );
-                })()}
+                    );
+                  })()}
+                </div>
+
               </div>
             );
           })()}
