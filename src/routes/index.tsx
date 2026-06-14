@@ -2078,6 +2078,90 @@ function LoansTab() {
     `);
     w.document.close();
   };
+  const downloadLoansPDF = () => {
+    const w = window.open("", "_blank", "width=1100,height=700");
+    if (!w) return;
+    const rows = filteredLoans.map((l) => {
+      const m = data.members.find((x) => x.id === l.memberId);
+      const due = loanTotalDue(l);
+      const paid = loanPaid(data.payments, l.id);
+      const remaining = Math.max(0, due - paid);
+      const inst = monthlyInstallment(l.amount, l.interestRate, l.durationMonths);
+      const firstPay = addMonths(l.date, 1);
+      const endDate = addMonths(l.date, l.durationMonths);
+      const originalLoanNo = data.loans.findIndex((x) => x.id === l.id) + 1;
+      return {
+        loanNo: toBn(originalLoanNo),
+        member: `${m?.name ?? "—"}${m?.serial ? ` -${toBn(m.serial)}` : ""}`,
+        date: fmtDate(l.date),
+        principal: formatTk(l.amount),
+        totalDue: formatTk(due),
+        installment: formatTk(inst),
+        firstPay: firstPay ? fmtDate(firstPay) : "—",
+        endDate: endDate ? fmtDate(endDate) : "—",
+        paid: formatTk(paid),
+        remaining: formatTk(remaining),
+        status: l.status === "active" ? "চলমান" : "পরিশোধিত",
+      };
+    });
+    const html = `
+      <table style="width:100%;border-collapse:collapse;font-size:13px;">
+        <thead>
+          <tr style="background:#f5f5f5;">
+            <th style="border:1px solid #ccc;padding:8px;text-align:left;">ঋণ নং</th>
+            <th style="border:1px solid #ccc;padding:8px;text-align:left;">সদস্য</th>
+            <th style="border:1px solid #ccc;padding:8px;text-align:left;">তারিখ</th>
+            <th style="border:1px solid #ccc;padding:8px;text-align:right;">মূল</th>
+            <th style="border:1px solid #ccc;padding:8px;text-align:right;">মোট প্রদেয়</th>
+            <th style="border:1px solid #ccc;padding:8px;text-align:right;">মাসিক কিস্তি</th>
+            <th style="border:1px solid #ccc;padding:8px;text-align:right;">১ম কিস্তি</th>
+            <th style="border:1px solid #ccc;padding:8px;text-align:right;">ঋণ শেষ</th>
+            <th style="border:1px solid #ccc;padding:8px;text-align:right;">পরিশোধ</th>
+            <th style="border:1px solid #ccc;padding:8px;text-align:right;">বকেয়া</th>
+            <th style="border:1px solid #ccc;padding:8px;text-align:left;">অবস্থা</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${rows.map((r) => `
+            <tr>
+              <td style="border:1px solid #ccc;padding:8px;">${r.loanNo}</td>
+              <td style="border:1px solid #ccc;padding:8px;">${r.member}</td>
+              <td style="border:1px solid #ccc;padding:8px;">${r.date}</td>
+              <td style="border:1px solid #ccc;padding:8px;text-align:right;">${r.principal}</td>
+              <td style="border:1px solid #ccc;padding:8px;text-align:right;">${r.totalDue}</td>
+              <td style="border:1px solid #ccc;padding:8px;text-align:right;">${r.installment}</td>
+              <td style="border:1px solid #ccc;padding:8px;text-align:right;">${r.firstPay}</td>
+              <td style="border:1px solid #ccc;padding:8px;text-align:right;">${r.endDate}</td>
+              <td style="border:1px solid #ccc;padding:8px;text-align:right;">${r.paid}</td>
+              <td style="border:1px solid #ccc;padding:8px;text-align:right;">${r.remaining}</td>
+              <td style="border:1px solid #ccc;padding:8px;">${r.status}</td>
+            </tr>
+          `).join("")}
+        </tbody>
+      </table>
+    `;
+    w.document.write(`
+      <!DOCTYPE html>
+      <html><head><meta charset="utf-8" /><title>ঋণ তালিকা - ${data.samitiName || "সমিতি"}</title>
+      <style>
+        body { font-family: "Segoe UI", "Noto Sans Bengali", sans-serif; margin: 0; padding: 24px; color: #111; background:#fff; }
+        @media print {
+          body { padding: 0; }
+          .no-print { display: none; }
+          @page { size: A4 landscape; margin: 10mm; }
+        }
+      </style></head>
+      <body>
+        <div class="no-print" style="margin-bottom:16px; display:flex; gap:8px;">
+          <button onclick="window.print()" style="padding:8px 16px;font-size:14px;cursor:pointer;">প্রিন্ট / PDF সংরক্ষণ</button>
+        </div>
+        <h2 style="text-align:center;margin:0 0 8px;">ঋণ ব্যবস্থাপনা</h2>
+        <p style="text-align:center;font-size:12px;color:#666;margin-bottom:12px;">${data.samitiName || "সমিতি"} | মোট ${toBn(filteredLoans.length)}টি ঋণ | তারিখ: ${fmtDate(today())}</p>
+        ${html}
+      </body></html>
+    `);
+    w.document.close();
+  };
 
   const downloadLoansExcel = () => {
     const rows = filteredLoans.map((l) => {
@@ -2209,12 +2293,15 @@ function LoansTab() {
             <DialogFooter><Button onClick={submit}>ঋণ প্রদান</Button></DialogFooter>
           </DialogContent>
         </Dialog>
-        <div className="flex gap-2">
+        <div className="flex flex-wrap gap-2">
           <Button variant="outline" size="sm" onClick={printLoans} title="প্রিন্ট">
             <Printer className="h-4 w-4 mr-1" />প্রিন্ট
           </Button>
+          <Button variant="outline" size="sm" onClick={downloadLoansPDF} title="PDF ডাউনলোড">
+            <FileText className="h-4 w-4 mr-1" />PDF
+          </Button>
           <Button variant="outline" size="sm" onClick={downloadLoansExcel} title="Excel ডাউনলোড">
-            <Download className="h-4 w-4 mr-1" />ডাউনলোড
+            <Download className="h-4 w-4 mr-1" />Excel
           </Button>
         </div>
       </CardHeader>
