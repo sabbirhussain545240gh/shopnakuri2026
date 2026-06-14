@@ -2345,35 +2345,36 @@ function LoansTab() {
         <DialogContent className="max-w-2xl">
           <DialogHeader><DialogTitle>ঋণের বিস্তারিত</DialogTitle></DialogHeader>
           {detailFor && (() => {
-            const m = data.members.find((x) => x.id === detailFor.memberId);
-            const gm = data.members.find((x) => x.id === detailFor.memberGuarantorId);
-            const due = loanTotalDue(detailFor);
-            const pays = data.payments.filter((p) => p.loanId === detailFor.id);
+            const currentLoan = data.loans.find((x) => x.id === detailFor.id) ?? detailFor;
+            const m = data.members.find((x) => x.id === currentLoan.memberId);
+            const gm = data.members.find((x) => x.id === currentLoan.memberGuarantorId);
+            const due = loanTotalDue(currentLoan);
+            const pays = data.payments.filter((p) => p.loanId === currentLoan.id);
             const paid = pays.reduce((s, p) => s + p.amount, 0);
-            const idx = data.loans.findIndex((x) => x.id === detailFor.id);
+            const idx = data.loans.findIndex((x) => x.id === currentLoan.id);
             return (
               <div className="space-y-3 text-sm">
                 <div className="grid grid-cols-2 gap-2">
                   <div><span className="text-muted-foreground">ঋণ নং:</span> {toBn(idx + 1)}</div>
-                  <div><span className="text-muted-foreground">তারিখ:</span> {fmtDate(detailFor.date)}</div>
+                  <div><span className="text-muted-foreground">তারিখ:</span> {fmtDate(currentLoan.date)}</div>
                   <div><span className="text-muted-foreground">সদস্য:</span> {m?.name ?? "—"}</div>
                   <div><span className="text-muted-foreground">মোবাইল:</span> {m?.phone ?? "—"}</div>
-                  <div><span className="text-muted-foreground">মূল:</span> {formatTk(detailFor.amount)}</div>
-                  <div><span className="text-muted-foreground">সুদের হার:</span> {toBn(detailFor.interestRate)}%</div>
-                  <div><span className="text-muted-foreground">মেয়াদ:</span> {toBn(detailFor.durationMonths)} মাস</div>
-                  <div><span className="text-muted-foreground">মাসিক কিস্তি:</span> {formatTk(monthlyInstallment(detailFor.amount, detailFor.interestRate, detailFor.durationMonths))}</div>
-                  <div><span className="text-muted-foreground">১ম কিস্তির তারিখ:</span> {fmtDate(addMonths(detailFor.date, 1))}</div>
-                  <div><span className="text-muted-foreground">ঋণ শেষ:</span> {fmtDate(addMonths(detailFor.date, detailFor.durationMonths))}</div>
+                  <div><span className="text-muted-foreground">মূল:</span> {formatTk(currentLoan.amount)}</div>
+                  <div><span className="text-muted-foreground">সুদের হার:</span> {toBn(currentLoan.interestRate)}%</div>
+                  <div><span className="text-muted-foreground">মেয়াদ:</span> {toBn(currentLoan.durationMonths)} মাস</div>
+                  <div><span className="text-muted-foreground">মাসিক কিস্তি:</span> {formatTk(monthlyInstallment(currentLoan.amount, currentLoan.interestRate, currentLoan.durationMonths))}</div>
+                  <div><span className="text-muted-foreground">১ম কিস্তির তারিখ:</span> {fmtDate(addMonths(currentLoan.date, 1))}</div>
+                  <div><span className="text-muted-foreground">ঋণ শেষ:</span> {fmtDate(addMonths(currentLoan.date, currentLoan.durationMonths))}</div>
                   <div><span className="text-muted-foreground">মোট প্রদেয়:</span> {formatTk(due)}</div>
                   <div><span className="text-success">পরিশোধ:</span> {formatTk(paid)}</div>
                   <div><span className="text-destructive">বকেয়া:</span> {formatTk(Math.max(0, due - paid))}</div>
-                  <div><span className="text-muted-foreground">অবস্থা:</span> {detailFor.status === "active" ? "চলমান" : "পরিশোধিত"}</div>
+                  <div><span className="text-muted-foreground">অবস্থা:</span> {currentLoan.status === "active" ? "চলমান" : "পরিশোধিত"}</div>
                 </div>
                 <div className="border-t pt-2">
                   <div className="font-medium mb-1">জামিনদার</div>
                   <div>সদস্য জামিনদার: {gm?.name ?? "—"}</div>
-                  {detailFor.familyGuarantor && (
-                    <div>পারিবারিক: {detailFor.familyGuarantor.name} ({detailFor.familyGuarantor.relation}) — {detailFor.familyGuarantor.phone}</div>
+                  {currentLoan.familyGuarantor && (
+                    <div>পারিবারিক: {currentLoan.familyGuarantor.name} ({currentLoan.familyGuarantor.relation}) — {currentLoan.familyGuarantor.phone}</div>
                   )}
                 </div>
                 <div className="border-t pt-2">
@@ -2395,7 +2396,8 @@ function LoansTab() {
                   <Button
                     variant="outline"
                     onClick={() => {
-                      const newStatus = refreshLoanStatus(detailFor.id);
+                      const newStatus = refreshLoanStatus(currentLoan.id);
+                      setDetailFor((prev) => prev && newStatus ? { ...prev, status: newStatus } : prev);
                       if (newStatus === "closed") {
                         toast.success("ঋণের স্ট্যাটাস আপডেট হয়েছে — এখন পরিশোধিত");
                       } else {
@@ -2414,7 +2416,7 @@ function LoansTab() {
                         samitiAddress: data.samitiAddress,
                         establishedDate: data.establishedDate,
                       };
-                      printLoanDetail(detailFor, idx + 1, m, gm, pays, samiti);
+                      printLoanDetail(currentLoan, idx + 1, m, gm, pays, samiti);
                     }}
                   >
                     <Printer className="h-4 w-4" /> প্রিন্ট
@@ -2429,7 +2431,7 @@ function LoansTab() {
                         establishedDate: data.establishedDate,
                       };
                       try {
-                        await exportLoanDetailPdf(detailFor, idx + 1, m, gm, pays, samiti);
+                        await exportLoanDetailPdf(currentLoan, idx + 1, m, gm, pays, samiti);
                       } catch (e) {
                         toast.error("PDF ডাউনলোড ব্যর্থ হয়েছে");
                       }
@@ -2437,14 +2439,14 @@ function LoansTab() {
                   >
                     <Download className="h-4 w-4" /> PDF ডাউনলোড
                   </Button>
-                  {detailFor.status === "active" && (() => {
-                    const inst = monthlyInstallment(detailFor.amount, detailFor.interestRate, detailFor.durationMonths);
+                  {currentLoan.status === "active" && (() => {
+                    const inst = monthlyInstallment(currentLoan.amount, currentLoan.interestRate, currentLoan.durationMonths);
                     const remaining = Math.max(0, due - paid);
                     return (
                       <Button
                         onClick={() => {
                           const target = Math.min(inst, remaining);
-                          setPayFor(detailFor);
+                          setPayFor(currentLoan);
                           setPayForm({ amount: String(Math.round(target)), date: today(), note: "" });
                           setDetailFor(null);
                         }}

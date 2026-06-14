@@ -135,6 +135,11 @@ const empty: SamitiData = {
   settings: { defaultInterestRate: 10, defaultDurationMonths: 12, notice: "" },
 };
 
+function loanShouldBeClosed(loan: Loan, paid: number) {
+  const remaining = Math.max(0, loanTotalDue(loan) - paid);
+  return Math.round(remaining) <= 0;
+}
+
 function load(): SamitiData {
   if (typeof window === "undefined") return empty;
   try {
@@ -150,7 +155,7 @@ function load(): SamitiData {
     // reconcile loan statuses based on payments
     parsed.loans = parsed.loans.map((l) => {
       const paid = parsed.payments.filter((p) => p.loanId === l.id).reduce((s, p) => s + p.amount, 0);
-      const shouldBeClosed = paid + 0.0001 >= loanTotalDue(l);
+      const shouldBeClosed = loanShouldBeClosed(l, paid);
       return { ...l, status: shouldBeClosed ? "closed" : "active" };
     });
     return parsed;
@@ -256,7 +261,7 @@ export async function startCloudSync(userId: string) {
       const incoming = { ...empty, ...(res.data as SamitiData) };
       incoming.loans = incoming.loans.map((l) => {
         const paid = incoming.payments.filter((p) => p.loanId === l.id).reduce((s, p) => s + p.amount, 0);
-        const shouldBeClosed = paid + 0.0001 >= loanTotalDue(l);
+        const shouldBeClosed = loanShouldBeClosed(l, paid);
         return { ...l, status: shouldBeClosed ? "closed" : "active" };
       });
       setState(incoming);
@@ -382,9 +387,8 @@ export function useSamiti() {
   const reconcileLoanStatus = (loanId: string, loans: Loan[], payments: LoanPayment[]): Loan[] => {
     const loan = loans.find((l) => l.id === loanId);
     if (!loan) return loans;
-    const due = loanTotalDue(loan);
     const paid = payments.filter((p) => p.loanId === loanId).reduce((s, p) => s + p.amount, 0);
-    const shouldBeClosed = paid + 0.0001 >= due;
+    const shouldBeClosed = loanShouldBeClosed(loan, paid);
     const nextStatus: Loan["status"] = shouldBeClosed ? "closed" : "active";
     if (loan.status === nextStatus) return loans;
     return loans.map((l) => (l.id === loanId ? { ...l, status: nextStatus } : l));
