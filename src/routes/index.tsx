@@ -1985,6 +1985,17 @@ function LoansTab() {
     toast.success("ঋণ আপডেট হয়েছে");
   };
 
+  const filteredLoans = useMemo(() => {
+    const term = loanSearch.trim().toLowerCase();
+    return data.loans.filter((l) => {
+      const m = data.members.find((x) => x.id === l.memberId);
+      const name = (m?.name ?? "").toLowerCase();
+      const matchesSearch = !term || name.includes(term);
+      const matchesStatus = loanStatusFilter === "all" || l.status === loanStatusFilter;
+      return matchesSearch && matchesStatus;
+    });
+  }, [data.loans, data.members, loanSearch, loanStatusFilter]);
+
   return (
     <Card>
       <CardHeader className="flex flex-row items-center justify-between gap-2">
