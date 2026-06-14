@@ -253,7 +253,13 @@ export async function startCloudSync(userId: string) {
     readOnlyMode = !res.canWrite;
     if (res.data && typeof res.data === "object" && Object.keys(res.data as object).length > 0) {
       suppressCloudSave = true;
-      setState({ ...empty, ...(res.data as SamitiData) });
+      const incoming = { ...empty, ...(res.data as SamitiData) };
+      incoming.loans = incoming.loans.map((l) => {
+        const paid = incoming.payments.filter((p) => p.loanId === l.id).reduce((s, p) => s + p.amount, 0);
+        const shouldBeClosed = paid + 0.0001 >= loanTotalDue(l);
+        return { ...l, status: shouldBeClosed ? "closed" : "active" };
+      });
+      setState(incoming);
       suppressCloudSave = false;
       setCloudStatus("saved");
     } else if (cloudCanWrite) {
