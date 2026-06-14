@@ -2181,7 +2181,7 @@ function LoansTab() {
                         title="বিস্তারিত দেখুন"
                         onClick={() => setDetailFor(l)}
                       >
-                        {m?.name ?? "—"}
+                        {m?.name ?? "—"}{m?.serial ? ` (নং: ${toBn(m.serial)})` : ""}
                       </button>
                     </TableCell>
                     <TableCell className="font-medium">{toBn(idx + 1)}</TableCell>
