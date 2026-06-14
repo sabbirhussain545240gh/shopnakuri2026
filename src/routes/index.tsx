@@ -2114,7 +2114,16 @@ function LoansTab() {
                 return (
                   <TableRow key={l.id}>
                     <TableCell className="font-medium">{toBn(idx + 1)}</TableCell>
-                    <TableCell className="font-medium">{m?.name ?? "—"}</TableCell>
+                    <TableCell className="font-medium">
+                      <button
+                        type="button"
+                        className="text-foreground hover:text-primary underline-offset-2 hover:underline cursor-pointer"
+                        title="বিস্তারিত দেখুন"
+                        onClick={() => setDetailFor(l)}
+                      >
+                        {m?.name ?? "—"}
+                      </button>
+                    </TableCell>
                     <TableCell>{fmtDate(l.date)}</TableCell>
                     <TableCell className="text-right">{formatTk(l.amount)}</TableCell>
                     <TableCell className="text-right">{formatTk(due)}</TableCell>
