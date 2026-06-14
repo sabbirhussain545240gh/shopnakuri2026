@@ -21,7 +21,7 @@ import { Badge } from "@/components/ui/badge";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Textarea } from "@/components/ui/textarea";
-import { Users, PiggyBank, HandCoins, LayoutDashboard, Trash2, Plus, CheckCircle2, Pencil, Settings as SettingsIcon, Wallet, Download, Upload, AlertTriangle, TrendingUp, TrendingDown, Menu, Printer, FileText, Receipt, Search, Eye, Share, ImageDown, Check, ChevronsUpDown, ShieldCheck, Loader2, ArrowRight, Banknote, QrCode, RefreshCw, X } from "lucide-react";
+import { Users, PiggyBank, HandCoins, LayoutDashboard, Trash2, Plus, CheckCircle2, Pencil, Settings as SettingsIcon, Wallet, Download, Upload, AlertTriangle, TrendingUp, TrendingDown, Menu, Printer, FileText, Receipt, Search, Eye, Share, ImageDown, Check, ChevronsUpDown, ShieldCheck, Loader2, ArrowRight, Banknote, QrCode, RefreshCw, X, Scale } from "lucide-react";
 import { toast } from "sonner";
 import { AuthGate, SignOutButton, CloudStatusBadge } from "@/components/AuthGate";
 import { makeQrDataUrl } from "@/lib/receipt-qr";
@@ -161,6 +161,7 @@ const navItems = [
   { value: "deposits", label: "জমা ইতিহাস", icon: PiggyBank },
   { value: "cashbook", label: "আয়-ব্যয়", icon: Wallet },
   { value: "reports", label: "রিপোর্ট", icon: FileText },
+  { value: "reconciliation", label: "এমাউন্ট সমন্নয়", icon: Scale },
   { value: "settings", label: "সেটিংস", icon: SettingsIcon },
   { value: "admin", label: "সুপার এডমিন", icon: ShieldCheck },
 ];
@@ -363,6 +364,7 @@ function SamitiApp() {
           {tab === "deposits" && <DepositsHistoryTab />}
           {tab === "cashbook" && <CashbookTab />}
           {tab === "reports" && <ReportsTab />}
+          {tab === "reconciliation" && <ReconciliationTab />}
           {tab === "settings" && <SettingsTab />}
           {tab === "admin" && <AdminTab />}
         </main>
@@ -4102,6 +4104,130 @@ function SettingsTab() {
 // ===== Admin =====
 function AdminTab() {
   return <RoleManager />;
+}
+
+// ===== Reconciliation =====
+function ReconciliationTab() {
+  const { data } = useSamiti();
+
+  const totals = useMemo(() => {
+    const totalDeposit = data.deposits.reduce((a, d) => a + d.amount, 0);
+    const totalLoanGiven = data.loans.reduce((a, l) => a + l.amount, 0);
+    const totalRepaid = data.payments.reduce((a, p) => a + p.amount, 0);
+    const totalIncome = data.transactions.filter((t) => t.type === "income").reduce((a, t) => a + t.amount, 0);
+    const totalExpense = data.transactions.filter((t) => t.type === "expense").reduce((a, t) => a + t.amount, 0);
+    const outstanding = data.loans
+      .filter((l) => l.status === "active")
+      .reduce((a, l) => a + (loanTotalDue(l) - loanPaid(data.payments, l.id)), 0);
+    const totalLoanReceivable = data.loans.reduce((a, l) => a + loanTotalDue(l), 0);
+    const netAssets = totalDeposit + totalRepaid + totalIncome - totalExpense - totalLoanGiven;
+    const fundBalance = netAssets + outstanding;
+    return {
+      totalDeposit,
+      totalLoanGiven,
+      totalRepaid,
+      totalIncome,
+      totalExpense,
+      outstanding,
+      totalLoanReceivable,
+      netAssets,
+      fundBalance,
+    };
+  }, [data]);
+
+  const rows = [
+    { label: "মোট সঞ্চয়/চাদা জমা", value: totals.totalDeposit, type: "positive" as const },
+    { label: "মোট ঋণ প্রদান", value: totals.totalLoanGiven, type: "negative" as const },
+    { label: "মোট কিস্তি আদায়", value: totals.totalRepaid, type: "positive" as const },
+    { label: "মোট আয়", value: totals.totalIncome, type: "positive" as const },
+    { label: "মোট ব্যয়", value: totals.totalExpense, type: "negative" as const },
+    { label: "চলমান ঋণ বকেয়া", value: totals.outstanding, type: "neutral" as const },
+    { label: "সর্বমোট ঋণ প্রাপ্তি (আদায় + বকেয়া)", value: totals.totalLoanReceivable, type: "neutral" as const },
+    { label: "নীট সম্পদ (জমা + আদায় + আয় - ব্যয় - ঋণ)", value: totals.netAssets, type: "neutral" as const },
+    { label: "তহবিল ব্যালেন্স (নীট সম্পদ + বকেয়া)", value: totals.fundBalance, type: "neutral" as const },
+  ];
+
+  const memberReconciliation = useMemo(() => {
+    return data.members.map((m) => {
+      const deposit = data.deposits.filter((d) => d.memberId === m.id).reduce((a, d) => a + d.amount, 0);
+      const memberLoans = data.loans.filter((l) => l.memberId === m.id);
+      const loanTaken = memberLoans.reduce((a, l) => a + l.amount, 0);
+      const repaid = memberLoans.reduce((a, l) => a + loanPaid(data.payments, l.id), 0);
+      const due = memberLoans.reduce((a, l) => a + (loanTotalDue(l) - loanPaid(data.payments, l.id)), 0);
+      return { member: m, deposit, loanTaken, repaid, due };
+    }).sort((a, b) => (a.member.serial || 0) - (b.member.serial || 0));
+  }, [data]);
+
+  return (
+    <div className="space-y-6">
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Scale className="h-5 w-5 text-primary" />
+            এমাউন্ট সমন্নয় (Account Reconciliation)
+          </CardTitle>
+          <CardDescription>সমিতির সামগ্রিক অর্থনৈতিক অবস্থার সংক্ষিপ্ত বিবরণ</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="grid gap-3">
+            {rows.map((r) => (
+              <div key={r.label} className="flex items-center justify-between rounded-lg border px-4 py-3">
+                <span className="text-sm font-medium">{r.label}</span>
+                <span className={cn(
+                  "text-sm font-bold",
+                  r.type === "positive" && "text-success",
+                  r.type === "negative" && "text-destructive",
+                  r.type === "neutral" && "text-foreground"
+                )}>
+                  {formatTk(r.value)}
+                </span>
+              </div>
+            ))}
+          </div>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>সদস্যভিত্তিক সমন্নয়</CardTitle>
+          <CardDescription>প্রত্যেক সদস্যের জমা, ঋণ ও বকেয়ার হিসাব</CardDescription>
+        </CardHeader>
+        <CardContent>
+          {memberReconciliation.length === 0 ? (
+            <p className="text-sm text-muted-foreground text-center py-8">কোনও সদস্য নেই।</p>
+          ) : (
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>সদস্য</TableHead>
+                  <TableHead className="text-right">মোট জমা</TableHead>
+                  <TableHead className="text-right">ঋণ গ্রহণ</TableHead>
+                  <TableHead className="text-right">ঋণ আদায়</TableHead>
+                  <TableHead className="text-right">ঋণ বকেয়া</TableHead>
+                  <TableHead className="text-right">নীট অবস্থান</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {memberReconciliation.map((r) => {
+                  const net = r.deposit - r.loanTaken + r.repaid;
+                  return (
+                    <TableRow key={r.member.id}>
+                      <TableCell className="font-medium">{r.member.name}{r.member.serial ? ` -${toBn(r.member.serial)}` : ""}</TableCell>
+                      <TableCell className="text-right text-success">{formatTk(r.deposit)}</TableCell>
+                      <TableCell className="text-right text-destructive">{formatTk(r.loanTaken)}</TableCell>
+                      <TableCell className="text-right text-success">{formatTk(r.repaid)}</TableCell>
+                      <TableCell className="text-right font-semibold text-destructive">{formatTk(r.due)}</TableCell>
+                      <TableCell className="text-right font-bold">{formatTk(net)}</TableCell>
+                    </TableRow>
+                  );
+                })}
+              </TableBody>
+            </Table>
+          )}
+        </CardContent>
+      </Card>
+    </div>
+  );
 }
 
 // ===== Reports =====
