@@ -374,10 +374,10 @@ export function useSamiti() {
     setState({ ...getState(), loans: [...getState().loans, { ...l, id: crypto.randomUUID(), status: "active" }] });
   }, []);
   const updateLoan = useCallback((id: string, updates: Partial<Omit<Loan, "id">>) => {
-    setState({
-      ...getState(),
-      loans: getState().loans.map((l) => (l.id === id ? { ...l, ...updates } : l)),
-    });
+    const s = getState();
+    const loansUpdated = s.loans.map((l) => (l.id === id ? { ...l, ...updates } : l));
+    const loans = reconcileLoanStatus(id, loansUpdated, s.payments);
+    setState({ ...s, loans });
   }, []);
   const reconcileLoanStatus = (loanId: string, loans: Loan[], payments: LoanPayment[]): Loan[] => {
     const loan = loans.find((l) => l.id === loanId);
