@@ -2245,6 +2245,24 @@ function LoansTab() {
                     </Table>
                   )}
                 </div>
+                {detailFor.status === "active" && (() => {
+                  const inst = monthlyInstallment(detailFor.amount, detailFor.interestRate, detailFor.durationMonths);
+                  const remaining = Math.max(0, due - paid);
+                  return (
+                    <div className="border-t pt-3 flex justify-end">
+                      <Button
+                        onClick={() => {
+                          const target = Math.min(inst, remaining);
+                          setPayFor(detailFor);
+                          setPayForm({ amount: String(Math.round(target)), date: today(), note: "" });
+                          setDetailFor(null);
+                        }}
+                      >
+                        ঋণ আদায়
+                      </Button>
+                    </div>
+                  );
+                })()}
               </div>
             );
           })()}
