@@ -2117,6 +2117,15 @@ function LoansTab() {
                 <SelectItem value="closed">পরিশোধিত</SelectItem>
               </SelectContent>
             </Select>
+            <Button
+              variant="outline"
+              size="icon"
+              title="পরিষ্কার"
+              disabled={!loanSearch && loanStatusFilter === "all"}
+              onClick={() => { setLoanSearch(""); setLoanStatusFilter("all"); }}
+            >
+              <X className="h-4 w-4" />
+            </Button>
           </div>
         )}
         {data.loans.length === 0 ? (
