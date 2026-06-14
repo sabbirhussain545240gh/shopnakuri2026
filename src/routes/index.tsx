@@ -4107,8 +4107,29 @@ function AdminTab() {
 }
 
 // ===== Reconciliation =====
+const ADJUST_CATEGORY = "সমন্নয়";
+
 function ReconciliationTab() {
-  const { data } = useSamiti();
+  const { data, addTransaction, deleteTransaction } = useSamiti();
+  const [form, setForm] = useState<{ type: "income" | "expense"; amount: string; date: string; note: string }>({
+    type: "income", amount: "", date: today(), note: "",
+  });
+
+  const submitAdjust = () => {
+    const amt = Number(form.amount);
+    if (!amt || amt <= 0) { toast.error("সঠিক পরিমাণ দিন"); return; }
+    addTransaction({ type: form.type, category: ADJUST_CATEGORY, amount: amt, date: form.date, note: form.note });
+    setForm({ type: "income", amount: "", date: today(), note: "" });
+    toast.success("সমন্নয় রেকর্ড সংরক্ষিত হয়েছে");
+  };
+
+  const adjustments = useMemo(
+    () => data.transactions
+      .filter((t) => t.category === ADJUST_CATEGORY)
+      .slice()
+      .sort((a, b) => (a.date < b.date ? 1 : -1)),
+    [data.transactions]
+  );
 
   const totals = useMemo(() => {
     const totalDeposit = data.deposits.reduce((a, d) => a + d.amount, 0);
