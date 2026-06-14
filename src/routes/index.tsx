@@ -1834,6 +1834,12 @@ function SavingsTab() {
           <CardDescription>মোট {toBn(data.deposits.length)}টি লেনদেন</CardDescription>
         </div>
         <div className="flex items-center gap-2 flex-wrap">
+          <Button variant="outline" size="sm" disabled={data.members.length === 0} onClick={printCollectionForm}>
+            <Printer className="h-4 w-4 mr-1" />কালেকশন ফর্ম
+          </Button>
+          <Button variant="outline" size="sm" disabled={data.members.length === 0} onClick={() => downloadCollectionPdf().catch(() => toast.error("PDF তৈরিতে সমস্যা"))}>
+            <FileText className="h-4 w-4 mr-1" />ফর্ম PDF
+          </Button>
           <Button variant="outline" disabled={data.members.length < 2} onClick={replicateFromFirst}>
             ১ নং অনুযায়ী সকলের চাঁদা
           </Button>
