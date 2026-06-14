@@ -1825,6 +1825,23 @@ function SavingsTab() {
     pdf.save("কালেকশন-ফর্ম.pdf");
   };
 
+  const downloadCollectionExcel = () => {
+    const monthLabel = new Date().toLocaleDateString("bn-BD", { year: "numeric", month: "long" });
+    const rows = collectionRows.map(({ m, inst, due, hasLoan }) => ({
+      "সি.নং": m.serial || 0,
+      "সদস্যের নাম": m.name,
+      "মাসিক চাদা": "",
+      "বকেয়া ঋণ": hasLoan ? due : "—",
+      "মাসিক কিস্তি": hasLoan ? inst : "—",
+      "আদায়কৃত কিস্তি": "",
+      "স্বাক্ষর": "",
+    }));
+    const ws = XLSX.utils.json_to_sheet(rows);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, `কালেকশন ফর্ম ${monthLabel}`);
+    XLSX.writeFile(wb, `কালেকশন-ফর্ম-${monthLabel}.xlsx`);
+  };
+
   return (
     <>
     <Card>
