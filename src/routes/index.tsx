@@ -4238,7 +4238,75 @@ function ReconciliationTab() {
         </CardContent>
       </Card>
 
-
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Scale className="h-5 w-5 text-primary" />
+            বকেয়া ঋণ সমন্নয়
+          </CardTitle>
+          <CardDescription>সদস্যের চলমান ঋণের বকেয়া পরিমাণ সমন্নয় করুন (পরিশোধ / মওকুফ)</CardDescription>
+        </CardHeader>
+        <CardContent>
+          {activeLoansWithDue.length === 0 ? (
+            <p className="text-sm text-muted-foreground text-center py-6 border rounded-lg">কোনও বকেয়া ঋণ নেই।</p>
+          ) : (
+            <>
+              <div className="grid gap-3 md:grid-cols-5">
+                <div className="space-y-1.5 md:col-span-2">
+                  <Label>সদস্য / ঋণ নির্বাচন</Label>
+                  <Select
+                    value={loanForm.loanId}
+                    onValueChange={(v) => setLoanForm({ ...loanForm, loanId: v })}
+                  >
+                    <SelectTrigger><SelectValue placeholder="বাছাই করুন" /></SelectTrigger>
+                    <SelectContent>
+                      {activeLoansWithDue.map((x) => (
+                        <SelectItem key={x.loan.id} value={x.loan.id}>
+                          {x.member?.name || "?"} -{toBn(x.member?.serial ?? 0)} • বকেয়াঃ {formatTk(x.due)}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="space-y-1.5">
+                  <Label>পরিমাণ (৳)</Label>
+                  <Input
+                    type="number"
+                    inputMode="decimal"
+                    value={loanForm.amount}
+                    onChange={(e) => setLoanForm({ ...loanForm, amount: e.target.value })}
+                    placeholder={selectedLoan ? String(Math.round(selectedLoan.due)) : "0"}
+                  />
+                </div>
+                <div className="space-y-1.5">
+                  <Label>তারিখ</Label>
+                  <Input type="date" value={loanForm.date} onChange={(e) => setLoanForm({ ...loanForm, date: e.target.value })} />
+                </div>
+                <div className="space-y-1.5">
+                  <Label>মন্তব্য</Label>
+                  <Input value={loanForm.note} onChange={(e) => setLoanForm({ ...loanForm, note: e.target.value })} placeholder="সমন্নয়" />
+                </div>
+              </div>
+              {selectedLoan && (
+                <div className="mt-3 text-xs text-muted-foreground">
+                  বর্তমান বকেয়াঃ <span className="font-semibold text-foreground">{formatTk(selectedLoan.due)}</span>
+                  {loanForm.amount && Number(loanForm.amount) > 0 && (
+                    <> • সমন্নয়ের পরঃ <span className="font-semibold text-foreground">{formatTk(Math.max(0, selectedLoan.due - Number(loanForm.amount)))}</span></>
+                  )}
+                </div>
+              )}
+              <div className="mt-4 flex justify-end gap-2">
+                {selectedLoan && (
+                  <Button variant="outline" onClick={() => setLoanForm({ ...loanForm, amount: String(Math.round(selectedLoan.due)) })}>
+                    সম্পূর্ণ বকেয়া
+                  </Button>
+                )}
+                <Button onClick={submitLoanAdjust}><Plus className="h-4 w-4" /> সমন্নয় করুন</Button>
+              </div>
+            </>
+          )}
+        </CardContent>
+      </Card>
 
       <Card>
         <CardHeader>
