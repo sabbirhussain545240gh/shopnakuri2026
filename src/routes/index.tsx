@@ -2141,7 +2141,7 @@ function LoansTab() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {data.loans.map((l, idx) => {
+              {filteredLoans.map((l, idx) => {
                 const m = data.members.find((x) => x.id === l.memberId);
                 const due = loanTotalDue(l);
                 const paid = loanPaid(data.payments, l.id);
