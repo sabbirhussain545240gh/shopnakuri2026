@@ -147,6 +147,12 @@ function load(): SamitiData {
       if (typeof (m as any).serial === "number") return m;
       return { ...m, serial: nextSerial++ };
     });
+    // reconcile loan statuses based on payments
+    parsed.loans = parsed.loans.map((l) => {
+      const paid = parsed.payments.filter((p) => p.loanId === l.id).reduce((s, p) => s + p.amount, 0);
+      const shouldBeClosed = paid + 0.0001 >= loanTotalDue(l);
+      return { ...l, status: shouldBeClosed ? "closed" : "active" };
+    });
     return parsed;
   } catch {
     return empty;
