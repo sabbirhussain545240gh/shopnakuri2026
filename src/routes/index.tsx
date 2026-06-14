@@ -4107,8 +4107,29 @@ function AdminTab() {
 }
 
 // ===== Reconciliation =====
+const ADJUST_CATEGORY = "সমন্নয়";
+
 function ReconciliationTab() {
-  const { data } = useSamiti();
+  const { data, addTransaction, deleteTransaction } = useSamiti();
+  const [form, setForm] = useState<{ type: "income" | "expense"; amount: string; date: string; note: string }>({
+    type: "income", amount: "", date: today(), note: "",
+  });
+
+  const submitAdjust = () => {
+    const amt = Number(form.amount);
+    if (!amt || amt <= 0) { toast.error("সঠিক পরিমাণ দিন"); return; }
+    addTransaction({ type: form.type, category: ADJUST_CATEGORY, amount: amt, date: form.date, note: form.note });
+    setForm({ type: "income", amount: "", date: today(), note: "" });
+    toast.success("সমন্নয় রেকর্ড সংরক্ষিত হয়েছে");
+  };
+
+  const adjustments = useMemo(
+    () => data.transactions
+      .filter((t) => t.category === ADJUST_CATEGORY)
+      .slice()
+      .sort((a, b) => (a.date < b.date ? 1 : -1)),
+    [data.transactions]
+  );
 
   const totals = useMemo(() => {
     const totalDeposit = data.deposits.reduce((a, d) => a + d.amount, 0);
@@ -4183,6 +4204,87 @@ function ReconciliationTab() {
                 </span>
               </div>
             ))}
+          </div>
+        </CardContent>
+      </Card>
+
+
+
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Plus className="h-5 w-5 text-primary" />
+            নতুন সমন্নয় / পেমেন্ট রেকর্ড
+          </CardTitle>
+          <CardDescription>তহবিল সমন্নয়ের জন্য আয় বা ব্যয় যোগ করুন</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="grid gap-3 md:grid-cols-5">
+            <div className="space-y-1.5">
+              <Label>ধরন</Label>
+              <Select value={form.type} onValueChange={(v: "income" | "expense") => setForm({ ...form, type: v })}>
+                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="income">আয় / জমা</SelectItem>
+                  <SelectItem value="expense">ব্যয় / উত্তোলন</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-1.5">
+              <Label>পরিমাণ (৳)</Label>
+              <Input type="number" inputMode="decimal" value={form.amount} onChange={(e) => setForm({ ...form, amount: e.target.value })} placeholder="0" />
+            </div>
+            <div className="space-y-1.5">
+              <Label>তারিখ</Label>
+              <Input type="date" value={form.date} onChange={(e) => setForm({ ...form, date: e.target.value })} />
+            </div>
+            <div className="space-y-1.5 md:col-span-2">
+              <Label>মন্তব্য</Label>
+              <Input value={form.note} onChange={(e) => setForm({ ...form, note: e.target.value })} placeholder="যেমনঃ ব্যাংক সমন্নয়, পুরাতন বকেয়া, ইত্যাদি" />
+            </div>
+          </div>
+          <div className="mt-4 flex justify-end">
+            <Button onClick={submitAdjust}><Plus className="h-4 w-4" /> যোগ করুন</Button>
+          </div>
+
+          <div className="mt-6">
+            <h4 className="text-sm font-semibold mb-2">সাম্প্রতিক সমন্নয় রেকর্ড</h4>
+            {adjustments.length === 0 ? (
+              <p className="text-sm text-muted-foreground text-center py-6 border rounded-lg">কোনও সমন্নয় রেকর্ড নেই।</p>
+            ) : (
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>তারিখ</TableHead>
+                    <TableHead>ধরন</TableHead>
+                    <TableHead>মন্তব্য</TableHead>
+                    <TableHead className="text-right">পরিমাণ</TableHead>
+                    <TableHead className="w-12"></TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {adjustments.map((t) => (
+                    <TableRow key={t.id}>
+                      <TableCell>{fmtDate(t.date)}</TableCell>
+                      <TableCell>
+                        <Badge variant="outline" className={cn(t.type === "income" ? "text-success border-success/40" : "text-destructive border-destructive/40")}>
+                          {t.type === "income" ? "আয়" : "ব্যয়"}
+                        </Badge>
+                      </TableCell>
+                      <TableCell className="text-muted-foreground">{t.note || "-"}</TableCell>
+                      <TableCell className={cn("text-right font-semibold", t.type === "income" ? "text-success" : "text-destructive")}>
+                        {t.type === "income" ? "+" : "−"} {formatTk(t.amount)}
+                      </TableCell>
+                      <TableCell>
+                        <Button variant="ghost" size="icon" onClick={() => { deleteTransaction(t.id); toast.success("মুছে ফেলা হয়েছে"); }}>
+                          <Trash2 className="h-4 w-4 text-destructive" />
+                        </Button>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            )}
           </div>
         </CardContent>
       </Card>
