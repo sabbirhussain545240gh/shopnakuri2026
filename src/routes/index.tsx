@@ -1990,7 +1990,8 @@ function LoansTab() {
     return data.loans.filter((l) => {
       const m = data.members.find((x) => x.id === l.memberId);
       const name = (m?.name ?? "").toLowerCase();
-      const matchesSearch = !term || name.includes(term);
+      const loanNo = String(data.loans.findIndex((x) => x.id === l.id) + 1);
+      const matchesSearch = !term || name.includes(term) || loanNo.includes(term);
       const matchesStatus = loanStatusFilter === "all" || l.status === loanStatusFilter;
       return matchesSearch && matchesStatus;
     });
