@@ -836,6 +836,97 @@ function MembersTab() {
     }
   };
 
+  const printList = () => {
+    const w = window.open("", "_blank", "width=900,height=700");
+    if (!w) return;
+    const rows = data.members.map((m) => {
+      const totalDeposit = memberTotalDeposit(data.deposits, m.id);
+      return `
+        <tr>
+          <td style="border:1px solid #ccc;padding:8px;text-align:center;">${toBn(m.serial || 0)}</td>
+          <td style="border:1px solid #ccc;padding:8px;">${m.name}</td>
+          <td style="border:1px solid #ccc;padding:8px;">${m.phone ? toBn(m.phone) : "—"}</td>
+          <td style="border:1px solid #ccc;padding:8px;">${m.nid ? toBn(m.nid) : "—"}</td>
+          <td style="border:1px solid #ccc;padding:8px;">${fmtDate(m.joinDate)}</td>
+          <td style="border:1px solid #ccc;padding:8px;text-align:right;">${formatTk(totalDeposit)}</td>
+        </tr>`;
+    }).join("");
+    w.document.write(`<!DOCTYPE html>
+<html><head><meta charset="utf-8" /><title>সদস্য তালিকা - ${data.samitiName}</title>
+<style>
+  body { font-family: "Segoe UI", "Noto Sans Bengali", sans-serif; margin: 0; padding: 24px; background: #fff; color: #111; }
+  h2 { margin: 0 0 8px; font-size: 20px; }
+  p { margin: 0 0 16px; font-size: 14px; color: #555; }
+  table { width: 100%; border-collapse: collapse; font-size: 14:14px; }
+  th { background: #f3f4f6; border: 1px solid #ccc; padding: 10px; text-align: left; }
+  th:nth-child(1), th:nth-child(6) { text-align: center; }
+  @media print { body { padding: 0; } .no-print { display: none; } }
+</style></head>
+<body>
+  <div class="no-print" style="margin-bottom:16px;">
+    <button onclick="window.print()" style="padding:8px 16px;font-size:14px;cursor:pointer;">প্রিন্ট করুন</button>
+  </div>
+  <h2>${data.samitiName}</h2>
+  <p>সদস্য তালিকা — মোট ${toBn(data.members.length)} জন</p>
+  <table>
+    <thead><tr>
+      <th>সি.নং</th><th>নাম</th><th>মোবাইল</th><th>NID/জন্ম সনদ</th><th>যোগদান</th><th style="text-align:right;">মোট সঞ্চয়/চাদা</th>
+    </tr></thead>
+    <tbody>${rows}</tbody>
+  </table>
+  <script>setTimeout(()=>window.print(),300)</script>
+</body></html>`);
+    w.document.close();
+  };
+
+  const downloadListExcel = () => {
+    const rows = data.members.map((m) => ({
+      "সি.নং": m.serial || 0,
+      "নাম": m.name,
+      "পিতার নাম": m.fatherName,
+      "মাতার নাম": m.motherName,
+      "মোবাইল": m.phone,
+      "NID/জন্ম সনদ": m.nid,
+      "ঠিকানা": m.address,
+      "যোগদানের তারিখ": m.joinDate,
+      "জন্ম তারিখ": m.birthDate,
+      "নমিনির নাম": m.nominee?.name || "",
+      "নমিনির সম্পর্ক": m.nominee?.relation || "",
+      "নমিনির মোবাইল": m.nominee?.phone || "",
+      "নমিনির NID": m.nominee?.nid || "",
+      "মোট সঞ্চয়/চাদা": memberTotalDeposit(data.deposits, m.id),
+    }));
+    const ws = XLSX.utils.json_to_sheet(rows);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, "সদস্য তালিকা");
+    XLSX.writeFile(wb, "সদস্য-তালিকা.xlsx");
+  };
+
+  const downloadListPdf = async () => {
+    const { default: jsPDF } = await import("jspdf");
+    const { default: autoTable } = await import("jspdf-autotable");
+    const pdf = new jsPDF({ orientation: "landscape", unit: "pt", format: "a4" });
+    pdf.setFontSize(16);
+    pdf.text(data.samitiName || "সমিতি", 40, 30);
+    pdf.setFontSize(12);
+    pdf.text(`সদস্য তালিকা — মোট ${toBn(data.members.length)} জন`, 40, 50);
+    autoTable(pdf, {
+      startY: 65,
+      head: [["সি.নং", "নাম", "মোবাইল", "NID/জন্ম সনদ", "যোগদান", "মোট সঞ্চয়/চাদা"]],
+      body: data.members.map((m) => [
+        toBn(m.serial || 0),
+        m.name,
+        m.phone ? toBn(m.phone) : "—",
+        m.nid ? toBn(m.nid) : "—",
+        fmtDate(m.joinDate),
+        formatTk(memberTotalDeposit(data.deposits, m.id)).replace("৳ ", ""),
+      ]),
+      styles: { font: "helvetica", fontSize: 10 },
+      headStyles: { fillColor: [52, 73, 94], textColor: 255 },
+    });
+    pdf.save("সদস্য-তালিকা.pdf");
+  };
+
   return (
     <Card>
       <CardHeader className="flex flex-row items-center justify-between gap-2 flex-wrap">
@@ -844,6 +935,19 @@ function MembersTab() {
           <CardDescription>মোট {toBn(data.members.length)} জন সদস্য</CardDescription>
         </div>
         <div className="flex gap-2 flex-wrap items-center">
+          {data.members.length > 0 && (
+            <>
+              <Button variant="outline" size="sm" onClick={printList}>
+                <Printer className="h-4 w-4 mr-1" />প্রিন্ট
+              </Button>
+              <Button variant="outline" size="sm" onClick={downloadListExcel}>
+                <Download className="h-4 w-4 mr-1" />Excel
+              </Button>
+              <Button variant="outline" size="sm" onClick={() => downloadListPdf().catch(() => toast.error("PDF তৈরিতে সমস্যা"))}>
+                <FileText className="h-4 w-4 mr-1" />PDF
+              </Button>
+            </>
+          )}
           <input
             ref={fileInputRef}
             type="file"
