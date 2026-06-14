@@ -1719,6 +1719,112 @@ function SavingsTab() {
     });
   }, [data.deposits, data.members, search]);
 
+  const collectionRows = useMemo(() => {
+    const sorted = [...data.members].sort((a, b) => (a.serial || 0) - (b.serial || 0));
+    return sorted.map((m) => {
+      const activeLoans = data.loans.filter((l) => l.memberId === m.id && l.status !== "closed");
+      let inst = 0;
+      let due = 0;
+      for (const l of activeLoans) {
+        inst += monthlyInstallment(l.amount, l.interestRate, l.durationMonths);
+        due += loanTotalDue(l) - loanPaid(data.payments, l.id);
+      }
+      return { m, inst: Math.round(inst), due: Math.round(due), hasLoan: activeLoans.length > 0 };
+    });
+  }, [data.members, data.loans, data.payments]);
+
+  const printCollectionForm = () => {
+    const w = window.open("", "_blank", "width=1100,height=800");
+    if (!w) return;
+    const monthLabel = new Date().toLocaleDateString("bn-BD", { year: "numeric", month: "long" });
+    const rows = collectionRows.map(({ m, inst, due, hasLoan }) => `
+      <tr>
+        <td class="c">${toBn(m.serial || 0)}</td>
+        <td>${m.name}</td>
+        <td class="r"></td>
+        <td class="r">${hasLoan ? formatTk(due) : "—"}</td>
+        <td class="r">${hasLoan ? formatTk(inst) : "—"}</td>
+        <td class="r"></td>
+        <td></td>
+      </tr>`).join("");
+    w.document.write(`<!DOCTYPE html>
+<html><head><meta charset="utf-8" /><title>কালেকশন ফর্ম - ${data.samitiName}</title>
+<style>
+  @page { size: A4 landscape; margin: 10mm; }
+  body { font-family: "Segoe UI", "Noto Sans Bengali", sans-serif; margin: 0; padding: 8px 12px; color: #111; }
+  h2 { margin: 0; font-size: 18px; text-align: center; }
+  .sub { text-align: center; font-size: 12px; color: #555; margin: 2px 0 8px; }
+  table { width: 100%; border-collapse: collapse; font-size: 12px; table-layout: fixed; }
+  th, td { border: 1px solid #333; padding: 4px 6px; }
+  th { background: #e5e7eb; text-align: center; font-size: 12px; }
+  td.c { text-align: center; }
+  td.r { text-align: right; }
+  tbody tr { height: 22px; }
+  .foot { display:flex; justify-content: space-between; font-size: 12px; margin-top: 14px; }
+  @media print { .no-print { display: none; } body { padding: 0; } }
+</style></head>
+<body>
+  <div class="no-print" style="text-align:right;margin-bottom:6px;">
+    <button onclick="window.print()" style="padding:6px 14px;cursor:pointer;">প্রিন্ট করুন</button>
+  </div>
+  <h2>${data.samitiName}</h2>
+  <div class="sub">মাসিক চাদা ও ঋণের কিস্তি আদায় ফর্ম — ${monthLabel}</div>
+  <table>
+    <colgroup>
+      <col style="width:6%"><col style="width:22%"><col style="width:13%"><col style="width:13%"><col style="width:13%"><col style="width:13%"><col style="width:20%">
+    </colgroup>
+    <thead><tr>
+      <th>সি.নং</th><th>সদস্যের নাম</th><th>মাসিক চাদা</th><th>বকেয়া ঋণ</th><th>মাসিক কিস্তি</th><th>আদায়কৃত কিস্তি</th><th>স্বাক্ষর</th>
+    </tr></thead>
+    <tbody>${rows}</tbody>
+  </table>
+  <div class="foot">
+    <div>কালেকটরের স্বাক্ষর: ____________________</div>
+    <div>সভাপতি/সম্পাদকের স্বাক্ষর: ____________________</div>
+  </div>
+  <script>setTimeout(()=>window.print(),300)</script>
+</body></html>`);
+    w.document.close();
+  };
+
+  const downloadCollectionPdf = async () => {
+    const { default: jsPDF } = await import("jspdf");
+    const { default: autoTable } = await import("jspdf-autotable");
+    const pdf = new jsPDF({ orientation: "landscape", unit: "pt", format: "a4" });
+    const pageW = pdf.internal.pageSize.getWidth();
+    const monthLabel = new Date().toLocaleDateString("bn-BD", { year: "numeric", month: "long" });
+    pdf.setFontSize(14);
+    pdf.text(data.samitiName || "সমিতি", pageW / 2, 28, { align: "center" });
+    pdf.setFontSize(11);
+    pdf.text(`Monthly Collection Form — ${monthLabel}`, pageW / 2, 46, { align: "center" });
+    autoTable(pdf, {
+      startY: 58,
+      head: [["Sl", "Name", "Monthly Chada", "Loan Due", "Installment", "Paid", "Signature"]],
+      body: collectionRows.map(({ m, inst, due, hasLoan }) => [
+        toBn(m.serial || 0),
+        m.name,
+        "",
+        hasLoan ? formatTk(due).replace("৳ ", "") : "—",
+        hasLoan ? formatTk(inst).replace("৳ ", "") : "—",
+        "",
+        "",
+      ]),
+      styles: { font: "helvetica", fontSize: 9, cellPadding: 3, minCellHeight: 16 },
+      headStyles: { fillColor: [52, 73, 94], textColor: 255, halign: "center" },
+      columnStyles: {
+        0: { halign: "center", cellWidth: 35 },
+        1: { cellWidth: 160 },
+        2: { halign: "right", cellWidth: 90 },
+        3: { halign: "right", cellWidth: 90 },
+        4: { halign: "right", cellWidth: 90 },
+        5: { halign: "right", cellWidth: 90 },
+        6: { cellWidth: 140 },
+      },
+      margin: { left: 20, right: 20 },
+    });
+    pdf.save("কালেকশন-ফর্ম.pdf");
+  };
+
   return (
     <>
     <Card>
@@ -1728,6 +1834,12 @@ function SavingsTab() {
           <CardDescription>মোট {toBn(data.deposits.length)}টি লেনদেন</CardDescription>
         </div>
         <div className="flex items-center gap-2 flex-wrap">
+          <Button variant="outline" size="sm" disabled={data.members.length === 0} onClick={printCollectionForm}>
+            <Printer className="h-4 w-4 mr-1" />কালেকশন ফর্ম
+          </Button>
+          <Button variant="outline" size="sm" disabled={data.members.length === 0} onClick={() => downloadCollectionPdf().catch(() => toast.error("PDF তৈরিতে সমস্যা"))}>
+            <FileText className="h-4 w-4 mr-1" />ফর্ম PDF
+          </Button>
           <Button variant="outline" disabled={data.members.length < 2} onClick={replicateFromFirst}>
             ১ নং অনুযায়ী সকলের চাঁদা
           </Button>
