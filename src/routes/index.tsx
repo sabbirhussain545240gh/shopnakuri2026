@@ -2209,7 +2209,14 @@ function LoansTab() {
             <DialogFooter><Button onClick={submit}>ঋণ প্রদান</Button></DialogFooter>
           </DialogContent>
         </Dialog>
-
+        <div className="flex gap-2">
+          <Button variant="outline" size="sm" onClick={printLoans} title="প্রিন্ট">
+            <Printer className="h-4 w-4 mr-1" />প্রিন্ট
+          </Button>
+          <Button variant="outline" size="sm" onClick={downloadLoansExcel} title="Excel ডাউনলোড">
+            <Download className="h-4 w-4 mr-1" />ডাউনলোড
+          </Button>
+        </div>
       </CardHeader>
       <CardContent>
         {data.loans.length > 0 && (
