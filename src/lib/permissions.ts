@@ -16,6 +16,7 @@ export type TabKey =
   | "deposits"
   | "cashbook"
   | "reports"
+  | "reconciliation"
   | "settings"
   | "admin";
 
