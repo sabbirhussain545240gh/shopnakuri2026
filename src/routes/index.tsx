@@ -2180,10 +2180,9 @@ function LoansTab() {
                         title="বিস্তারিত দেখুন"
                         onClick={() => setDetailFor(l)}
                       >
-                        {m?.name ?? "—"}{m?.serial ? ` (নং: ${toBn(m.serial)})` : ""}
-                      </button>
-                    </TableCell>
-                    <TableCell className="font-medium">{toBn(idx + 1)}</TableCell>
+                         {m?.name ?? "—"}{m?.serial ? ` -${toBn(m.serial)}` : ""}
+                       </button>
+                     </TableCell>
                     <TableCell>{fmtDate(l.date)}</TableCell>
                     <TableCell className="text-right">{formatTk(l.amount)}</TableCell>
                     <TableCell className="text-right">{formatTk(due)}</TableCell>
