@@ -161,6 +161,7 @@ const navItems = [
   { value: "deposits", label: "জমা ইতিহাস", icon: PiggyBank },
   { value: "cashbook", label: "আয়-ব্যয়", icon: Wallet },
   { value: "reports", label: "রিপোর্ট", icon: FileText },
+  { value: "reconciliation", label: "এমাউন্ট সমন্নয়", icon: Scale },
   { value: "settings", label: "সেটিংস", icon: SettingsIcon },
   { value: "admin", label: "সুপার এডমিন", icon: ShieldCheck },
 ];
