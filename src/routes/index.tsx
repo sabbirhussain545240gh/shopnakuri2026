@@ -2140,10 +2140,9 @@ function LoansTab() {
             <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>ঋণ নং</TableHead>
-                <TableHead>সদস্য</TableHead>
-                <TableHead>নং</TableHead>
-                <TableHead>তারিখ</TableHead>
+                 <TableHead>ঋণ নং</TableHead>
+                 <TableHead>সদস্য</TableHead>
+                 <TableHead>তারিখ</TableHead>
                 <TableHead className="text-right">মূল</TableHead><TableHead className="text-right">মোট প্রদেয়</TableHead>
                 <TableHead className="text-right">মাসিক কিস্তি</TableHead>
                 <TableHead className="text-right">১ম কিস্তির তারিখ</TableHead>
@@ -2181,10 +2180,9 @@ function LoansTab() {
                         title="বিস্তারিত দেখুন"
                         onClick={() => setDetailFor(l)}
                       >
-                        {m?.name ?? "—"}{m?.serial ? ` (নং: ${toBn(m.serial)})` : ""}
-                      </button>
-                    </TableCell>
-                    <TableCell className="font-medium">{toBn(idx + 1)}</TableCell>
+                         {m?.name ?? "—"}{m?.serial ? ` -${toBn(m.serial)}` : ""}
+                       </button>
+                     </TableCell>
                     <TableCell>{fmtDate(l.date)}</TableCell>
                     <TableCell className="text-right">{formatTk(l.amount)}</TableCell>
                     <TableCell className="text-right">{formatTk(due)}</TableCell>
