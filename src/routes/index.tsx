@@ -364,6 +364,7 @@ function SamitiApp() {
           {tab === "deposits" && <DepositsHistoryTab />}
           {tab === "cashbook" && <CashbookTab />}
           {tab === "reports" && <ReportsTab />}
+          {tab === "reconciliation" && <ReconciliationTab />}
           {tab === "settings" && <SettingsTab />}
           {tab === "admin" && <AdminTab />}
         </main>
