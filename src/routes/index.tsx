@@ -1900,6 +1900,8 @@ function LoansTab() {
   const [payForm, setPayForm] = useState({ amount: "", date: today(), note: "" });
   const [receipt, setReceipt] = useState<null | { loan: Loan; memberName: string; memberSerial?: number; amount: number; date: string; paidAfter: number; remainingAfter: number; receiptNo: string; note?: string; logo?: string; loanNo?: number }>(null);
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [loanSearch, setLoanSearch] = useState("");
+  const [loanStatusFilter, setLoanStatusFilter] = useState<"all" | "active" | "closed">("all");
 
   const setField = (key: string, value: string) => {
     setForm((prev) => ({ ...prev, [key]: value }));
