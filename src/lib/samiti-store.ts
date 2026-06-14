@@ -147,6 +147,12 @@ function load(): SamitiData {
       if (typeof (m as any).serial === "number") return m;
       return { ...m, serial: nextSerial++ };
     });
+    // reconcile loan statuses based on payments
+    parsed.loans = parsed.loans.map((l) => {
+      const paid = parsed.payments.filter((p) => p.loanId === l.id).reduce((s, p) => s + p.amount, 0);
+      const shouldBeClosed = paid + 0.0001 >= loanTotalDue(l);
+      return { ...l, status: shouldBeClosed ? "closed" : "active" };
+    });
     return parsed;
   } catch {
     return empty;
@@ -247,7 +253,13 @@ export async function startCloudSync(userId: string) {
     readOnlyMode = !res.canWrite;
     if (res.data && typeof res.data === "object" && Object.keys(res.data as object).length > 0) {
       suppressCloudSave = true;
-      setState({ ...empty, ...(res.data as SamitiData) });
+      const incoming = { ...empty, ...(res.data as SamitiData) };
+      incoming.loans = incoming.loans.map((l) => {
+        const paid = incoming.payments.filter((p) => p.loanId === l.id).reduce((s, p) => s + p.amount, 0);
+        const shouldBeClosed = paid + 0.0001 >= loanTotalDue(l);
+        return { ...l, status: shouldBeClosed ? "closed" : "active" };
+      });
+      setState(incoming);
       suppressCloudSave = false;
       setCloudStatus("saved");
     } else if (cloudCanWrite) {
@@ -362,10 +374,10 @@ export function useSamiti() {
     setState({ ...getState(), loans: [...getState().loans, { ...l, id: crypto.randomUUID(), status: "active" }] });
   }, []);
   const updateLoan = useCallback((id: string, updates: Partial<Omit<Loan, "id">>) => {
-    setState({
-      ...getState(),
-      loans: getState().loans.map((l) => (l.id === id ? { ...l, ...updates } : l)),
-    });
+    const s = getState();
+    const loansUpdated = s.loans.map((l) => (l.id === id ? { ...l, ...updates } : l));
+    const loans = reconcileLoanStatus(id, loansUpdated, s.payments);
+    setState({ ...s, loans });
   }, []);
   const reconcileLoanStatus = (loanId: string, loans: Loan[], payments: LoanPayment[]): Loan[] => {
     const loan = loans.find((l) => l.id === loanId);
