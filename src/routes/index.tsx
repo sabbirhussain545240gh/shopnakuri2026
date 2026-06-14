@@ -4110,9 +4110,12 @@ function AdminTab() {
 const ADJUST_CATEGORY = "সমন্নয়";
 
 function ReconciliationTab() {
-  const { data, addTransaction, deleteTransaction } = useSamiti();
+  const { data, addTransaction, deleteTransaction, addPayment } = useSamiti();
   const [form, setForm] = useState<{ type: "income" | "expense"; amount: string; date: string; note: string }>({
     type: "income", amount: "", date: today(), note: "",
+  });
+  const [loanForm, setLoanForm] = useState<{ loanId: string; amount: string; date: string; note: string }>({
+    loanId: "", amount: "", date: today(), note: "সমন্নয়",
   });
 
   const submitAdjust = () => {
@@ -4121,6 +4124,33 @@ function ReconciliationTab() {
     addTransaction({ type: form.type, category: ADJUST_CATEGORY, amount: amt, date: form.date, note: form.note });
     setForm({ type: "income", amount: "", date: today(), note: "" });
     toast.success("সমন্নয় রেকর্ড সংরক্ষিত হয়েছে");
+  };
+
+  const activeLoansWithDue = useMemo(() => {
+    return data.loans
+      .filter((l) => l.status === "active")
+      .map((l) => {
+        const member = data.members.find((m) => m.id === l.memberId);
+        const due = Math.max(0, loanTotalDue(l) - loanPaid(data.payments, l.id));
+        return { loan: l, member, due };
+      })
+      .filter((x) => x.due > 0)
+      .sort((a, b) => (a.member?.serial || 0) - (b.member?.serial || 0));
+  }, [data.loans, data.payments, data.members]);
+
+  const selectedLoan = activeLoansWithDue.find((x) => x.loan.id === loanForm.loanId);
+
+  const submitLoanAdjust = () => {
+    if (!loanForm.loanId) { toast.error("একটি ঋণ নির্বাচন করুন"); return; }
+    const amt = Number(loanForm.amount);
+    if (!amt || amt <= 0) { toast.error("সঠিক পরিমাণ দিন"); return; }
+    if (selectedLoan && amt > selectedLoan.due + 0.5) {
+      toast.error(`বকেয়ার চেয়ে বেশি দেওয়া যাবে না (বকেয়াঃ ${formatTk(selectedLoan.due)})`);
+      return;
+    }
+    addPayment({ loanId: loanForm.loanId, amount: amt, date: loanForm.date, note: loanForm.note || "সমন্নয়" });
+    setLoanForm({ loanId: "", amount: "", date: today(), note: "সমন্নয়" });
+    toast.success("বকেয়া ঋণ সমন্নয় হয়েছে");
   };
 
   const adjustments = useMemo(
