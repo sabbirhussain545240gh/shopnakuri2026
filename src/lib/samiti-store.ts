@@ -417,6 +417,13 @@ export function useSamiti() {
       loans: getState().loans.map((l) => (l.id === id ? { ...l, status: "closed" } : l)),
     });
   }, []);
+  const refreshLoanStatus = useCallback((id: string) => {
+    const s = getState();
+    const loans = reconcileLoanStatus(id, s.loans, s.payments);
+    setState({ ...s, loans });
+    const loan = loans.find((l) => l.id === id);
+    return loan?.status ?? null;
+  }, []);
   const deleteLoan = useCallback((id: string) => {
     const s = getState();
     setState({
