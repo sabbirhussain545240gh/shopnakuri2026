@@ -417,6 +417,13 @@ export function useSamiti() {
       loans: getState().loans.map((l) => (l.id === id ? { ...l, status: "closed" } : l)),
     });
   }, []);
+  const refreshLoanStatus = useCallback((id: string) => {
+    const s = getState();
+    const loans = reconcileLoanStatus(id, s.loans, s.payments);
+    setState({ ...s, loans });
+    const loan = loans.find((l) => l.id === id);
+    return loan?.status ?? null;
+  }, []);
   const deleteLoan = useCallback((id: string) => {
     const s = getState();
     setState({
@@ -447,7 +454,7 @@ export function useSamiti() {
     updateSamitiInfo,
     addMember, addMembers, updateMember, deleteMember,
     addDeposit, addDeposits, updateDeposit, deleteDeposit,
-    addLoan, updateLoan, addPayment, updatePayment, deletePayment, closeLoan, deleteLoan,
+    addLoan, updateLoan, addPayment, updatePayment, deletePayment, closeLoan, refreshLoanStatus, deleteLoan,
     addTransaction, deleteTransaction,
     updateSettings, resetAll, importData,
   };

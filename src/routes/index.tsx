@@ -21,7 +21,7 @@ import { Badge } from "@/components/ui/badge";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Textarea } from "@/components/ui/textarea";
-import { Users, PiggyBank, HandCoins, LayoutDashboard, Trash2, Plus, CheckCircle2, Pencil, Settings as SettingsIcon, Wallet, Download, Upload, AlertTriangle, TrendingUp, TrendingDown, Menu, Printer, FileText, Receipt, Search, Eye, Share, ImageDown, Check, ChevronsUpDown, ShieldCheck, Loader2, ArrowRight, Banknote, QrCode } from "lucide-react";
+import { Users, PiggyBank, HandCoins, LayoutDashboard, Trash2, Plus, CheckCircle2, Pencil, Settings as SettingsIcon, Wallet, Download, Upload, AlertTriangle, TrendingUp, TrendingDown, Menu, Printer, FileText, Receipt, Search, Eye, Share, ImageDown, Check, ChevronsUpDown, ShieldCheck, Loader2, ArrowRight, Banknote, QrCode, RefreshCw } from "lucide-react";
 import { toast } from "sonner";
 import { AuthGate, SignOutButton, CloudStatusBadge } from "@/components/AuthGate";
 import { makeQrDataUrl } from "@/lib/receipt-qr";
@@ -1890,7 +1890,7 @@ function SavingsTab() {
 
 // ===== Loans =====
 function LoansTab() {
-  const { data, addLoan, updateLoan, addPayment, closeLoan, deleteLoan } = useSamiti();
+  const { data, addLoan, updateLoan, addPayment, closeLoan, refreshLoanStatus, deleteLoan } = useSamiti();
   const [open, setOpen] = useState(false);
   const [payFor, setPayFor] = useState<Loan | null>(null);
   const [editFor, setEditFor] = useState<Loan | null>(null);
@@ -2392,6 +2392,19 @@ function LoansTab() {
                   )}
                 </div>
                 <div className="border-t pt-3 flex flex-wrap justify-end gap-2">
+                  <Button
+                    variant="outline"
+                    onClick={() => {
+                      const newStatus = refreshLoanStatus(detailFor.id);
+                      if (newStatus === "closed") {
+                        toast.success("ঋণের স্ট্যাটাস আপডেট হয়েছে — এখন পরিশোধিত");
+                      } else {
+                        toast.success("ঋণের স্ট্যাটাস আপডেট হয়েছে — চলমান");
+                      }
+                    }}
+                  >
+                    <RefreshCw className="h-4 w-4" /> স্ট্যাটাস আপডেট
+                  </Button>
                   <Button
                     variant="outline"
                     onClick={() => {
