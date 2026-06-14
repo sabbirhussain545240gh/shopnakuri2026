@@ -857,7 +857,7 @@ function MembersTab() {
   body { font-family: "Segoe UI", "Noto Sans Bengali", sans-serif; margin: 0; padding: 24px; background: #fff; color: #111; }
   h2 { margin: 0 0 8px; font-size: 20px; }
   p { margin: 0 0 16px; font-size: 14px; color: #555; }
-  table { width: 100%; border-collapse: collapse; font-size: 14:14px; }
+  table { width: 100%; border-collapse: collapse; font-size: 14px; }
   th { background: #f3f4f6; border: 1px solid #ccc; padding: 10px; text-align: left; }
   th:nth-child(1), th:nth-child(6) { text-align: center; }
   @media print { body { padding: 0; } .no-print { display: none; } }
