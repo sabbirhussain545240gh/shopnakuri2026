@@ -367,18 +367,37 @@ export function useSamiti() {
       loans: getState().loans.map((l) => (l.id === id ? { ...l, ...updates } : l)),
     });
   }, []);
+  const reconcileLoanStatus = (loanId: string, loans: Loan[], payments: LoanPayment[]): Loan[] => {
+    const loan = loans.find((l) => l.id === loanId);
+    if (!loan) return loans;
+    const due = loanTotalDue(loan);
+    const paid = payments.filter((p) => p.loanId === loanId).reduce((s, p) => s + p.amount, 0);
+    const shouldBeClosed = paid + 0.0001 >= due;
+    const nextStatus: Loan["status"] = shouldBeClosed ? "closed" : "active";
+    if (loan.status === nextStatus) return loans;
+    return loans.map((l) => (l.id === loanId ? { ...l, status: nextStatus } : l));
+  };
   const addPayment = useCallback((p: Omit<LoanPayment, "id">) => {
-    setState({ ...getState(), payments: [...getState().payments, { ...p, id: crypto.randomUUID() }] });
+    const s = getState();
+    const payments = [...s.payments, { ...p, id: crypto.randomUUID() }];
+    const loans = reconcileLoanStatus(p.loanId, s.loans, payments);
+    setState({ ...s, payments, loans });
   }, []);
   const updatePayment = useCallback((id: string, updates: Partial<Omit<LoanPayment, "id">>) => {
-    setState({
-      ...getState(),
-      payments: getState().payments.map((p) => (p.id === id ? { ...p, ...updates } : p)),
-    });
+    const s = getState();
+    const payments = s.payments.map((p) => (p.id === id ? { ...p, ...updates } : p));
+    const target = payments.find((p) => p.id === id);
+    const loans = target ? reconcileLoanStatus(target.loanId, s.loans, payments) : s.loans;
+    setState({ ...s, payments, loans });
   }, []);
   const deletePayment = useCallback((id: string) => {
-    setState({ ...getState(), payments: getState().payments.filter((p) => p.id !== id) });
+    const s = getState();
+    const target = s.payments.find((p) => p.id === id);
+    const payments = s.payments.filter((p) => p.id !== id);
+    const loans = target ? reconcileLoanStatus(target.loanId, s.loans, payments) : s.loans;
+    setState({ ...s, payments, loans });
   }, []);
+
 
   const closeLoan = useCallback((id: string) => {
     setState({
