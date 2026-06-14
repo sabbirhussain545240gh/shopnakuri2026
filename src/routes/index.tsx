@@ -2095,8 +2095,33 @@ function LoansTab() {
 
       </CardHeader>
       <CardContent>
+        {data.loans.length > 0 && (
+          <div className="flex flex-col sm:flex-row gap-3 mb-4">
+            <div className="relative flex-1">
+              <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <Input
+                placeholder="সদস্যের নাম দিয়ে খুঁজুন..."
+                value={loanSearch}
+                onChange={(e) => setLoanSearch(e.target.value)}
+                className="pl-9"
+              />
+            </div>
+            <Select value={loanStatusFilter} onValueChange={(v) => setLoanStatusFilter(v as "all" | "active" | "closed")}>
+              <SelectTrigger className="w-full sm:w-44">
+                <SelectValue placeholder="স্ট্যাটাস" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">সব ঋণ</SelectItem>
+                <SelectItem value="active">চলমান</SelectItem>
+                <SelectItem value="closed">পরিশোধিত</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+        )}
         {data.loans.length === 0 ? (
           <p className="text-sm text-muted-foreground text-center py-10">কোনও ঋণ নেই।</p>
+        ) : filteredLoans.length === 0 ? (
+          <p className="text-sm text-muted-foreground text-center py-10">ফিল্টারে কোনও ঋণ পাওয়া যায়নি।</p>
         ) : (
           <>
             <p className="text-xs text-muted-foreground mb-3 leading-relaxed">
