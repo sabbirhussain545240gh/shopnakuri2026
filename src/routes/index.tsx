@@ -1990,7 +1990,8 @@ function LoansTab() {
     return data.loans.filter((l) => {
       const m = data.members.find((x) => x.id === l.memberId);
       const name = (m?.name ?? "").toLowerCase();
-      const matchesSearch = !term || name.includes(term);
+      const loanNo = String(data.loans.findIndex((x) => x.id === l.id) + 1);
+      const matchesSearch = !term || name.includes(term) || loanNo.includes(term);
       const matchesStatus = loanStatusFilter === "all" || l.status === loanStatusFilter;
       return matchesSearch && matchesStatus;
     });
@@ -2100,7 +2101,7 @@ function LoansTab() {
             <div className="relative flex-1">
               <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <Input
-                placeholder="সদস্যের নাম দিয়ে খুঁজুন..."
+                placeholder="নাম বা ঋণ নং দিয়ে খুঁজুন..."
                 value={loanSearch}
                 onChange={(e) => setLoanSearch(e.target.value)}
                 className="pl-9"
@@ -2149,9 +2150,19 @@ function LoansTab() {
                 const inst = monthlyInstallment(l.amount, l.interestRate, l.durationMonths);
                 const firstPay = addMonths(l.date, 1);
                 const endDate = addMonths(l.date, l.durationMonths);
+                const originalLoanNo = data.loans.findIndex((x) => x.id === l.id) + 1;
                 return (
                   <TableRow key={l.id}>
-                    <TableCell className="font-medium">{toBn(idx + 1)}</TableCell>
+                    <TableCell className="font-medium">
+                      <button
+                        type="button"
+                        className="text-foreground hover:text-primary underline-offset-2 hover:underline cursor-pointer"
+                        title="বিস্তারিত দেখুন"
+                        onClick={() => setDetailFor(l)}
+                      >
+                        {toBn(originalLoanNo)}
+                      </button>
+                    </TableCell>
                     <TableCell className="font-medium">
                       <button
                         type="button"
