@@ -2141,7 +2141,9 @@ function LoansTab() {
             <TableHeader>
               <TableRow>
                 <TableHead>ঋণ নং</TableHead>
-                <TableHead>সদস্য</TableHead><TableHead>তারিখ</TableHead>
+                <TableHead>সদস্য</TableHead>
+                <TableHead>নং</TableHead>
+                <TableHead>তারিখ</TableHead>
                 <TableHead className="text-right">মূল</TableHead><TableHead className="text-right">মোট প্রদেয়</TableHead>
                 <TableHead className="text-right">মাসিক কিস্তি</TableHead>
                 <TableHead className="text-right">১ম কিস্তির তারিখ</TableHead>
