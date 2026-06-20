@@ -2989,6 +2989,7 @@ function LoansTab() {
                       </>
                     );
                   })()}
+                  {currentLoan.status === "active" && (() => {
                     const inst = monthlyInstallment(currentLoan.amount, currentLoan.interestRate, currentLoan.durationMonths);
                     const remaining = Math.max(0, due - paid);
                     return (
