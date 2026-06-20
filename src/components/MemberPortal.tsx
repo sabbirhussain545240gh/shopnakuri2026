@@ -362,11 +362,15 @@ function LoansSection({ data }: { data: MemberViewResponse }) {
           return (
             <div key={l.id} className="rounded-lg border p-4 bg-card">
               <div className="flex items-center justify-between gap-2 flex-wrap">
-                <div className="font-semibold">ঋণ নং {toBn(idx + 1)}</div>
+                <div className="font-semibold">
+                  সমিতির ঋণ নং {toBn(l.samitiLoanNo ?? idx + 1)}
+                  <span className="text-muted-foreground font-normal"> · সদস্য ঋণ নং {toBn(idx + 1)}</span>
+                </div>
                 <Badge variant={l.status === "active" ? "default" : "secondary"}>
                   {l.status === "active" ? "চলমান" : "পরিশোধিত"}
                 </Badge>
               </div>
+
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mt-3 text-sm">
                 <div><div className="text-muted-foreground text-xs">মূল ঋণ</div><div className="font-medium">{formatTk(totalDue)}</div></div>
                 <div><div className="text-muted-foreground text-xs">মেয়াদ</div><div className="font-medium">{toBn(l.durationMonths)} মাস</div></div>
