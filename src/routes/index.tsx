@@ -1516,7 +1516,7 @@ function buildLoanDetailHtml(
     ["সদস্য", member?.name ?? "—"],
     ["মোবাইল", member?.phone ? toBn(member.phone) : "—"],
     ["মূল", formatTk(loan.amount)],
-    ["সুদের হার", `${toBn(loan.interestRate)}%`],
+    ["মুনাফার হার", `${toBn(loan.interestRate)}%`],
     ["মেয়াদ", `${toBn(loan.durationMonths)} মাস`],
     ["মাসিক কিস্তি", formatTk(inst)],
     ["১ম কিস্তির তারিখ", fmtDate(addMonths(loan.date, 1))],
@@ -2154,7 +2154,7 @@ function LoansTab() {
     const amt = Number(form.amount);
     if (!form.amount.trim() || isNaN(amt) || amt <= 0) nextErrors.amount = "সঠিক পরিমাণ দিন";
     const rate = Number(form.interestRate);
-    if (!form.interestRate.trim() || isNaN(rate) || rate <= 0) nextErrors.interestRate = "সঠিক সুদের হার দিন";
+    if (!form.interestRate.trim() || isNaN(rate) || rate <= 0) nextErrors.interestRate = "সঠিক মুনাফার হার দিন";
     if (!form.memberGuarantorId.trim()) nextErrors.memberGuarantorId = "সদস্য জামিনদার নির্বাচন করুন";
     if (!form.familyGuarantorName.trim()) nextErrors.familyGuarantorName = "জামিনদারের নাম দিন";
     if (!form.familyGuarantorRelation.trim()) nextErrors.familyGuarantorRelation = "সম্পর্ক নির্বাচন করুন";
@@ -2419,7 +2419,7 @@ function LoansTab() {
         "সদস্য নং": m?.serial ?? "",
         "তারিখ": l.date,
         "মূল": l.amount,
-        "সুদের হার (%)": l.interestRate,
+        "মুনাফার হার (%)": l.interestRate,
         "মেয়াদ (মাস)": l.durationMonths,
         "মোট প্রদেয়": due,
         "মাসিক কিস্তি": Math.round(inst),
@@ -2464,7 +2464,7 @@ function LoansTab() {
                   {errors.amount && <p className="text-xs text-destructive mt-1">{errors.amount}</p>}
                 </div>
                 <div>
-                  <Label>সুদের হার (%) *</Label>
+                  <Label>মুনাফার হার (%) *</Label>
                   <Input type="number" className={errors.interestRate ? "border-destructive" : ""} value={form.interestRate} onChange={(e) => setField("interestRate", e.target.value)} />
                   {errors.interestRate && <p className="text-xs text-destructive mt-1">{errors.interestRate}</p>}
                 </div>
@@ -2585,7 +2585,7 @@ function LoansTab() {
         ) : (
           <>
             <p className="text-xs text-muted-foreground mb-3 leading-relaxed">
-              <strong>গণনা পদ্ধতি:</strong> মাসিক কিস্তি = (মূল + সুদ) ÷ মেয়াদ (মাস)। সুদ = মূল × সুদের হার × মেয়াদ ÷ (১০০ × ১২)। ১ম কিস্তির তারিখ = ঋণ প্রদানের তারিখ থেকে ১ মাস পর। ঋণ শেষ = ঋণ প্রদানের তারিখ + মেয়াদ (মাস)।
+              <strong>গণনা পদ্ধতি:</strong> মাসিক কিস্তি = (মূল + মুনাফা) ÷ মেয়াদ (মাস)। মুনাফা = মূল × মুনাফার হার × মেয়াদ ÷ (১০০ × ১২)। ১ম কিস্তির তারিখ = ঋণ প্রদানের তারিখ থেকে ১ মাস পর। ঋণ শেষ = ঋণ প্রদানের তারিখ + মেয়াদ (মাস)।
             </p>
             <Table>
             <TableHeader>
@@ -2835,7 +2835,7 @@ function LoansTab() {
             </div>
             <div className="grid grid-cols-2 gap-3">
               <div><Label>পরিমাণ</Label><Input type="number" value={editForm.amount} onChange={(e) => setEditForm({ ...editForm, amount: e.target.value })} /></div>
-              <div><Label>সুদের হার (%)</Label><Input type="number" value={editForm.interestRate} onChange={(e) => setEditForm({ ...editForm, interestRate: e.target.value })} /></div>
+              <div><Label>মুনাফার হার (%)</Label><Input type="number" value={editForm.interestRate} onChange={(e) => setEditForm({ ...editForm, interestRate: e.target.value })} /></div>
               <div><Label>মেয়াদ (মাস)</Label><Input type="number" value={editForm.durationMonths} onChange={(e) => setEditForm({ ...editForm, durationMonths: e.target.value })} /></div>
               <div><Label>তারিখ</Label><Input type="date" value={editForm.date} onChange={(e) => setEditForm({ ...editForm, date: e.target.value })} /></div>
             </div>
@@ -2878,7 +2878,7 @@ function LoansTab() {
                   <div><span className="text-muted-foreground">সদস্য:</span> {m?.name ?? "—"}</div>
                   <div><span className="text-muted-foreground">মোবাইল:</span> {m?.phone ?? "—"}</div>
                   <div><span className="text-muted-foreground">মূল:</span> {formatTk(currentLoan.amount)}</div>
-                  <div><span className="text-muted-foreground">সুদের হার:</span> {toBn(currentLoan.interestRate)}%</div>
+                  <div><span className="text-muted-foreground">মুনাফার হার:</span> {toBn(currentLoan.interestRate)}%</div>
                   <div><span className="text-muted-foreground">মেয়াদ:</span> {toBn(currentLoan.durationMonths)} মাস</div>
                   <div><span className="text-muted-foreground">মাসিক কিস্তি:</span> {formatTk(monthlyInstallment(currentLoan.amount, currentLoan.interestRate, currentLoan.durationMonths))}</div>
                   <div><span className="text-muted-foreground">১ম কিস্তির তারিখ:</span> {fmtDate(addMonths(currentLoan.date, 1))}</div>
@@ -3887,7 +3887,7 @@ function DepositsHistoryTab() {
   );
 }
 
-const INCOME_CATS = ["সদস্য ফি", "ভর্তি ফি", "অনুদান", "সুদ আয়", "অন্যান্য"];
+const INCOME_CATS = ["সদস্য ফি", "ভর্তি ফি", "অনুদান", "মুনাফা আয়", "অন্যান্য"];
 const EXPENSE_CATS = ["স্টেশনারি", "মিটিং খরচ", "যাতায়াত", "ভাড়া", "বিল", "অন্যান্য"];
 
 function CashbookTab() {
@@ -4855,7 +4855,7 @@ function ReportsTab() {
         csv += `${d.date},"${m?.name || ""}",${d.amount},"${d.note || ""}"\n`;
       });
     } else if (reportType === "loans") {
-      csv = "তারিখ,সদস্য,মূল,সুদ%,মেয়াদ,পরিশোধ,বকেয়া,অবস্থা\n";
+      csv = "তারিখ,সদস্য,মূল,মুনাফা%,মেয়াদ,পরিশোধ,বকেয়া,অবস্থা\n";
       filtered.loans.forEach((l) => {
         const m = data.members.find((x) => x.id === l.memberId);
         const paid = loanPaid(data.payments, l.id);
