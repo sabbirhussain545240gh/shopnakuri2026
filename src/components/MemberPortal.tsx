@@ -383,7 +383,7 @@ function MemberProfileCard({ member, data }: { member: NonNullable<MemberViewRes
   );
 }
 
-function LoansSection({ data }: { data: MemberViewResponse }) {
+function LoansSection({ data, onView }: { data: MemberViewResponse; onView: (title: string, html: string) => void }) {
   const loans = data.loans;
   if (loans.length === 0) {
     return (
