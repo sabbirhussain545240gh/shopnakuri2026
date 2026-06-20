@@ -368,8 +368,6 @@ function LoansSection({ data }: { data: MemberViewResponse }) {
                 </Badge>
               </div>
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mt-3 text-sm">
-                <div><div className="text-muted-foreground text-xs">ঋণ মূল</div><div className="font-medium">{formatTk(l.amount)}</div></div>
-                <div><div className="text-muted-foreground text-xs">সুদ (বার্ষিক)</div><div className="font-medium">{toBn(l.interestRate)}%</div></div>
                 <div><div className="text-muted-foreground text-xs">মেয়াদ</div><div className="font-medium">{toBn(l.durationMonths)} মাস</div></div>
                 <div><div className="text-muted-foreground text-xs">তারিখ</div><div className="font-medium">{fmtDate(l.date)}</div></div>
                 <div><div className="text-muted-foreground text-xs">মাসিক কিস্তি</div><div className="font-medium">{formatTk(inst)}</div></div>
