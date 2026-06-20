@@ -156,7 +156,7 @@ function buildClosureHtml(p: { samitiName: string; logo?: string; memberName: st
       <div><span class="muted">মোট প্রদেয়:</span> <b>${formatTk(p.totalDue)}</b></div>
       <div><span class="muted">মোট পরিশোধিত:</span> <b style="color:#15803d;">${formatTk(p.totalPaid)}</b></div>
     </div>
-    ${qrBlock(qr)}
+    ${qrBlock(qr, "certificate")}
     <div class="signs">
       <div>—————————————<br/>সদস্যের স্বাক্ষর</div>
       <div>—————————————<br/>কোষাধ্যক্ষের স্বাক্ষর</div>
