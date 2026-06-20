@@ -3673,15 +3673,24 @@ function DepositsHistoryTab() {
 
   const rows = useMemo(() => {
     const memberById = new Map(data.members.map((m) => [m.id, m]));
+    const seqByDepositId = new Map<string, number>();
+    const counters = new Map<string, number>();
+    [...data.deposits]
+      .sort((a, b) => (a.date < b.date ? -1 : a.date > b.date ? 1 : a.id < b.id ? -1 : 1))
+      .forEach((d) => {
+        const n = (counters.get(d.memberId) ?? 0) + 1;
+        counters.set(d.memberId, n);
+        seqByDepositId.set(d.id, n);
+      });
     return [...data.deposits]
       .sort((a, b) => (a.date < b.date ? 1 : -1))
-      .map((d, idx) => {
+      .map((d) => {
         const member = memberById.get(d.memberId);
         return {
           id: d.id,
           memberId: d.memberId,
           date: d.date,
-          depositNo: idx + 1,
+          depositNo: seqByDepositId.get(d.id) ?? 1,
           memberName: member?.name ?? "—",
           memberSerial: member?.serial ?? 0,
           amount: d.amount,
