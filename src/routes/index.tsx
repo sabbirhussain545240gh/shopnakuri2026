@@ -3012,6 +3012,19 @@ function LoansTab() {
           })()}
         </DialogContent>
       </Dialog>
+
+      <Dialog open={!!closureView} onOpenChange={(o) => !o && setClosureView(null)}>
+        <DialogContent className="max-w-5xl p-0 overflow-hidden">
+          <DialogHeader className="p-4 pb-2"><DialogTitle>ঋণ পরিশোধ সনদ</DialogTitle></DialogHeader>
+          {closureView && (
+            <iframe title="closure" srcDoc={closureSrcDoc(closureView)} className="w-full h-[70vh] border-0" />
+          )}
+          <div className="p-3 border-t flex justify-end gap-2">
+            <Button variant="outline" onClick={() => closureView && printClosureHtml(closureView)}><Printer className="h-4 w-4" /> প্রিন্ট</Button>
+            <Button variant="ghost" onClick={() => setClosureView(null)}>বন্ধ</Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </Card>
   );
 }
