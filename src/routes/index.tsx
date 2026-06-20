@@ -2141,6 +2141,7 @@ function LoansTab() {
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [loanSearch, setLoanSearch] = useState("");
   const [loanStatusFilter, setLoanStatusFilter] = useState<"all" | "active" | "closed">("all");
+  const [closureView, setClosureView] = useState<string | null>(null);
 
   const setField = (key: string, value: string) => {
     setForm((prev) => ({ ...prev, [key]: value }));
