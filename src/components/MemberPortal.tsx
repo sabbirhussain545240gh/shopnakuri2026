@@ -133,7 +133,7 @@ function buildClosureHtml(p: { samitiName: string; logo?: string; memberName: st
       <div><span class="muted">ঋণ গ্রহণ তারিখ:</span> <b>${fmtDate(p.loanDate)}</b></div>
     </div>
     <div style="margin-top:14px;padding:12px;background:#f0fdf4;border:1px solid #bbf7d0;border-radius:6px;font-size:13px;line-height:1.8;text-align:center;">
-      এই মর্মে প্রত্যয়ন করা যাচ্ছে যে, উপরোক্ত সদস্য তাঁর গৃহীত <b>${formatTk(p.loanAmount)}</b> টাকার ঋণ (সুদ <b>${toBn(p.interestRate)}%</b> বার্ষিক, মেয়াদ <b>${toBn(p.durationMonths)}</b> মাস) সম্পূর্ণরূপে পরিশোধ করেছেন। তাঁর কোনো বকেয়া নেই।
+      এই মর্মে প্রত্যয়ন করা যাচ্ছে যে, উপরোক্ত সদস্য তাঁর গৃহীত (মোট প্রদেয় <b>${formatTk(p.totalDue)}</b> টাকা, মেয়াদ <b>${toBn(p.durationMonths)}</b> মাস) সম্পূর্ণরূপে পরিশোধ করেছেন। তাঁহার <b>${toBn(p.loanNo ?? 0)}</b> নং ঋণের কোনো বকেয়া নেই।
     </div>
     <div class="totals">
       <div><span class="muted">মোট প্রদেয়:</span> <b>${formatTk(p.totalDue)}</b></div>
