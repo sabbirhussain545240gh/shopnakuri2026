@@ -3188,6 +3188,10 @@ function InstallmentsTab() {
                 {data.members.map((m) => <SelectItem key={m.id} value={m.id}>{toBn(m.serial)} — {m.name}</SelectItem>)}
               </SelectContent>
             </Select>
+            <div className="flex items-center gap-1">
+              <Input type="month" className="w-40" value={filterMonth} onChange={(e) => setFilterMonth(e.target.value)} title="মাস ফিল্টার" />
+              {filterMonth && <Button size="sm" variant="ghost" onClick={() => setFilterMonth("")}>সকল মাস</Button>}
+            </div>
             <Dialog open={open} onOpenChange={(o) => { setOpen(o); if (!o) setErrors({}); }}>
               <DialogTrigger asChild>
                 <Button disabled={activeLoans.length === 0}><Plus className="h-4 w-4 mr-1" />নতুন কিস্তি</Button>
