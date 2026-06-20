@@ -120,7 +120,8 @@ function buildInstallmentHtml(p: { samitiName: string; logo?: string; memberName
 }
 
 function buildClosureHtml(p: { samitiName: string; logo?: string; memberName: string; memberSerial?: number; loanNo?: number; loanAmount: number; interestRate: number; durationMonths: number; totalDue: number; totalPaid: number; loanDate: string; closeDate: string; certNo: string }, qr?: string) {
-  return `<div class="r" id="r" style="border:2px solid #15803d;">
+  return `<style>@page{size:A4 landscape;margin:12mm}@media print{html,body{width:297mm}#r{width:100% !important;max-width:none !important}}</style>
+  <div class="r" id="r" style="border:2px solid #15803d;width:270mm;max-width:100%;margin:0 auto;padding:18px 24px;">
     <div class="header">
       ${p.logo ? `<img src="${p.logo}" alt="logo" class="logo"/>` : ""}
       <div class="head-text"><div class="title">${p.samitiName}</div><div class="sub" style="color:#15803d;font-weight:700;letter-spacing:1px;">ঋণ পরিশোধ সনদ</div></div>
@@ -140,7 +141,11 @@ function buildClosureHtml(p: { samitiName: string; logo?: string; memberName: st
       <div><span class="muted">মোট পরিশোধিত:</span> <b style="color:#15803d;">${formatTk(p.totalPaid)}</b></div>
     </div>
     ${qrBlock(qr)}
-    <div class="sign"><div>—————————<br/>সদস্য</div><div style="text-align:right">—————————<br/>কোষাধ্যক্ষ</div></div>
+    <div style="display:flex;justify-content:space-between;gap:16px;margin-top:48px;font-size:12px;">
+      <div style="text-align:center;flex:1;">—————————————<br/>সদস্যের স্বাক্ষর</div>
+      <div style="text-align:center;flex:1;">—————————————<br/>কোষাধ্যক্ষের স্বাক্ষর</div>
+      <div style="text-align:center;flex:1;">—————————————<br/>সভাপতির স্বাক্ষর</div>
+    </div>
   </div>`;
 }
 
