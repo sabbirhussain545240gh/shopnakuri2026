@@ -3770,7 +3770,7 @@ function DepositsHistoryTab() {
                 <TableRow key={r.id}>
                   <TableCell className="text-center text-muted-foreground">{toBn(i + 1)}</TableCell>
                   <TableCell>{fmtDate(r.date)}</TableCell>
-                  <TableCell className="text-center font-semibold">{toBn(r.depositNo)}</TableCell>
+                  <TableCell className="text-center font-semibold">CH-{toBn(r.memberSerial)}-{toBn(r.depositNo)}</TableCell>
                   <TableCell className="font-medium">{r.memberName} <span className="text-xs text-muted-foreground">(সদস্য নং {toBn(r.memberSerial)})</span></TableCell>
                   <TableCell className="text-muted-foreground text-sm">{r.note || "—"}</TableCell>
                   <TableCell className="text-right font-semibold text-success">{formatTk(r.amount)}</TableCell>
