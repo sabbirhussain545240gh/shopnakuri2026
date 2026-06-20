@@ -57,7 +57,7 @@ const receiptCss = `
   @media print{body{padding:0;} .no-print{display:none;}}
 `;
 
-const qrBlock = (qrDataUrl?: string) =>
+const qrBlock = (qrDataUrl?: string, kind: "receipt" | "certificate" = "receipt") =>
   qrDataUrl
     ? `<div class="qr">
         <div class="qr-frame">
@@ -66,9 +66,11 @@ const qrBlock = (qrDataUrl?: string) =>
         <div class="qr-info">
           <div class="qr-title">
             <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><path d="M14 14h3v3h-3zM20 14h1M14 20h3M20 20h1"/></svg>
-            যাচাইকৃত ডিজিটাল রিসিপ্ট
+            ${kind === "certificate" ? "যাচাইকৃত ডিজিটাল সনদ" : "যাচাইকৃত ডিজিটাল রিসিপ্ট"}
           </div>
-          মোবাইল ক্যামেরা দিয়ে এই QR কোডটি স্ক্যান করে রিসিপ্টের তথ্য তাৎক্ষণিক যাচাই করুন।
+          ${kind === "certificate"
+            ? "মোবাইল ক্যামেরা দিয়ে এই QR কোডটি স্ক্যান করে ঋণ পরিশোধ সনদের সত্যতা ও সদস্যের পরিশোধ তথ্য যাচাই করুন।"
+            : "মোবাইল ক্যামেরা দিয়ে এই QR কোডটি স্ক্যান করে রিসিপ্টের তথ্য তাৎক্ষণিক যাচাই করুন।"}
           <div class="qr-badge">SECURE • VERIFY</div>
         </div>
       </div>`
@@ -154,7 +156,7 @@ function buildClosureHtml(p: { samitiName: string; logo?: string; memberName: st
       <div><span class="muted">মোট প্রদেয়:</span> <b>${formatTk(p.totalDue)}</b></div>
       <div><span class="muted">মোট পরিশোধিত:</span> <b style="color:#15803d;">${formatTk(p.totalPaid)}</b></div>
     </div>
-    ${qrBlock(qr)}
+    ${qrBlock(qr, "certificate")}
     <div class="signs">
       <div>—————————————<br/>সদস্যের স্বাক্ষর</div>
       <div>—————————————<br/>কোষাধ্যক্ষের স্বাক্ষর</div>
