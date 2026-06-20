@@ -59,23 +59,24 @@ const qrBlock = (qr?: string) =>
     ? `<div class="qr"><img src="${qr}" alt="QR"/><div class="qr-text"><b>যাচাই করুন</b><br/>এই QR কোডটি স্ক্যান করে রিসিপ্টের তথ্য যাচাই করতে পারবেন।</div></div>`
     : "";
 
-function buildDepositHtml(p: { samitiName: string; logo?: string; memberName: string; memberSerial?: number; amount: number; date: string; totalAfter: number; receiptNo: string; note?: string }, qr?: string) {
+function buildDepositHtml(p: { samitiName: string; logo?: string; memberName: string; memberSerial?: number; amount: number; date: string; totalAfter: number; receiptNo: string; note?: string; cashierName?: string; cashierId?: string }, qr?: string) {
   return `<div class="r" id="r">
     <div class="header">${p.logo ? `<img src="${p.logo}" class="logo"/>` : ""}<div class="head-text"><div class="title">${p.samitiName}</div><div class="sub">সঞ্চয়/চাদা জমা রিসিপ্ট</div></div></div>
     <div class="grid">
       <div><span class="muted">রিসিপ্ট নং:</span> <b>${p.receiptNo}</b></div>
       <div><span class="muted">তারিখ:</span> <b>${fmtDate(p.date)}</b></div>
       <div class="full"><span class="muted">সদস্য:</span> <b>${p.memberSerial ? `${toBn(p.memberSerial)}. ` : ""}${p.memberName}</b></div>
+      ${p.cashierName ? `<div class="full"><span class="muted">গ্রহণকারী (এডমিন/ক্যাশিয়ার):</span> <b>${p.cashierName}${p.cashierId ? ` · ${p.cashierId}` : ""}</b></div>` : ""}
     </div>
     <div class="row"><span>জমার পরিমাণ</span><span class="amount">${formatTk(p.amount)}</span></div>
     <div class="totals"><div class="full"><span class="muted">মোট সঞ্চয় (এই জমা সহ):</span> <b>${formatTk(p.totalAfter)}</b></div></div>
     ${p.note ? `<div class="note"><span class="muted">নোট:</span> <b>${p.note.replace(/</g, "&lt;")}</b></div>` : ""}
     ${qrBlock(qr)}
-    <div class="sign"><div>—————————<br/>গ্রহীতা</div><div style="text-align:right">—————————<br/>কোষাধ্যক্ষ</div></div>
+    <div class="sign"><div>—————————<br/>গ্রহীতা</div><div style="text-align:right">—————————<br/>${p.cashierName ?? "কোষাধ্যক্ষ"}</div></div>
   </div>`;
 }
 
-function buildInstallmentHtml(p: { samitiName: string; logo?: string; memberName: string; loanAmount: number; durationMonths: number; amount: number; date: string; paidAfter: number; remainingAfter: number; receiptNo: string; note?: string; loanNo?: number }, qr?: string) {
+function buildInstallmentHtml(p: { samitiName: string; logo?: string; memberName: string; loanAmount: number; durationMonths: number; amount: number; date: string; paidAfter: number; remainingAfter: number; receiptNo: string; note?: string; loanNo?: number; cashierName?: string; cashierId?: string }, qr?: string) {
   return `<div class="r" id="r">
     <div class="header">${p.logo ? `<img src="${p.logo}" class="logo"/>` : ""}<div class="head-text"><div class="title">${p.samitiName}</div><div class="sub">কিস্তি প্রাপ্তি রিসিপ্ট</div></div></div>
     <div class="grid">
@@ -84,6 +85,7 @@ function buildInstallmentHtml(p: { samitiName: string; logo?: string; memberName
       <div class="full"><span class="muted">সদস্য:</span> <b>${p.memberName}${p.loanNo ? ` (ঋণ নং ${toBn(p.loanNo)})` : ""}</b></div>
       <div><span class="muted">ঋণ মূল:</span> ${formatTk(p.loanAmount)}</div>
       <div><span class="muted">মেয়াদ:</span> ${toBn(p.durationMonths)} মাস</div>
+      ${p.cashierName ? `<div class="full"><span class="muted">গ্রহণকারী (এডমিন/ক্যাশিয়ার):</span> <b>${p.cashierName}${p.cashierId ? ` · ${p.cashierId}` : ""}</b></div>` : ""}
     </div>
     <div class="row"><span>প্রাপ্ত কিস্তি</span><span class="amount">${formatTk(p.amount)}</span></div>
     <div class="totals">
@@ -92,7 +94,7 @@ function buildInstallmentHtml(p: { samitiName: string; logo?: string; memberName
     </div>
     ${p.note ? `<div class="note"><span class="muted">নোট:</span> <b>${p.note.replace(/</g, "&lt;")}</b></div>` : ""}
     ${qrBlock(qr)}
-    <div class="sign"><div>—————————<br/>গ্রহীতা</div><div style="text-align:right">—————————<br/>কোষাধ্যক্ষ</div></div>
+    <div class="sign"><div>—————————<br/>গ্রহীতা</div><div style="text-align:right">—————————<br/>${p.cashierName ?? "কোষাধ্যক্ষ"}</div></div>
   </div>`;
 }
 
