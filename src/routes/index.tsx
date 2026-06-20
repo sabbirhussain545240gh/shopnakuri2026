@@ -3087,10 +3087,32 @@ function InstallmentsTab() {
     .sort((a, b) => b.date.localeCompare(a.date))
     .filter((p) => {
       if (filterLoan !== "all" && p.loanId !== filterLoan) return false;
+      if (filterMonth && !p.date.startsWith(filterMonth)) return false;
       if (filterMember === "all") return true;
       const loan = data.loans.find((l) => l.id === p.loanId);
       return loan?.memberId === filterMember;
     });
+
+  // মাসিক কিস্তি স্থিতি: কোন কোন ঋণির এই মাসে কিস্তি আছে এবং কে পরিশোধ করেছে
+  const monthlyStatus = useMemo(() => {
+    if (!filterMonth) return [] as Array<{ loan: Loan; loanNo: number; member?: Member; installment: number; paidInMonth: number; status: "paid" | "partial" | "unpaid" }>;
+    return data.loans
+      .filter((l) => l.date.slice(0, 7) <= filterMonth) // ঋণটি ঐ মাসের আগে/সমান শুরু হয়েছে
+      .filter((l) => filterMember === "all" || l.memberId === filterMember)
+      .filter((l) => filterLoan === "all" || l.id === filterLoan)
+      .map((l) => {
+        const loanNo = data.loans.findIndex((x) => x.id === l.id) + 1;
+        const member = data.members.find((m) => m.id === l.memberId);
+        const installment = l.durationMonths > 0 ? loanTotalDue(l) / l.durationMonths : 0;
+        const paidInMonth = data.payments
+          .filter((p) => p.loanId === l.id && p.date.startsWith(filterMonth))
+          .reduce((s, p) => s + p.amount, 0);
+        const status: "paid" | "partial" | "unpaid" =
+          paidInMonth >= installment - 0.01 ? "paid" : paidInMonth > 0 ? "partial" : "unpaid";
+        return { loan: l, loanNo, member, installment, paidInMonth, status };
+      })
+      .sort((a, b) => (a.member?.serial || 0) - (b.member?.serial || 0));
+  }, [data, filterMonth, filterMember, filterLoan]);
 
   const totalCollected = allPayments.reduce((s, p) => s + p.amount, 0);
   const totalOutstanding = activeLoans.reduce((s, l) => s + Math.max(0, loanTotalDue(l) - loanPaid(data.payments, l.id)), 0);
