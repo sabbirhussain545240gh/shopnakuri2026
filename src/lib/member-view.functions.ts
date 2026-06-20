@@ -8,7 +8,9 @@ export type MemberViewLoan = {
   date: string;
   durationMonths: number;
   status: "active" | "closed";
+  samitiLoanNo?: number;
 };
+
 export type MemberViewPayment = {
   id: string;
   loanId: string;
