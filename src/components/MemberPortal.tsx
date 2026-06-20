@@ -119,6 +119,31 @@ function buildInstallmentHtml(p: { samitiName: string; logo?: string; memberName
   </div>`;
 }
 
+function buildClosureHtml(p: { samitiName: string; logo?: string; memberName: string; memberSerial?: number; loanNo?: number; loanAmount: number; interestRate: number; durationMonths: number; totalDue: number; totalPaid: number; loanDate: string; closeDate: string; certNo: string }, qr?: string) {
+  return `<div class="r" id="r" style="border:2px solid #15803d;">
+    <div class="header">
+      ${p.logo ? `<img src="${p.logo}" alt="logo" class="logo"/>` : ""}
+      <div class="head-text"><div class="title">${p.samitiName}</div><div class="sub" style="color:#15803d;font-weight:700;letter-spacing:1px;">ঋণ পরিশোধ সনদ</div></div>
+    </div>
+    <div class="grid">
+      <div><span class="muted">সনদ নং:</span> <b>${p.certNo}</b></div>
+      <div><span class="muted">ইস্যু তারিখ:</span> <b>${fmtDate(p.closeDate)}</b></div>
+      <div class="full"><span class="muted">সদস্য:</span> <b>${p.memberSerial ? `${toBn(p.memberSerial)}. ` : ""}${p.memberName}</b></div>
+      ${p.loanNo ? `<div><span class="muted">ঋণ নং:</span> <b>${toBn(p.loanNo)}</b></div>` : ""}
+      <div><span class="muted">ঋণ গ্রহণ তারিখ:</span> <b>${fmtDate(p.loanDate)}</b></div>
+    </div>
+    <div style="margin-top:14px;padding:12px;background:#f0fdf4;border:1px solid #bbf7d0;border-radius:6px;font-size:13px;line-height:1.8;text-align:center;">
+      এই মর্মে প্রত্যয়ন করা যাচ্ছে যে, উপরোক্ত সদস্য তাঁর গৃহীত <b>${formatTk(p.loanAmount)}</b> টাকার ঋণ (সুদ <b>${toBn(p.interestRate)}%</b> বার্ষিক, মেয়াদ <b>${toBn(p.durationMonths)}</b> মাস) সম্পূর্ণরূপে পরিশোধ করেছেন। তাঁর কোনো বকেয়া নেই।
+    </div>
+    <div class="totals">
+      <div><span class="muted">মোট প্রদেয়:</span> <b>${formatTk(p.totalDue)}</b></div>
+      <div><span class="muted">মোট পরিশোধিত:</span> <b style="color:#15803d;">${formatTk(p.totalPaid)}</b></div>
+    </div>
+    ${qrBlock(qr)}
+    <div class="sign"><div>—————————<br/>সদস্য</div><div style="text-align:right">—————————<br/>কোষাধ্যক্ষ</div></div>
+  </div>`;
+}
+
 async function renderHtmlToCanvas(html: string): Promise<HTMLCanvasElement> {
   const { default: html2canvas } = await import("html2canvas");
   const iframe = document.createElement("iframe");
