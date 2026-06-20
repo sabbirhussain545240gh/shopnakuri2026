@@ -25,6 +25,7 @@ import { Users, PiggyBank, HandCoins, LayoutDashboard, Trash2, Plus, CheckCircle
 import { toast } from "sonner";
 import { AuthGate, SignOutButton, CloudStatusBadge } from "@/components/AuthGate";
 import { makeQrDataUrl } from "@/lib/receipt-qr";
+import { buildClosureWithQr, printClosureHtml, closureSrcDoc } from "@/lib/closure-cert";
 import { useMyRoles, allowedTabs, roleLabel, roleBadgeClass, canWrite, type TabKey } from "@/lib/permissions";
 import { RoleManager } from "@/components/RoleManager";
 import { getMyProfile } from "@/lib/roles.functions";
@@ -2140,6 +2141,7 @@ function LoansTab() {
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [loanSearch, setLoanSearch] = useState("");
   const [loanStatusFilter, setLoanStatusFilter] = useState<"all" | "active" | "closed">("all");
+  const [closureView, setClosureView] = useState<string | null>(null);
 
   const setField = (key: string, value: string) => {
     setForm((prev) => ({ ...prev, [key]: value }));
@@ -2955,6 +2957,38 @@ function LoansTab() {
                   >
                     <Download className="h-4 w-4" /> PDF ডাউনলোড
                   </Button>
+                  {currentLoan.status === "closed" && (() => {
+                    const buildCert = async () => {
+                      const lastPay = [...pays].sort((a, b) => b.date.localeCompare(a.date))[0];
+                      const closeDate = lastPay?.date || today();
+                      const certNo = `C-${toBn(idx + 1)}`;
+                      return await buildClosureWithQr({
+                        samitiName: data.samitiName,
+                        logo: data.samitiLogo,
+                        memberName: m?.name ?? "",
+                        memberSerial: m?.serial,
+                        loanNo: idx + 1,
+                        loanAmount: currentLoan.amount,
+                        interestRate: currentLoan.interestRate,
+                        durationMonths: currentLoan.durationMonths,
+                        totalDue: due,
+                        totalPaid: paid,
+                        loanDate: currentLoan.date,
+                        closeDate,
+                        certNo,
+                      });
+                    };
+                    return (
+                      <>
+                        <Button variant="outline" onClick={async () => { try { setClosureView(await buildCert()); } catch { toast.error("সনদ তৈরি ব্যর্থ"); } }}>
+                          <Eye className="h-4 w-4" /> সনদ দেখুন
+                        </Button>
+                        <Button variant="outline" onClick={async () => { try { printClosureHtml(await buildCert()); } catch { toast.error("প্রিন্ট ব্যর্থ"); } }}>
+                          <Printer className="h-4 w-4" /> সনদ প্রিন্ট
+                        </Button>
+                      </>
+                    );
+                  })()}
                   {currentLoan.status === "active" && (() => {
                     const inst = monthlyInstallment(currentLoan.amount, currentLoan.interestRate, currentLoan.durationMonths);
                     const remaining = Math.max(0, due - paid);
@@ -2976,6 +3010,19 @@ function LoansTab() {
               </div>
             );
           })()}
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={!!closureView} onOpenChange={(o) => !o && setClosureView(null)}>
+        <DialogContent className="max-w-5xl p-0 overflow-hidden">
+          <DialogHeader className="p-4 pb-2"><DialogTitle>ঋণ পরিশোধ সনদ</DialogTitle></DialogHeader>
+          {closureView && (
+            <iframe title="closure" srcDoc={closureSrcDoc(closureView)} className="w-full h-[70vh] border-0" />
+          )}
+          <div className="p-3 border-t flex justify-end gap-2">
+            <Button variant="outline" onClick={() => closureView && printClosureHtml(closureView)}><Printer className="h-4 w-4" /> প্রিন্ট</Button>
+            <Button variant="ghost" onClick={() => setClosureView(null)}>বন্ধ</Button>
+          </div>
         </DialogContent>
       </Dialog>
     </Card>
