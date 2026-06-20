@@ -3664,7 +3664,7 @@ function DepositsHistoryTab() {
       amount: r.amount,
       date: r.date,
       totalAfter,
-      receiptNo: `D-${toBn(r.depositNo)}`,
+      receiptNo: `CH-${toBn(r.memberSerial ?? 0)}-${toBn(r.depositNo)}`,
       note: r.note,
       logo: data.samitiLogo,
     });
