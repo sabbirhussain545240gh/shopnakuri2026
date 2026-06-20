@@ -456,7 +456,7 @@ function InstallmentReceiptsSection({ data, onView }: { data: MemberViewResponse
                             samitiName: data.samitiName, logo: data.samitiLogo, memberName: data.member.name,
                             loanAmount: r.loan.amount, durationMonths: r.loan.durationMonths,
                             amount: r.p.amount, date: r.p.date, paidAfter: r.paidAfter, remainingAfter: r.remainingAfter,
-                            receiptNo: r.receiptNo, note: r.p.note, loanNo: r.loanNo,
+                            receiptNo: r.receiptNo, note: r.p.note, loanNo: r.loanNo, cashierName: data.cashier?.name, cashierId: data.cashier?.identifier,
                           }, dataUrl);
                           onView("কিস্তি রিসিপ্ট", html);
                         }}>
@@ -472,7 +472,7 @@ function InstallmentReceiptsSection({ data, onView }: { data: MemberViewResponse
                             samitiName: data.samitiName, logo: data.samitiLogo, memberName: data.member.name,
                             loanAmount: r.loan.amount, durationMonths: r.loan.durationMonths,
                             amount: r.p.amount, date: r.p.date, paidAfter: r.paidAfter, remainingAfter: r.remainingAfter,
-                            receiptNo: r.receiptNo, note: r.p.note, loanNo: r.loanNo,
+                            receiptNo: r.receiptNo, note: r.p.note, loanNo: r.loanNo, cashierName: data.cashier?.name, cashierId: data.cashier?.identifier,
                           }, dataUrl);
                           printHtml("কিস্তি রিসিপ্ট", html);
                         }}>
@@ -488,7 +488,7 @@ function InstallmentReceiptsSection({ data, onView }: { data: MemberViewResponse
                             samitiName: data.samitiName, logo: data.samitiLogo, memberName: data.member.name,
                             loanAmount: r.loan.amount, durationMonths: r.loan.durationMonths,
                             amount: r.p.amount, date: r.p.date, paidAfter: r.paidAfter, remainingAfter: r.remainingAfter,
-                            receiptNo: r.receiptNo, note: r.p.note, loanNo: r.loanNo,
+                            receiptNo: r.receiptNo, note: r.p.note, loanNo: r.loanNo, cashierName: data.cashier?.name, cashierId: data.cashier?.identifier,
                           }, dataUrl);
                           const canvas = await renderHtmlToCanvas(html);
                           const link = document.createElement("a");
@@ -564,7 +564,7 @@ function DepositReceiptsSection({ data, onView }: { data: MemberViewResponse; on
                             samitiName: data.samitiName, logo: data.samitiLogo,
                             memberName: data.member.name, memberSerial: data.member.serial,
                             amount: r.d.amount, date: r.d.date, totalAfter: r.totalAfter,
-                            receiptNo: r.receiptNo, note: r.d.note,
+                            receiptNo: r.receiptNo, note: r.d.note, cashierName: data.cashier?.name, cashierId: data.cashier?.identifier,
                           }, dataUrl);
                           onView("জমা রিসিপ্ট", html);
                         }}>
@@ -580,7 +580,7 @@ function DepositReceiptsSection({ data, onView }: { data: MemberViewResponse; on
                             samitiName: data.samitiName, logo: data.samitiLogo,
                             memberName: data.member.name, memberSerial: data.member.serial,
                             amount: r.d.amount, date: r.d.date, totalAfter: r.totalAfter,
-                            receiptNo: r.receiptNo, note: r.d.note,
+                            receiptNo: r.receiptNo, note: r.d.note, cashierName: data.cashier?.name, cashierId: data.cashier?.identifier,
                           }, dataUrl);
                           printHtml("জমা রিসিপ্ট", html);
                         }}>
@@ -596,7 +596,7 @@ function DepositReceiptsSection({ data, onView }: { data: MemberViewResponse; on
                             samitiName: data.samitiName, logo: data.samitiLogo,
                             memberName: data.member.name, memberSerial: data.member.serial,
                             amount: r.d.amount, date: r.d.date, totalAfter: r.totalAfter,
-                            receiptNo: r.receiptNo, note: r.d.note,
+                            receiptNo: r.receiptNo, note: r.d.note, cashierName: data.cashier?.name, cashierId: data.cashier?.identifier,
                           }, dataUrl);
                           const canvas = await renderHtmlToCanvas(html);
                           const link = document.createElement("a");
