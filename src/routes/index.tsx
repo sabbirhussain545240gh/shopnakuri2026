@@ -3293,6 +3293,56 @@ function InstallmentsTab() {
           )}
         </CardContent>
       </Card>
+
+      {filterMonth && (
+        <Card>
+          <CardHeader>
+            <CardTitle>মাসিক কিস্তি স্থিতি — {filterMonth}</CardTitle>
+            <CardDescription>
+              মোট {toBn(monthlyStatus.length)}টি চলমান ঋণ |{" "}
+              পরিশোধিত: {toBn(monthlyStatus.filter((r) => r.status === "paid").length)} |{" "}
+              আংশিক: {toBn(monthlyStatus.filter((r) => r.status === "partial").length)} |{" "}
+              বকেয়া: {toBn(monthlyStatus.filter((r) => r.status === "unpaid").length)}
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            {monthlyStatus.length === 0 ? (
+              <p className="text-sm text-muted-foreground text-center py-8">এই মাসে কোনও চলমান ঋণ নেই।</p>
+            ) : (
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>ঋণ নং</TableHead>
+                    <TableHead>সদস্য</TableHead>
+                    <TableHead className="text-right">মাসিক কিস্তি</TableHead>
+                    <TableHead className="text-right">এ মাসে পরিশোধ</TableHead>
+                    <TableHead>অবস্থা</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {monthlyStatus.map((r) => (
+                    <TableRow key={r.loan.id}>
+                      <TableCell className="font-medium">{toBn(r.loanNo)}</TableCell>
+                      <TableCell className="font-medium">{r.member?.name ?? "—"}</TableCell>
+                      <TableCell className="text-right">{formatTk(r.installment)}</TableCell>
+                      <TableCell className="text-right text-success font-semibold">{formatTk(r.paidInMonth)}</TableCell>
+                      <TableCell>
+                        {r.status === "paid" ? (
+                          <Badge className="bg-success text-success-foreground">পরিশোধিত</Badge>
+                        ) : r.status === "partial" ? (
+                          <Badge variant="outline" className="border-amber-500 text-amber-600">আংশিক</Badge>
+                        ) : (
+                          <Badge variant="destructive">বকেয়া</Badge>
+                        )}
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            )}
+          </CardContent>
+        </Card>
+      )}
     </div>
   );
 }
