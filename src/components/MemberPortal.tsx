@@ -341,7 +341,7 @@ function LoansSection({ data }: { data: MemberViewResponse }) {
     return (
       <Card>
         <CardHeader>
-          <CardTitle className="flex items-center gap-2"><HandCoins className="h-5 w-5 text-primary" /> আপনার ঋণ</CardTitle>
+          <CardTitle className="flex items-center gap-2"><HandCoins className="h-5 w-5 text-primary" /> আমার ঋণ</CardTitle>
           <CardDescription>আপনার নামে কোনো ঋণ নেই।</CardDescription>
         </CardHeader>
       </Card>
@@ -350,7 +350,7 @@ function LoansSection({ data }: { data: MemberViewResponse }) {
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="flex items-center gap-2"><HandCoins className="h-5 w-5 text-primary" /> আপনার ঋণ</CardTitle>
+        <CardTitle className="flex items-center gap-2"><HandCoins className="h-5 w-5 text-primary" /> আমার ঋণ</CardTitle>
         <CardDescription>মোট {toBn(loans.length)}টি ঋণ</CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
