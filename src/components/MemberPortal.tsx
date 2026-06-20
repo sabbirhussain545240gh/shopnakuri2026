@@ -412,27 +412,33 @@ function LoansSection({ data }: { data: MemberViewResponse }) {
 
 function InstallmentReceiptsSection({ data, onView }: { data: MemberViewResponse; onView: (title: string, html: string) => void }) {
   const rows = useMemo(() => {
-    const loanIndex = new Map(data.loans.map((l, i) => [l.id, i + 1]));
+    const loanIndex = new Map(data.loans.map((l, i) => [l.id, l.samitiLoanNo ?? i + 1]));
     const sorted = [...data.payments].sort((a, b) => b.date.localeCompare(a.date));
-    // compute paid-after per loan in chronological order
+    // compute paid-after & per-loan payment index in chronological order
     const chrono = [...data.payments].sort((a, b) => a.date.localeCompare(b.date));
     const cumByLoan: Record<string, number> = {};
+    const idxByLoan: Record<string, number> = {};
     const paidAfter = new Map<string, number>();
+    const payIdx = new Map<string, number>();
     for (const p of chrono) {
       cumByLoan[p.loanId] = (cumByLoan[p.loanId] ?? 0) + p.amount;
+      idxByLoan[p.loanId] = (idxByLoan[p.loanId] ?? 0) + 1;
       paidAfter.set(p.id, cumByLoan[p.loanId]);
+      payIdx.set(p.id, idxByLoan[p.loanId]);
     }
     return sorted.map((p) => {
       const loan = data.loans.find((l) => l.id === p.loanId);
       const totalDue = loan ? loanTotalDue(loan) : 0;
       const paid = paidAfter.get(p.id) ?? p.amount;
+      const loanNo = loanIndex.get(p.loanId);
+      const pi = payIdx.get(p.id) ?? 1;
       return {
         p,
         loan,
-        loanNo: loanIndex.get(p.loanId),
+        loanNo,
         paidAfter: paid,
         remainingAfter: Math.max(0, totalDue - paid),
-        receiptNo: `R-${p.id.slice(0, 6).toUpperCase()}`,
+        receiptNo: `R-${toBn(loanNo ?? 0)}-${toBn(pi)}`,
       };
     });
   }, [data]);
@@ -536,14 +542,15 @@ function DepositReceiptsSection({ data, onView }: { data: MemberViewResponse; on
   const rows = useMemo(() => {
     const chrono = [...data.deposits].sort((a, b) => a.date.localeCompare(b.date));
     const totalAfter = new Map<string, number>();
+    const depNo = new Map<string, number>();
     let cum = 0;
-    for (const d of chrono) { cum += d.amount; totalAfter.set(d.id, cum); }
+    chrono.forEach((d, i) => { cum += d.amount; totalAfter.set(d.id, cum); depNo.set(d.id, i + 1); });
     return [...data.deposits]
       .sort((a, b) => b.date.localeCompare(a.date))
       .map((d) => ({
         d,
         totalAfter: totalAfter.get(d.id) ?? d.amount,
-        receiptNo: `D-${d.id.slice(0, 6).toUpperCase()}`,
+        receiptNo: `D-${toBn(depNo.get(d.id) ?? 1)}`,
       }));
   }, [data]);
 
