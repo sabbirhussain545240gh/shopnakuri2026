@@ -2201,7 +2201,7 @@ function LoansTab() {
       date: payForm.date,
       paidAfter,
       remainingAfter,
-      receiptNo: `R-${Date.now().toString().slice(-6)}`,
+      receiptNo: `KS-${toBn(mem?.serial ?? 0)}-${toBn(data.payments.filter((p) => p.loanId === payFor.id).length + 1)}`,
       loanNo: data.loans.findIndex((l) => l.id === payFor.id) + 1,
       note: payForm.note.trim() || undefined,
       logo: data.samitiLogo || undefined,
