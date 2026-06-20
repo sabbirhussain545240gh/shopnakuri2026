@@ -3407,7 +3407,7 @@ function ReceiptsHistoryTab() {
       date: r.date,
       paidAfter,
       remainingAfter,
-      receiptNo: `R-${toBn(r.loanNo)}-${toBn(loanPayments.findIndex((p) => p.id === r.id) + 1)}`,
+      receiptNo: `KS-${toBn(r.memberSerial ?? 0)}-${toBn(loanPayments.findIndex((p) => p.id === r.id) + 1)}`,
       note: r.note,
       logo: data.samitiLogo,
       loanNo: r.loanNo,
