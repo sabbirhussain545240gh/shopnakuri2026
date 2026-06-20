@@ -119,6 +119,31 @@ function buildInstallmentHtml(p: { samitiName: string; logo?: string; memberName
   </div>`;
 }
 
+function buildClosureHtml(p: { samitiName: string; logo?: string; memberName: string; memberSerial?: number; loanNo?: number; loanAmount: number; interestRate: number; durationMonths: number; totalDue: number; totalPaid: number; loanDate: string; closeDate: string; certNo: string }, qr?: string) {
+  return `<div class="r" id="r" style="border:2px solid #15803d;">
+    <div class="header">
+      ${p.logo ? `<img src="${p.logo}" alt="logo" class="logo"/>` : ""}
+      <div class="head-text"><div class="title">${p.samitiName}</div><div class="sub" style="color:#15803d;font-weight:700;letter-spacing:1px;">ঋণ পরিশোধ সনদ</div></div>
+    </div>
+    <div class="grid">
+      <div><span class="muted">সনদ নং:</span> <b>${p.certNo}</b></div>
+      <div><span class="muted">ইস্যু তারিখ:</span> <b>${fmtDate(p.closeDate)}</b></div>
+      <div class="full"><span class="muted">সদস্য:</span> <b>${p.memberSerial ? `${toBn(p.memberSerial)}. ` : ""}${p.memberName}</b></div>
+      ${p.loanNo ? `<div><span class="muted">ঋণ নং:</span> <b>${toBn(p.loanNo)}</b></div>` : ""}
+      <div><span class="muted">ঋণ গ্রহণ তারিখ:</span> <b>${fmtDate(p.loanDate)}</b></div>
+    </div>
+    <div style="margin-top:14px;padding:12px;background:#f0fdf4;border:1px solid #bbf7d0;border-radius:6px;font-size:13px;line-height:1.8;text-align:center;">
+      এই মর্মে প্রত্যয়ন করা যাচ্ছে যে, উপরোক্ত সদস্য তাঁর গৃহীত <b>${formatTk(p.loanAmount)}</b> টাকার ঋণ (সুদ <b>${toBn(p.interestRate)}%</b> বার্ষিক, মেয়াদ <b>${toBn(p.durationMonths)}</b> মাস) সম্পূর্ণরূপে পরিশোধ করেছেন। তাঁর কোনো বকেয়া নেই।
+    </div>
+    <div class="totals">
+      <div><span class="muted">মোট প্রদেয়:</span> <b>${formatTk(p.totalDue)}</b></div>
+      <div><span class="muted">মোট পরিশোধিত:</span> <b style="color:#15803d;">${formatTk(p.totalPaid)}</b></div>
+    </div>
+    ${qrBlock(qr)}
+    <div class="sign"><div>—————————<br/>সদস্য</div><div style="text-align:right">—————————<br/>কোষাধ্যক্ষ</div></div>
+  </div>`;
+}
+
 async function renderHtmlToCanvas(html: string): Promise<HTMLCanvasElement> {
   const { default: html2canvas } = await import("html2canvas");
   const iframe = document.createElement("iframe");
@@ -220,7 +245,7 @@ export function MemberPortal() {
           <>
             {data.summary && <SamitiSummaryCard summary={data.summary} member={data.member} />}
             {data.member && <MemberProfileCard member={data.member} data={data} />}
-            <LoansSection data={data} />
+            <LoansSection data={data} onView={(title, html) => setViewing({ title, html })} />
             <InstallmentReceiptsSection data={data} onView={(title, html) => setViewing({ title, html })} />
             <DepositReceiptsSection data={data} onView={(title, html) => setViewing({ title, html })} />
           </>
@@ -358,7 +383,7 @@ function MemberProfileCard({ member, data }: { member: NonNullable<MemberViewRes
   );
 }
 
-function LoansSection({ data }: { data: MemberViewResponse }) {
+function LoansSection({ data, onView }: { data: MemberViewResponse; onView: (title: string, html: string) => void }) {
   const loans = data.loans;
   if (loans.length === 0) {
     return (
@@ -402,6 +427,59 @@ function LoansSection({ data }: { data: MemberViewResponse }) {
                 <div><div className="text-muted-foreground text-xs">পরিশোধিত</div><div className="font-medium text-success">{formatTk(paid)}</div></div>
                 <div><div className="text-muted-foreground text-xs">বকেয়া</div><div className={`font-semibold ${remaining > 0 ? "text-destructive" : "text-success"}`}>{formatTk(remaining)}</div></div>
               </div>
+              {l.status === "closed" && data.member && (
+                <div className="mt-3 flex flex-wrap gap-2 pt-3 border-t">
+                  <Button size="sm" variant="outline" onClick={async () => {
+                    const lastPay = [...data.payments].filter((p) => p.loanId === l.id).sort((a, b) => b.date.localeCompare(a.date))[0];
+                    const closeDate = lastPay?.date || new Date().toISOString().slice(0, 10);
+                    const certNo = `C-${toBn(l.samitiLoanNo ?? idx + 1)}`;
+                    const { dataUrl } = await buildReceiptQr({
+                      t: "installment", s: data.samitiName, n: certNo, m: data.member!.name,
+                      a: paid, d: closeDate, pa: paid, ra: 0, ln: l.samitiLoanNo ?? idx + 1,
+                    });
+                    const html = buildClosureHtml({
+                      samitiName: data.samitiName, logo: data.samitiLogo, memberName: data.member!.name, memberSerial: data.member!.serial,
+                      loanNo: l.samitiLoanNo ?? idx + 1, loanAmount: l.amount, interestRate: l.interestRate, durationMonths: l.durationMonths,
+                      totalDue, totalPaid: paid, loanDate: l.date, closeDate, certNo,
+                    }, dataUrl);
+                    onView("ঋণ পরিশোধ সনদ", html);
+                  }}><Eye className="h-4 w-4 mr-1" /> সনদ দেখুন</Button>
+                  <Button size="sm" variant="outline" onClick={async () => {
+                    const lastPay = [...data.payments].filter((p) => p.loanId === l.id).sort((a, b) => b.date.localeCompare(a.date))[0];
+                    const closeDate = lastPay?.date || new Date().toISOString().slice(0, 10);
+                    const certNo = `C-${toBn(l.samitiLoanNo ?? idx + 1)}`;
+                    const { dataUrl } = await buildReceiptQr({
+                      t: "installment", s: data.samitiName, n: certNo, m: data.member!.name,
+                      a: paid, d: closeDate, pa: paid, ra: 0, ln: l.samitiLoanNo ?? idx + 1,
+                    });
+                    const html = buildClosureHtml({
+                      samitiName: data.samitiName, logo: data.samitiLogo, memberName: data.member!.name, memberSerial: data.member!.serial,
+                      loanNo: l.samitiLoanNo ?? idx + 1, loanAmount: l.amount, interestRate: l.interestRate, durationMonths: l.durationMonths,
+                      totalDue, totalPaid: paid, loanDate: l.date, closeDate, certNo,
+                    }, dataUrl);
+                    printHtml("ঋণ পরিশোধ সনদ", html);
+                  }}><Printer className="h-4 w-4 mr-1" /> প্রিন্ট</Button>
+                  <Button size="sm" variant="outline" onClick={async () => {
+                    const lastPay = [...data.payments].filter((p) => p.loanId === l.id).sort((a, b) => b.date.localeCompare(a.date))[0];
+                    const closeDate = lastPay?.date || new Date().toISOString().slice(0, 10);
+                    const certNo = `C-${toBn(l.samitiLoanNo ?? idx + 1)}`;
+                    const { dataUrl } = await buildReceiptQr({
+                      t: "installment", s: data.samitiName, n: certNo, m: data.member!.name,
+                      a: paid, d: closeDate, pa: paid, ra: 0, ln: l.samitiLoanNo ?? idx + 1,
+                    });
+                    const html = buildClosureHtml({
+                      samitiName: data.samitiName, logo: data.samitiLogo, memberName: data.member!.name, memberSerial: data.member!.serial,
+                      loanNo: l.samitiLoanNo ?? idx + 1, loanAmount: l.amount, interestRate: l.interestRate, durationMonths: l.durationMonths,
+                      totalDue, totalPaid: paid, loanDate: l.date, closeDate, certNo,
+                    }, dataUrl);
+                    const canvas = await renderHtmlToCanvas(html);
+                    const link = document.createElement("a");
+                    link.href = canvas.toDataURL("image/jpeg", 0.92);
+                    link.download = `ঋণ-সনদ-${certNo}.jpg`;
+                    link.click();
+                  }}><ImageDown className="h-4 w-4 mr-1" /> ছবি</Button>
+                </div>
+              )}
             </div>
           );
         })}
