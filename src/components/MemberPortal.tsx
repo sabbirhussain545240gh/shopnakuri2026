@@ -245,7 +245,7 @@ export function MemberPortal() {
           <>
             {data.summary && <SamitiSummaryCard summary={data.summary} member={data.member} />}
             {data.member && <MemberProfileCard member={data.member} data={data} />}
-            <LoansSection data={data} />
+            <LoansSection data={data} onView={(title, html) => setViewing({ title, html })} />
             <InstallmentReceiptsSection data={data} onView={(title, html) => setViewing({ title, html })} />
             <DepositReceiptsSection data={data} onView={(title, html) => setViewing({ title, html })} />
           </>
