@@ -29,6 +29,7 @@ export type MemberViewResponse = {
   error?: string;
   samitiName: string;
   samitiLogo: string;
+  cashier?: { name: string; identifier?: string; role?: string } | null;
   member: {
     id: string;
     serial?: number;
@@ -142,10 +143,19 @@ export const getMyMemberView = createServerFn({ method: "GET" })
             nid: String(m.nominee.nid ?? ""),
           }
         : null;
+      const { data: adminProfile } = await supabaseAdmin
+        .from("profiles")
+        .select("display_name, identifier")
+        .eq("user_id", adminId)
+        .maybeSingle();
+      const cashierName = String(
+        adminProfile?.display_name || adminProfile?.identifier || d.cashierName || d.adminName || "এডমিন"
+      );
       return {
         ok: true,
         samitiName: String(d.samitiName ?? "সমিতি"),
         samitiLogo: String(d.samitiLogo ?? ""),
+        cashier: { name: cashierName, identifier: adminProfile?.identifier ? String(adminProfile.identifier) : undefined, role: "admin" },
         member: {
           id: m.id,
           serial: typeof m.serial === "number" ? m.serial : undefined,
