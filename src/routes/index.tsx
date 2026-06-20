@@ -2957,7 +2957,38 @@ function LoansTab() {
                   >
                     <Download className="h-4 w-4" /> PDF ডাউনলোড
                   </Button>
-                  {currentLoan.status === "active" && (() => {
+                  {currentLoan.status === "closed" && (() => {
+                    const buildCert = async () => {
+                      const lastPay = [...pays].sort((a, b) => b.date.localeCompare(a.date))[0];
+                      const closeDate = lastPay?.date || today();
+                      const certNo = `C-${toBn(idx + 1)}`;
+                      return await buildClosureWithQr({
+                        samitiName: data.samitiName,
+                        logo: data.samitiLogo,
+                        memberName: m?.name ?? "",
+                        memberSerial: m?.serial,
+                        loanNo: idx + 1,
+                        loanAmount: currentLoan.amount,
+                        interestRate: currentLoan.interestRate,
+                        durationMonths: currentLoan.durationMonths,
+                        totalDue: due,
+                        totalPaid: paid,
+                        loanDate: currentLoan.date,
+                        closeDate,
+                        certNo,
+                      });
+                    };
+                    return (
+                      <>
+                        <Button variant="outline" onClick={async () => { try { setClosureView(await buildCert()); } catch { toast.error("সনদ তৈরি ব্যর্থ"); } }}>
+                          <Eye className="h-4 w-4" /> সনদ দেখুন
+                        </Button>
+                        <Button variant="outline" onClick={async () => { try { printClosureHtml(await buildCert()); } catch { toast.error("প্রিন্ট ব্যর্থ"); } }}>
+                          <Printer className="h-4 w-4" /> সনদ প্রিন্ট
+                        </Button>
+                      </>
+                    );
+                  })()}
                     const inst = monthlyInstallment(currentLoan.amount, currentLoan.interestRate, currentLoan.durationMonths);
                     const remaining = Math.max(0, due - paid);
                     return (
