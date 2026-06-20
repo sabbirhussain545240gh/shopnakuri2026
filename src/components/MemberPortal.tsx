@@ -542,14 +542,15 @@ function DepositReceiptsSection({ data, onView }: { data: MemberViewResponse; on
   const rows = useMemo(() => {
     const chrono = [...data.deposits].sort((a, b) => a.date.localeCompare(b.date));
     const totalAfter = new Map<string, number>();
+    const depNo = new Map<string, number>();
     let cum = 0;
-    for (const d of chrono) { cum += d.amount; totalAfter.set(d.id, cum); }
+    chrono.forEach((d, i) => { cum += d.amount; totalAfter.set(d.id, cum); depNo.set(d.id, i + 1); });
     return [...data.deposits]
       .sort((a, b) => b.date.localeCompare(a.date))
       .map((d) => ({
         d,
         totalAfter: totalAfter.get(d.id) ?? d.amount,
-        receiptNo: `D-${d.id.slice(0, 6).toUpperCase()}`,
+        receiptNo: `D-${toBn(depNo.get(d.id) ?? 1)}`,
       }));
   }, [data]);
 
