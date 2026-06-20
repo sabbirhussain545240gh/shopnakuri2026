@@ -368,10 +368,10 @@ function LoansSection({ data }: { data: MemberViewResponse }) {
                 </Badge>
               </div>
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mt-3 text-sm">
+                <div><div className="text-muted-foreground text-xs">মূল ঋণ</div><div className="font-medium">{formatTk(totalDue)}</div></div>
                 <div><div className="text-muted-foreground text-xs">মেয়াদ</div><div className="font-medium">{toBn(l.durationMonths)} মাস</div></div>
                 <div><div className="text-muted-foreground text-xs">তারিখ</div><div className="font-medium">{fmtDate(l.date)}</div></div>
                 <div><div className="text-muted-foreground text-xs">মাসিক কিস্তি</div><div className="font-medium">{formatTk(inst)}</div></div>
-                <div><div className="text-muted-foreground text-xs">মোট প্রাপ্য</div><div className="font-medium">{formatTk(totalDue)}</div></div>
                 <div><div className="text-muted-foreground text-xs">পরিশোধিত</div><div className="font-medium text-success">{formatTk(paid)}</div></div>
                 <div><div className="text-muted-foreground text-xs">বকেয়া</div><div className={`font-semibold ${remaining > 0 ? "text-destructive" : "text-success"}`}>{formatTk(remaining)}</div></div>
               </div>
