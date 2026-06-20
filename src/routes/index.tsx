@@ -3756,7 +3756,7 @@ function DepositsHistoryTab() {
               <TableRow>
                 <TableHead className="w-16 text-center">ক্রম</TableHead>
                 <TableHead>তারিখ</TableHead>
-                <TableHead className="w-24 text-center">জমা নং</TableHead>
+                <TableHead className="w-32 text-center">রিসিপ্ট নং</TableHead>
                 <TableHead>সদস্য</TableHead>
                 <TableHead>নোট</TableHead>
                 <TableHead className="text-right">পরিমাণ</TableHead>
