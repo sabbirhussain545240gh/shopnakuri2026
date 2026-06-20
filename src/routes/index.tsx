@@ -1654,13 +1654,14 @@ function SavingsTab() {
     addDeposit({ memberId: form.memberId, amount: amt, date: form.date, note: form.note });
     const mem = data.members.find((x) => x.id === form.memberId);
     const prevTotal = memberTotalDeposit(data.deposits, form.memberId);
+    const depositNo = data.deposits.filter((d) => d.memberId === form.memberId).length + 1;
     setReceipt({
       memberName: mem?.name ?? "—",
       memberSerial: mem?.serial,
       amount: amt,
       date: form.date,
       totalAfter: prevTotal + amt,
-      receiptNo: `D-${Date.now().toString().slice(-6)}`,
+      receiptNo: `CH-${toBn(mem?.serial ?? 0)}-${toBn(depositNo)}`,
       note: form.note.trim() || undefined,
       logo: data.samitiLogo || undefined,
     });
