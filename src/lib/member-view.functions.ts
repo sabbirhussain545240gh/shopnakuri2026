@@ -101,7 +101,10 @@ export const getMyMemberView = createServerFn({ method: "GET" })
       const members: any[] = Array.isArray(d.members) ? d.members : [];
       const m = members.find((x) => x?.id === memberRef);
       if (!m) continue;
-      const loans = (Array.isArray(d.loans) ? d.loans : [])
+      const allLoansList: any[] = Array.isArray(d.loans) ? d.loans : [];
+      const samitiLoanNoById = new Map<string, number>();
+      allLoansList.forEach((l: any, i: number) => { if (l?.id) samitiLoanNoById.set(String(l.id), i + 1); });
+      const loans = allLoansList
         .filter((l: any) => l?.memberId === memberRef)
         .map((l: any) => ({
           id: String(l.id),
@@ -110,7 +113,9 @@ export const getMyMemberView = createServerFn({ method: "GET" })
           date: String(l.date ?? ""),
           durationMonths: Number(l.durationMonths) || 0,
           status: l.status === "closed" ? "closed" : "active",
+          samitiLoanNo: samitiLoanNoById.get(String(l.id)),
         })) as MemberViewLoan[];
+
       const loanIds = new Set(loans.map((l) => l.id));
       const payments = (Array.isArray(d.payments) ? d.payments : [])
         .filter((p: any) => loanIds.has(p?.loanId))
