@@ -91,6 +91,7 @@ export function buildClosureHtml(p: ClosureInput, qr?: string) {
     #r.closure .signs > div{flex:1;text-align:center;}
   </style>
   <div class="r closure" id="r">
+    ${p.logo ? `<div class="watermark" style="background-image:url('${p.logo}')"></div>` : ""}
     <div class="header">
       ${p.logo ? `<img src="${p.logo}" alt="logo" class="logo"/>` : ""}
       <div class="head-text"><div class="title">${p.samitiName}</div><div class="sub" style="color:#15803d;font-weight:700;letter-spacing:1px;">ঋণ পরিশোধ সনদ</div></div>
