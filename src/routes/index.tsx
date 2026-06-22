@@ -5585,6 +5585,23 @@ function treasurerSignHtml(t?: CommitteeMember | null) {
   return `<div style="text-align:right">${img}${name}${role}${phone}</div>`;
 }
 
+function TreasurerSignBlock({ committee }: { committee?: CommitteeMember[] }) {
+  const t = findTreasurer(committee);
+  if (!t) return <div className="text-right">—————————<br />কোষাধ্যক্ষ</div>;
+  return (
+    <div className="text-right">
+      {t.signature ? (
+        <img src={t.signature} alt="" className="h-9 max-w-[140px] object-contain ml-auto mb-0.5" />
+      ) : (
+        <div className="border-b border-foreground/70 h-7 w-32 ml-auto mb-0.5" />
+      )}
+      {t.name && <div className="font-semibold text-foreground">{t.name}</div>}
+      <div>{t.role || "কোষাধ্যক্ষ"}</div>
+      {t.phone && <div>{toBn(t.phone)}</div>}
+    </div>
+  );
+}
+
 const qrBlockHtml = (qrDataUrl?: string) =>
   qrDataUrl
     ? `<div class="qr">
