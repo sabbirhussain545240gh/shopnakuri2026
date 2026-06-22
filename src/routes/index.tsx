@@ -4144,7 +4144,7 @@ function SettingsTab() {
       quotesSectionTitle: quotesSectionTitle.trim(),
       messages: messages.map((m) => ({ role: m.role.trim(), name: m.name.trim(), photo: m.photo || "", message: m.message.trim() })).filter((m) => m.name || m.message || m.role),
       messagesSectionTitle: messagesSectionTitle.trim(),
-      committee: committee.map((c) => ({ role: c.role.trim(), name: c.name.trim(), phone: c.phone.trim(), photo: c.photo || "" })).filter((c) => c.role || c.name || c.phone),
+      committee: committee.map((c) => ({ role: c.role.trim(), name: c.name.trim(), phone: c.phone.trim(), photo: c.photo || "", signature: c.signature || "" })).filter((c) => c.role || c.name || c.phone),
       committeeSectionTitle: committeeSectionTitle.trim(),
       committeeSectionSubtitle: committeeSectionSubtitle.trim(),
     });
