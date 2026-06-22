@@ -24,12 +24,14 @@ export type MemberViewDeposit = {
   date: string;
   note?: string;
 };
+export type MemberViewCommittee = { role: string; name: string; phone: string; photo?: string; signature?: string };
 export type MemberViewResponse = {
   ok: boolean;
   error?: string;
   samitiName: string;
   samitiLogo: string;
   cashier?: { name: string; identifier?: string; role?: string } | null;
+  committee?: MemberViewCommittee[];
   member: {
     id: string;
     serial?: number;
