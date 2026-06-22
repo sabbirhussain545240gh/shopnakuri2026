@@ -2056,7 +2056,7 @@ function SavingsTab() {
             })} />
             <div className="mt-6 flex justify-between text-xs text-muted-foreground">
               <div>—————————<br />গ্রহীতা</div>
-              <div className="text-right">—————————<br />কোষাধ্যক্ষ</div>
+              <TreasurerSignBlock committee={data.settings.committee} />
             </div>
           </div>
         )}
@@ -2754,7 +2754,7 @@ function LoansTab() {
               })} />
               <div className="mt-6 flex justify-between text-xs text-muted-foreground">
                 <div>—————————<br />গ্রহীতা</div>
-                <div className="text-right">—————————<br />কোষাধ্যক্ষ</div>
+                <TreasurerSignBlock committee={data.settings.committee} />
               </div>
             </div>
           )}
@@ -3521,7 +3521,7 @@ function ReceiptsHistoryTab() {
               })} />
               <div className="mt-6 flex justify-between text-xs text-muted-foreground">
                 <div>—————————<br />গ্রহীতা</div>
-                <div className="text-right">—————————<br />কোষাধ্যক্ষ</div>
+                <TreasurerSignBlock committee={data.settings.committee} />
               </div>
             </div>
           )}
@@ -3902,7 +3902,7 @@ function DepositsHistoryTab() {
               })} />
               <div className="mt-6 flex justify-between text-xs text-muted-foreground">
                 <div>—————————<br />গ্রহীতা</div>
-                <div className="text-right">—————————<br />কোষাধ্যক্ষ</div>
+                <TreasurerSignBlock committee={data.settings.committee} />
               </div>
             </div>
           )}
@@ -5587,7 +5587,7 @@ function treasurerSignHtml(t?: CommitteeMember | null) {
 
 function TreasurerSignBlock({ committee }: { committee?: CommitteeMember[] }) {
   const t = findTreasurer(committee);
-  if (!t) return <div className="text-right">—————————<br />কোষাধ্যক্ষ</div>;
+  if (!t) return <TreasurerSignBlock committee={data.settings.committee} />;
   return (
     <div className="text-right">
       {t.signature ? (
