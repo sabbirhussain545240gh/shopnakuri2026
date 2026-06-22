@@ -5571,6 +5571,20 @@ const receiptCss = `
   @media print{body{padding:0;} .no-print{display:none;}}
 `;
 
+function findTreasurer(committee?: CommitteeMember[]) {
+  return committee?.find((c) => (c.role || "").includes("কোষাধ্যক্ষ")) || null;
+}
+function treasurerSignHtml(t?: CommitteeMember | null) {
+  if (!t) return `<div style="text-align:right">—————————<br/>কোষাধ্যক্ষ</div>`;
+  const img = t.signature
+    ? `<img src="${t.signature}" alt="" style="height:40px;max-width:140px;object-fit:contain;display:block;margin-left:auto;margin-bottom:2px;"/>`
+    : `<div style="border-bottom:1px solid #111;height:34px;width:140px;margin-left:auto;margin-bottom:2px;"></div>`;
+  const name = t.name ? `<div style="font-weight:600;color:#111;">${t.name}</div>` : "";
+  const role = `<div style="color:#666;font-size:11px;">${t.role || "কোষাধ্যক্ষ"}</div>`;
+  const phone = t.phone ? `<div style="color:#666;font-size:11px;">${toBn(t.phone)}</div>` : "";
+  return `<div style="text-align:right">${img}${name}${role}${phone}</div>`;
+}
+
 const qrBlockHtml = (qrDataUrl?: string) =>
   qrDataUrl
     ? `<div class="qr">
