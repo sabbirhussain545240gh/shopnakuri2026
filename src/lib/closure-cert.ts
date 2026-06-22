@@ -43,7 +43,8 @@ export const closureCss = `
   .qr-info{flex:1;font-size:11px;color:#475569;line-height:1.55;}
   .qr-info .qr-title{display:inline-flex;align-items:center;gap:6px;color:#0f172a;font-size:12px;font-weight:700;margin-bottom:4px;}
   .qr-info .qr-badge{display:inline-block;background:#0f172a;color:#fff;font-size:9px;padding:2px 6px;border-radius:3px;letter-spacing:0.5px;margin-top:6px;}
-  @media print{body{padding:0;} .no-print{display:none;}}
+  @page{size:A4 landscape;margin:10mm;}
+  @media print{html,body{width:297mm;margin:0;padding:0;}body{padding:0 !important;} .no-print{display:none;} #r{width:277mm !important;max-width:none !important;margin:0 auto !important;box-sizing:border-box;}}
 `;
 
 const qrBlock = (qrDataUrl?: string) =>
