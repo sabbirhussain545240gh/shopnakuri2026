@@ -5624,6 +5624,7 @@ const qrBlockHtml = (qrDataUrl?: string) =>
 
 function buildReceiptHtml(r: { loan: Loan; memberName: string; amount: number; date: string; paidAfter: number; remainingAfter: number; receiptNo: string; note?: string; logo?: string; loanNo?: number }, samitiName: string, qrDataUrl?: string, treasurer?: CommitteeMember | null) {
   return `<div class="r" id="r">
+    ${r.logo ? `<div class="watermark" style="background-image:url('${r.logo}')"></div>` : ""}
     <div class="header">
       ${r.logo ? `<img src="${r.logo}" alt="logo" class="logo"/>` : ""}
       <div class="head-text"><div class="title">${samitiName}</div><div class="sub">কিস্তি প্রাপ্তি রিসিপ্ট</div></div>
