@@ -2056,7 +2056,7 @@ function SavingsTab() {
             })} />
             <div className="mt-6 flex justify-between text-xs text-muted-foreground">
               <div>—————————<br />গ্রহীতা</div>
-              <div className="text-right">—————————<br />কোষাধ্যক্ষ</div>
+              <TreasurerSignBlock committee={data.settings.committee} />
             </div>
           </div>
         )}
@@ -2066,7 +2066,7 @@ function SavingsTab() {
             if (!receipt) return;
             try {
               toast.loading("ছবি তৈরি হচ্ছে...", { id: "djpg" });
-              const canvas = await renderDepositReceiptCanvas(receipt, data.samitiName || "সমিতি");
+              const canvas = await renderDepositReceiptCanvas(receipt, data.samitiName || "সমিতি", findTreasurer(data.settings.committee));
               const blob = await new Promise<Blob | null>((res) => canvas.toBlob(res, "image/jpeg", 0.95));
               if (!blob) throw new Error("blob");
               const url = URL.createObjectURL(blob);
@@ -2088,7 +2088,7 @@ function SavingsTab() {
             const text = `জমা রিসিপ্ট\nসমিতি: ${data.samitiName || "সমিতি"}\nরিসিপ্ট নং: ${receipt.receiptNo}\nতারিখ: ${fmtDate(receipt.date)}\nসদস্য: ${receipt.memberSerial ? `${toBn(receipt.memberSerial)}. ` : ""}${receipt.memberName}\nজমার পরিমাণ: ${formatTk(receipt.amount)}\nমোট সঞ্চয়: ${formatTk(receipt.totalAfter)}`;
             try {
               toast.loading("শেয়ার প্রস্তুত হচ্ছে...", { id: "dshare" });
-              const canvas = await renderDepositReceiptCanvas(receipt, data.samitiName || "সমিতি");
+              const canvas = await renderDepositReceiptCanvas(receipt, data.samitiName || "সমিতি", findTreasurer(data.settings.committee));
               const blob = await new Promise<Blob | null>((res) => canvas.toBlob(res, "image/jpeg", 0.95));
               toast.dismiss("dshare");
               const file = blob ? new File([blob], `জমা-রিসিপ্ট-${receipt.receiptNo}.jpg`, { type: "image/jpeg" }) : null;
@@ -2114,7 +2114,7 @@ function SavingsTab() {
           <Button onClick={async () => {
             if (!receipt) return;
             const qrDataUrl = await buildDepositQr(receipt, data.samitiName || "সমিতি");
-            const html = buildDepositReceiptHtml(receipt, data.samitiName || "সমিতি", qrDataUrl);
+            const html = buildDepositReceiptHtml(receipt, data.samitiName || "সমিতি", qrDataUrl, findTreasurer(data.settings.committee));
             const w = window.open("", "_blank", "width=600,height=800");
             if (!w) return;
             w.document.write(`<!DOCTYPE html><html><head><meta charset="utf-8"><title>জমা রিসিপ্ট</title><style>${receiptCss}</style></head><body>${html}<script>setTimeout(()=>window.print(),300)</script></body></html>`);
@@ -2754,7 +2754,7 @@ function LoansTab() {
               })} />
               <div className="mt-6 flex justify-between text-xs text-muted-foreground">
                 <div>—————————<br />গ্রহীতা</div>
-                <div className="text-right">—————————<br />কোষাধ্যক্ষ</div>
+                <TreasurerSignBlock committee={data.settings.committee} />
               </div>
             </div>
           )}
@@ -2764,7 +2764,7 @@ function LoansTab() {
               if (!receipt) return;
               try {
                 toast.loading("ছবি তৈরি হচ্ছে...", { id: "rjpg" });
-                const canvas = await renderReceiptCanvas(receipt, data.samitiName || "সমিতি");
+                const canvas = await renderReceiptCanvas(receipt, data.samitiName || "সমিতি", findTreasurer(data.settings.committee));
                 const blob = await new Promise<Blob | null>((res) => canvas.toBlob(res, "image/jpeg", 0.95));
                 if (!blob) throw new Error("blob");
                 const url = URL.createObjectURL(blob);
@@ -2786,7 +2786,7 @@ function LoansTab() {
               const text = `কিস্তি রিসিপ্ট\nসমিতি: ${data.samitiName || "সমিতি"}\nরিসিপ্ট নং: ${receipt.receiptNo}\nতারিখ: ${fmtDate(receipt.date)}\nসদস্য: ${receipt.memberName}${receipt.loanNo ? ` (ঋণ নং ${toBn(receipt.loanNo)})` : ""}\nপ্রাপ্ত কিস্তি: ${formatTk(receipt.amount)}\nমোট পরিশোধিত: ${formatTk(receipt.paidAfter)}\nঅবশিষ্ট বকেয়া: ${formatTk(receipt.remainingAfter)}`;
               try {
                 toast.loading("শেয়ার প্রস্তুত হচ্ছে...", { id: "rshare" });
-                const canvas = await renderReceiptCanvas(receipt, data.samitiName || "সমিতি");
+                const canvas = await renderReceiptCanvas(receipt, data.samitiName || "সমিতি", findTreasurer(data.settings.committee));
                 const blob = await new Promise<Blob | null>((res) => canvas.toBlob(res, "image/jpeg", 0.95));
                 toast.dismiss("rshare");
                 const file = blob ? new File([blob], `রিসিপ্ট-${receipt.receiptNo}.jpg`, { type: "image/jpeg" }) : null;
@@ -2812,7 +2812,7 @@ function LoansTab() {
             <Button onClick={async () => {
               if (!receipt) return;
               const qrDataUrl = await buildInstallmentQr(receipt, data.samitiName || "সমিতি");
-              const html = buildReceiptHtml(receipt, data.samitiName || "সমিতি", qrDataUrl);
+              const html = buildReceiptHtml(receipt, data.samitiName || "সমিতি", qrDataUrl, findTreasurer(data.settings.committee));
               const w = window.open("", "_blank", "width=600,height=800");
               if (!w) return;
               w.document.write(`<!DOCTYPE html><html><head><meta charset="utf-8"><title>রিসিপ্ট</title><style>${receiptCss}</style></head><body>${html}<script>setTimeout(()=>window.print(),300)</script></body></html>`);
@@ -3521,7 +3521,7 @@ function ReceiptsHistoryTab() {
               })} />
               <div className="mt-6 flex justify-between text-xs text-muted-foreground">
                 <div>—————————<br />গ্রহীতা</div>
-                <div className="text-right">—————————<br />কোষাধ্যক্ষ</div>
+                <TreasurerSignBlock committee={data.settings.committee} />
               </div>
             </div>
           )}
@@ -3531,7 +3531,7 @@ function ReceiptsHistoryTab() {
               if (!receipt) return;
               try {
                 toast.loading("ছবি তৈরি হচ্ছে...", { id: "rhjpg" });
-                const canvas = await renderReceiptCanvas(receipt, data.samitiName || "সমিতি");
+                const canvas = await renderReceiptCanvas(receipt, data.samitiName || "সমিতি", findTreasurer(data.settings.committee));
                 const blob = await new Promise<Blob | null>((res) => canvas.toBlob(res, "image/jpeg", 0.95));
                 if (!blob) throw new Error("blob");
                 const url = URL.createObjectURL(blob);
@@ -3553,7 +3553,7 @@ function ReceiptsHistoryTab() {
               const text = `কিস্তি রিসিপ্ট\nসমিতি: ${data.samitiName || "সমিতি"}\nরিসিপ্ট নং: ${receipt.receiptNo}\nতারিখ: ${fmtDate(receipt.date)}\nসদস্য: ${receipt.memberName}${receipt.loanNo ? ` (ঋণ নং ${toBn(receipt.loanNo)})` : ""}\nপ্রাপ্ত কিস্তি: ${formatTk(receipt.amount)}\nমোট পরিশোধিত: ${formatTk(receipt.paidAfter)}\nঅবশিষ্ট বকেয়া: ${formatTk(receipt.remainingAfter)}`;
               try {
                 toast.loading("শেয়ার প্রস্তুত হচ্ছে...", { id: "rhshare" });
-                const canvas = await renderReceiptCanvas(receipt, data.samitiName || "সমিতি");
+                const canvas = await renderReceiptCanvas(receipt, data.samitiName || "সমিতি", findTreasurer(data.settings.committee));
                 const blob = await new Promise<Blob | null>((res) => canvas.toBlob(res, "image/jpeg", 0.95));
                 toast.dismiss("rhshare");
                 const file = blob ? new File([blob], `রিসিপ্ট-${receipt.receiptNo}.jpg`, { type: "image/jpeg" }) : null;
@@ -3579,7 +3579,7 @@ function ReceiptsHistoryTab() {
             <Button onClick={async () => {
               if (!receipt) return;
               const qrDataUrl = await buildInstallmentQr(receipt, data.samitiName || "সমিতি");
-              const html = buildReceiptHtml(receipt, data.samitiName || "সমিতি", qrDataUrl);
+              const html = buildReceiptHtml(receipt, data.samitiName || "সমিতি", qrDataUrl, findTreasurer(data.settings.committee));
               const w = window.open("", "_blank", "width=600,height=800");
               if (!w) return;
               w.document.write(`<!DOCTYPE html><html><head><meta charset="utf-8"><title>রিসিপ্ট</title><style>${receiptCss}</style></head><body>${html}<script>setTimeout(()=>window.print(),300)</script></body></html>`);
@@ -3902,7 +3902,7 @@ function DepositsHistoryTab() {
               })} />
               <div className="mt-6 flex justify-between text-xs text-muted-foreground">
                 <div>—————————<br />গ্রহীতা</div>
-                <div className="text-right">—————————<br />কোষাধ্যক্ষ</div>
+                <TreasurerSignBlock committee={data.settings.committee} />
               </div>
             </div>
           )}
@@ -3912,7 +3912,7 @@ function DepositsHistoryTab() {
               if (!receipt) return;
               try {
                 toast.loading("ছবি তৈরি হচ্ছে...", { id: "djpg" });
-                const canvas = await renderDepositReceiptCanvas(receipt, data.samitiName || "সমিতি");
+                const canvas = await renderDepositReceiptCanvas(receipt, data.samitiName || "সমিতি", findTreasurer(data.settings.committee));
                 const blob = await new Promise<Blob | null>((res) => canvas.toBlob(res, "image/jpeg", 0.95));
                 if (!blob) throw new Error("blob");
                 const url = URL.createObjectURL(blob);
@@ -3934,7 +3934,7 @@ function DepositsHistoryTab() {
               const text = `জমা রিসিপ্ট\nসমিতি: ${data.samitiName || "সমিতি"}\nরিসিপ্ট নং: ${receipt.receiptNo}\nতারিখ: ${fmtDate(receipt.date)}\nসদস্য: ${receipt.memberSerial ? `${toBn(receipt.memberSerial)}. ` : ""}${receipt.memberName}\nজমার পরিমাণ: ${formatTk(receipt.amount)}\nমোট সঞ্চয়: ${formatTk(receipt.totalAfter)}`;
               try {
                 toast.loading("শেয়ার প্রস্তুত হচ্ছে...", { id: "dshare" });
-                const canvas = await renderDepositReceiptCanvas(receipt, data.samitiName || "সমিতি");
+                const canvas = await renderDepositReceiptCanvas(receipt, data.samitiName || "সমিতি", findTreasurer(data.settings.committee));
                 const blob = await new Promise<Blob | null>((res) => canvas.toBlob(res, "image/jpeg", 0.95));
                 toast.dismiss("dshare");
                 const file = blob ? new File([blob], `জমা-রিসিপ্ট-${receipt.receiptNo}.jpg`, { type: "image/jpeg" }) : null;
@@ -3960,7 +3960,7 @@ function DepositsHistoryTab() {
             <Button onClick={async () => {
               if (!receipt) return;
               const qrDataUrl = await buildDepositQr(receipt, data.samitiName || "সমিতি");
-              const html = buildDepositReceiptHtml(receipt, data.samitiName || "সমিতি", qrDataUrl);
+              const html = buildDepositReceiptHtml(receipt, data.samitiName || "সমিতি", qrDataUrl, findTreasurer(data.settings.committee));
               const w = window.open("", "_blank", "width=600,height=800");
               if (!w) return;
               w.document.write(`<!DOCTYPE html><html><head><meta charset="utf-8"><title>জমা রিসিপ্ট</title><style>${receiptCss}</style></head><body>${html}<script>setTimeout(()=>window.print(),300)</script></body></html>`);
@@ -5571,6 +5571,37 @@ const receiptCss = `
   @media print{body{padding:0;} .no-print{display:none;}}
 `;
 
+function findTreasurer(committee?: CommitteeMember[]) {
+  return committee?.find((c) => (c.role || "").includes("কোষাধ্যক্ষ")) || null;
+}
+function treasurerSignHtml(t?: CommitteeMember | null) {
+  if (!t) return `<div style="text-align:right">—————————<br/>কোষাধ্যক্ষ</div>`;
+  const img = t.signature
+    ? `<img src="${t.signature}" alt="" style="height:40px;max-width:140px;object-fit:contain;display:block;margin-left:auto;margin-bottom:2px;"/>`
+    : `<div style="border-bottom:1px solid #111;height:34px;width:140px;margin-left:auto;margin-bottom:2px;"></div>`;
+  const name = t.name ? `<div style="font-weight:600;color:#111;">${t.name}</div>` : "";
+  const role = `<div style="color:#666;font-size:11px;">${t.role || "কোষাধ্যক্ষ"}</div>`;
+  const phone = t.phone ? `<div style="color:#666;font-size:11px;">${toBn(t.phone)}</div>` : "";
+  return `<div style="text-align:right">${img}${name}${role}${phone}</div>`;
+}
+
+function TreasurerSignBlock({ committee }: { committee?: CommitteeMember[] }) {
+  const t = findTreasurer(committee);
+  if (!t) return <div className="text-right">—————————<br />কোষাধ্যক্ষ</div>;
+  return (
+    <div className="text-right">
+      {t.signature ? (
+        <img src={t.signature} alt="" className="h-9 max-w-[140px] object-contain ml-auto mb-0.5" />
+      ) : (
+        <div className="border-b border-foreground/70 h-7 w-32 ml-auto mb-0.5" />
+      )}
+      {t.name && <div className="font-semibold text-foreground">{t.name}</div>}
+      <div>{t.role || "কোষাধ্যক্ষ"}</div>
+      {t.phone && <div>{toBn(t.phone)}</div>}
+    </div>
+  );
+}
+
 const qrBlockHtml = (qrDataUrl?: string) =>
   qrDataUrl
     ? `<div class="qr">
@@ -5589,7 +5620,7 @@ const qrBlockHtml = (qrDataUrl?: string) =>
     : "";
 
 
-function buildReceiptHtml(r: { loan: Loan; memberName: string; amount: number; date: string; paidAfter: number; remainingAfter: number; receiptNo: string; note?: string; logo?: string; loanNo?: number }, samitiName: string, qrDataUrl?: string) {
+function buildReceiptHtml(r: { loan: Loan; memberName: string; amount: number; date: string; paidAfter: number; remainingAfter: number; receiptNo: string; note?: string; logo?: string; loanNo?: number }, samitiName: string, qrDataUrl?: string, treasurer?: CommitteeMember | null) {
   return `<div class="r" id="r">
     <div class="header">
       ${r.logo ? `<img src="${r.logo}" alt="logo" class="logo"/>` : ""}
@@ -5609,7 +5640,7 @@ function buildReceiptHtml(r: { loan: Loan; memberName: string; amount: number; d
     </div>
     ${r.note ? `<div class="note"><span class="muted">নোট:</span> <b>${r.note.replace(/</g, "&lt;")}</b></div>` : ""}
     ${qrBlockHtml(qrDataUrl)}
-    <div class="sign"><div>—————————<br/>গ্রহীতা</div><div style="text-align:right">—————————<br/>কোষাধ্যক্ষ</div></div>
+    <div class="sign"><div>—————————<br/>গ্রহীতা</div>${treasurerSignHtml(treasurer)}</div>
   </div>`;
 }
 
@@ -5622,7 +5653,7 @@ async function buildInstallmentQr(r: { memberName: string; memberSerial?: number
   return makeQrDataUrl(text);
 }
 
-async function renderReceiptCanvas(r: { loan: Loan; memberName: string; memberSerial?: number; amount: number; date: string; paidAfter: number; remainingAfter: number; receiptNo: string; note?: string; logo?: string; loanNo?: number }, samitiName: string): Promise<HTMLCanvasElement> {
+async function renderReceiptCanvas(r: { loan: Loan; memberName: string; memberSerial?: number; amount: number; date: string; paidAfter: number; remainingAfter: number; receiptNo: string; note?: string; logo?: string; loanNo?: number }, samitiName: string, treasurer?: CommitteeMember | null): Promise<HTMLCanvasElement> {
   const qrDataUrl = await buildInstallmentQr(r, samitiName);
   const { default: html2canvas } = await import("html2canvas");
   const iframe = document.createElement("iframe");
@@ -5631,7 +5662,7 @@ async function renderReceiptCanvas(r: { loan: Loan; memberName: string; memberSe
   try {
     const doc = iframe.contentDocument!;
     doc.open();
-    doc.write(`<!DOCTYPE html><html><head><meta charset="utf-8"><style>${receiptCss}</style></head><body>${buildReceiptHtml(r, samitiName, qrDataUrl)}</body></html>`);
+    doc.write(`<!DOCTYPE html><html><head><meta charset="utf-8"><style>${receiptCss}</style></head><body>${buildReceiptHtml(r, samitiName, qrDataUrl, treasurer)}</body></html>`);
     doc.close();
     await new Promise((res) => setTimeout(res, 60));
     const target = doc.getElementById("r")!;
@@ -5653,7 +5684,7 @@ type DepositReceiptData = {
   logo?: string;
 };
 
-function buildDepositReceiptHtml(r: DepositReceiptData, samitiName: string, qrDataUrl?: string) {
+function buildDepositReceiptHtml(r: DepositReceiptData, samitiName: string, qrDataUrl?: string, treasurer?: CommitteeMember | null) {
   return `<div class="r" id="r">
     <div class="header">
       ${r.logo ? `<img src="${r.logo}" alt="logo" class="logo"/>` : ""}
@@ -5670,7 +5701,7 @@ function buildDepositReceiptHtml(r: DepositReceiptData, samitiName: string, qrDa
     </div>
     ${r.note ? `<div class="note"><span class="muted">নোট:</span> <b>${r.note.replace(/</g, "&lt;")}</b></div>` : ""}
     ${qrBlockHtml(qrDataUrl)}
-    <div class="sign"><div>—————————<br/>গ্রহীতা</div><div style="text-align:right">—————————<br/>কোষাধ্যক্ষ</div></div>
+    <div class="sign"><div>—————————<br/>গ্রহীতা</div>${treasurerSignHtml(treasurer)}</div>
   </div>`;
 }
 
@@ -5683,7 +5714,7 @@ async function buildDepositQr(r: DepositReceiptData, samitiName: string): Promis
   return makeQrDataUrl(text);
 }
 
-async function renderDepositReceiptCanvas(r: DepositReceiptData, samitiName: string): Promise<HTMLCanvasElement> {
+async function renderDepositReceiptCanvas(r: DepositReceiptData, samitiName: string, treasurer?: CommitteeMember | null): Promise<HTMLCanvasElement> {
   const qrDataUrl = await buildDepositQr(r, samitiName);
   const { default: html2canvas } = await import("html2canvas");
   const iframe = document.createElement("iframe");
@@ -5692,7 +5723,7 @@ async function renderDepositReceiptCanvas(r: DepositReceiptData, samitiName: str
   try {
     const doc = iframe.contentDocument!;
     doc.open();
-    doc.write(`<!DOCTYPE html><html><head><meta charset="utf-8"><style>${receiptCss}</style></head><body>${buildDepositReceiptHtml(r, samitiName, qrDataUrl)}</body></html>`);
+    doc.write(`<!DOCTYPE html><html><head><meta charset="utf-8"><style>${receiptCss}</style></head><body>${buildDepositReceiptHtml(r, samitiName, qrDataUrl, treasurer)}</body></html>`);
     doc.close();
     await new Promise((res) => setTimeout(res, 60));
     const target = doc.getElementById("r")!;
