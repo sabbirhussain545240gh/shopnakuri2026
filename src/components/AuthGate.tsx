@@ -327,6 +327,9 @@ export function IntroSplash({ onEnter, onSkipIfDisabled, enterLabel, forceShow }
   const goalsSubtitle = s.goalsSectionSubtitle?.trim() || "সদস্যদের কল্যাণ ও আর্থিক স্বনির্ভরতাই আমাদের মূল লক্ষ্য";
   const quotesTitle = s.quotesSectionTitle?.trim() || "অনুপ্রেরণামূলক বাণী";
   const messagesTitle = s.messagesSectionTitle?.trim() || "প্রতিষ্ঠাতা, সভাপতি ও সাধারণ সম্পাদকের বাণী";
+  const committee = (s.committee || []).filter((c) => c.name?.trim() || c.role?.trim() || c.phone?.trim());
+  const committeeTitle = s.committeeSectionTitle?.trim() || "কার্যকারী কমিটি";
+  const committeeSubtitle = s.committeeSectionSubtitle?.trim() || "বর্তমান কমিটির সদস্যবৃন্দ";
   return (
     <div className="min-h-screen bg-gradient-to-br from-emerald-50 via-background to-sky-50 dark:from-emerald-950/30 dark:via-background dark:to-sky-950/30">
       <div className="mx-auto max-w-5xl px-4 py-10 md:py-16">
