@@ -174,9 +174,9 @@ function buildClosureHtml(p: { samitiName: string; logo?: string; memberName: st
     </div>
     ${qrBlock(qr, "certificate")}
     <div class="signs">
-      <div>—————————————<br/>সদস্যের স্বাক্ষর</div>
-      <div>—————————————<br/>কোষাধ্যক্ষের স্বাক্ষর</div>
-      <div>—————————————<br/>সভাপতির স্বাক্ষর</div>
+      <div><div style="height:48px;border-bottom:1px solid #111;margin-bottom:4px;"></div>সদস্যের স্বাক্ষর</div>
+      ${mpSignBlock("কোষাধ্যক্ষের স্বাক্ষর", mpFindCommittee(p.committee, ["কোষাধ্যক্ষ"]))}
+      ${mpSignBlock("সভাপতির স্বাক্ষর", mpFindCommittee(p.committee, ["সভাপতি"]))}
     </div>
   </div>`;
 }
