@@ -62,6 +62,7 @@ export type Transaction = {
 export type Goal = { icon: string; title: string; desc: string };
 export type Quote = { bn: string; en: string };
 export type Message = { role: string; name: string; photo: string; message: string };
+export type CommitteeMember = { role: string; name: string; phone: string; photo: string };
 
 export type Settings = {
   defaultInterestRate: number;
