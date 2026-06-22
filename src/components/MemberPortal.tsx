@@ -477,7 +477,7 @@ function LoansSection({ data, onView }: { data: MemberViewResponse; onView: (tit
                     const html = buildClosureHtml({
                       samitiName: data.samitiName, logo: data.samitiLogo, memberName: data.member!.name, memberSerial: data.member!.serial,
                       loanNo: l.samitiLoanNo ?? idx + 1, loanAmount: l.amount, interestRate: l.interestRate, durationMonths: l.durationMonths,
-                      totalDue, totalPaid: paid, loanDate: l.date, closeDate, certNo,
+                      totalDue, totalPaid: paid, loanDate: l.date, closeDate, certNo, committee: data.committee,
                     }, dataUrl);
                     onView("ঋণ পরিশোধ সনদ", html);
                   }}><Eye className="h-4 w-4 mr-1" /> সনদ দেখুন</Button>
@@ -492,7 +492,7 @@ function LoansSection({ data, onView }: { data: MemberViewResponse; onView: (tit
                     const html = buildClosureHtml({
                       samitiName: data.samitiName, logo: data.samitiLogo, memberName: data.member!.name, memberSerial: data.member!.serial,
                       loanNo: l.samitiLoanNo ?? idx + 1, loanAmount: l.amount, interestRate: l.interestRate, durationMonths: l.durationMonths,
-                      totalDue, totalPaid: paid, loanDate: l.date, closeDate, certNo,
+                      totalDue, totalPaid: paid, loanDate: l.date, closeDate, certNo, committee: data.committee,
                     }, dataUrl);
                     printHtml("ঋণ পরিশোধ সনদ", html);
                   }}><Printer className="h-4 w-4 mr-1" /> প্রিন্ট</Button>
@@ -507,7 +507,7 @@ function LoansSection({ data, onView }: { data: MemberViewResponse; onView: (tit
                     const html = buildClosureHtml({
                       samitiName: data.samitiName, logo: data.samitiLogo, memberName: data.member!.name, memberSerial: data.member!.serial,
                       loanNo: l.samitiLoanNo ?? idx + 1, loanAmount: l.amount, interestRate: l.interestRate, durationMonths: l.durationMonths,
-                      totalDue, totalPaid: paid, loanDate: l.date, closeDate, certNo,
+                      totalDue, totalPaid: paid, loanDate: l.date, closeDate, certNo, committee: data.committee,
                     }, dataUrl);
                     const canvas = await renderHtmlToCanvas(html);
                     const link = document.createElement("a");
