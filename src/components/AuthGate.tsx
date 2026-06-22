@@ -406,6 +406,33 @@ export function IntroSplash({ onEnter, onSkipIfDisabled, enterLabel, forceShow }
                   </div>
                 ))}
               </div>
+          </CardContent>
+          </Card>
+        )}
+
+        {committee.length > 0 && (
+          <Card className="mt-8">
+            <CardHeader>
+              <CardTitle className="text-xl md:text-2xl">{committeeTitle}</CardTitle>
+              <CardDescription>{committeeSubtitle}</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="grid gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
+                {committee.map((c, i) => (
+                  <div key={i} className="rounded-lg border bg-card p-4 flex flex-col items-center text-center">
+                    {c.photo ? (
+                      <img src={c.photo} alt={c.name} className="h-20 w-20 rounded-full object-cover ring-2 ring-emerald-200/60 dark:ring-emerald-900/40" />
+                    ) : (
+                      <div className="h-20 w-20 rounded-full bg-gradient-to-br from-emerald-500 to-sky-600 text-white flex items-center justify-center text-2xl">
+                        {(c.name?.trim()?.[0]) || "👤"}
+                      </div>
+                    )}
+                    <div className="mt-2 font-semibold text-foreground">{c.name || "—"}</div>
+                    <div className="text-xs text-emerald-700 dark:text-emerald-400 font-medium">{c.role}</div>
+                    {c.phone && <div className="mt-1 text-xs text-muted-foreground">📞 {c.phone}</div>}
+                  </div>
+                ))}
+              </div>
             </CardContent>
           </Card>
         )}
