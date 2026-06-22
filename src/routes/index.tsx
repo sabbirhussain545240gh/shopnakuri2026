@@ -4440,7 +4440,76 @@ function SettingsTab() {
         </CardContent>
       </Card>
 
-
+      <Card className="md:col-span-2">
+        <CardHeader>
+          <CardTitle>কার্যকারী কমিটি</CardTitle>
+          <CardDescription>সমিতির বর্তমান কমিটির সদস্যদের তথ্য যোগ/এডিট করুন (পরিচিতি পেজে দেখানো হবে)</CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-3">
+          <div className="grid gap-2 sm:grid-cols-2">
+            <div>
+              <Label className="text-xs">সেকশন শিরোনাম</Label>
+              <Input value={committeeSectionTitle} onChange={(e) => setCommitteeSectionTitle(e.target.value)} placeholder="কার্যকারী কমিটি" />
+            </div>
+            <div>
+              <Label className="text-xs">সেকশন সাবটাইটেল</Label>
+              <Input value={committeeSectionSubtitle} onChange={(e) => setCommitteeSectionSubtitle(e.target.value)} placeholder="বর্তমান কমিটির সদস্যবৃন্দ" />
+            </div>
+          </div>
+          {committee.map((c, i) => (
+            <div key={i} className="grid gap-3 sm:grid-cols-[96px_1fr_auto] items-start border rounded-md p-3">
+              <div className="space-y-2">
+                <div className="h-24 w-24 rounded-full border bg-muted overflow-hidden flex items-center justify-center">
+                  {c.photo ? (
+                    <img src={c.photo} alt="" className="h-full w-full object-cover" />
+                  ) : (
+                    <span className="text-2xl text-muted-foreground">👤</span>
+                  )}
+                </div>
+                <Input
+                  type="file"
+                  accept="image/*"
+                  className="text-xs"
+                  onChange={(e) => {
+                    const f = e.target.files?.[0];
+                    if (!f) return;
+                    if (f.size > 2 * 1024 * 1024) { toast.error("ছবি ২ MB এর কম হতে হবে"); return; }
+                    const r = new FileReader();
+                    r.onload = () => setCommittee(committee.map((x, j) => j === i ? { ...x, photo: String(r.result || "") } : x));
+                    r.readAsDataURL(f);
+                  }}
+                />
+                {c.photo && (
+                  <Button type="button" variant="ghost" size="sm" onClick={() => setCommittee(committee.map((x, j) => j === i ? { ...x, photo: "" } : x))}>ছবি সরান</Button>
+                )}
+              </div>
+              <div className="space-y-2">
+                <div className="grid gap-2 sm:grid-cols-3">
+                  <div>
+                    <Label className="text-xs">পদবি</Label>
+                    <Input value={c.role} onChange={(e) => setCommittee(committee.map((x, j) => j === i ? { ...x, role: e.target.value } : x))} placeholder="সভাপতি / সম্পাদক / কোষাধ্যক্ষ" />
+                  </div>
+                  <div>
+                    <Label className="text-xs">নাম</Label>
+                    <Input value={c.name} onChange={(e) => setCommittee(committee.map((x, j) => j === i ? { ...x, name: e.target.value } : x))} placeholder="পুরো নাম" />
+                  </div>
+                  <div>
+                    <Label className="text-xs">মোবাইল</Label>
+                    <Input value={c.phone} onChange={(e) => setCommittee(committee.map((x, j) => j === i ? { ...x, phone: e.target.value } : x))} placeholder="01XXXXXXXXX" />
+                  </div>
+                </div>
+              </div>
+              <Button type="button" variant="ghost" size="icon" onClick={() => setCommittee(committee.filter((_, j) => j !== i))}>
+                <Trash2 className="h-4 w-4 text-destructive" />
+              </Button>
+            </div>
+          ))}
+          <Button type="button" variant="outline" size="sm" onClick={() => setCommittee([...committee, { role: "", name: "", phone: "", photo: "" }])}>
+            <Plus className="h-4 w-4 mr-1" />নতুন কমিটি সদস্য
+          </Button>
+          <Button onClick={saveGeneral} className="w-full">সংরক্ষণ</Button>
+        </CardContent>
+      </Card>
 
 
       <Card>
