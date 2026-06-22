@@ -5667,7 +5667,7 @@ type DepositReceiptData = {
   logo?: string;
 };
 
-function buildDepositReceiptHtml(r: DepositReceiptData, samitiName: string, qrDataUrl?: string) {
+function buildDepositReceiptHtml(r: DepositReceiptData, samitiName: string, qrDataUrl?: string, treasurer?: CommitteeMember | null) {
   return `<div class="r" id="r">
     <div class="header">
       ${r.logo ? `<img src="${r.logo}" alt="logo" class="logo"/>` : ""}
@@ -5684,7 +5684,7 @@ function buildDepositReceiptHtml(r: DepositReceiptData, samitiName: string, qrDa
     </div>
     ${r.note ? `<div class="note"><span class="muted">নোট:</span> <b>${r.note.replace(/</g, "&lt;")}</b></div>` : ""}
     ${qrBlockHtml(qrDataUrl)}
-    <div class="sign"><div>—————————<br/>গ্রহীতা</div><div style="text-align:right">—————————<br/>কোষাধ্যক্ষ</div></div>
+    <div class="sign"><div>—————————<br/>গ্রহীতা</div>${treasurerSignHtml(treasurer)}</div>
   </div>`;
 }
 
