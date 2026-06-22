@@ -129,7 +129,7 @@ function buildInstallmentHtml(p: { samitiName: string; logo?: string; memberName
     </div>
     ${p.note ? `<div class="note"><span class="muted">নোট:</span> <b>${p.note.replace(/</g, "&lt;")}</b></div>` : ""}
     ${qrBlock(qr)}
-    <div class="sign"><div>—————————<br/>গ্রহীতা</div><div style="text-align:right">—————————<br/>কোষাধ্যক্ষ</div></div>
+    <div class="sign"><div>—————————<br/>গ্রহীতা</div>${mpTreasurerSignHtml(p.committee)}</div>
   </div>`;
 }
 
