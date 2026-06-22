@@ -121,7 +121,23 @@ function buildInstallmentHtml(p: { samitiName: string; logo?: string; memberName
   </div>`;
 }
 
-function buildClosureHtml(p: { samitiName: string; logo?: string; memberName: string; memberSerial?: number; loanNo?: number; loanAmount: number; interestRate: number; durationMonths: number; totalDue: number; totalPaid: number; loanDate: string; closeDate: string; certNo: string }, qr?: string) {
+type MPCommittee = { role: string; name: string; phone: string; photo?: string; signature?: string };
+function mpFindCommittee(committee: MPCommittee[] | undefined, keywords: string[]) {
+  if (!committee) return null;
+  return committee.find((c) => keywords.some((k) => (c.role || "").includes(k))) || null;
+}
+function mpSignBlock(label: string, c: MPCommittee | null) {
+  if (!c) return `<div><div style="height:48px;border-bottom:1px solid #111;margin-bottom:4px;"></div>${label}</div>`;
+  const img = c.signature
+    ? `<img src="${c.signature}" alt="" style="height:46px;max-width:160px;object-fit:contain;display:block;margin:0 auto 2px;" />`
+    : `<div style="height:48px;border-bottom:1px solid #111;margin-bottom:4px;"></div>`;
+  const name = c.name ? `<div style="font-weight:600;">${c.name}</div>` : "";
+  const role = c.role ? `<div style="color:#475569;font-size:12px;">${c.role}</div>` : `<div style="color:#475569;font-size:12px;">${label}</div>`;
+  const phone = c.phone ? `<div style="color:#475569;font-size:11px;">${toBn(c.phone)}</div>` : "";
+  return `<div>${img}${name}${role}${phone}</div>`;
+}
+
+function buildClosureHtml(p: { samitiName: string; logo?: string; memberName: string; memberSerial?: number; loanNo?: number; loanAmount: number; interestRate: number; durationMonths: number; totalDue: number; totalPaid: number; loanDate: string; closeDate: string; certNo: string; committee?: MPCommittee[] }, qr?: string) {
   return `<style>
     @page{size:A4 landscape;margin:10mm}
     @media print{html,body{width:297mm;margin:0;padding:0}body{padding:0 !important}#r{width:277mm !important;max-width:none !important;margin:0 auto !important;box-sizing:border-box}}
