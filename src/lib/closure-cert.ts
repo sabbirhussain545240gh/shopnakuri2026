@@ -1,5 +1,21 @@
-import { toBn, formatTk } from "@/lib/samiti-store";
+import { toBn, formatTk, type CommitteeMember } from "@/lib/samiti-store";
 import { buildReceiptQr } from "@/lib/receipt-qr";
+
+function findCommittee(committee: CommitteeMember[] | undefined, keywords: string[]) {
+  if (!committee) return null;
+  return committee.find((c) => keywords.some((k) => (c.role || "").includes(k))) || null;
+}
+
+function signBlock(label: string, c: CommitteeMember | null) {
+  if (!c) return `<div><div style="height:48px;border-bottom:1px solid #111;margin-bottom:4px;"></div>${label}</div>`;
+  const img = c.signature
+    ? `<img src="${c.signature}" alt="" style="height:46px;max-width:160px;object-fit:contain;display:block;margin:0 auto 2px;" />`
+    : `<div style="height:48px;border-bottom:1px solid #111;margin-bottom:4px;"></div>`;
+  const name = c.name ? `<div style="font-weight:600;">${c.name}</div>` : "";
+  const role = c.role ? `<div style="color:#475569;font-size:12px;">${c.role}</div>` : `<div style="color:#475569;font-size:12px;">${label}</div>`;
+  const phone = c.phone ? `<div style="color:#475569;font-size:11px;">${toBn(c.phone)}</div>` : "";
+  return `<div>${img}${name}${role}${phone}</div>`;
+}
 
 function fmtDate(d: string) {
   if (!d) return "—";
@@ -54,6 +70,7 @@ export type ClosureInput = {
   loanDate: string;
   closeDate: string;
   certNo: string;
+  committee?: CommitteeMember[];
 };
 
 export function buildClosureHtml(p: ClosureInput, qr?: string) {
@@ -93,9 +110,9 @@ export function buildClosureHtml(p: ClosureInput, qr?: string) {
     </div>
     ${qrBlock(qr)}
     <div class="signs">
-      <div>—————————————<br/>সদস্যের স্বাক্ষর</div>
-      <div>—————————————<br/>কোষাধ্যক্ষের স্বাক্ষর</div>
-      <div>—————————————<br/>সভাপতির স্বাক্ষর</div>
+      <div><div style="height:48px;border-bottom:1px solid #111;margin-bottom:4px;"></div>সদস্যের স্বাক্ষর</div>
+      ${signBlock("কোষাধ্যক্ষের স্বাক্ষর", findCommittee(p.committee, ["কোষাধ্যক্ষ"]))}
+      ${signBlock("সভাপতির স্বাক্ষর", findCommittee(p.committee, ["সভাপতি"]))}
     </div>
   </div>`;
 }

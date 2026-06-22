@@ -24,12 +24,14 @@ export type MemberViewDeposit = {
   date: string;
   note?: string;
 };
+export type MemberViewCommittee = { role: string; name: string; phone: string; photo?: string; signature?: string };
 export type MemberViewResponse = {
   ok: boolean;
   error?: string;
   samitiName: string;
   samitiLogo: string;
   cashier?: { name: string; identifier?: string; role?: string } | null;
+  committee?: MemberViewCommittee[];
   member: {
     id: string;
     serial?: number;
@@ -156,6 +158,17 @@ export const getMyMemberView = createServerFn({ method: "GET" })
         samitiName: String(d.samitiName ?? "সমিতি"),
         samitiLogo: String(d.samitiLogo ?? ""),
         cashier: { name: cashierName, identifier: adminProfile?.identifier ? String(adminProfile.identifier) : undefined, role: "admin" },
+        committee: (() => {
+          const list = d?.settings?.committee;
+          if (!Array.isArray(list)) return [];
+          return list.map((c: any) => ({
+            role: String(c?.role ?? ""),
+            name: String(c?.name ?? ""),
+            phone: String(c?.phone ?? ""),
+            photo: c?.photo ? String(c.photo) : undefined,
+            signature: c?.signature ? String(c.signature) : undefined,
+          }));
+        })(),
         member: {
           id: m.id,
           serial: typeof m.serial === "number" ? m.serial : undefined,
