@@ -37,7 +37,7 @@ export const closureCss = `
   .grid{display:grid;}
   .totals{display:grid;}
   .full{grid-column:1 / -1;}
-  .qr{margin-top:16px;padding:12px;border:1px solid #e5e7eb;border-radius:8px;display:flex;align-items:center;gap:14px;background:#fff;break-inside:avoid;}
+  .qr{margin-top:16px;padding:12px;border:1px solid #e5e7eb;border-radius:8px;display:flex;align-items:center;gap:14px;background:rgba(255,255,255,0.55);break-inside:avoid;}
   .qr-frame{padding:10px;background:#fff;border:1px solid #e5e7eb;border-radius:6px;}
   .qr-frame img{width:145px;height:145px;display:block;image-rendering:pixelated;}
   .qr-info{flex:1;font-size:11px;color:#475569;line-height:1.55;}
