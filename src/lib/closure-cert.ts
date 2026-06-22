@@ -37,7 +37,7 @@ export const closureCss = `
   .grid{display:grid;}
   .totals{display:grid;}
   .full{grid-column:1 / -1;}
-  .qr{margin-top:16px;padding:12px;border:1px solid #e5e7eb;border-radius:8px;display:flex;align-items:center;gap:14px;background:#fff;break-inside:avoid;}
+  .qr{margin-top:16px;padding:12px;border:1px solid #e5e7eb;border-radius:8px;display:flex;align-items:center;gap:14px;background:rgba(255,255,255,0.55);break-inside:avoid;}
   .qr-frame{padding:10px;background:#fff;border:1px solid #e5e7eb;border-radius:6px;}
   .qr-frame img{width:145px;height:145px;display:block;image-rendering:pixelated;}
   .qr-info{flex:1;font-size:11px;color:#475569;line-height:1.55;}
@@ -86,7 +86,7 @@ export function buildClosureHtml(p: ClosureInput, qr?: string) {
     #r.closure .title{font-size:36px;line-height:1.15;color:#14532d;}
     #r.closure .sub{font-size:18px;margin-top:6px;}
     #r.closure .grid{grid-template-columns:1fr 1fr 1fr;gap:10px 24px;font-size:15px;margin-top:18px;}
-    #r.closure .certify{margin-top:18px;padding:18px 22px;background:#f0fdf4;border:1px solid #bbf7d0;border-radius:8px;font-size:17px;line-height:2;text-align:center;}
+    #r.closure .certify{margin-top:18px;padding:18px 22px;background:rgba(240,253,244,0.55);border:1px solid #bbf7d0;border-radius:8px;font-size:17px;line-height:2;text-align:center;}
     #r.closure .totals{grid-template-columns:1fr 1fr;gap:10px 24px;font-size:16px;margin-top:14px;}
     #r.closure .signs{display:flex;justify-content:space-between;gap:24px;margin-top:64px;font-size:14px;}
     #r.closure .signs > div{flex:1;text-align:center;}
