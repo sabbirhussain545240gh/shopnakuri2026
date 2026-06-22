@@ -5645,7 +5645,7 @@ async function renderReceiptCanvas(r: { loan: Loan; memberName: string; memberSe
   try {
     const doc = iframe.contentDocument!;
     doc.open();
-    doc.write(`<!DOCTYPE html><html><head><meta charset="utf-8"><style>${receiptCss}</style></head><body>${buildReceiptHtml(r, samitiName, qrDataUrl)}</body></html>`);
+    doc.write(`<!DOCTYPE html><html><head><meta charset="utf-8"><style>${receiptCss}</style></head><body>${buildReceiptHtml(r, samitiName, qrDataUrl, treasurer)}</body></html>`);
     doc.close();
     await new Promise((res) => setTimeout(res, 60));
     const target = doc.getElementById("r")!;
