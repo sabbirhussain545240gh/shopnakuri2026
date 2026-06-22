@@ -5697,7 +5697,7 @@ async function buildDepositQr(r: DepositReceiptData, samitiName: string): Promis
   return makeQrDataUrl(text);
 }
 
-async function renderDepositReceiptCanvas(r: DepositReceiptData, samitiName: string): Promise<HTMLCanvasElement> {
+async function renderDepositReceiptCanvas(r: DepositReceiptData, samitiName: string, treasurer?: CommitteeMember | null): Promise<HTMLCanvasElement> {
   const qrDataUrl = await buildDepositQr(r, samitiName);
   const { default: html2canvas } = await import("html2canvas");
   const iframe = document.createElement("iframe");
