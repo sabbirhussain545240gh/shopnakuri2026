@@ -5689,6 +5689,7 @@ type DepositReceiptData = {
 
 function buildDepositReceiptHtml(r: DepositReceiptData, samitiName: string, qrDataUrl?: string, treasurer?: CommitteeMember | null) {
   return `<div class="r" id="r">
+    ${r.logo ? `<div class="watermark" style="background-image:url('${r.logo}')"></div>` : ""}
     <div class="header">
       ${r.logo ? `<img src="${r.logo}" alt="logo" class="logo"/>` : ""}
       <div class="head-text"><div class="title">${samitiName}</div><div class="sub">সঞ্চয়/চাদা জমা রিসিপ্ট</div></div>
