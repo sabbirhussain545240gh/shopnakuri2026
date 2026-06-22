@@ -92,6 +92,7 @@ function mpTreasurerSignHtml(committee?: MPCommittee[]) {
 
 function buildDepositHtml(p: { samitiName: string; logo?: string; memberName: string; memberSerial?: number; amount: number; date: string; totalAfter: number; receiptNo: string; note?: string; cashierName?: string; cashierId?: string; committee?: MPCommittee[] }, qr?: string) {
   return `<div class="r" id="r">
+    ${p.logo ? `<div class="watermark" style="background-image:url('${p.logo}')"></div>` : ""}
     <div class="header">
       ${p.logo ? `<img src="${p.logo}" alt="logo" class="logo"/>` : ""}
       <div class="head-text"><div class="title">${p.samitiName}</div><div class="sub">সঞ্চয়/চাদা জমা রিসিপ্ট</div></div>
