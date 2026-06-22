@@ -5587,7 +5587,7 @@ function treasurerSignHtml(t?: CommitteeMember | null) {
 
 function TreasurerSignBlock({ committee }: { committee?: CommitteeMember[] }) {
   const t = findTreasurer(committee);
-  if (!t) return <TreasurerSignBlock committee={data.settings.committee} />;
+  if (!t) return <div className="text-right">—————————<br />কোষাধ্যক্ষ</div>;
   return (
     <div className="text-right">
       {t.signature ? (
