@@ -114,6 +114,7 @@ function buildDepositHtml(p: { samitiName: string; logo?: string; memberName: st
 
 function buildInstallmentHtml(p: { samitiName: string; logo?: string; memberName: string; loanAmount: number; durationMonths: number; amount: number; date: string; paidAfter: number; remainingAfter: number; receiptNo: string; note?: string; loanNo?: number; cashierName?: string; cashierId?: string; committee?: MPCommittee[] }, qr?: string) {
   return `<div class="r" id="r">
+    ${p.logo ? `<div class="watermark" style="background-image:url('${p.logo}')"></div>` : ""}
     <div class="header">
       ${p.logo ? `<img src="${p.logo}" alt="logo" class="logo"/>` : ""}
       <div class="head-text"><div class="title">${p.samitiName}</div><div class="sub">কিস্তি প্রাপ্তি রিসিপ্ট</div></div>
