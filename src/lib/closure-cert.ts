@@ -70,6 +70,7 @@ export type ClosureInput = {
   loanDate: string;
   closeDate: string;
   certNo: string;
+  committee?: CommitteeMember[];
 };
 
 export function buildClosureHtml(p: ClosureInput, qr?: string) {
