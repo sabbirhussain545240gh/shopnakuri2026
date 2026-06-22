@@ -327,6 +327,9 @@ export function IntroSplash({ onEnter, onSkipIfDisabled, enterLabel, forceShow }
   const goalsSubtitle = s.goalsSectionSubtitle?.trim() || "সদস্যদের কল্যাণ ও আর্থিক স্বনির্ভরতাই আমাদের মূল লক্ষ্য";
   const quotesTitle = s.quotesSectionTitle?.trim() || "অনুপ্রেরণামূলক বাণী";
   const messagesTitle = s.messagesSectionTitle?.trim() || "প্রতিষ্ঠাতা, সভাপতি ও সাধারণ সম্পাদকের বাণী";
+  const committee = (s.committee || []).filter((c) => c.name?.trim() || c.role?.trim() || c.phone?.trim());
+  const committeeTitle = s.committeeSectionTitle?.trim() || "কার্যকারী কমিটি";
+  const committeeSubtitle = s.committeeSectionSubtitle?.trim() || "বর্তমান কমিটির সদস্যবৃন্দ";
   return (
     <div className="min-h-screen bg-gradient-to-br from-emerald-50 via-background to-sky-50 dark:from-emerald-950/30 dark:via-background dark:to-sky-950/30">
       <div className="mx-auto max-w-5xl px-4 py-10 md:py-16">
@@ -400,6 +403,33 @@ export function IntroSplash({ onEnter, onSkipIfDisabled, enterLabel, forceShow }
                     {m.message && (
                       <p className="mt-2 text-sm text-muted-foreground italic">"{m.message}"</p>
                     )}
+                  </div>
+                ))}
+              </div>
+          </CardContent>
+          </Card>
+        )}
+
+        {committee.length > 0 && (
+          <Card className="mt-8">
+            <CardHeader>
+              <CardTitle className="text-xl md:text-2xl">{committeeTitle}</CardTitle>
+              <CardDescription>{committeeSubtitle}</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="grid gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
+                {committee.map((c, i) => (
+                  <div key={i} className="rounded-lg border bg-card p-4 flex flex-col items-center text-center">
+                    {c.photo ? (
+                      <img src={c.photo} alt={c.name} className="h-20 w-20 rounded-full object-cover ring-2 ring-emerald-200/60 dark:ring-emerald-900/40" />
+                    ) : (
+                      <div className="h-20 w-20 rounded-full bg-gradient-to-br from-emerald-500 to-sky-600 text-white flex items-center justify-center text-2xl">
+                        {(c.name?.trim()?.[0]) || "👤"}
+                      </div>
+                    )}
+                    <div className="mt-2 font-semibold text-foreground">{c.name || "—"}</div>
+                    <div className="text-xs text-emerald-700 dark:text-emerald-400 font-medium">{c.role}</div>
+                    {c.phone && <div className="mt-1 text-xs text-muted-foreground">📞 {c.phone}</div>}
                   </div>
                 ))}
               </div>
