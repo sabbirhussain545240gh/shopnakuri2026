@@ -5706,7 +5706,7 @@ async function renderDepositReceiptCanvas(r: DepositReceiptData, samitiName: str
   try {
     const doc = iframe.contentDocument!;
     doc.open();
-    doc.write(`<!DOCTYPE html><html><head><meta charset="utf-8"><style>${receiptCss}</style></head><body>${buildDepositReceiptHtml(r, samitiName, qrDataUrl)}</body></html>`);
+    doc.write(`<!DOCTYPE html><html><head><meta charset="utf-8"><style>${receiptCss}</style></head><body>${buildDepositReceiptHtml(r, samitiName, qrDataUrl, treasurer)}</body></html>`);
     doc.close();
     await new Promise((res) => setTimeout(res, 60));
     const target = doc.getElementById("r")!;
