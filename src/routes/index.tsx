@@ -2066,7 +2066,7 @@ function SavingsTab() {
             if (!receipt) return;
             try {
               toast.loading("ছবি তৈরি হচ্ছে...", { id: "djpg" });
-              const canvas = await renderDepositReceiptCanvas(receipt, data.samitiName || "সমিতি");
+              const canvas = await renderDepositReceiptCanvas(receipt, data.samitiName || "সমিতি", findTreasurer(data.settings.committee));
               const blob = await new Promise<Blob | null>((res) => canvas.toBlob(res, "image/jpeg", 0.95));
               if (!blob) throw new Error("blob");
               const url = URL.createObjectURL(blob);
@@ -2088,7 +2088,7 @@ function SavingsTab() {
             const text = `জমা রিসিপ্ট\nসমিতি: ${data.samitiName || "সমিতি"}\nরিসিপ্ট নং: ${receipt.receiptNo}\nতারিখ: ${fmtDate(receipt.date)}\nসদস্য: ${receipt.memberSerial ? `${toBn(receipt.memberSerial)}. ` : ""}${receipt.memberName}\nজমার পরিমাণ: ${formatTk(receipt.amount)}\nমোট সঞ্চয়: ${formatTk(receipt.totalAfter)}`;
             try {
               toast.loading("শেয়ার প্রস্তুত হচ্ছে...", { id: "dshare" });
-              const canvas = await renderDepositReceiptCanvas(receipt, data.samitiName || "সমিতি");
+              const canvas = await renderDepositReceiptCanvas(receipt, data.samitiName || "সমিতি", findTreasurer(data.settings.committee));
               const blob = await new Promise<Blob | null>((res) => canvas.toBlob(res, "image/jpeg", 0.95));
               toast.dismiss("dshare");
               const file = blob ? new File([blob], `জমা-রিসিপ্ট-${receipt.receiptNo}.jpg`, { type: "image/jpeg" }) : null;
@@ -2114,7 +2114,7 @@ function SavingsTab() {
           <Button onClick={async () => {
             if (!receipt) return;
             const qrDataUrl = await buildDepositQr(receipt, data.samitiName || "সমিতি");
-            const html = buildDepositReceiptHtml(receipt, data.samitiName || "সমিতি", qrDataUrl);
+            const html = buildDepositReceiptHtml(receipt, data.samitiName || "সমিতি", qrDataUrl, findTreasurer(data.settings.committee));
             const w = window.open("", "_blank", "width=600,height=800");
             if (!w) return;
             w.document.write(`<!DOCTYPE html><html><head><meta charset="utf-8"><title>জমা রিসিপ্ট</title><style>${receiptCss}</style></head><body>${html}<script>setTimeout(()=>window.print(),300)</script></body></html>`);
@@ -2764,7 +2764,7 @@ function LoansTab() {
               if (!receipt) return;
               try {
                 toast.loading("ছবি তৈরি হচ্ছে...", { id: "rjpg" });
-                const canvas = await renderReceiptCanvas(receipt, data.samitiName || "সমিতি");
+                const canvas = await renderReceiptCanvas(receipt, data.samitiName || "সমিতি", findTreasurer(data.settings.committee));
                 const blob = await new Promise<Blob | null>((res) => canvas.toBlob(res, "image/jpeg", 0.95));
                 if (!blob) throw new Error("blob");
                 const url = URL.createObjectURL(blob);
@@ -2786,7 +2786,7 @@ function LoansTab() {
               const text = `কিস্তি রিসিপ্ট\nসমিতি: ${data.samitiName || "সমিতি"}\nরিসিপ্ট নং: ${receipt.receiptNo}\nতারিখ: ${fmtDate(receipt.date)}\nসদস্য: ${receipt.memberName}${receipt.loanNo ? ` (ঋণ নং ${toBn(receipt.loanNo)})` : ""}\nপ্রাপ্ত কিস্তি: ${formatTk(receipt.amount)}\nমোট পরিশোধিত: ${formatTk(receipt.paidAfter)}\nঅবশিষ্ট বকেয়া: ${formatTk(receipt.remainingAfter)}`;
               try {
                 toast.loading("শেয়ার প্রস্তুত হচ্ছে...", { id: "rshare" });
-                const canvas = await renderReceiptCanvas(receipt, data.samitiName || "সমিতি");
+                const canvas = await renderReceiptCanvas(receipt, data.samitiName || "সমিতি", findTreasurer(data.settings.committee));
                 const blob = await new Promise<Blob | null>((res) => canvas.toBlob(res, "image/jpeg", 0.95));
                 toast.dismiss("rshare");
                 const file = blob ? new File([blob], `রিসিপ্ট-${receipt.receiptNo}.jpg`, { type: "image/jpeg" }) : null;
@@ -2812,7 +2812,7 @@ function LoansTab() {
             <Button onClick={async () => {
               if (!receipt) return;
               const qrDataUrl = await buildInstallmentQr(receipt, data.samitiName || "সমিতি");
-              const html = buildReceiptHtml(receipt, data.samitiName || "সমিতি", qrDataUrl);
+              const html = buildReceiptHtml(receipt, data.samitiName || "সমিতি", qrDataUrl, findTreasurer(data.settings.committee));
               const w = window.open("", "_blank", "width=600,height=800");
               if (!w) return;
               w.document.write(`<!DOCTYPE html><html><head><meta charset="utf-8"><title>রিসিপ্ট</title><style>${receiptCss}</style></head><body>${html}<script>setTimeout(()=>window.print(),300)</script></body></html>`);
@@ -3531,7 +3531,7 @@ function ReceiptsHistoryTab() {
               if (!receipt) return;
               try {
                 toast.loading("ছবি তৈরি হচ্ছে...", { id: "rhjpg" });
-                const canvas = await renderReceiptCanvas(receipt, data.samitiName || "সমিতি");
+                const canvas = await renderReceiptCanvas(receipt, data.samitiName || "সমিতি", findTreasurer(data.settings.committee));
                 const blob = await new Promise<Blob | null>((res) => canvas.toBlob(res, "image/jpeg", 0.95));
                 if (!blob) throw new Error("blob");
                 const url = URL.createObjectURL(blob);
@@ -3553,7 +3553,7 @@ function ReceiptsHistoryTab() {
               const text = `কিস্তি রিসিপ্ট\nসমিতি: ${data.samitiName || "সমিতি"}\nরিসিপ্ট নং: ${receipt.receiptNo}\nতারিখ: ${fmtDate(receipt.date)}\nসদস্য: ${receipt.memberName}${receipt.loanNo ? ` (ঋণ নং ${toBn(receipt.loanNo)})` : ""}\nপ্রাপ্ত কিস্তি: ${formatTk(receipt.amount)}\nমোট পরিশোধিত: ${formatTk(receipt.paidAfter)}\nঅবশিষ্ট বকেয়া: ${formatTk(receipt.remainingAfter)}`;
               try {
                 toast.loading("শেয়ার প্রস্তুত হচ্ছে...", { id: "rhshare" });
-                const canvas = await renderReceiptCanvas(receipt, data.samitiName || "সমিতি");
+                const canvas = await renderReceiptCanvas(receipt, data.samitiName || "সমিতি", findTreasurer(data.settings.committee));
                 const blob = await new Promise<Blob | null>((res) => canvas.toBlob(res, "image/jpeg", 0.95));
                 toast.dismiss("rhshare");
                 const file = blob ? new File([blob], `রিসিপ্ট-${receipt.receiptNo}.jpg`, { type: "image/jpeg" }) : null;
@@ -3579,7 +3579,7 @@ function ReceiptsHistoryTab() {
             <Button onClick={async () => {
               if (!receipt) return;
               const qrDataUrl = await buildInstallmentQr(receipt, data.samitiName || "সমিতি");
-              const html = buildReceiptHtml(receipt, data.samitiName || "সমিতি", qrDataUrl);
+              const html = buildReceiptHtml(receipt, data.samitiName || "সমিতি", qrDataUrl, findTreasurer(data.settings.committee));
               const w = window.open("", "_blank", "width=600,height=800");
               if (!w) return;
               w.document.write(`<!DOCTYPE html><html><head><meta charset="utf-8"><title>রিসিপ্ট</title><style>${receiptCss}</style></head><body>${html}<script>setTimeout(()=>window.print(),300)</script></body></html>`);
@@ -3912,7 +3912,7 @@ function DepositsHistoryTab() {
               if (!receipt) return;
               try {
                 toast.loading("ছবি তৈরি হচ্ছে...", { id: "djpg" });
-                const canvas = await renderDepositReceiptCanvas(receipt, data.samitiName || "সমিতি");
+                const canvas = await renderDepositReceiptCanvas(receipt, data.samitiName || "সমিতি", findTreasurer(data.settings.committee));
                 const blob = await new Promise<Blob | null>((res) => canvas.toBlob(res, "image/jpeg", 0.95));
                 if (!blob) throw new Error("blob");
                 const url = URL.createObjectURL(blob);
@@ -3934,7 +3934,7 @@ function DepositsHistoryTab() {
               const text = `জমা রিসিপ্ট\nসমিতি: ${data.samitiName || "সমিতি"}\nরিসিপ্ট নং: ${receipt.receiptNo}\nতারিখ: ${fmtDate(receipt.date)}\nসদস্য: ${receipt.memberSerial ? `${toBn(receipt.memberSerial)}. ` : ""}${receipt.memberName}\nজমার পরিমাণ: ${formatTk(receipt.amount)}\nমোট সঞ্চয়: ${formatTk(receipt.totalAfter)}`;
               try {
                 toast.loading("শেয়ার প্রস্তুত হচ্ছে...", { id: "dshare" });
-                const canvas = await renderDepositReceiptCanvas(receipt, data.samitiName || "সমিতি");
+                const canvas = await renderDepositReceiptCanvas(receipt, data.samitiName || "সমিতি", findTreasurer(data.settings.committee));
                 const blob = await new Promise<Blob | null>((res) => canvas.toBlob(res, "image/jpeg", 0.95));
                 toast.dismiss("dshare");
                 const file = blob ? new File([blob], `জমা-রিসিপ্ট-${receipt.receiptNo}.jpg`, { type: "image/jpeg" }) : null;
@@ -3960,7 +3960,7 @@ function DepositsHistoryTab() {
             <Button onClick={async () => {
               if (!receipt) return;
               const qrDataUrl = await buildDepositQr(receipt, data.samitiName || "সমিতি");
-              const html = buildDepositReceiptHtml(receipt, data.samitiName || "সমিতি", qrDataUrl);
+              const html = buildDepositReceiptHtml(receipt, data.samitiName || "সমিতি", qrDataUrl, findTreasurer(data.settings.committee));
               const w = window.open("", "_blank", "width=600,height=800");
               if (!w) return;
               w.document.write(`<!DOCTYPE html><html><head><meta charset="utf-8"><title>জমা রিসিপ্ট</title><style>${receiptCss}</style></head><body>${html}<script>setTimeout(()=>window.print(),300)</script></body></html>`);
