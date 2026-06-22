@@ -4498,13 +4498,41 @@ function SettingsTab() {
                     <Input value={c.phone} onChange={(e) => setCommittee(committee.map((x, j) => j === i ? { ...x, phone: e.target.value } : x))} placeholder="01XXXXXXXXX" />
                   </div>
                 </div>
+                <div>
+                  <Label className="text-xs">স্বাক্ষর (ছবি)</Label>
+                  <div className="flex items-center gap-3 mt-1">
+                    <div className="h-12 w-32 rounded border bg-muted/40 overflow-hidden flex items-center justify-center">
+                      {c.signature ? (
+                        <img src={c.signature} alt="signature" className="h-full w-full object-contain" />
+                      ) : (
+                        <span className="text-[10px] text-muted-foreground">স্বাক্ষর নেই</span>
+                      )}
+                    </div>
+                    <Input
+                      type="file"
+                      accept="image/*"
+                      className="text-xs"
+                      onChange={(e) => {
+                        const f = e.target.files?.[0];
+                        if (!f) return;
+                        if (f.size > 1 * 1024 * 1024) { toast.error("স্বাক্ষর ১ MB এর কম হতে হবে"); return; }
+                        const r = new FileReader();
+                        r.onload = () => setCommittee(committee.map((x, j) => j === i ? { ...x, signature: String(r.result || "") } : x));
+                        r.readAsDataURL(f);
+                      }}
+                    />
+                    {c.signature && (
+                      <Button type="button" variant="ghost" size="sm" onClick={() => setCommittee(committee.map((x, j) => j === i ? { ...x, signature: "" } : x))}>সরান</Button>
+                    )}
+                  </div>
+                </div>
               </div>
               <Button type="button" variant="ghost" size="icon" onClick={() => setCommittee(committee.filter((_, j) => j !== i))}>
                 <Trash2 className="h-4 w-4 text-destructive" />
               </Button>
             </div>
           ))}
-          <Button type="button" variant="outline" size="sm" onClick={() => setCommittee([...committee, { role: "", name: "", phone: "", photo: "" }])}>
+          <Button type="button" variant="outline" size="sm" onClick={() => setCommittee([...committee, { role: "", name: "", phone: "", photo: "", signature: "" }])}>
             <Plus className="h-4 w-4 mr-1" />নতুন কমিটি সদস্য
           </Button>
           <Button onClick={saveGeneral} className="w-full">সংরক্ষণ</Button>
