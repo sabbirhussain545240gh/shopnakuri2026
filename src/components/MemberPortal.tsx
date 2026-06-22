@@ -109,7 +109,7 @@ function buildDepositHtml(p: { samitiName: string; logo?: string; memberName: st
   </div>`;
 }
 
-function buildInstallmentHtml(p: { samitiName: string; logo?: string; memberName: string; loanAmount: number; durationMonths: number; amount: number; date: string; paidAfter: number; remainingAfter: number; receiptNo: string; note?: string; loanNo?: number; cashierName?: string; cashierId?: string }, qr?: string) {
+function buildInstallmentHtml(p: { samitiName: string; logo?: string; memberName: string; loanAmount: number; durationMonths: number; amount: number; date: string; paidAfter: number; remainingAfter: number; receiptNo: string; note?: string; loanNo?: number; cashierName?: string; cashierId?: string; committee?: MPCommittee[] }, qr?: string) {
   return `<div class="r" id="r">
     <div class="header">
       ${p.logo ? `<img src="${p.logo}" alt="logo" class="logo"/>` : ""}
