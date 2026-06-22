@@ -2977,6 +2977,7 @@ function LoansTab() {
                         loanDate: currentLoan.date,
                         closeDate,
                         certNo,
+                        committee: data.settings.committee,
                       });
                     };
                     return (
