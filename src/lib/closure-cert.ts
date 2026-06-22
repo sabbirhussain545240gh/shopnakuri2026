@@ -110,9 +110,9 @@ export function buildClosureHtml(p: ClosureInput, qr?: string) {
     </div>
     ${qrBlock(qr)}
     <div class="signs">
-      <div>—————————————<br/>সদস্যের স্বাক্ষর</div>
-      <div>—————————————<br/>কোষাধ্যক্ষের স্বাক্ষর</div>
-      <div>—————————————<br/>সভাপতির স্বাক্ষর</div>
+      <div><div style="height:48px;border-bottom:1px solid #111;margin-bottom:4px;"></div>সদস্যের স্বাক্ষর</div>
+      ${signBlock("কোষাধ্যক্ষের স্বাক্ষর", findCommittee(p.committee, ["কোষাধ্যক্ষ"]))}
+      ${signBlock("সভাপতির স্বাক্ষর", findCommittee(p.committee, ["সভাপতি"]))}
     </div>
   </div>`;
 }
