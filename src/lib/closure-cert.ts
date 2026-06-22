@@ -26,7 +26,9 @@ function fmtDate(d: string) {
 
 export const closureCss = `
   body{margin:0;padding:20px;background:#fff;color:#111;font-family:"Segoe UI","Noto Sans Bengali",Arial,sans-serif;}
-  .r{background:#fff;margin:0 auto;}
+  .r{background:#fff;margin:0 auto;position:relative;overflow:hidden;}
+  .watermark{position:absolute;inset:0;background-repeat:no-repeat;background-position:center;background-size:55% auto;opacity:0.07;pointer-events:none;z-index:0;}
+  .r > *:not(.watermark){position:relative;z-index:1;}
   .header{display:flex;align-items:center;justify-content:center;gap:12px;margin-bottom:6px;}
   .head-text{text-align:center;}
   .title{font-weight:700;margin:0;}
@@ -89,6 +91,7 @@ export function buildClosureHtml(p: ClosureInput, qr?: string) {
     #r.closure .signs > div{flex:1;text-align:center;}
   </style>
   <div class="r closure" id="r">
+    ${p.logo ? `<div class="watermark" style="background-image:url('${p.logo}')"></div>` : ""}
     <div class="header">
       ${p.logo ? `<img src="${p.logo}" alt="logo" class="logo"/>` : ""}
       <div class="head-text"><div class="title">${p.samitiName}</div><div class="sub" style="color:#15803d;font-weight:700;letter-spacing:1px;">ঋণ পরিশোধ সনদ</div></div>

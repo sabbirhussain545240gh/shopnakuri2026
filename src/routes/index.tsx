@@ -5546,7 +5546,9 @@ async function exportReportPdf(p: ReportParams) {
 
 const receiptCss = `
   body{margin:0;padding:20px;background:#fff;color:#111;font-family:"Segoe UI","Noto Sans Bengali",Arial,sans-serif;}
-  .r{width:520px;border:1px solid #ddd;border-radius:8px;padding:20px;background:#fff;}
+  .r{width:520px;border:1px solid #ddd;border-radius:8px;padding:20px;background:#fff;position:relative;overflow:hidden;}
+  .watermark{position:absolute;inset:0;background-repeat:no-repeat;background-position:center;background-size:60% auto;opacity:0.07;pointer-events:none;z-index:0;}
+  .r > *:not(.watermark){position:relative;z-index:1;}
   .center{text-align:center;}
   .header{display:flex;align-items:center;justify-content:center;gap:12px;margin-bottom:6px;}
   .logo{width:54px;height:54px;object-fit:contain;border-radius:6px;}
@@ -5622,6 +5624,7 @@ const qrBlockHtml = (qrDataUrl?: string) =>
 
 function buildReceiptHtml(r: { loan: Loan; memberName: string; amount: number; date: string; paidAfter: number; remainingAfter: number; receiptNo: string; note?: string; logo?: string; loanNo?: number }, samitiName: string, qrDataUrl?: string, treasurer?: CommitteeMember | null) {
   return `<div class="r" id="r">
+    ${r.logo ? `<div class="watermark" style="background-image:url('${r.logo}')"></div>` : ""}
     <div class="header">
       ${r.logo ? `<img src="${r.logo}" alt="logo" class="logo"/>` : ""}
       <div class="head-text"><div class="title">${samitiName}</div><div class="sub">কিস্তি প্রাপ্তি রিসিপ্ট</div></div>
@@ -5686,6 +5689,7 @@ type DepositReceiptData = {
 
 function buildDepositReceiptHtml(r: DepositReceiptData, samitiName: string, qrDataUrl?: string, treasurer?: CommitteeMember | null) {
   return `<div class="r" id="r">
+    ${r.logo ? `<div class="watermark" style="background-image:url('${r.logo}')"></div>` : ""}
     <div class="header">
       ${r.logo ? `<img src="${r.logo}" alt="logo" class="logo"/>` : ""}
       <div class="head-text"><div class="title">${samitiName}</div><div class="sub">সঞ্চয়/চাদা জমা রিসিপ্ট</div></div>
