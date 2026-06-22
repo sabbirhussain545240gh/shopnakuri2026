@@ -82,6 +82,9 @@ export type Settings = {
   goalsSectionSubtitle?: string;
   quotesSectionTitle?: string;
   messagesSectionTitle?: string;
+  committee?: CommitteeMember[];
+  committeeSectionTitle?: string;
+  committeeSectionSubtitle?: string;
 };
 
 
