@@ -76,7 +76,19 @@ const qrBlock = (qrDataUrl?: string, kind: "receipt" | "certificate" = "receipt"
       </div>`
     : "";
 
-function buildDepositHtml(p: { samitiName: string; logo?: string; memberName: string; memberSerial?: number; amount: number; date: string; totalAfter: number; receiptNo: string; note?: string; cashierName?: string; cashierId?: string }, qr?: string) {
+function mpTreasurerSignHtml(committee?: MPCommittee[]) {
+  const t = committee?.find((c) => (c.role || "").includes("কোষাধ্যক্ষ"));
+  if (!t) return `<div style="text-align:right">—————————<br/>কোষাধ্যক্ষ</div>`;
+  const img = t.signature
+    ? `<img src="${t.signature}" alt="" style="height:40px;max-width:140px;object-fit:contain;display:block;margin-left:auto;margin-bottom:2px;"/>`
+    : `<div style="border-bottom:1px solid #111;height:34px;width:140px;margin-left:auto;margin-bottom:2px;"></div>`;
+  const name = t.name ? `<div style="font-weight:600;color:#111;">${t.name}</div>` : "";
+  const role = `<div style="color:#666;font-size:11px;">${t.role || "কোষাধ্যক্ষ"}</div>`;
+  const phone = t.phone ? `<div style="color:#666;font-size:11px;">${toBn(t.phone)}</div>` : "";
+  return `<div style="text-align:right">${img}${name}${role}${phone}</div>`;
+}
+
+function buildDepositHtml(p: { samitiName: string; logo?: string; memberName: string; memberSerial?: number; amount: number; date: string; totalAfter: number; receiptNo: string; note?: string; cashierName?: string; cashierId?: string; committee?: MPCommittee[] }, qr?: string) {
   return `<div class="r" id="r">
     <div class="header">
       ${p.logo ? `<img src="${p.logo}" alt="logo" class="logo"/>` : ""}
@@ -93,7 +105,7 @@ function buildDepositHtml(p: { samitiName: string; logo?: string; memberName: st
     </div>
     ${p.note ? `<div class="note"><span class="muted">নোট:</span> <b>${p.note.replace(/</g, "&lt;")}</b></div>` : ""}
     ${qrBlock(qr)}
-    <div class="sign"><div>—————————<br/>গ্রহীতা</div><div style="text-align:right">—————————<br/>কোষাধ্যক্ষ</div></div>
+    <div class="sign"><div>—————————<br/>গ্রহীতা</div>${mpTreasurerSignHtml(p.committee)}</div>
   </div>`;
 }
 
