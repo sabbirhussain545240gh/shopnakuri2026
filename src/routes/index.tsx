@@ -5859,13 +5859,17 @@ function printReport(p: ReportParams) {
     <!DOCTYPE html>
     <html><head><meta charset="utf-8" /><title>${title} - ${p.samitiName}</title>
     <style>
-      body { font-family: "Segoe UI", "Noto Sans Bengali", sans-serif; margin: 0; padding: 24px; color: #111; background:#fff; }
+      body { font-family: "Segoe UI", "Noto Sans Bengali", sans-serif; margin: 0; padding: 24px; color: #111; background:#fff; position: relative; }
       h3 { margin: 16px 0 6px; font-size: 14px; }
-      @media print { body { padding: 0; } .no-print { display: none; } }
+      @media print { body { padding: 0 12px; } .no-print { display: none; } }
+      ${printBrandCss}
     </style></head>
     <body>
+      ${printWatermark(p.samitiLogo)}
+      <div class="ps-content">
       <div class="no-print" style="margin-bottom:12px;"><button onclick="window.print()" style="padding:8px 16px;font-size:14px;cursor:pointer;">প্রিন্ট করুন</button></div>
       ${inner}
+      </div>
       <script>setTimeout(()=>window.print(),300)</script>
     </body></html>
   `);
