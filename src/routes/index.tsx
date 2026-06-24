@@ -3247,10 +3247,11 @@ function InstallmentsTab() {
   const allPayments = [...data.payments]
     .sort((a, b) => b.date.localeCompare(a.date))
     .filter((p) => {
+      const loan = data.loans.find((l) => l.id === p.loanId);
+      if (filterStatus !== "all" && loan?.status !== filterStatus) return false;
       if (filterLoan !== "all" && p.loanId !== filterLoan) return false;
       if (filterMonth && !p.date.startsWith(filterMonth)) return false;
       if (filterMember === "all") return true;
-      const loan = data.loans.find((l) => l.id === p.loanId);
       return loan?.memberId === filterMember;
     });
 
