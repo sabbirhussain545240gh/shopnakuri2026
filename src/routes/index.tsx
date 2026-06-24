@@ -3343,6 +3343,14 @@ function InstallmentsTab() {
                 </Command>
               </PopoverContent>
             </Popover>
+            <Select value={filterStatus} onValueChange={(v) => setFilterStatus(v as "all" | "active" | "closed")}>
+              <SelectTrigger className="w-36"><SelectValue placeholder="স্ট্যাটাস" /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">সকল স্ট্যাটাস</SelectItem>
+                <SelectItem value="active">চলমান</SelectItem>
+                <SelectItem value="closed">পরিশোধিত</SelectItem>
+              </SelectContent>
+            </Select>
             <Select value={filterMember} onValueChange={setFilterMember}>
               <SelectTrigger className="w-44"><SelectValue placeholder="সদস্য ফিল্টার" /></SelectTrigger>
               <SelectContent>
