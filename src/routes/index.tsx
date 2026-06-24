@@ -3940,6 +3940,16 @@ function DepositsHistoryTab() {
       .sort((a, b) => (a.serial || 0) - (b.serial || 0));
   }, [rows, data.members, monthFilter]);
 
+  const paidMembersList = useMemo(() => {
+    if (monthFilter === "all") return [];
+    const totals = new Map<string, number>();
+    rows.forEach((r) => totals.set(r.memberId, (totals.get(r.memberId) || 0) + r.amount));
+    return [...data.members]
+      .filter((m) => totals.has(m.id))
+      .sort((a, b) => (a.serial || 0) - (b.serial || 0))
+      .map((m) => ({ ...m, paidAmount: totals.get(m.id) || 0 }));
+  }, [rows, data.members, monthFilter]);
+
   const startEdit = (r: { id: string; memberId: string; amount: number; date: string; note: string }) => {
     setEditId(r.id);
     setEditForm({ memberId: r.memberId, amount: String(r.amount), date: r.date, note: r.note });
