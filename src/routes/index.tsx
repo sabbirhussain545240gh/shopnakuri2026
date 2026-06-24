@@ -3837,6 +3837,9 @@ function ReceiptsHistoryTab() {
 function DepositsHistoryTab() {
   const { data, updateDeposit, deleteDeposit } = useSamiti();
   const [q, setQ] = useState("");
+  const [minAmount, setMinAmount] = useState("");
+  const [maxAmount, setMaxAmount] = useState("");
+  const [sortBy, setSortBy] = useState<"date_desc" | "date_asc" | "amount_desc" | "amount_asc">("date_desc");
   const [editId, setEditId] = useState<string | null>(null);
   const [editForm, setEditForm] = useState({ memberId: "", amount: "", date: today(), note: "" });
   const [editMemberOpen, setEditMemberOpen] = useState(false);
@@ -3888,16 +3891,29 @@ function DepositsHistoryTab() {
         };
       })
       .filter((r) => {
-        if (!q.trim()) return true;
-        const s = q.toLowerCase();
-        return (
-          r.memberName.toLowerCase().includes(s) ||
-          String(r.memberSerial).includes(s) ||
-          toBn(r.memberSerial).includes(s) ||
-          r.note.toLowerCase().includes(s)
-        );
+        if (q.trim()) {
+          const s = q.toLowerCase();
+          const ok = (
+            r.memberName.toLowerCase().includes(s) ||
+            String(r.memberSerial).includes(s) ||
+            toBn(r.memberSerial).includes(s) ||
+            r.note.toLowerCase().includes(s)
+          );
+          if (!ok) return false;
+        }
+        const mn = Number(minAmount);
+        const mx = Number(maxAmount);
+        if (minAmount && !isNaN(mn) && r.amount < mn) return false;
+        if (maxAmount && !isNaN(mx) && r.amount > mx) return false;
+        return true;
+      })
+      .sort((a, b) => {
+        if (sortBy === "amount_desc") return b.amount - a.amount;
+        if (sortBy === "amount_asc") return a.amount - b.amount;
+        if (sortBy === "date_asc") return a.date < b.date ? -1 : a.date > b.date ? 1 : 0;
+        return a.date < b.date ? 1 : a.date > b.date ? -1 : 0;
       });
-  }, [data, q]);
+  }, [data, q, minAmount, maxAmount, sortBy]);
 
   const total = rows.reduce((s, r) => s + r.amount, 0);
 
@@ -3937,6 +3953,32 @@ function DepositsHistoryTab() {
           <Search className="h-4 w-4 absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
           <Input value={q} onChange={(e) => setQ(e.target.value)} placeholder="সদস্য / সদস্য নং / নোট খুঁজুন" className="pl-9" />
         </div>
+      </div>
+
+      <div className="flex flex-col md:flex-row md:items-end gap-3">
+        <div className="flex-1">
+          <Label className="text-xs text-muted-foreground">সর্বনিম্ন পরিমাণ</Label>
+          <Input type="number" inputMode="numeric" value={minAmount} onChange={(e) => setMinAmount(e.target.value)} placeholder="০" />
+        </div>
+        <div className="flex-1">
+          <Label className="text-xs text-muted-foreground">সর্বোচ্চ পরিমাণ</Label>
+          <Input type="number" inputMode="numeric" value={maxAmount} onChange={(e) => setMaxAmount(e.target.value)} placeholder="∞" />
+        </div>
+        <div className="flex-1">
+          <Label className="text-xs text-muted-foreground">সাজান</Label>
+          <Select value={sortBy} onValueChange={(v) => setSortBy(v as typeof sortBy)}>
+            <SelectTrigger><SelectValue /></SelectTrigger>
+            <SelectContent>
+              <SelectItem value="date_desc">তারিখ (নতুন → পুরাতন)</SelectItem>
+              <SelectItem value="date_asc">তারিখ (পুরাতন → নতুন)</SelectItem>
+              <SelectItem value="amount_desc">পরিমাণ (বেশি → কম)</SelectItem>
+              <SelectItem value="amount_asc">পরিমাণ (কম → বেশি)</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+        {(minAmount || maxAmount || sortBy !== "date_desc") && (
+          <Button variant="outline" onClick={() => { setMinAmount(""); setMaxAmount(""); setSortBy("date_desc"); }}>রিসেট</Button>
+        )}
       </div>
 
       <Card>
