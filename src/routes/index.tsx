@@ -1941,6 +1941,9 @@ function SavingsTab() {
           <CardDescription>মোট {toBn(data.deposits.length)}টি লেনদেন</CardDescription>
         </div>
         <div className="flex items-center gap-2 flex-wrap">
+          <Button variant="outline" size="sm" disabled={data.deposits.length === 0} onClick={printDeposits}>
+            <Printer className="h-4 w-4 mr-1" />প্রিন্ট তালিকা
+          </Button>
           <Button variant="outline" size="sm" disabled={data.members.length === 0} onClick={printCollectionForm}>
             <Printer className="h-4 w-4 mr-1" />কালেকশন ফর্ম
           </Button>
