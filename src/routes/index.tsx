@@ -2359,7 +2359,7 @@ function LoansTab() {
       date: payForm.date,
       paidAfter,
       remainingAfter,
-      receiptNo: `KS-${toBn(mem?.serial ?? 0)}-${toBn(data.payments.filter((p) => p.loanId === payFor.id).length + 1)}`,
+      receiptNo: `KS-${toBn(data.loans.findIndex((l) => l.id === payFor.id) + 1)}-${toBn(data.payments.filter((p) => p.loanId === payFor.id).length + 1)}`,
       loanNo: data.loans.findIndex((l) => l.id === payFor.id) + 1,
       note: payForm.note.trim() || undefined,
       logo: data.samitiLogo || undefined,
@@ -3445,7 +3445,7 @@ function InstallmentsTab() {
                   const m = loan ? data.members.find((x) => x.id === loan.memberId) : null;
                   const rem = loan ? Math.max(0, loanTotalDue(loan) - loanPaid(data.payments, loan.id)) : 0;
                   const payNoForLoan = loan ? data.payments.filter((x) => x.loanId === loan.id).findIndex((x) => x.id === p.id) + 1 : 0;
-                  const receiptNo = loan && m ? `KS-${toBn(m.serial)}-${toBn(payNoForLoan)}` : "—";
+                  const receiptNo = loan && m ? `KS-${toBn(loanIdx)}-${toBn(payNoForLoan)}` : "—";
                   return (
                     <TableRow key={p.id}>
                       <TableCell className="font-medium font-mono text-xs">{receiptNo}</TableCell>
@@ -3548,7 +3548,7 @@ function ReceiptsHistoryTab() {
         const member = loan ? memberById.get(loan.memberId) : undefined;
         const loanPays = paymentsByLoan.get(p.loanId) ?? [];
         const payNo = loanPays.findIndex((x) => x.id === p.id) + 1;
-        const receiptNo = `KS-${toBn(member?.serial ?? 0)}-${toBn(payNo)}`;
+        const receiptNo = `KS-${toBn(loanIndexById.get(p.loanId) ?? 0)}-${toBn(payNo)}`;
         return {
           id: p.id,
           loanId: p.loanId,
@@ -3593,7 +3593,7 @@ function ReceiptsHistoryTab() {
       date: r.date,
       paidAfter,
       remainingAfter,
-      receiptNo: `KS-${toBn(r.memberSerial ?? 0)}-${toBn(loanPayments.findIndex((p) => p.id === r.id) + 1)}`,
+      receiptNo: `KS-${toBn(r.loanNo)}-${toBn(loanPayments.findIndex((p) => p.id === r.id) + 1)}`,
       note: r.note,
       logo: data.samitiLogo,
       loanNo: r.loanNo,
