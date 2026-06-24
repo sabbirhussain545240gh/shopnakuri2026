@@ -1794,12 +1794,16 @@ function SavingsTab() {
 <html><head><meta charset="utf-8" /><title>সঞ্চয়/চাদা তালিকা - ${data.samitiName}</title>
 <style>
   @page { size: A4; margin: 12mm; }
-  body { font-family: "Segoe UI", "Noto Sans Bengali", sans-serif; color: #111; margin: 0; padding: 8px 12px; }
+  body { font-family: "Segoe UI", "Noto Sans Bengali", sans-serif; color: #111; margin: 0; padding: 8px 12px; position: relative; }
+  .wm { position: fixed; inset: 0; background-repeat: no-repeat; background-position: center; background-size: 60% auto; opacity: 0.10; pointer-events: none; z-index: 0; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  .content { position: relative; z-index: 1; }
+  .hdr { display:flex; align-items:center; justify-content:center; gap:10px; margin-bottom:4px; }
+  .hdr img { height:48px; width:48px; object-fit:contain; border-radius:6px; }
   h2 { margin: 0; font-size: 18px; text-align: center; }
   .sub { text-align: center; font-size: 12px; color: #555; margin: 2px 0 4px; }
   .filters { font-size: 11px; color: #444; text-align: center; margin-bottom: 8px; }
   table { width: 100%; border-collapse: collapse; font-size: 12px; }
-  th, td { border: 1px solid #333; padding: 4px 6px; }
+  th, td { border: 1px solid #333; padding: 4px 6px; background: transparent; }
   th { background: #e5e7eb; text-align: center; }
   td.c { text-align: center; }
   td.r { text-align: right; }
@@ -1807,10 +1811,15 @@ function SavingsTab() {
   @media print { .no-print { display: none; } body { padding: 0; } }
 </style></head>
 <body>
+  ${data.samitiLogo ? `<div class="wm" style="background-image:url('${data.samitiLogo}')"></div>` : ""}
+  <div class="content">
   <div class="no-print" style="text-align:right;margin-bottom:6px;">
     <button onclick="window.print()" style="padding:6px 14px;cursor:pointer;">প্রিন্ট করুন</button>
   </div>
-  <h2>${data.samitiName}</h2>
+  <div class="hdr">
+    ${data.samitiLogo ? `<img src="${data.samitiLogo}" alt="logo" />` : ""}
+    <h2>${data.samitiName}</h2>
+  </div>
   <div class="sub">সঞ্চয়/চাদা / জমা তালিকা</div>
   ${filterParts.length ? `<div class="filters">${filterParts.join(" • ")}</div>` : ""}
   <table>
