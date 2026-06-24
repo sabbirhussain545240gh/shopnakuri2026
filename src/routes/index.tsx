@@ -1641,6 +1641,11 @@ function SavingsTab() {
   const [open, setOpen] = useState(false);
   const [form, setForm] = useState({ memberId: "", amount: "", date: today(), note: "" });
   const [search, setSearch] = useState("");
+  const [filterMemberId, setFilterMemberId] = useState<string>("all");
+  const [dateFrom, setDateFrom] = useState<string>("");
+  const [dateTo, setDateTo] = useState<string>("");
+  const [minAmount, setMinAmount] = useState<string>("");
+  const [maxAmount, setMaxAmount] = useState<string>("");
   const [editId, setEditId] = useState<string | null>(null);
   const [editForm, setEditForm] = useState({ memberId: "", amount: "", date: today(), note: "" });
   const [memberOpen, setMemberOpen] = useState(false);
