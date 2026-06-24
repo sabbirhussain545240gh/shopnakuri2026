@@ -3604,7 +3604,7 @@ function ReceiptsHistoryTab() {
     <div className="space-y-4">
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
         <div>
-          <h2 className="text-2xl font-bold">রিসিপ্ট ইতিহাস</h2>
+          <h2 className="text-2xl font-bold">কিস্তি রিসিপ্ট ইতিহাস</h2>
           <p className="text-sm text-muted-foreground">সকল কিস্তি আদায়ের তালিকা</p>
         </div>
         <div className="relative w-full md:w-72">
