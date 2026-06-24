@@ -1890,14 +1890,16 @@ function SavingsTab() {
   td.r { text-align: right; }
   tbody tr { height: 22px; }
   .foot { display:flex; justify-content: space-between; font-size: 12px; margin-top: 14px; }
-  @media print { .no-print { display: none; } body { padding: 0; } }
+  @media print { .no-print { display: none; } body { padding: 0 12px; } }
+  ${printBrandCss}
 </style></head>
 <body>
+  ${printWatermark(data.samitiLogo)}
+  <div class="ps-content">
   <div class="no-print" style="text-align:right;margin-bottom:6px;">
     <button onclick="window.print()" style="padding:6px 14px;cursor:pointer;">প্রিন্ট করুন</button>
   </div>
-  <h2>${data.samitiName}</h2>
-  <div class="sub">মাসিক চাদা ও ঋণের কিস্তি আদায় ফর্ম — ${monthLabel}</div>
+  ${printHeader(data.samitiName, data.samitiLogo, `মাসিক চাদা ও ঋণের কিস্তি আদায় ফর্ম — ${monthLabel}`)}
   <table>
     <colgroup>
       <col style="width:6%"><col style="width:22%"><col style="width:13%"><col style="width:13%"><col style="width:13%"><col style="width:13%"><col style="width:20%">
