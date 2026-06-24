@@ -3837,6 +3837,9 @@ function ReceiptsHistoryTab() {
 function DepositsHistoryTab() {
   const { data, updateDeposit, deleteDeposit } = useSamiti();
   const [q, setQ] = useState("");
+  const [minAmount, setMinAmount] = useState("");
+  const [maxAmount, setMaxAmount] = useState("");
+  const [sortBy, setSortBy] = useState<"date_desc" | "date_asc" | "amount_desc" | "amount_asc">("date_desc");
   const [editId, setEditId] = useState<string | null>(null);
   const [editForm, setEditForm] = useState({ memberId: "", amount: "", date: today(), note: "" });
   const [editMemberOpen, setEditMemberOpen] = useState(false);
