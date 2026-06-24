@@ -1771,6 +1771,7 @@ function SavingsTab() {
       const m = data.members.find((x) => x.id === d.memberId);
       return `<tr>
         <td class="c">${toBn(i + 1)}</td>
+        <td class="c">${receiptNoFor(d)}</td>
         <td class="c">${fmtDate(d.date)}</td>
         <td class="c">${toBn(m?.serial || 0)}</td>
         <td>${m?.name || "—"}</td>
