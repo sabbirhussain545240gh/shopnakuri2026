@@ -1815,11 +1815,11 @@ function SavingsTab() {
   ${filterParts.length ? `<div class="filters">${filterParts.join(" • ")}</div>` : ""}
   <table>
     <thead><tr>
-      <th style="width:6%">ক্রম</th><th style="width:14%">তারিখ</th><th style="width:8%">সি.নং</th>
-      <th style="width:28%">সদস্যের নাম</th><th>মন্তব্য</th><th style="width:16%">পরিমাণ</th>
+      <th style="width:5%">ক্রম</th><th style="width:14%">রিসিপ্ট নং</th><th style="width:12%">তারিখ</th><th style="width:7%">সি.নং</th>
+      <th style="width:24%">সদস্যের নাম</th><th>মন্তব্য</th><th style="width:14%">পরিমাণ</th>
     </tr></thead>
-    <tbody>${rows || `<tr><td colspan="6" class="c">কোনও তথ্য নেই</td></tr>`}</tbody>
-    <tfoot><tr><td colspan="5" class="r">মোট (${toBn(filteredDeposits.length)}টি)</td><td class="r">${formatTk(total)}</td></tr></tfoot>
+    <tbody>${rows || `<tr><td colspan="7" class="c">কোনও তথ্য নেই</td></tr>`}</tbody>
+    <tfoot><tr><td colspan="6" class="r">মোট (${toBn(filteredDeposits.length)}টি)</td><td class="r">${formatTk(total)}</td></tr></tfoot>
   </table>
   <script>setTimeout(()=>window.print(),300)</script>
 </body></html>`);
