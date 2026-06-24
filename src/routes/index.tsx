@@ -3260,6 +3260,7 @@ function InstallmentsTab() {
     if (!filterMonth) return [] as Array<{ loan: Loan; loanNo: number; member?: Member; installment: number; paidInMonth: number; status: "paid" | "partial" | "unpaid" }>;
     return data.loans
       .filter((l) => l.date.slice(0, 7) <= filterMonth) // ঋণটি ঐ মাসের আগে/সমান শুরু হয়েছে
+      .filter((l) => filterStatus === "all" || l.status === filterStatus)
       .filter((l) => filterMember === "all" || l.memberId === filterMember)
       .filter((l) => filterLoan === "all" || l.id === filterLoan)
       .map((l) => {
@@ -3274,7 +3275,7 @@ function InstallmentsTab() {
         return { loan: l, loanNo, member, installment, paidInMonth, status };
       })
       .sort((a, b) => (a.member?.serial || 0) - (b.member?.serial || 0));
-  }, [data, filterMonth, filterMember, filterLoan]);
+  }, [data, filterMonth, filterMember, filterLoan, filterStatus]);
 
   const totalCollected = allPayments.reduce((s, p) => s + p.amount, 0);
   const totalOutstanding = activeLoans.reduce((s, l) => s + Math.max(0, loanTotalDue(l) - loanPaid(data.payments, l.id)), 0);
