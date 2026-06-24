@@ -3891,16 +3891,29 @@ function DepositsHistoryTab() {
         };
       })
       .filter((r) => {
-        if (!q.trim()) return true;
-        const s = q.toLowerCase();
-        return (
-          r.memberName.toLowerCase().includes(s) ||
-          String(r.memberSerial).includes(s) ||
-          toBn(r.memberSerial).includes(s) ||
-          r.note.toLowerCase().includes(s)
-        );
+        if (q.trim()) {
+          const s = q.toLowerCase();
+          const ok = (
+            r.memberName.toLowerCase().includes(s) ||
+            String(r.memberSerial).includes(s) ||
+            toBn(r.memberSerial).includes(s) ||
+            r.note.toLowerCase().includes(s)
+          );
+          if (!ok) return false;
+        }
+        const mn = Number(minAmount);
+        const mx = Number(maxAmount);
+        if (minAmount && !isNaN(mn) && r.amount < mn) return false;
+        if (maxAmount && !isNaN(mx) && r.amount > mx) return false;
+        return true;
+      })
+      .sort((a, b) => {
+        if (sortBy === "amount_desc") return b.amount - a.amount;
+        if (sortBy === "amount_asc") return a.amount - b.amount;
+        if (sortBy === "date_asc") return a.date < b.date ? -1 : a.date > b.date ? 1 : 0;
+        return a.date < b.date ? 1 : a.date > b.date ? -1 : 0;
       });
-  }, [data, q]);
+  }, [data, q, minAmount, maxAmount, sortBy]);
 
   const total = rows.reduce((s, r) => s + r.amount, 0);
 
