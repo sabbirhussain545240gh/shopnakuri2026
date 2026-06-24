@@ -1913,6 +1913,7 @@ function SavingsTab() {
     <div>কালেকটরের স্বাক্ষর: ____________________</div>
     <div>সভাপতি/সম্পাদকের স্বাক্ষর: ____________________</div>
   </div>
+  </div>
   <script>setTimeout(()=>window.print(),300)</script>
 </body></html>`);
     w.document.close();
