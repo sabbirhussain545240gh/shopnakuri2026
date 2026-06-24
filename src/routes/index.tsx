@@ -1737,6 +1737,24 @@ function SavingsTab() {
       });
   }, [data.deposits, data.members, search, filterMemberId, dateFrom, dateTo, minAmount, maxAmount]);
 
+  const depositSeq = useMemo(() => {
+    const map = new Map<string, number>();
+    const counters = new Map<string, number>();
+    [...data.deposits]
+      .sort((a, b) => (a.date < b.date ? -1 : a.date > b.date ? 1 : a.id < b.id ? -1 : 1))
+      .forEach((d) => {
+        const n = (counters.get(d.memberId) ?? 0) + 1;
+        counters.set(d.memberId, n);
+        map.set(d.id, n);
+      });
+    return map;
+  }, [data.deposits]);
+
+  const receiptNoFor = (d: { id: string; memberId: string }) => {
+    const m = data.members.find((x) => x.id === d.memberId);
+    return `CH-${toBn(m?.serial ?? 0)}-${toBn(depositSeq.get(d.id) ?? 1)}`;
+  };
+
   const resetFilters = () => {
     setSearch("");
     setFilterMemberId("all");
@@ -1753,6 +1771,7 @@ function SavingsTab() {
       const m = data.members.find((x) => x.id === d.memberId);
       return `<tr>
         <td class="c">${toBn(i + 1)}</td>
+        <td class="c">${receiptNoFor(d)}</td>
         <td class="c">${fmtDate(d.date)}</td>
         <td class="c">${toBn(m?.serial || 0)}</td>
         <td>${m?.name || "—"}</td>
@@ -1796,11 +1815,11 @@ function SavingsTab() {
   ${filterParts.length ? `<div class="filters">${filterParts.join(" • ")}</div>` : ""}
   <table>
     <thead><tr>
-      <th style="width:6%">ক্রম</th><th style="width:14%">তারিখ</th><th style="width:8%">সি.নং</th>
-      <th style="width:28%">সদস্যের নাম</th><th>মন্তব্য</th><th style="width:16%">পরিমাণ</th>
+      <th style="width:5%">ক্রম</th><th style="width:14%">রিসিপ্ট নং</th><th style="width:12%">তারিখ</th><th style="width:7%">সি.নং</th>
+      <th style="width:24%">সদস্যের নাম</th><th>মন্তব্য</th><th style="width:14%">পরিমাণ</th>
     </tr></thead>
-    <tbody>${rows || `<tr><td colspan="6" class="c">কোনও তথ্য নেই</td></tr>`}</tbody>
-    <tfoot><tr><td colspan="5" class="r">মোট (${toBn(filteredDeposits.length)}টি)</td><td class="r">${formatTk(total)}</td></tr></tfoot>
+    <tbody>${rows || `<tr><td colspan="7" class="c">কোনও তথ্য নেই</td></tr>`}</tbody>
+    <tfoot><tr><td colspan="6" class="r">মোট (${toBn(filteredDeposits.length)}টি)</td><td class="r">${formatTk(total)}</td></tr></tfoot>
   </table>
   <script>setTimeout(()=>window.print(),300)</script>
 </body></html>`);
@@ -2082,6 +2101,7 @@ function SavingsTab() {
           <Table>
             <TableHeader>
               <TableRow>
+                <TableHead>রিসিপ্ট নং</TableHead>
                 <TableHead>তারিখ</TableHead>
                 <TableHead>
                   <div className="relative">
@@ -2122,6 +2142,7 @@ function SavingsTab() {
                 }
                 return (
                   <TableRow key={d.id}>
+                    <TableCell className="font-mono text-xs">{receiptNoFor(d)}</TableCell>
                     <TableCell>{fmtDate(d.date)}</TableCell>
                     <TableCell className="font-medium">{toBn(m?.serial || 0)}. {highlightedName}</TableCell>
                     <TableCell className="text-muted-foreground">{d.note || "—"}</TableCell>
