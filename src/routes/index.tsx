@@ -862,26 +862,29 @@ function MembersTab() {
     w.document.write(`<!DOCTYPE html>
 <html><head><meta charset="utf-8" /><title>সদস্য তালিকা - ${data.samitiName}</title>
 <style>
-  body { font-family: "Segoe UI", "Noto Sans Bengali", sans-serif; margin: 0; padding: 24px; background: #fff; color: #111; }
-  h2 { margin: 0 0 8px; font-size: 20px; }
-  p { margin: 0 0 16px; font-size: 14px; color: #555; }
+  body { font-family: "Segoe UI", "Noto Sans Bengali", sans-serif; margin: 0; padding: 24px; background: #fff; color: #111; position: relative; }
+  p { margin: 0 0 16px; font-size: 14px; color: #555; text-align: center; }
   table { width: 100%; border-collapse: collapse; font-size: 14px; }
   th { background: #f3f4f6; border: 1px solid #ccc; padding: 10px; text-align: left; }
   th:nth-child(1), th:nth-child(6) { text-align: center; }
-  @media print { body { padding: 0; } .no-print { display: none; } }
+  @media print { body { padding: 0 12px; } .no-print { display: none; } }
+  ${printBrandCss}
 </style></head>
 <body>
+  ${printWatermark(data.samitiLogo)}
+  <div class="ps-content">
   <div class="no-print" style="margin-bottom:16px;">
     <button onclick="window.print()" style="padding:8px 16px;font-size:14px;cursor:pointer;">প্রিন্ট করুন</button>
   </div>
-  <h2>${data.samitiName}</h2>
-  <p>সদস্য তালিকা — মোট ${toBn(data.members.length)} জন</p>
+  ${printHeader(data.samitiName, data.samitiLogo, "সদস্য তালিকা")}
+  <p>মোট ${toBn(data.members.length)} জন</p>
   <table>
     <thead><tr>
       <th>সি.নং</th><th>নাম</th><th>মোবাইল</th><th>NID/জন্ম সনদ</th><th>যোগদান</th><th style="text-align:right;">মোট সঞ্চয়/চাদা</th>
     </tr></thead>
     <tbody>${rows}</tbody>
   </table>
+  </div>
   <script>setTimeout(()=>window.print(),300)</script>
 </body></html>`);
     w.document.close();
