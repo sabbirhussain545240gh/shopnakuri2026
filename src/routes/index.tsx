@@ -4106,15 +4106,41 @@ function DepositsHistoryTab() {
                   </TableRow>
                   {missingMembers.map((m, i) => (
                     <TableRow key={`missing-${m.id}`} className="bg-destructive/5 hover:bg-destructive/10">
-                      <TableCell className="text-center text-destructive">{toBn(i + 1)}</TableCell>
-                      <TableCell className="text-destructive">—</TableCell>
-                      <TableCell className="text-center text-destructive">—</TableCell>
-                      <TableCell className="font-medium text-destructive">
+                      <TableCell className="text-center">{toBn(i + 1)}</TableCell>
+                      <TableCell>—</TableCell>
+                      <TableCell className="text-center">—</TableCell>
+                      <TableCell className="font-medium">
                         {m.name} <span className="text-xs">(সদস্য নং {toBn(m.serial || 0)})</span>
                       </TableCell>
                       <TableCell colSpan={2} className="text-right">
                         <span className="inline-flex items-center gap-1 rounded-full bg-destructive/15 px-2 py-0.5 text-xs font-semibold text-destructive">
                           ● জমা হয়নি
+                        </span>
+                      </TableCell>
+                      <TableCell />
+                    </TableRow>
+                  ))}
+                </>
+              )}
+              {monthFilter !== "all" && paidMembersList.length > 0 && (
+                <>
+                  <TableRow className="bg-emerald-500/10 hover:bg-emerald-500/10">
+                    <TableCell colSpan={7} className="text-center font-semibold text-emerald-700 dark:text-emerald-400 py-2">
+                      ✓ {fmtMonth(monthFilter)} মাসে যাদের চাঁদা পরিশোধ হয়েছে ({toBn(paidMembersList.length)} জন)
+                    </TableCell>
+                  </TableRow>
+                  {paidMembersList.map((m, i) => (
+                    <TableRow key={`paid-${m.id}`} className="bg-emerald-500/5 hover:bg-emerald-500/10">
+                      <TableCell className="text-center">{toBn(i + 1)}</TableCell>
+                      <TableCell>—</TableCell>
+                      <TableCell className="text-center">—</TableCell>
+                      <TableCell className="font-medium">
+                        {m.name} <span className="text-xs">(সদস্য নং {toBn(m.serial || 0)})</span>
+                      </TableCell>
+                      <TableCell className="text-right font-semibold">{formatTk(m.paidAmount)}</TableCell>
+                      <TableCell className="text-right">
+                        <span className="inline-flex items-center gap-1 rounded-full bg-emerald-500/15 px-2 py-0.5 text-xs font-semibold text-emerald-700 dark:text-emerald-400">
+                          ● পরিশোধ
                         </span>
                       </TableCell>
                       <TableCell />
