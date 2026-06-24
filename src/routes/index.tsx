@@ -2044,6 +2044,41 @@ function SavingsTab() {
         ) : data.deposits.length === 0 ? (
           <p className="text-sm text-muted-foreground text-center py-10">কোনও জমা নেই।</p>
         ) : (
+          <>
+          <div className="flex flex-wrap items-end gap-2 mb-3 p-2 rounded-md border bg-muted/30">
+            <div className="flex flex-col gap-1">
+              <Label className="text-xs">সদস্য</Label>
+              <Select value={filterMemberId} onValueChange={setFilterMemberId}>
+                <SelectTrigger className="h-8 w-48 text-xs"><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">সকল সদস্য</SelectItem>
+                  {[...data.members].sort((a, b) => (a.serial || 0) - (b.serial || 0)).map((m) => (
+                    <SelectItem key={m.id} value={m.id}>{toBn(m.serial || 0)}. {m.name}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="flex flex-col gap-1">
+              <Label className="text-xs">শুরুর তারিখ</Label>
+              <Input type="date" value={dateFrom} onChange={(e) => setDateFrom(e.target.value)} className="h-8 w-40 text-xs" />
+            </div>
+            <div className="flex flex-col gap-1">
+              <Label className="text-xs">শেষ তারিখ</Label>
+              <Input type="date" value={dateTo} onChange={(e) => setDateTo(e.target.value)} className="h-8 w-40 text-xs" />
+            </div>
+            <div className="flex flex-col gap-1">
+              <Label className="text-xs">সর্বনিম্ন (৳)</Label>
+              <Input type="number" value={minAmount} onChange={(e) => setMinAmount(e.target.value)} className="h-8 w-28 text-xs" />
+            </div>
+            <div className="flex flex-col gap-1">
+              <Label className="text-xs">সর্বোচ্চ (৳)</Label>
+              <Input type="number" value={maxAmount} onChange={(e) => setMaxAmount(e.target.value)} className="h-8 w-28 text-xs" />
+            </div>
+            <Button variant="ghost" size="sm" onClick={resetFilters} className="h-8">রিসেট</Button>
+            <div className="ml-auto text-xs text-muted-foreground self-center">
+              {toBn(filteredDeposits.length)}টি / মোট {formatTk(filteredDeposits.reduce((s, d) => s + d.amount, 0))}
+            </div>
+          </div>
           <Table>
             <TableHeader>
               <TableRow>
