@@ -3631,7 +3631,7 @@ function ReceiptsHistoryTab() {
             </TableHeader>
             <TableBody>
               {rows.length === 0 ? (
-                <TableRow><TableCell colSpan={7} className="text-center text-muted-foreground py-8">কোনো রিসিপ্ট পাওয়া যায়নি</TableCell></TableRow>
+                <TableRow><TableCell colSpan={8} className="text-center text-muted-foreground py-8">কোনো রিসিপ্ট পাওয়া যায়নি</TableCell></TableRow>
               ) : rows.map((r, i) => (
                 <TableRow key={r.id}>
                   <TableCell className="text-center text-muted-foreground">{toBn(i + 1)}</TableCell>
@@ -3639,6 +3639,7 @@ function ReceiptsHistoryTab() {
                   <TableCell className="text-center font-semibold">{toBn(r.loanNo)}</TableCell>
                   <TableCell className="font-medium">{r.memberName} <span className="text-xs text-muted-foreground">(ঋণ নং {toBn(r.loanNo)})</span></TableCell>
                   <TableCell className="text-muted-foreground text-sm">{r.note || "—"}</TableCell>
+                  <TableCell className="font-mono text-xs">{r.receiptNo}</TableCell>
                   <TableCell className="text-right font-semibold text-success">{formatTk(r.amount)}</TableCell>
                   <TableCell>
                     <div className="flex items-center justify-center gap-1">
@@ -3658,11 +3659,12 @@ function ReceiptsHistoryTab() {
 
               {rows.length > 0 && (
                 <TableRow>
-                  <TableCell colSpan={5} className="text-right font-semibold">মোট</TableCell>
+                  <TableCell colSpan={6} className="text-right font-semibold">মোট</TableCell>
                   <TableCell className="text-right font-bold">{formatTk(total)}</TableCell>
                   <TableCell />
                 </TableRow>
               )}
+
             </TableBody>
           </Table>
         </CardContent>
