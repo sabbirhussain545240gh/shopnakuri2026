@@ -2101,6 +2101,7 @@ function SavingsTab() {
           <Table>
             <TableHeader>
               <TableRow>
+                <TableHead>রিসিপ্ট নং</TableHead>
                 <TableHead>তারিখ</TableHead>
                 <TableHead>
                   <div className="relative">
