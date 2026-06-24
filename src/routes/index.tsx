@@ -153,6 +153,12 @@ const monthlyInstallment = (amount: number, rate: number, months: number) => {
   return (amount + interest) / months;
 };
 
+// Shared print branding: watermark + header (logo + samiti name) for all reports/documents.
+const printBrandCss = `.ps-wm{position:fixed;inset:0;background-repeat:no-repeat;background-position:center;background-size:60% auto;opacity:0.10;pointer-events:none;z-index:0;-webkit-print-color-adjust:exact;print-color-adjust:exact;}.ps-content{position:relative;z-index:1;}.ps-hdr{display:flex;align-items:center;justify-content:center;gap:12px;border-bottom:2px solid #333;padding-bottom:10px;margin-bottom:12px;}.ps-hdr img{height:64px;width:64px;object-fit:contain;border-radius:6px;}.ps-hdr .ps-name{margin:0;font-size:20px;font-weight:700;text-align:center;}.ps-hdr .ps-sub{font-size:12px;color:#555;text-align:center;margin-top:2px;}`;
+const printWatermark = (logo?: string) => logo ? `<div class="ps-wm" style="background-image:url('${logo}')"></div>` : "";
+const printHeader = (samitiName?: string, logo?: string, subtitle?: string) => `<div class="ps-hdr">${logo ? `<img src="${logo}" alt="logo" crossorigin="anonymous" />` : ""}<div><div class="ps-name">${samitiName || "সমিতি"}</div>${subtitle ? `<div class="ps-sub">${subtitle}</div>` : ""}</div></div>`;
+
+
 const navItems = [
   { value: "dashboard", label: "ড্যাশবোর্ড", icon: LayoutDashboard },
   { value: "members", label: "সদস্য", icon: Users },
