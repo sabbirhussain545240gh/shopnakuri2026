@@ -2475,16 +2475,19 @@ function LoansTab() {
       <!DOCTYPE html>
       <html><head><meta charset="utf-8" /><title>ঋণ ব্যবস্থাপনা - ${data.samitiName || "সমিতি"}</title>
       <style>
-        body { font-family: "Segoe UI", "Noto Sans Bengali", sans-serif; margin: 0; padding: 24px; color: #111; background:#fff; }
-        @media print { body { padding: 0; } .no-print { display: none; } }
+        body { font-family: "Segoe UI", "Noto Sans Bengali", sans-serif; margin: 0; padding: 24px; color: #111; background:#fff; position: relative; }
+        @media print { body { padding: 0 12px; } .no-print { display: none; } }
+        ${printBrandCss}
       </style></head>
       <body>
+        ${printWatermark(data.samitiLogo)}
+        <div class="ps-content">
         <div class="no-print" style="margin-bottom:16px;">
           <button onclick="window.print()" style="padding:8px 16px;font-size:14px;cursor:pointer;">প্রিন্ট করুন</button>
         </div>
-        <h2 style="text-align:center;margin:0 0 8px;">ঋণ ব্যবস্থাপনা</h2>
-        <p style="text-align:center;font-size:12px;color:#666;margin-bottom:12px;">${data.samitiName || "সমিতি"} | মোট ${toBn(filteredLoans.length)}টি ঋণ | প্রিন্ট তারিখ: ${fmtDate(today())}</p>
+        ${printHeader(data.samitiName, data.samitiLogo, `ঋণ ব্যবস্থাপনা — মোট ${toBn(filteredLoans.length)}টি ঋণ | প্রিন্ট তারিখ: ${fmtDate(today())}`)}
         ${html}
+        </div>
         <script>setTimeout(()=>window.print(),300)</script>
       </body></html>
     `);
