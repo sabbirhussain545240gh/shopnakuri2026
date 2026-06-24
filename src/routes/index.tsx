@@ -3840,6 +3840,7 @@ function DepositsHistoryTab() {
   const [minAmount, setMinAmount] = useState("");
   const [maxAmount, setMaxAmount] = useState("");
   const [sortBy, setSortBy] = useState<"date_desc" | "date_asc" | "amount_desc" | "amount_asc">("date_desc");
+  const [monthFilter, setMonthFilter] = useState<string>("all");
   const [editId, setEditId] = useState<string | null>(null);
   const [editForm, setEditForm] = useState({ memberId: "", amount: "", date: today(), note: "" });
   const [editMemberOpen, setEditMemberOpen] = useState(false);
@@ -3905,6 +3906,7 @@ function DepositsHistoryTab() {
         const mx = Number(maxAmount);
         if (minAmount && !isNaN(mn) && r.amount < mn) return false;
         if (maxAmount && !isNaN(mx) && r.amount > mx) return false;
+        if (monthFilter !== "all" && r.date.slice(0, 7) !== monthFilter) return false;
         return true;
       })
       .sort((a, b) => {
@@ -3913,7 +3915,19 @@ function DepositsHistoryTab() {
         if (sortBy === "date_asc") return a.date < b.date ? -1 : a.date > b.date ? 1 : 0;
         return a.date < b.date ? 1 : a.date > b.date ? -1 : 0;
       });
-  }, [data, q, minAmount, maxAmount, sortBy]);
+  }, [data, q, minAmount, maxAmount, sortBy, monthFilter]);
+
+  const monthOptions = useMemo(() => {
+    const set = new Set<string>();
+    data.deposits.forEach((d) => set.add(d.date.slice(0, 7)));
+    return Array.from(set).sort((a, b) => (a < b ? 1 : -1));
+  }, [data.deposits]);
+
+  const fmtMonth = (ym: string) => {
+    const [y, m] = ym.split("-").map(Number);
+    const names = ["JAN", "FEB", "MAR", "APR", "MAY", "JUN", "JUL", "AUG", "SEP", "OCT", "NOV", "DEC"];
+    return `${names[(m || 1) - 1]} ${y}`;
+  };
 
   const total = rows.reduce((s, r) => s + r.amount, 0);
 
@@ -3976,8 +3990,20 @@ function DepositsHistoryTab() {
             </SelectContent>
           </Select>
         </div>
-        {(minAmount || maxAmount || sortBy !== "date_desc") && (
-          <Button variant="outline" onClick={() => { setMinAmount(""); setMaxAmount(""); setSortBy("date_desc"); }}>রিসেট</Button>
+        <div className="flex-1">
+          <Label className="text-xs text-muted-foreground">মাস</Label>
+          <Select value={monthFilter} onValueChange={setMonthFilter}>
+            <SelectTrigger><SelectValue placeholder="সকল মাস" /></SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">সকল মাস</SelectItem>
+              {monthOptions.map((ym) => (
+                <SelectItem key={ym} value={ym}>{fmtMonth(ym)}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+        {(minAmount || maxAmount || sortBy !== "date_desc" || monthFilter !== "all") && (
+          <Button variant="outline" onClick={() => { setMinAmount(""); setMaxAmount(""); setSortBy("date_desc"); setMonthFilter("all"); }}>রিসেট</Button>
         )}
       </div>
 
