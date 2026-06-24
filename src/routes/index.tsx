@@ -3992,15 +3992,38 @@ function DepositsHistoryTab() {
         </div>
         <div className="flex-1">
           <Label className="text-xs text-muted-foreground">মাস</Label>
-          <Select value={monthFilter} onValueChange={setMonthFilter}>
-            <SelectTrigger><SelectValue placeholder="সকল মাস" /></SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">সকল মাস</SelectItem>
-              {monthOptions.map((ym) => (
-                <SelectItem key={ym} value={ym}>{fmtMonth(ym)}</SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+          <div className="flex gap-1">
+            <Select value={monthFilter} onValueChange={setMonthFilter}>
+              <SelectTrigger><SelectValue placeholder="সকল মাস" /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">সকল মাস</SelectItem>
+                {monthOptions.map((ym) => (
+                  <SelectItem key={ym} value={ym}>{fmtMonth(ym)}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button variant="outline" size="icon" type="button" aria-label="ক্যালেন্ডার থেকে মাস বাছুন">
+                  <CalendarIcon className="h-4 w-4" />
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-auto p-0" align="start">
+                <Calendar
+                  mode="single"
+                  captionLayout="dropdown"
+                  selected={monthFilter !== "all" ? new Date(monthFilter + "-01") : undefined}
+                  onSelect={(d) => {
+                    if (d) {
+                      const ym = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
+                      setMonthFilter(ym);
+                    }
+                  }}
+                  className="p-3 pointer-events-auto"
+                />
+              </PopoverContent>
+            </Popover>
+          </div>
         </div>
         {(minAmount || maxAmount || sortBy !== "date_desc" || monthFilter !== "all") && (
           <Button variant="outline" onClick={() => { setMinAmount(""); setMaxAmount(""); setSortBy("date_desc"); setMonthFilter("all"); }}>রিসেট</Button>
