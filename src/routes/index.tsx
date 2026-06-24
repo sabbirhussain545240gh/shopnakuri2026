@@ -4014,7 +4014,7 @@ function DepositsHistoryTab() {
                   mode="single"
                   captionLayout="dropdown"
                   selected={monthFilter !== "all" ? new Date(monthFilter + "-01") : undefined}
-                  onSelect={(d) => {
+                  onSelect={(d: Date | undefined) => {
                     if (d) {
                       const ym = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
                       setMonthFilter(ym);
