@@ -1737,6 +1737,24 @@ function SavingsTab() {
       });
   }, [data.deposits, data.members, search, filterMemberId, dateFrom, dateTo, minAmount, maxAmount]);
 
+  const depositSeq = useMemo(() => {
+    const map = new Map<string, number>();
+    const counters = new Map<string, number>();
+    [...data.deposits]
+      .sort((a, b) => (a.date < b.date ? -1 : a.date > b.date ? 1 : a.id < b.id ? -1 : 1))
+      .forEach((d) => {
+        const n = (counters.get(d.memberId) ?? 0) + 1;
+        counters.set(d.memberId, n);
+        map.set(d.id, n);
+      });
+    return map;
+  }, [data.deposits]);
+
+  const receiptNoFor = (d: { id: string; memberId: string }) => {
+    const m = data.members.find((x) => x.id === d.memberId);
+    return `CH-${toBn(m?.serial ?? 0)}-${toBn(depositSeq.get(d.id) ?? 1)}`;
+  };
+
   const resetFilters = () => {
     setSearch("");
     setFilterMemberId("all");
