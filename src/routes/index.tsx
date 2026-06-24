@@ -3198,6 +3198,7 @@ function InstallmentsTab() {
   const [filterMember, setFilterMember] = useState<string>("all");
   const [filterLoan, setFilterLoan] = useState<string>("all");
   const [filterMonth, setFilterMonth] = useState<string>(today().slice(0, 7));
+  const [filterStatus, setFilterStatus] = useState<"all" | "active" | "closed">("all");
   const [loanOpen, setLoanOpen] = useState(false);
 
   const activeLoans = data.loans.filter((l) => l.status === "active");
