@@ -4087,6 +4087,31 @@ function DepositsHistoryTab() {
                   <TableCell />
                 </TableRow>
               )}
+              {missingMembers.length > 0 && (
+                <>
+                  <TableRow className="bg-destructive/10 hover:bg-destructive/10">
+                    <TableCell colSpan={7} className="text-center font-semibold text-destructive py-2">
+                      ⚠ {fmtMonth(monthFilter)} মাসে যাদের চাঁদা জমা হয়নি ({toBn(missingMembers.length)} জন)
+                    </TableCell>
+                  </TableRow>
+                  {missingMembers.map((m, i) => (
+                    <TableRow key={`missing-${m.id}`} className="bg-destructive/5 hover:bg-destructive/10">
+                      <TableCell className="text-center text-destructive">{toBn(i + 1)}</TableCell>
+                      <TableCell className="text-destructive">—</TableCell>
+                      <TableCell className="text-center text-destructive">—</TableCell>
+                      <TableCell className="font-medium text-destructive">
+                        {m.name} <span className="text-xs">(সদস্য নং {toBn(m.serial || 0)})</span>
+                      </TableCell>
+                      <TableCell colSpan={2} className="text-right">
+                        <span className="inline-flex items-center gap-1 rounded-full bg-destructive/15 px-2 py-0.5 text-xs font-semibold text-destructive">
+                          ● জমা হয়নি
+                        </span>
+                      </TableCell>
+                      <TableCell />
+                    </TableRow>
+                  ))}
+                </>
+              )}
             </TableBody>
           </Table>
         </CardContent>
