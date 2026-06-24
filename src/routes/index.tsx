@@ -3535,11 +3535,20 @@ function ReceiptsHistoryTab() {
     const memberById = new Map(data.members.map((m) => [m.id, m]));
     const loanIndexById = new Map(data.loans.map((l, i) => [l.id, i + 1]));
     const loanById = new Map(data.loans.map((l) => [l.id, l]));
+    const paymentsByLoan = new Map<string, typeof data.payments>();
+    for (const p of data.payments) {
+      const arr = paymentsByLoan.get(p.loanId) ?? [];
+      arr.push(p);
+      paymentsByLoan.set(p.loanId, arr);
+    }
     return [...data.payments]
       .sort((a, b) => (a.date < b.date ? 1 : -1))
       .map((p) => {
         const loan = loanById.get(p.loanId);
         const member = loan ? memberById.get(loan.memberId) : undefined;
+        const loanPays = paymentsByLoan.get(p.loanId) ?? [];
+        const payNo = loanPays.findIndex((x) => x.id === p.id) + 1;
+        const receiptNo = `KS-${toBn(member?.serial ?? 0)}-${toBn(payNo)}`;
         return {
           id: p.id,
           loanId: p.loanId,
@@ -3550,6 +3559,7 @@ function ReceiptsHistoryTab() {
           loanNo: loanIndexById.get(p.loanId) ?? 0,
           amount: p.amount,
           note: p.note ?? "",
+          receiptNo,
         };
       })
       .filter((r) => {
@@ -3559,10 +3569,12 @@ function ReceiptsHistoryTab() {
           r.memberName.toLowerCase().includes(s) ||
           String(r.loanNo).includes(s) ||
           toBn(r.loanNo).includes(s) ||
+          r.receiptNo.toLowerCase().includes(s) ||
           r.note.toLowerCase().includes(s)
         );
       });
   }, [data, q]);
+
 
   const total = rows.reduce((s, r) => s + r.amount, 0);
 
