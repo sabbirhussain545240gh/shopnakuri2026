@@ -2142,6 +2142,7 @@ function SavingsTab() {
                 }
                 return (
                   <TableRow key={d.id}>
+                    <TableCell className="font-mono text-xs">{receiptNoFor(d)}</TableCell>
                     <TableCell>{fmtDate(d.date)}</TableCell>
                     <TableCell className="font-medium">{toBn(m?.serial || 0)}. {highlightedName}</TableCell>
                     <TableCell className="text-muted-foreground">{d.note || "—"}</TableCell>
