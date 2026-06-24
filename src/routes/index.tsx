@@ -3906,6 +3906,7 @@ function DepositsHistoryTab() {
         const mx = Number(maxAmount);
         if (minAmount && !isNaN(mn) && r.amount < mn) return false;
         if (maxAmount && !isNaN(mx) && r.amount > mx) return false;
+        if (monthFilter !== "all" && r.date.slice(0, 7) !== monthFilter) return false;
         return true;
       })
       .sort((a, b) => {
@@ -3914,7 +3915,19 @@ function DepositsHistoryTab() {
         if (sortBy === "date_asc") return a.date < b.date ? -1 : a.date > b.date ? 1 : 0;
         return a.date < b.date ? 1 : a.date > b.date ? -1 : 0;
       });
-  }, [data, q, minAmount, maxAmount, sortBy]);
+  }, [data, q, minAmount, maxAmount, sortBy, monthFilter]);
+
+  const monthOptions = useMemo(() => {
+    const set = new Set<string>();
+    data.deposits.forEach((d) => set.add(d.date.slice(0, 7)));
+    return Array.from(set).sort((a, b) => (a < b ? 1 : -1));
+  }, [data.deposits]);
+
+  const fmtMonth = (ym: string) => {
+    const [y, m] = ym.split("-").map(Number);
+    const names = ["JAN", "FEB", "MAR", "APR", "MAY", "JUN", "JUL", "AUG", "SEP", "OCT", "NOV", "DEC"];
+    return `${names[(m || 1) - 1]} ${y}`;
+  };
 
   const total = rows.reduce((s, r) => s + r.amount, 0);
 
