@@ -1641,6 +1641,11 @@ function SavingsTab() {
   const [open, setOpen] = useState(false);
   const [form, setForm] = useState({ memberId: "", amount: "", date: today(), note: "" });
   const [search, setSearch] = useState("");
+  const [filterMemberId, setFilterMemberId] = useState<string>("all");
+  const [dateFrom, setDateFrom] = useState<string>("");
+  const [dateTo, setDateTo] = useState<string>("");
+  const [minAmount, setMinAmount] = useState<string>("");
+  const [maxAmount, setMaxAmount] = useState<string>("");
   const [editId, setEditId] = useState<string | null>(null);
   const [editForm, setEditForm] = useState({ memberId: "", amount: "", date: today(), note: "" });
   const [memberOpen, setMemberOpen] = useState(false);
@@ -1713,13 +1718,96 @@ function SavingsTab() {
 
   const filteredDeposits = useMemo(() => {
     const q = search.trim().toLowerCase();
-    if (!q) return [...data.deposits].sort((a, b) => b.date.localeCompare(a.date));
-    return [...data.deposits].sort((a, b) => b.date.localeCompare(a.date)).filter((d) => {
+    const min = minAmount ? Number(minAmount) : null;
+    const max = maxAmount ? Number(maxAmount) : null;
+    return [...data.deposits]
+      .sort((a, b) => b.date.localeCompare(a.date))
+      .filter((d) => {
+        if (filterMemberId !== "all" && d.memberId !== filterMemberId) return false;
+        if (dateFrom && d.date < dateFrom) return false;
+        if (dateTo && d.date > dateTo) return false;
+        if (min !== null && d.amount < min) return false;
+        if (max !== null && d.amount > max) return false;
+        if (q) {
+          const m = data.members.find((x) => x.id === d.memberId);
+          const text = `${m?.serial || ""} ${m?.name || ""} ${d.note || ""} ${d.date}`.toLowerCase();
+          if (!text.includes(q)) return false;
+        }
+        return true;
+      });
+  }, [data.deposits, data.members, search, filterMemberId, dateFrom, dateTo, minAmount, maxAmount]);
+
+  const resetFilters = () => {
+    setSearch("");
+    setFilterMemberId("all");
+    setDateFrom("");
+    setDateTo("");
+    setMinAmount("");
+    setMaxAmount("");
+  };
+
+  const printDeposits = () => {
+    const w = window.open("", "_blank", "width=1000,height=800");
+    if (!w) return;
+    const rows = filteredDeposits.map((d, i) => {
       const m = data.members.find((x) => x.id === d.memberId);
-      const text = `${m?.serial || ""} ${m?.name || ""} ${d.note || ""} ${d.date}`.toLowerCase();
-      return text.includes(q);
-    });
-  }, [data.deposits, data.members, search]);
+      return `<tr>
+        <td class="c">${toBn(i + 1)}</td>
+        <td class="c">${fmtDate(d.date)}</td>
+        <td class="c">${toBn(m?.serial || 0)}</td>
+        <td>${m?.name || "—"}</td>
+        <td>${d.note || ""}</td>
+        <td class="r">${formatTk(d.amount)}</td>
+      </tr>`;
+    }).join("");
+    const total = filteredDeposits.reduce((s, d) => s + d.amount, 0);
+    const filterParts: string[] = [];
+    if (filterMemberId !== "all") {
+      const m = data.members.find((x) => x.id === filterMemberId);
+      if (m) filterParts.push(`সদস্য: ${toBn(m.serial || 0)}. ${m.name}`);
+    }
+    if (dateFrom) filterParts.push(`শুরু: ${fmtDate(dateFrom)}`);
+    if (dateTo) filterParts.push(`শেষ: ${fmtDate(dateTo)}`);
+    if (minAmount) filterParts.push(`সর্বনিম্ন: ${formatTk(Number(minAmount))}`);
+    if (maxAmount) filterParts.push(`সর্বোচ্চ: ${formatTk(Number(maxAmount))}`);
+    if (search.trim()) filterParts.push(`সার্চ: ${search.trim()}`);
+    w.document.write(`<!DOCTYPE html>
+<html><head><meta charset="utf-8" /><title>সঞ্চয়/চাদা তালিকা - ${data.samitiName}</title>
+<style>
+  @page { size: A4; margin: 12mm; }
+  body { font-family: "Segoe UI", "Noto Sans Bengali", sans-serif; color: #111; margin: 0; padding: 8px 12px; }
+  h2 { margin: 0; font-size: 18px; text-align: center; }
+  .sub { text-align: center; font-size: 12px; color: #555; margin: 2px 0 4px; }
+  .filters { font-size: 11px; color: #444; text-align: center; margin-bottom: 8px; }
+  table { width: 100%; border-collapse: collapse; font-size: 12px; }
+  th, td { border: 1px solid #333; padding: 4px 6px; }
+  th { background: #e5e7eb; text-align: center; }
+  td.c { text-align: center; }
+  td.r { text-align: right; }
+  tfoot td { font-weight: bold; background: #f3f4f6; }
+  @media print { .no-print { display: none; } body { padding: 0; } }
+</style></head>
+<body>
+  <div class="no-print" style="text-align:right;margin-bottom:6px;">
+    <button onclick="window.print()" style="padding:6px 14px;cursor:pointer;">প্রিন্ট করুন</button>
+  </div>
+  <h2>${data.samitiName}</h2>
+  <div class="sub">সঞ্চয়/চাদা / জমা তালিকা</div>
+  ${filterParts.length ? `<div class="filters">${filterParts.join(" • ")}</div>` : ""}
+  <table>
+    <thead><tr>
+      <th style="width:6%">ক্রম</th><th style="width:14%">তারিখ</th><th style="width:8%">সি.নং</th>
+      <th style="width:28%">সদস্যের নাম</th><th>মন্তব্য</th><th style="width:16%">পরিমাণ</th>
+    </tr></thead>
+    <tbody>${rows || `<tr><td colspan="6" class="c">কোনও তথ্য নেই</td></tr>`}</tbody>
+    <tfoot><tr><td colspan="5" class="r">মোট (${toBn(filteredDeposits.length)}টি)</td><td class="r">${formatTk(total)}</td></tr></tfoot>
+  </table>
+  <script>setTimeout(()=>window.print(),300)</script>
+</body></html>`);
+    w.document.close();
+  };
+
+
 
   const collectionRows = useMemo(() => {
     const sorted = [...data.members].sort((a, b) => (a.serial || 0) - (b.serial || 0));
@@ -1853,6 +1941,9 @@ function SavingsTab() {
           <CardDescription>মোট {toBn(data.deposits.length)}টি লেনদেন</CardDescription>
         </div>
         <div className="flex items-center gap-2 flex-wrap">
+          <Button variant="outline" size="sm" disabled={data.deposits.length === 0} onClick={printDeposits}>
+            <Printer className="h-4 w-4 mr-1" />প্রিন্ট তালিকা
+          </Button>
           <Button variant="outline" size="sm" disabled={data.members.length === 0} onClick={printCollectionForm}>
             <Printer className="h-4 w-4 mr-1" />কালেকশন ফর্ম
           </Button>
@@ -1953,6 +2044,41 @@ function SavingsTab() {
         ) : data.deposits.length === 0 ? (
           <p className="text-sm text-muted-foreground text-center py-10">কোনও জমা নেই।</p>
         ) : (
+          <>
+          <div className="flex flex-wrap items-end gap-2 mb-3 p-2 rounded-md border bg-muted/30">
+            <div className="flex flex-col gap-1">
+              <Label className="text-xs">সদস্য</Label>
+              <Select value={filterMemberId} onValueChange={setFilterMemberId}>
+                <SelectTrigger className="h-8 w-48 text-xs"><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">সকল সদস্য</SelectItem>
+                  {[...data.members].sort((a, b) => (a.serial || 0) - (b.serial || 0)).map((m) => (
+                    <SelectItem key={m.id} value={m.id}>{toBn(m.serial || 0)}. {m.name}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="flex flex-col gap-1">
+              <Label className="text-xs">শুরুর তারিখ</Label>
+              <Input type="date" value={dateFrom} onChange={(e) => setDateFrom(e.target.value)} className="h-8 w-40 text-xs" />
+            </div>
+            <div className="flex flex-col gap-1">
+              <Label className="text-xs">শেষ তারিখ</Label>
+              <Input type="date" value={dateTo} onChange={(e) => setDateTo(e.target.value)} className="h-8 w-40 text-xs" />
+            </div>
+            <div className="flex flex-col gap-1">
+              <Label className="text-xs">সর্বনিম্ন (৳)</Label>
+              <Input type="number" value={minAmount} onChange={(e) => setMinAmount(e.target.value)} className="h-8 w-28 text-xs" />
+            </div>
+            <div className="flex flex-col gap-1">
+              <Label className="text-xs">সর্বোচ্চ (৳)</Label>
+              <Input type="number" value={maxAmount} onChange={(e) => setMaxAmount(e.target.value)} className="h-8 w-28 text-xs" />
+            </div>
+            <Button variant="ghost" size="sm" onClick={resetFilters} className="h-8">রিসেট</Button>
+            <div className="ml-auto text-xs text-muted-foreground self-center">
+              {toBn(filteredDeposits.length)}টি / মোট {formatTk(filteredDeposits.reduce((s, d) => s + d.amount, 0))}
+            </div>
+          </div>
           <Table>
             <TableHeader>
               <TableRow>
@@ -2015,6 +2141,7 @@ function SavingsTab() {
               })}
             </TableBody>
           </Table>
+          </>
         )}
       </CardContent>
     </Card>
