@@ -3447,7 +3447,7 @@ function InstallmentsTab() {
                     <TableRow key={p.id}>
                       <TableCell>{fmtDate(p.date)}</TableCell>
                       <TableCell className="font-medium">{loan ? toBn(loanIdx) : "—"}</TableCell>
-                      <TableCell className="font-medium">{m?.name ?? "—"}</TableCell>
+                      <TableCell className="font-medium">{m ? `${toBn(m.serial)} — ${m.name}` : "—"}</TableCell>
                       <TableCell className="text-right">{loan ? formatTk(loan.amount) : "—"}</TableCell>
                       <TableCell className="text-right text-success font-semibold">{formatTk(p.amount)}</TableCell>
                       <TableCell className="text-right text-destructive">{formatTk(rem)}</TableCell>
