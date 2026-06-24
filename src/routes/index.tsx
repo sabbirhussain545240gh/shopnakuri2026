@@ -3990,8 +3990,20 @@ function DepositsHistoryTab() {
             </SelectContent>
           </Select>
         </div>
-        {(minAmount || maxAmount || sortBy !== "date_desc") && (
-          <Button variant="outline" onClick={() => { setMinAmount(""); setMaxAmount(""); setSortBy("date_desc"); }}>রিসেট</Button>
+        <div className="flex-1">
+          <Label className="text-xs text-muted-foreground">মাস</Label>
+          <Select value={monthFilter} onValueChange={setMonthFilter}>
+            <SelectTrigger><SelectValue placeholder="সকল মাস" /></SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">সকল মাস</SelectItem>
+              {monthOptions.map((ym) => (
+                <SelectItem key={ym} value={ym}>{fmtMonth(ym)}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+        {(minAmount || maxAmount || sortBy !== "date_desc" || monthFilter !== "all") && (
+          <Button variant="outline" onClick={() => { setMinAmount(""); setMaxAmount(""); setSortBy("date_desc"); setMonthFilter("all"); }}>রিসেট</Button>
         )}
       </div>
 
