@@ -4049,6 +4049,32 @@ function DepositsHistoryTab() {
         )}
       </div>
 
+      {monthFilter !== "all" && (paidMembersList.length > 0 || missingMembers.length > 0) && (
+        <div className="flex flex-wrap gap-2">
+          {paidMembersList.length > 0 && (
+            <Button variant="outline" size="sm" onClick={() => {
+              const w = window.open("", "_blank"); if (!w) return;
+              const rowsHtml = paidMembersList.map((m, i) => `<tr><td style="text-align:center">${toBn(i+1)}</td><td style="text-align:center">${toBn(m.serial || 0)}</td><td>${m.name}</td><td style="text-align:right">${formatTk(m.paidAmount)}</td></tr>`).join("");
+              const totalPaid = paidMembersList.reduce((s, m) => s + m.paidAmount, 0);
+              w.document.write(`<!DOCTYPE html><html><head><meta charset="utf-8"><title>পরিশোধিত তালিকা - ${fmtMonth(monthFilter)}</title><style>body{font-family:sans-serif;padding:20px;}h2{text-align:center;margin:4px 0;}h3{text-align:center;margin:4px 0;color:#047857;}table{width:100%;border-collapse:collapse;margin-top:12px;}th,td{border:1px solid #ccc;padding:6px 8px;font-size:13px;}th{background:#d1fae5;}@media print{.no-print{display:none;}}</style></head><body><div class="no-print" style="margin-bottom:12px;text-align:center;"><button onclick="window.print()" style="padding:8px 16px;cursor:pointer;">প্রিন্ট করুন</button></div><h2>${data.samitiName || "সমিতি"}</h2><h3>✓ ${fmtMonth(monthFilter)} মাসে পরিশোধিত সদস্য তালিকা (${toBn(paidMembersList.length)} জন)</h3><table><thead><tr><th>ক্রম</th><th>সদস্য নং</th><th>নাম</th><th>পরিমাণ</th></tr></thead><tbody>${rowsHtml}<tr><td colspan="3" style="text-align:right;font-weight:bold">মোট</td><td style="text-align:right;font-weight:bold">${formatTk(totalPaid)}</td></tr></tbody></table><script>setTimeout(()=>window.print(),300)</script></body></html>`);
+              w.document.close();
+            }}>
+              <Printer className="h-4 w-4 mr-1" />পরিশোধিত তালিকা প্রিন্ট
+            </Button>
+          )}
+          {missingMembers.length > 0 && (
+            <Button variant="outline" size="sm" onClick={() => {
+              const w = window.open("", "_blank"); if (!w) return;
+              const rowsHtml = missingMembers.map((m, i) => `<tr><td style="text-align:center">${toBn(i+1)}</td><td style="text-align:center">${toBn(m.serial || 0)}</td><td>${m.name}</td><td style="text-align:center;color:#b91c1c;font-weight:bold">জমা হয়নি</td></tr>`).join("");
+              w.document.write(`<!DOCTYPE html><html><head><meta charset="utf-8"><title>বকেয়া তালিকা - ${fmtMonth(monthFilter)}</title><style>body{font-family:sans-serif;padding:20px;}h2{text-align:center;margin:4px 0;}h3{text-align:center;margin:4px 0;color:#b91c1c;}table{width:100%;border-collapse:collapse;margin-top:12px;}th,td{border:1px solid #ccc;padding:6px 8px;font-size:13px;}th{background:#fee2e2;}@media print{.no-print{display:none;}}</style></head><body><div class="no-print" style="margin-bottom:12px;text-align:center;"><button onclick="window.print()" style="padding:8px 16px;cursor:pointer;">প্রিন্ট করুন</button></div><h2>${data.samitiName || "সমিতি"}</h2><h3>⚠ ${fmtMonth(monthFilter)} মাসে যাদের চাঁদা জমা হয়নি (${toBn(missingMembers.length)} জন)</h3><table><thead><tr><th>ক্রম</th><th>সদস্য নং</th><th>নাম</th><th>অবস্থা</th></tr></thead><tbody>${rowsHtml}</tbody></table><script>setTimeout(()=>window.print(),300)</script></body></html>`);
+              w.document.close();
+            }}>
+              <Printer className="h-4 w-4 mr-1" />বকেয়া তালিকা প্রিন্ট
+            </Button>
+          )}
+        </div>
+      )}
+
       <Card>
         <CardContent className="p-0">
           <Table>
