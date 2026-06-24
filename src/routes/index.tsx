@@ -3198,6 +3198,7 @@ function InstallmentsTab() {
   const [filterMember, setFilterMember] = useState<string>("all");
   const [filterLoan, setFilterLoan] = useState<string>("all");
   const [filterMonth, setFilterMonth] = useState<string>(today().slice(0, 7));
+  const [filterStatus, setFilterStatus] = useState<"all" | "active" | "closed">("all");
   const [loanOpen, setLoanOpen] = useState(false);
 
   const activeLoans = data.loans.filter((l) => l.status === "active");
@@ -3246,10 +3247,11 @@ function InstallmentsTab() {
   const allPayments = [...data.payments]
     .sort((a, b) => b.date.localeCompare(a.date))
     .filter((p) => {
+      const loan = data.loans.find((l) => l.id === p.loanId);
+      if (filterStatus !== "all" && loan?.status !== filterStatus) return false;
       if (filterLoan !== "all" && p.loanId !== filterLoan) return false;
       if (filterMonth && !p.date.startsWith(filterMonth)) return false;
       if (filterMember === "all") return true;
-      const loan = data.loans.find((l) => l.id === p.loanId);
       return loan?.memberId === filterMember;
     });
 
@@ -3341,6 +3343,14 @@ function InstallmentsTab() {
                 </Command>
               </PopoverContent>
             </Popover>
+            <Select value={filterStatus} onValueChange={(v) => setFilterStatus(v as "all" | "active" | "closed")}>
+              <SelectTrigger className="w-36"><SelectValue placeholder="স্ট্যাটাস" /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">সকল স্ট্যাটাস</SelectItem>
+                <SelectItem value="active">চলমান</SelectItem>
+                <SelectItem value="closed">পরিশোধিত</SelectItem>
+              </SelectContent>
+            </Select>
             <Select value={filterMember} onValueChange={setFilterMember}>
               <SelectTrigger className="w-44"><SelectValue placeholder="সদস্য ফিল্টার" /></SelectTrigger>
               <SelectContent>
