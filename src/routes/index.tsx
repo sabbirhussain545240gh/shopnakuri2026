@@ -3930,7 +3930,7 @@ function DepositsHistoryTab() {
     <div className="space-y-4">
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
         <div>
-          <h2 className="text-2xl font-bold">জমা ইতিহাস</h2>
+          <h2 className="text-2xl font-bold">চাঁদা জমা ইতিহাস</h2>
           <p className="text-sm text-muted-foreground">সকল সঞ্চয়/চাদা জমার তালিকা</p>
         </div>
         <div className="relative w-full md:w-72">
