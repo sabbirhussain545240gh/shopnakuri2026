@@ -1830,6 +1830,7 @@ function SavingsTab() {
     <tbody>${rows || `<tr><td colspan="7" class="c">কোনও তথ্য নেই</td></tr>`}</tbody>
     <tfoot><tr><td colspan="6" class="r">মোট (${toBn(filteredDeposits.length)}টি)</td><td class="r">${formatTk(total)}</td></tr></tfoot>
   </table>
+  </div>
   <script>setTimeout(()=>window.print(),300)</script>
 </body></html>`);
     w.document.close();
