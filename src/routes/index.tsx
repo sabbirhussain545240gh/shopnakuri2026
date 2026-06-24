@@ -3439,14 +3439,16 @@ function InstallmentsTab() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {allPayments.map((p, idx) => {
+                {allPayments.map((p) => {
                   const loan = data.loans.find((l) => l.id === p.loanId);
                   const loanIdx = loan ? data.loans.findIndex((l) => l.id === loan.id) + 1 : 0;
                   const m = loan ? data.members.find((x) => x.id === loan.memberId) : null;
                   const rem = loan ? Math.max(0, loanTotalDue(loan) - loanPaid(data.payments, loan.id)) : 0;
+                  const payNoForLoan = loan ? data.payments.filter((x) => x.loanId === loan.id).findIndex((x) => x.id === p.id) + 1 : 0;
+                  const receiptNo = loan && m ? `KS-${toBn(m.serial)}-${toBn(payNoForLoan)}` : "—";
                   return (
                     <TableRow key={p.id}>
-                      <TableCell className="font-medium">{toBn(idx + 1)}</TableCell>
+                      <TableCell className="font-medium font-mono text-xs">{receiptNo}</TableCell>
                       <TableCell>{fmtDate(p.date)}</TableCell>
                       <TableCell className="font-medium">{loan ? toBn(loanIdx) : "—"}</TableCell>
                       <TableCell className="font-medium">{m ? `${toBn(m.serial)} — ${m.name}` : "—"}</TableCell>
