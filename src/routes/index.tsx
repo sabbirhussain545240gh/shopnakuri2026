@@ -158,8 +158,8 @@ const navItems = [
   { value: "savings", label: "সঞ্চয়/চাদা", icon: PiggyBank },
   { value: "loans", label: "ঋণ", icon: HandCoins },
   { value: "installments", label: "কিস্তি আদায়", icon: Receipt },
-  { value: "receipts", label: "রিসিপ্ট ইতিহাস", icon: FileText },
-  { value: "deposits", label: "জমা ইতিহাস", icon: PiggyBank },
+  { value: "receipts", label: "কিস্তি রিসিপ্ট ইতিহাস", icon: FileText },
+  { value: "deposits", label: "চাঁদা জমা ইতিহাস", icon: PiggyBank },
   { value: "cashbook", label: "আয়-ব্যয়", icon: Wallet },
   { value: "reports", label: "রিপোর্ট", icon: FileText },
   { value: "reconciliation", label: "এমাউন্ট সমন্নয়", icon: Scale },
@@ -3604,7 +3604,7 @@ function ReceiptsHistoryTab() {
     <div className="space-y-4">
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
         <div>
-          <h2 className="text-2xl font-bold">রিসিপ্ট ইতিহাস</h2>
+          <h2 className="text-2xl font-bold">কিস্তি রিসিপ্ট ইতিহাস</h2>
           <p className="text-sm text-muted-foreground">সকল কিস্তি আদায়ের তালিকা</p>
         </div>
         <div className="relative w-full md:w-72">
@@ -3930,7 +3930,7 @@ function DepositsHistoryTab() {
     <div className="space-y-4">
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
         <div>
-          <h2 className="text-2xl font-bold">জমা ইতিহাস</h2>
+          <h2 className="text-2xl font-bold">চাঁদা জমা ইতিহাস</h2>
           <p className="text-sm text-muted-foreground">সকল সঞ্চয়/চাদা জমার তালিকা</p>
         </div>
         <div className="relative w-full md:w-72">
