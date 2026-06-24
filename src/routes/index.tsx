@@ -3494,7 +3494,7 @@ function InstallmentsTab() {
                   {monthlyStatus.map((r) => (
                     <TableRow key={r.loan.id}>
                       <TableCell className="font-medium">{toBn(r.loanNo)}</TableCell>
-                      <TableCell className="font-medium">{r.member?.name ?? "—"}</TableCell>
+                      <TableCell className="font-medium">{r.member ? `${toBn(r.member.serial)} — ${r.member.name}` : "—"}</TableCell>
                       <TableCell className="text-right">{formatTk(r.installment)}</TableCell>
                       <TableCell className="text-right text-success font-semibold">{formatTk(r.paidInMonth)}</TableCell>
                       <TableCell>
