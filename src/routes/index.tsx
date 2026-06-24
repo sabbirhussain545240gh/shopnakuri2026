@@ -3955,6 +3955,32 @@ function DepositsHistoryTab() {
         </div>
       </div>
 
+      <div className="flex flex-col md:flex-row md:items-end gap-3">
+        <div className="flex-1">
+          <Label className="text-xs text-muted-foreground">সর্বনিম্ন পরিমাণ</Label>
+          <Input type="number" inputMode="numeric" value={minAmount} onChange={(e) => setMinAmount(e.target.value)} placeholder="০" />
+        </div>
+        <div className="flex-1">
+          <Label className="text-xs text-muted-foreground">সর্বোচ্চ পরিমাণ</Label>
+          <Input type="number" inputMode="numeric" value={maxAmount} onChange={(e) => setMaxAmount(e.target.value)} placeholder="∞" />
+        </div>
+        <div className="flex-1">
+          <Label className="text-xs text-muted-foreground">সাজান</Label>
+          <Select value={sortBy} onValueChange={(v) => setSortBy(v as typeof sortBy)}>
+            <SelectTrigger><SelectValue /></SelectTrigger>
+            <SelectContent>
+              <SelectItem value="date_desc">তারিখ (নতুন → পুরাতন)</SelectItem>
+              <SelectItem value="date_asc">তারিখ (পুরাতন → নতুন)</SelectItem>
+              <SelectItem value="amount_desc">পরিমাণ (বেশি → কম)</SelectItem>
+              <SelectItem value="amount_asc">পরিমাণ (কম → বেশি)</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+        {(minAmount || maxAmount || sortBy !== "date_desc") && (
+          <Button variant="outline" onClick={() => { setMinAmount(""); setMaxAmount(""); setSortBy("date_desc"); }}>রিসেট</Button>
+        )}
+      </div>
+
       <Card>
         <CardContent className="p-0">
           <Table>
