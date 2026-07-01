@@ -5962,9 +5962,9 @@ const receiptCss = `
   .totals{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px;font-size:13px;}
   .due{color:#b91c1c;font-weight:600;}
   .sign{display:flex;justify-content:space-between;margin-top:32px;font-size:12px;color:#666;}
-  .qr{margin-top:16px;padding:12px;border:1px solid #e5e7eb;border-radius:8px;display:flex;align-items:center;gap:14px;background:#fff;break-inside:avoid;}
-  .qr-frame{padding:10px;background:#fff;border:1px solid #e5e7eb;border-radius:6px;}
-  .qr-frame img{width:145px;height:145px;display:block;image-rendering:pixelated;}
+  .qr{margin-top:16px;padding:12px;border:1px solid #e5e7eb;border-radius:8px;display:flex;align-items:center;gap:14px;background:transparent;break-inside:avoid;}
+  .qr-frame{padding:10px;background:transparent;border:1px solid #e5e7eb;border-radius:6px;}
+  .qr-frame img{width:145px;height:145px;display:block;image-rendering:pixelated;background:transparent;mix-blend-mode:multiply;}
   .qr-info{flex:1;font-size:11px;color:#475569;line-height:1.55;}
   .qr-info .qr-title{display:inline-flex;align-items:center;gap:6px;color:#0f172a;font-size:12px;font-weight:700;margin-bottom:4px;}
   .qr-info .qr-badge{display:inline-block;background:#0f172a;color:#fff;font-size:9px;padding:2px 6px;border-radius:3px;letter-spacing:0.5px;margin-top:6px;}
