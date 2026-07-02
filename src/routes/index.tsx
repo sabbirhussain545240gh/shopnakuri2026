@@ -1645,6 +1645,43 @@ async function exportLoanDetailPdf(
 
 
 
+function PendingCollectRow({
+  member,
+  month,
+  onCollect,
+}: {
+  member: Member;
+  month: string;
+  onCollect: (amount: number, date: string, note: string) => void;
+}) {
+  const [amount, setAmount] = useState("");
+  const [date, setDate] = useState(`${month}-${String(new Date().getDate()).padStart(2, "0")}`);
+  return (
+    <TableRow>
+      <TableCell className="font-medium">{toBn(member.serial || 0)}</TableCell>
+      <TableCell>{member.name}</TableCell>
+      <TableCell>
+        <Input type="number" value={amount} onChange={(e) => setAmount(e.target.value)} placeholder="পরিমাণ" className="h-8" />
+      </TableCell>
+      <TableCell>
+        <Input type="date" value={date} onChange={(e) => setDate(e.target.value)} className="h-8" />
+      </TableCell>
+      <TableCell>
+        <Button
+          size="sm"
+          onClick={() => {
+            const amt = Number(amount);
+            if (!amt || amt <= 0) { toast.error("সঠিক পরিমাণ দিন"); return; }
+            if (date.slice(0, 7) !== month) { toast.error("তারিখটি নির্বাচিত মাসের নয়"); return; }
+            onCollect(amt, date, "");
+            setAmount("");
+          }}
+        >চাদা আদায়</Button>
+      </TableCell>
+    </TableRow>
+  );
+}
+
 // ===== Savings =====
 function SavingsTab() {
   const { data, addDeposit, addDeposits, updateDeposit, deleteDeposit } = useSamiti();
@@ -2185,6 +2222,60 @@ function SavingsTab() {
               })}
             </TableBody>
           </Table>
+          {monthFilter !== "all" && (() => {
+            const paidIds = new Set(
+              data.deposits.filter((d) => d.date.slice(0, 7) === monthFilter).map((d) => d.memberId),
+            );
+            const pending = [...data.members]
+              .filter((m) => !paidIds.has(m.id))
+              .sort((a, b) => (a.serial || 0) - (b.serial || 0));
+            if (pending.length === 0) return (
+              <div className="mt-4 text-sm text-center text-success">এই মাসে সকল সদস্য জমা দিয়েছেন ✓</div>
+            );
+            return (
+              <div className="mt-6">
+                <div className="text-sm font-semibold mb-2 text-destructive">
+                  ⚠ জমা হয়নি ({toBn(pending.length)} জন) — {monthFilter}
+                </div>
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead className="w-16">ক্র নং</TableHead>
+                      <TableHead>নাম</TableHead>
+                      <TableHead className="w-40">পরিমাণ (৳)</TableHead>
+                      <TableHead className="w-40">তারিখ</TableHead>
+                      <TableHead className="w-32"></TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {pending.map((m) => (
+                      <PendingCollectRow
+                        key={m.id}
+                        member={m}
+                        month={monthFilter}
+                        onCollect={(amount, date, note) => {
+                          addDeposit({ memberId: m.id, amount, date, note });
+                          const prevTotal = memberTotalDeposit(data.deposits, m.id);
+                          const depositNo = data.deposits.filter((d) => d.memberId === m.id).length + 1;
+                          setReceipt({
+                            memberName: m.name,
+                            memberSerial: m.serial,
+                            amount,
+                            date,
+                            totalAfter: prevTotal + amount,
+                            receiptNo: `CH-${toBn(m.serial ?? 0)}-${toBn(depositNo)}`,
+                            note: note || undefined,
+                            logo: data.samitiLogo || undefined,
+                          });
+                          toast.success("জমা যোগ হয়েছে");
+                        }}
+                      />
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
+            );
+          })()}
           </>
         )}
       </CardContent>
