@@ -1766,8 +1766,7 @@ function SavingsTab() {
     setFilterMemberId("all");
     setDateFrom("");
     setDateTo("");
-    setMinAmount("");
-    setMaxAmount("");
+    setMonthFilter("all");
   };
 
   const printDeposits = () => {
