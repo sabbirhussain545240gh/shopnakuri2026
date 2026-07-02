@@ -1654,8 +1654,7 @@ function SavingsTab() {
   const [filterMemberId, setFilterMemberId] = useState<string>("all");
   const [dateFrom, setDateFrom] = useState<string>("");
   const [dateTo, setDateTo] = useState<string>("");
-  const [minAmount, setMinAmount] = useState<string>("");
-  const [maxAmount, setMaxAmount] = useState<string>("");
+  const [monthFilter, setMonthFilter] = useState<string>("all");
   const [editId, setEditId] = useState<string | null>(null);
   const [editForm, setEditForm] = useState({ memberId: "", amount: "", date: today(), note: "" });
   const [memberOpen, setMemberOpen] = useState(false);
@@ -1728,16 +1727,13 @@ function SavingsTab() {
 
   const filteredDeposits = useMemo(() => {
     const q = search.trim().toLowerCase();
-    const min = minAmount ? Number(minAmount) : null;
-    const max = maxAmount ? Number(maxAmount) : null;
     return [...data.deposits]
       .sort((a, b) => b.date.localeCompare(a.date))
       .filter((d) => {
         if (filterMemberId !== "all" && d.memberId !== filterMemberId) return false;
         if (dateFrom && d.date < dateFrom) return false;
         if (dateTo && d.date > dateTo) return false;
-        if (min !== null && d.amount < min) return false;
-        if (max !== null && d.amount > max) return false;
+        if (monthFilter !== "all" && d.date.slice(0, 7) !== monthFilter) return false;
         if (q) {
           const m = data.members.find((x) => x.id === d.memberId);
           const text = `${m?.serial || ""} ${m?.name || ""} ${d.note || ""} ${d.date}`.toLowerCase();
@@ -1745,7 +1741,7 @@ function SavingsTab() {
         }
         return true;
       });
-  }, [data.deposits, data.members, search, filterMemberId, dateFrom, dateTo, minAmount, maxAmount]);
+  }, [data.deposits, data.members, search, filterMemberId, dateFrom, dateTo, monthFilter]);
 
   const depositSeq = useMemo(() => {
     const map = new Map<string, number>();
@@ -1770,8 +1766,7 @@ function SavingsTab() {
     setFilterMemberId("all");
     setDateFrom("");
     setDateTo("");
-    setMinAmount("");
-    setMaxAmount("");
+    setMonthFilter("all");
   };
 
   const printDeposits = () => {
@@ -1797,8 +1792,7 @@ function SavingsTab() {
     }
     if (dateFrom) filterParts.push(`শুরু: ${fmtDate(dateFrom)}`);
     if (dateTo) filterParts.push(`শেষ: ${fmtDate(dateTo)}`);
-    if (minAmount) filterParts.push(`সর্বনিম্ন: ${formatTk(Number(minAmount))}`);
-    if (maxAmount) filterParts.push(`সর্বোচ্চ: ${formatTk(Number(maxAmount))}`);
+    if (monthFilter !== "all") filterParts.push(`মাস: ${monthFilter}`);
     if (search.trim()) filterParts.push(`সার্চ: ${search.trim()}`);
     w.document.write(`<!DOCTYPE html>
 <html><head><meta charset="utf-8" /><title>সঞ্চয়/চাদা তালিকা - ${data.samitiName}</title>
@@ -2109,12 +2103,18 @@ function SavingsTab() {
               <Input type="date" value={dateTo} onChange={(e) => setDateTo(e.target.value)} className="h-8 w-40 text-xs" />
             </div>
             <div className="flex flex-col gap-1">
-              <Label className="text-xs">সর্বনিম্ন (৳)</Label>
-              <Input type="number" value={minAmount} onChange={(e) => setMinAmount(e.target.value)} className="h-8 w-28 text-xs" />
-            </div>
-            <div className="flex flex-col gap-1">
-              <Label className="text-xs">সর্বোচ্চ (৳)</Label>
-              <Input type="number" value={maxAmount} onChange={(e) => setMaxAmount(e.target.value)} className="h-8 w-28 text-xs" />
+              <Label className="text-xs">মাস</Label>
+              <Select value={monthFilter} onValueChange={setMonthFilter}>
+                <SelectTrigger className="h-8 w-40 text-xs"><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">সকল মাস</SelectItem>
+                  {Array.from(new Set(data.deposits.map((d) => d.date.slice(0, 7))))
+                    .sort((a, b) => b.localeCompare(a))
+                    .map((ym) => (
+                      <SelectItem key={ym} value={ym}>{ym}</SelectItem>
+                    ))}
+                </SelectContent>
+              </Select>
             </div>
             <Button variant="ghost" size="sm" onClick={resetFilters} className="h-8">রিসেট</Button>
             <div className="ml-auto text-xs text-muted-foreground self-center">
