@@ -1792,8 +1792,7 @@ function SavingsTab() {
     }
     if (dateFrom) filterParts.push(`শুরু: ${fmtDate(dateFrom)}`);
     if (dateTo) filterParts.push(`শেষ: ${fmtDate(dateTo)}`);
-    if (minAmount) filterParts.push(`সর্বনিম্ন: ${formatTk(Number(minAmount))}`);
-    if (maxAmount) filterParts.push(`সর্বোচ্চ: ${formatTk(Number(maxAmount))}`);
+    if (monthFilter !== "all") filterParts.push(`মাস: ${monthFilter}`);
     if (search.trim()) filterParts.push(`সার্চ: ${search.trim()}`);
     w.document.write(`<!DOCTYPE html>
 <html><head><meta charset="utf-8" /><title>সঞ্চয়/চাদা তালিকা - ${data.samitiName}</title>
