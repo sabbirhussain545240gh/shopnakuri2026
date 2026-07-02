@@ -1727,16 +1727,13 @@ function SavingsTab() {
 
   const filteredDeposits = useMemo(() => {
     const q = search.trim().toLowerCase();
-    const min = minAmount ? Number(minAmount) : null;
-    const max = maxAmount ? Number(maxAmount) : null;
     return [...data.deposits]
       .sort((a, b) => b.date.localeCompare(a.date))
       .filter((d) => {
         if (filterMemberId !== "all" && d.memberId !== filterMemberId) return false;
         if (dateFrom && d.date < dateFrom) return false;
         if (dateTo && d.date > dateTo) return false;
-        if (min !== null && d.amount < min) return false;
-        if (max !== null && d.amount > max) return false;
+        if (monthFilter !== "all" && d.date.slice(0, 7) !== monthFilter) return false;
         if (q) {
           const m = data.members.find((x) => x.id === d.memberId);
           const text = `${m?.serial || ""} ${m?.name || ""} ${d.note || ""} ${d.date}`.toLowerCase();
@@ -1744,7 +1741,7 @@ function SavingsTab() {
         }
         return true;
       });
-  }, [data.deposits, data.members, search, filterMemberId, dateFrom, dateTo, minAmount, maxAmount]);
+  }, [data.deposits, data.members, search, filterMemberId, dateFrom, dateTo, monthFilter]);
 
   const depositSeq = useMemo(() => {
     const map = new Map<string, number>();
