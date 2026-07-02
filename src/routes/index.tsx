@@ -2103,12 +2103,18 @@ function SavingsTab() {
               <Input type="date" value={dateTo} onChange={(e) => setDateTo(e.target.value)} className="h-8 w-40 text-xs" />
             </div>
             <div className="flex flex-col gap-1">
-              <Label className="text-xs">সর্বনিম্ন (৳)</Label>
-              <Input type="number" value={minAmount} onChange={(e) => setMinAmount(e.target.value)} className="h-8 w-28 text-xs" />
-            </div>
-            <div className="flex flex-col gap-1">
-              <Label className="text-xs">সর্বোচ্চ (৳)</Label>
-              <Input type="number" value={maxAmount} onChange={(e) => setMaxAmount(e.target.value)} className="h-8 w-28 text-xs" />
+              <Label className="text-xs">মাস</Label>
+              <Select value={monthFilter} onValueChange={setMonthFilter}>
+                <SelectTrigger className="h-8 w-40 text-xs"><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">সকল মাস</SelectItem>
+                  {Array.from(new Set(data.deposits.map((d) => d.date.slice(0, 7))))
+                    .sort((a, b) => b.localeCompare(a))
+                    .map((ym) => (
+                      <SelectItem key={ym} value={ym}>{ym}</SelectItem>
+                    ))}
+                </SelectContent>
+              </Select>
             </div>
             <Button variant="ghost" size="sm" onClick={resetFilters} className="h-8">রিসেট</Button>
             <div className="ml-auto text-xs text-muted-foreground self-center">
