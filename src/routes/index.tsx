@@ -1645,6 +1645,43 @@ async function exportLoanDetailPdf(
 
 
 
+function PendingCollectRow({
+  member,
+  month,
+  onCollect,
+}: {
+  member: Member;
+  month: string;
+  onCollect: (amount: number, date: string, note: string) => void;
+}) {
+  const [amount, setAmount] = useState("");
+  const [date, setDate] = useState(`${month}-${String(new Date().getDate()).padStart(2, "0")}`);
+  return (
+    <TableRow>
+      <TableCell className="font-medium">{toBn(member.serial || 0)}</TableCell>
+      <TableCell>{member.name}</TableCell>
+      <TableCell>
+        <Input type="number" value={amount} onChange={(e) => setAmount(e.target.value)} placeholder="পরিমাণ" className="h-8" />
+      </TableCell>
+      <TableCell>
+        <Input type="date" value={date} onChange={(e) => setDate(e.target.value)} className="h-8" />
+      </TableCell>
+      <TableCell>
+        <Button
+          size="sm"
+          onClick={() => {
+            const amt = Number(amount);
+            if (!amt || amt <= 0) { toast.error("সঠিক পরিমাণ দিন"); return; }
+            if (date.slice(0, 7) !== month) { toast.error("তারিখটি নির্বাচিত মাসের নয়"); return; }
+            onCollect(amt, date, "");
+            setAmount("");
+          }}
+        >চাদা আদায়</Button>
+      </TableCell>
+    </TableRow>
+  );
+}
+
 // ===== Savings =====
 function SavingsTab() {
   const { data, addDeposit, addDeposits, updateDeposit, deleteDeposit } = useSamiti();
