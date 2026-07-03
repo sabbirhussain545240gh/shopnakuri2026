@@ -3625,30 +3625,29 @@ function InstallmentsTab() {
                           <TableCell className="text-right">{formatTk(r.installment)}</TableCell>
                           <TableCell className="text-right text-success font-semibold">{formatTk(r.paidInMonth)}</TableCell>
                           <TableCell>
-                            {r.status === "paid" ? (
-                              <Badge className="bg-success text-success-foreground">পরিশোধিত</Badge>
-                            ) : r.status === "partial" ? (
-                              <Badge variant="outline" className="border-amber-500 text-amber-600">আংশিক</Badge>
-                            ) : (
-                              <Badge variant="destructive">বকেয়া</Badge>
-                            )}
+                            <div className="flex items-center gap-1">
+                              {r.status === "paid" ? (
+                                <Badge className="bg-success text-success-foreground h-6 px-2 text-xs">পরিশোধিত</Badge>
+                              ) : r.status === "partial" ? (
+                                <Badge variant="outline" className="border-amber-500 text-amber-600 h-6 px-2 text-xs">আংশিক</Badge>
+                              ) : (
+                                <Badge variant="destructive" className="h-6 px-2 text-xs">বকেয়া</Badge>
+                              )}
+                              {r.status !== "paid" && r.loan.status === "active" && rem > 0 && (
+                                <Button
+                                  className="h-6 px-2 text-xs"
+                                  onClick={() => {
+                                    setForm({ loanId: r.loan.id, amount: String(suggested), date: defaultDate, note: "" });
+                                    setErrors({});
+                                    setOpen(true);
+                                  }}
+                                >
+                                  কিস্তি আদায়
+                                </Button>
+                              )}
+                            </div>
                           </TableCell>
-                          <TableCell className="text-right">
-                            {r.status !== "paid" && r.loan.status === "active" && rem > 0 ? (
-                              <Button
-                                size="sm"
-                                onClick={() => {
-                                  setForm({ loanId: r.loan.id, amount: String(suggested), date: defaultDate, note: "" });
-                                  setErrors({});
-                                  setOpen(true);
-                                }}
-                              >
-                                কিস্তি আদায়
-                              </Button>
-                            ) : (
-                              <span className="text-xs text-muted-foreground">—</span>
-                            )}
-                          </TableCell>
+                          <TableCell className="text-right"></TableCell>
                         </TableRow>
                       );
                     })}
