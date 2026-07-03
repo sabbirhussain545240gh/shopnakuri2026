@@ -3602,27 +3602,58 @@ function InstallmentsTab() {
                     <TableHead className="text-right">মাসিক কিস্তি</TableHead>
                     <TableHead className="text-right">এ মাসে পরিশোধ</TableHead>
                     <TableHead>অবস্থা</TableHead>
+                    <TableHead className="text-right">কার্যক্রম</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {monthlyStatus.map((r) => (
-                    <TableRow key={r.loan.id}>
-                      <TableCell className="font-medium">{toBn(r.loanNo)}</TableCell>
-                      <TableCell className="font-medium">{r.member ? `${toBn(r.member.serial)} — ${r.member.name}` : "—"}</TableCell>
-                      <TableCell className="text-right">{formatTk(r.installment)}</TableCell>
-                      <TableCell className="text-right text-success font-semibold">{formatTk(r.paidInMonth)}</TableCell>
-                      <TableCell>
-                        {r.status === "paid" ? (
-                          <Badge className="bg-success text-success-foreground">পরিশোধিত</Badge>
-                        ) : r.status === "partial" ? (
-                          <Badge variant="outline" className="border-amber-500 text-amber-600">আংশিক</Badge>
-                        ) : (
-                          <Badge variant="destructive">বকেয়া</Badge>
-                        )}
-                      </TableCell>
-                    </TableRow>
-                  ))}
+                  {[...monthlyStatus]
+                    .sort((a, b) => {
+                      const order = { unpaid: 0, partial: 1, paid: 2 } as const;
+                      return order[a.status] - order[b.status];
+                    })
+                    .map((r) => {
+                      const rem = Math.max(0, loanTotalDue(r.loan) - loanPaid(data.payments, r.loan.id));
+                      const dueThisMonth = Math.max(0, r.installment - r.paidInMonth);
+                      const suggested = Math.round(Math.min(dueThisMonth || r.installment, rem));
+                      const defaultDate = filterMonth === today().slice(0, 7)
+                        ? today()
+                        : `${filterMonth}-${String(new Date(Number(filterMonth.slice(0, 4)), Number(filterMonth.slice(5, 7)), 0).getDate()).padStart(2, "0")}`;
+                      return (
+                        <TableRow key={r.loan.id}>
+                          <TableCell className="font-medium">{toBn(r.loanNo)}</TableCell>
+                          <TableCell className="font-medium">{r.member ? `${toBn(r.member.serial)} — ${r.member.name}` : "—"}</TableCell>
+                          <TableCell className="text-right">{formatTk(r.installment)}</TableCell>
+                          <TableCell className="text-right text-success font-semibold">{formatTk(r.paidInMonth)}</TableCell>
+                          <TableCell>
+                            {r.status === "paid" ? (
+                              <Badge className="bg-success text-success-foreground">পরিশোধিত</Badge>
+                            ) : r.status === "partial" ? (
+                              <Badge variant="outline" className="border-amber-500 text-amber-600">আংশিক</Badge>
+                            ) : (
+                              <Badge variant="destructive">বকেয়া</Badge>
+                            )}
+                          </TableCell>
+                          <TableCell className="text-right">
+                            {r.status !== "paid" && r.loan.status === "active" && rem > 0 ? (
+                              <Button
+                                size="sm"
+                                onClick={() => {
+                                  setForm({ loanId: r.loan.id, amount: String(suggested), date: defaultDate, note: "" });
+                                  setErrors({});
+                                  setOpen(true);
+                                }}
+                              >
+                                কিস্তি আদায়
+                              </Button>
+                            ) : (
+                              <span className="text-xs text-muted-foreground">—</span>
+                            )}
+                          </TableCell>
+                        </TableRow>
+                      );
+                    })}
                 </TableBody>
+
               </Table>
             )}
           </CardContent>
