@@ -983,7 +983,7 @@ function MembersTab() {
               {/* Photo */}
               <div className="flex items-center gap-4">
                 <div className="h-24 w-24 rounded-lg border bg-muted overflow-hidden flex items-center justify-center shrink-0">
-                  {form.photo ? <img src={form.photo} alt="" className="h-full w-full object-cover" /> : <Users className="h-8 w-8 text-muted-foreground" />}
+                  {form.photo ? <img src={form.photo} alt="" className="h-full w-full object-contain bg-white" /> : <Users className="h-8 w-8 text-muted-foreground" />}
                 </div>
                 <div className="space-y-2">
                   <Label>সদস্যের ছবি</Label>
@@ -1060,7 +1060,7 @@ function MembersTab() {
                   <TableCell className="text-center font-semibold">{toBn(formatMemberSerial(m, data.serialPrefix))}</TableCell>
                   <TableCell>
                     <div className="h-10 w-10 rounded-full bg-muted overflow-hidden flex items-center justify-center">
-                      {m.photo ? <img src={m.photo} alt={m.name} className="h-full w-full object-cover" /> : <Users className="h-4 w-4 text-muted-foreground" />}
+                      {m.photo ? <img src={m.photo} alt={m.name} className="h-full w-full object-contain bg-white" /> : <Users className="h-4 w-4 text-muted-foreground" />}
                     </div>
                   </TableCell>
                   <TableCell className="font-medium">{m.name}</TableCell>
@@ -1119,7 +1119,7 @@ function MembersTab() {
               <div className="relative z-10 space-y-4">
               <div className="flex items-center gap-4">
                 <div className="h-24 w-24 rounded-lg bg-muted overflow-hidden flex items-center justify-center shrink-0">
-                  {viewMember.photo ? <img src={viewMember.photo} alt={viewMember.name} className="h-full w-full object-cover" /> : <Users className="h-8 w-8 text-muted-foreground" />}
+                  {viewMember.photo ? <img src={viewMember.photo} alt={viewMember.name} className="h-full w-full object-contain bg-white" /> : <Users className="h-8 w-8 text-muted-foreground" />}
                 </div>
                 <div>
                   <h3 className="text-xl font-bold">{viewMember.name}</h3>
@@ -1312,7 +1312,7 @@ function EditMemberForm({ member, onSave, onCancel }: { member: Member; onSave: 
     <div className="space-y-4">
       <div className="flex items-center gap-4">
         <div className="h-24 w-24 rounded-lg border bg-muted overflow-hidden flex items-center justify-center shrink-0">
-          {form.photo ? <img src={form.photo} alt="" className="h-full w-full object-cover" /> : <Users className="h-8 w-8 text-muted-foreground" />}
+          {form.photo ? <img src={form.photo} alt="" className="h-full w-full object-contain bg-white" /> : <Users className="h-8 w-8 text-muted-foreground" />}
         </div>
         <div className="space-y-2">
           <Label>সদস্যের ছবি</Label>
