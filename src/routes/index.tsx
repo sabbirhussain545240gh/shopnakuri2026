@@ -1379,7 +1379,7 @@ function Info({ label, value, className }: { label: string; value?: string; clas
   );
 }
 
-import { buildMemberCardHtml, printMemberCard, exportMemberCardJpeg, exportMemberCardPdf, type SamitiInfo } from "@/lib/member-card";
+
 
 
 function buildLoanDetailHtml(
