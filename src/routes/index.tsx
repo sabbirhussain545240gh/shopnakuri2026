@@ -993,7 +993,8 @@ function MembersTab() {
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                 <div><Label>সিরিয়াল নম্বর</Label><Input type="number" value={form.serial} onChange={(e) => setForm({ ...form, serial: e.target.value })} /></div>
-                <div><Label>ক্যাটাগরি (A, B, C…)</Label><Input maxLength={3} value={form.category} onChange={(e) => setForm({ ...form, category: e.target.value.toUpperCase() })} placeholder="যেমন: A" /></div>
+                <div><Label>ক্যাটাগরি (A, B, C…)</Label><Input list="member-categories-add" maxLength={3} value={form.category} onChange={(e) => setForm({ ...form, category: e.target.value.toUpperCase() })} placeholder="যেমন: A" /><datalist id="member-categories-add">{Array.from(new Set(data.members.map((m) => (m.category || "").trim()).filter(Boolean))).sort().map((c) => (<option key={c} value={c} />))}</datalist></div>
+
                 <div><Label>নাম *</Label><Input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} /></div>
                 <div><Label>মোবাইল নং</Label><Input value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} /></div>
                 <div><Label>পিতার নাম</Label><Input value={form.fatherName} onChange={(e) => setForm({ ...form, fatherName: e.target.value })} /></div>
@@ -1271,6 +1272,8 @@ function MembersTab() {
 const NOMINEE_RELATIONS = ["বাবা", "মা", "ভাই", "বোন", "স্বামী", "স্ত্রী", "পুত্র", "কন্যা"];
 
 function EditMemberForm({ member, onSave, onCancel }: { member: Member; onSave: (u: Partial<Omit<Member, "id">>) => void; onCancel: () => void }) {
+  const { data: samitiData } = useSamiti();
+  const existingCategories = Array.from(new Set(samitiData.members.map((m) => (m.category || "").trim()).filter(Boolean))).sort();
   const isCustomRelation = member.nominee?.relation && !NOMINEE_RELATIONS.includes(member.nominee.relation);
   const [form, setForm] = useState({
     serial: String(member.serial || ""),
@@ -1319,7 +1322,7 @@ function EditMemberForm({ member, onSave, onCancel }: { member: Member; onSave: 
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
         <div><Label>সিরিয়াল নম্বর</Label><Input type="number" value={form.serial} onChange={(e) => setForm({ ...form, serial: e.target.value })} /></div>
-        <div><Label>ক্যাটাগরি (A, B, C…)</Label><Input maxLength={3} value={form.category} onChange={(e) => setForm({ ...form, category: e.target.value.toUpperCase() })} placeholder="যেমন: A" /></div>
+        <div><Label>ক্যাটাগরি (A, B, C…)</Label><Input list="member-categories-edit" maxLength={3} value={form.category} onChange={(e) => setForm({ ...form, category: e.target.value.toUpperCase() })} placeholder="যেমন: A" /><datalist id="member-categories-edit">{existingCategories.map((c) => (<option key={c} value={c} />))}</datalist></div>
         <div><Label>নাম *</Label><Input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} /></div>
         <div><Label>মোবাইল নং</Label><Input value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} /></div>
         <div><Label>পিতার নাম</Label><Input value={form.fatherName} onChange={(e) => setForm({ ...form, fatherName: e.target.value })} /></div>
