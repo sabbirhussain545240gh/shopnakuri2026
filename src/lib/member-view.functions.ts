@@ -159,6 +159,8 @@ export const getMyMemberView = createServerFn({ method: "GET" })
         ok: true,
         samitiName: String(d.samitiName ?? "সমিতি"),
         samitiLogo: String(d.samitiLogo ?? ""),
+        samitiAddress: d.samitiAddress ? String(d.samitiAddress) : undefined,
+        establishedDate: d.establishedDate ? String(d.establishedDate) : undefined,
         cashier: { name: cashierName, identifier: adminProfile?.identifier ? String(adminProfile.identifier) : undefined, role: "admin" },
         committee: (() => {
           const list = d?.settings?.committee;
