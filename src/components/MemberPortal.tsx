@@ -5,12 +5,14 @@ import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Loader2, HandCoins, PiggyBank, Receipt as ReceiptIcon, Printer, ImageDown, AlertTriangle, User, Phone, MapPin, Calendar, Hash, Eye, Users, TrendingUp, Wallet } from "lucide-react";
+import { Loader2, HandCoins, PiggyBank, Receipt as ReceiptIcon, Printer, ImageDown, FileText, AlertTriangle, User, Phone, MapPin, Calendar, Hash, Eye, Users, TrendingUp, Wallet } from "lucide-react";
 import { SignOutButton, CloudStatusBadge } from "@/components/AuthGate";
 import { NotificationBell } from "@/components/NotificationBell";
 import { toBn, formatTk } from "@/lib/samiti-store";
 import { buildReceiptQr } from "@/lib/receipt-qr";
 import { getMyMemberView, type MemberViewResponse, type MemberViewLoan, type MemberViewPayment, type MemberViewDeposit } from "@/lib/member-view.functions";
+import { printMemberCard, exportMemberCardPdf, exportMemberCardJpeg } from "@/lib/member-card";
+import { toast } from "sonner";
 
 function fmtDate(d: string) {
   if (!d) return "—";
