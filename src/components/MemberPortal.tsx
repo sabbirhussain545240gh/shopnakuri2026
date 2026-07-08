@@ -5,12 +5,14 @@ import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Loader2, HandCoins, PiggyBank, Receipt as ReceiptIcon, Printer, ImageDown, AlertTriangle, User, Phone, MapPin, Calendar, Hash, Eye, Users, TrendingUp, Wallet } from "lucide-react";
+import { Loader2, HandCoins, PiggyBank, Receipt as ReceiptIcon, Printer, ImageDown, FileText, AlertTriangle, User, Phone, MapPin, Calendar, Hash, Eye, Users, TrendingUp, Wallet } from "lucide-react";
 import { SignOutButton, CloudStatusBadge } from "@/components/AuthGate";
 import { NotificationBell } from "@/components/NotificationBell";
 import { toBn, formatTk } from "@/lib/samiti-store";
 import { buildReceiptQr } from "@/lib/receipt-qr";
 import { getMyMemberView, type MemberViewResponse, type MemberViewLoan, type MemberViewPayment, type MemberViewDeposit } from "@/lib/member-view.functions";
+import { printMemberCard, exportMemberCardPdf, exportMemberCardJpeg } from "@/lib/member-card";
+import { toast } from "sonner";
 
 function fmtDate(d: string) {
   if (!d) return "—";
@@ -364,12 +366,30 @@ function MemberProfileCard({ member, data }: { member: NonNullable<MemberViewRes
     { icon: Phone, label: "মোবাইল", value: member.phone },
     { icon: MapPin, label: "ঠিকানা", value: member.address },
   ];
+  const samitiInfo = { samitiName: data.samitiName, samitiLogo: data.samitiLogo, samitiAddress: data.samitiAddress, establishedDate: data.establishedDate };
   return (
     <Card>
-      <CardHeader className="pb-2">
+      <CardHeader className="pb-2 flex-row items-center justify-between gap-2 space-y-0">
         <CardTitle className="flex items-center gap-2 text-base">
           <User className="h-5 w-5 text-primary" /> সদস্য প্রোফাইল
         </CardTitle>
+        <div className="flex flex-wrap gap-2">
+          <Button variant="outline" size="sm" onClick={() => printMemberCard(member, samitiInfo)}>
+            <Printer className="h-4 w-4 mr-1" /> প্রিন্ট
+          </Button>
+          <Button variant="outline" size="sm" onClick={async () => {
+            try { toast.loading("PDF তৈরি হচ্ছে...", { id: "mpdf" }); await exportMemberCardPdf(member, samitiInfo); toast.success("PDF ডাউনলোড হয়েছে", { id: "mpdf" }); }
+            catch { toast.error("PDF তৈরি ব্যর্থ", { id: "mpdf" }); }
+          }}>
+            <FileText className="h-4 w-4 mr-1" /> PDF
+          </Button>
+          <Button variant="outline" size="sm" onClick={async () => {
+            try { toast.loading("ছবি তৈরি হচ্ছে...", { id: "mjpg" }); await exportMemberCardJpeg(member, samitiInfo); toast.success("JPEG ডাউনলোড হয়েছে", { id: "mjpg" }); }
+            catch { toast.error("JPEG তৈরি ব্যর্থ", { id: "mjpg" }); }
+          }}>
+            <ImageDown className="h-4 w-4 mr-1" /> JPEG
+          </Button>
+        </div>
       </CardHeader>
       <CardContent>
         <div className="flex items-start gap-4">
