@@ -4545,16 +4545,16 @@ function CashbookTab() {
               <DialogHeader><DialogTitle>আয় বা ব্যয় যোগ করুন</DialogTitle></DialogHeader>
               <div className="space-y-3">
                 <div className="grid grid-cols-2 gap-2">
-                  <Button type="button" variant={form.type === "income" ? "default" : "outline"} onClick={() => setForm({ ...form, type: "income", category: "" })}>
+                  <Button type="button" variant={form.type === "income" ? "default" : "outline"} onClick={() => setForm({ ...form, type: "income", category: "", customCategory: "" })}>
                     <TrendingUp className="h-4 w-4 mr-1" />আয়
                   </Button>
-                  <Button type="button" variant={form.type === "expense" ? "default" : "outline"} onClick={() => setForm({ ...form, type: "expense", category: "" })}>
+                  <Button type="button" variant={form.type === "expense" ? "default" : "outline"} onClick={() => setForm({ ...form, type: "expense", category: "", customCategory: "" })}>
                     <TrendingDown className="h-4 w-4 mr-1" />ব্যয়
                   </Button>
                 </div>
                 <div>
                   <Label>ধরন *</Label>
-                  <Select value={form.category} onValueChange={(v) => setForm({ ...form, category: v })}>
+                  <Select value={form.category} onValueChange={(v) => setForm({ ...form, category: v, customCategory: v === "অন্যান্য" ? form.customCategory : "" })}>
                     <SelectTrigger><SelectValue placeholder="ধরন নির্বাচন করুন" /></SelectTrigger>
                     <SelectContent>{cats.map((c) => <SelectItem key={c} value={c}>{c}</SelectItem>)}</SelectContent>
                   </Select>
