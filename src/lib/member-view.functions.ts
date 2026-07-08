@@ -30,6 +30,8 @@ export type MemberViewResponse = {
   error?: string;
   samitiName: string;
   samitiLogo: string;
+  samitiAddress?: string;
+  establishedDate?: string;
   cashier?: { name: string; identifier?: string; role?: string } | null;
   committee?: MemberViewCommittee[];
   member: {
