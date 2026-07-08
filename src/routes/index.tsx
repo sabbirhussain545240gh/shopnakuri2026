@@ -4505,16 +4505,18 @@ const EXPENSE_CATS = ["স্টেশনারি", "মিটিং খরচ"
 function CashbookTab() {
   const { data, addTransaction, deleteTransaction } = useSamiti();
   const [open, setOpen] = useState(false);
-  const [form, setForm] = useState<{ type: "income" | "expense"; category: string; amount: string; date: string; note: string }>({
-    type: "income", category: "", amount: "", date: today(), note: "",
+  const [form, setForm] = useState<{ type: "income" | "expense"; category: string; customCategory: string; amount: string; date: string; note: string }>({
+    type: "income", category: "", customCategory: "", amount: "", date: today(), note: "",
   });
 
   const submit = () => {
     if (!form.category) { toast.error("ধরন নির্বাচন করুন"); return; }
+    const finalCat = form.category === "অন্যান্য" ? form.customCategory.trim() : form.category;
+    if (form.category === "অন্যান্য" && !finalCat) { toast.error("খাতের নাম লিখুন"); return; }
     const amt = Number(form.amount);
     if (!amt || amt <= 0) { toast.error("সঠিক পরিমাণ দিন"); return; }
-    addTransaction({ type: form.type, category: form.category, amount: amt, date: form.date, note: form.note });
-    setForm({ type: "income", category: "", amount: "", date: today(), note: "" });
+    addTransaction({ type: form.type, category: finalCat, amount: amt, date: form.date, note: form.note });
+    setForm({ type: "income", category: "", customCategory: "", amount: "", date: today(), note: "" });
     setOpen(false);
     toast.success("সংরক্ষিত হয়েছে");
   };
@@ -4543,20 +4545,23 @@ function CashbookTab() {
               <DialogHeader><DialogTitle>আয় বা ব্যয় যোগ করুন</DialogTitle></DialogHeader>
               <div className="space-y-3">
                 <div className="grid grid-cols-2 gap-2">
-                  <Button type="button" variant={form.type === "income" ? "default" : "outline"} onClick={() => setForm({ ...form, type: "income", category: "" })}>
+                  <Button type="button" variant={form.type === "income" ? "default" : "outline"} onClick={() => setForm({ ...form, type: "income", category: "", customCategory: "" })}>
                     <TrendingUp className="h-4 w-4 mr-1" />আয়
                   </Button>
-                  <Button type="button" variant={form.type === "expense" ? "default" : "outline"} onClick={() => setForm({ ...form, type: "expense", category: "" })}>
+                  <Button type="button" variant={form.type === "expense" ? "default" : "outline"} onClick={() => setForm({ ...form, type: "expense", category: "", customCategory: "" })}>
                     <TrendingDown className="h-4 w-4 mr-1" />ব্যয়
                   </Button>
                 </div>
                 <div>
                   <Label>ধরন *</Label>
-                  <Select value={form.category} onValueChange={(v) => setForm({ ...form, category: v })}>
+                  <Select value={form.category} onValueChange={(v) => setForm({ ...form, category: v, customCategory: v === "অন্যান্য" ? form.customCategory : "" })}>
                     <SelectTrigger><SelectValue placeholder="ধরন নির্বাচন করুন" /></SelectTrigger>
                     <SelectContent>{cats.map((c) => <SelectItem key={c} value={c}>{c}</SelectItem>)}</SelectContent>
                   </Select>
                 </div>
+                {form.category === "অন্যান্য" && (
+                  <div><Label>খাতের নাম *</Label><Input value={form.customCategory} onChange={(e) => setForm({ ...form, customCategory: e.target.value })} placeholder="খাতের নাম লিখুন" /></div>
+                )}
                 <div><Label>পরিমাণ *</Label><Input type="number" value={form.amount} onChange={(e) => setForm({ ...form, amount: e.target.value })} /></div>
                 <div><Label>তারিখ</Label><Input type="date" value={form.date} onChange={(e) => setForm({ ...form, date: e.target.value })} /></div>
                 <div><Label>মন্তব্য</Label><Input value={form.note} onChange={(e) => setForm({ ...form, note: e.target.value })} /></div>
