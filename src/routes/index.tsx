@@ -4631,6 +4631,7 @@ function SettingsTab() {
   const [name, setName] = useState(data.samitiName);
   const [address, setAddress] = useState(data.samitiAddress || "");
   const [estDate, setEstDate] = useState(data.establishedDate || "");
+  const [serialPrefix, setSerialPrefix] = useState(data.serialPrefix || "");
   const [logo, setLogo] = useState(data.samitiLogo || "");
   const [rate, setRate] = useState(String(data.settings.defaultInterestRate));
   const [dur, setDur] = useState(String(data.settings.defaultDurationMonths));
