@@ -1124,7 +1124,7 @@ function MembersTab() {
                 </div>
               </div>
               <div className="grid grid-cols-2 gap-3 text-sm">
-                <Info label="সিরিয়াল নম্বর" value={toBn(viewMember.serial || 0)} />
+                <Info label="সিরিয়াল নম্বর" value={toBn(formatMemberSerial(viewMember, data.serialPrefix))} />
                 <Info label="পিতার নাম" value={viewMember.fatherName} />
                 <Info label="মাতার নাম" value={viewMember.motherName} />
                 <Info label="মোবাইল" value={viewMember.phone ? toBn(viewMember.phone) : ""} />
