@@ -10,6 +10,7 @@ export type Nominee = {
 export type Member = {
   id: string;
   serial: number;
+  category?: string;
   name: string;
   fatherName: string;
   motherName: string;
@@ -21,6 +22,14 @@ export type Member = {
   nominee: Nominee;
   joinDate: string;
 };
+
+export function formatMemberSerial(m: { serial?: number; category?: string } | null | undefined, prefix?: string): string {
+  if (!m) return "";
+  const pre = (prefix || "").toString().trim();
+  const cat = (m.category || "").toString().trim();
+  const n = m.serial || 0;
+  return `${pre}${cat}${n}`;
+}
 
 export type Deposit = {
   id: string;
@@ -121,6 +130,7 @@ export type SamitiData = {
   samitiLogo: string;
   samitiAddress: string;
   establishedDate: string;
+  serialPrefix?: string;
   settings: Settings;
 };
 
@@ -321,7 +331,7 @@ export function useSamiti() {
   const data = getState();
 
   const setSamitiName = useCallback((name: string) => setState({ ...getState(), samitiName: name }), []);
-  const updateSamitiInfo = useCallback((info: Partial<Pick<SamitiData, "samitiName" | "samitiLogo" | "samitiAddress" | "establishedDate">>) => {
+  const updateSamitiInfo = useCallback((info: Partial<Pick<SamitiData, "samitiName" | "samitiLogo" | "samitiAddress" | "establishedDate" | "serialPrefix">>) => {
     setState({ ...getState(), ...info });
   }, []);
 

@@ -4,7 +4,7 @@ import html2canvas from "html2canvas";
 import * as XLSX from "xlsx";
 import {
   useSamiti, toBn, formatTk, memberTotalDeposit, loanPaid, loanTotalDue,
- DEFAULT_GOALS, DEFAULT_QUOTES, DEFAULT_MESSAGES,
+ DEFAULT_GOALS, DEFAULT_QUOTES, DEFAULT_MESSAGES, formatMemberSerial,
  type Member, type Loan, type Deposit, type Goal, type Quote, type Message, type CommitteeMember,
 } from "@/lib/samiti-store";
 import { cn } from "@/lib/utils";
@@ -706,6 +706,7 @@ function MembersTab() {
   const [open, setOpen] = useState(false);
   const emptyForm = {
     serial: "",
+    category: "",
     name: "", fatherName: "", motherName: "", phone: "",
     birthDate: "", nid: "", address: "", photo: "",
     nominee: { name: "", relation: "", phone: "", nid: "" },
@@ -734,7 +735,7 @@ function MembersTab() {
     const serialNum = form.serial ? parseInt(form.serial, 10) : 0;
     const { nomineeCustomRelation, ...rest } = form;
     const finalRelation = form.nominee.relation === "অন্যান্য" ? nomineeCustomRelation.trim() : form.nominee.relation;
-    addMember({ ...rest, serial: serialNum, nominee: { ...form.nominee, relation: finalRelation || "" } });
+    addMember({ ...rest, serial: serialNum, category: form.category.trim().toUpperCase(), nominee: { ...form.nominee, relation: finalRelation || "" } });
     setForm(emptyForm);
     setOpen(false);
     toast.success("সদস্য যোগ হয়েছে");
@@ -991,6 +992,7 @@ function MembersTab() {
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                 <div><Label>সিরিয়াল নম্বর</Label><Input type="number" value={form.serial} onChange={(e) => setForm({ ...form, serial: e.target.value })} /></div>
+                <div><Label>ক্যাটাগরি (A, B, C…)</Label><Input maxLength={3} value={form.category} onChange={(e) => setForm({ ...form, category: e.target.value.toUpperCase() })} placeholder="যেমন: A" /></div>
                 <div><Label>নাম *</Label><Input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} /></div>
                 <div><Label>মোবাইল নং</Label><Input value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} /></div>
                 <div><Label>পিতার নাম</Label><Input value={form.fatherName} onChange={(e) => setForm({ ...form, fatherName: e.target.value })} /></div>
@@ -1052,7 +1054,7 @@ function MembersTab() {
             <TableBody>
               {data.members.map((m) => (
                 <TableRow key={m.id} className="cursor-pointer" onClick={() => setViewMember(m)}>
-                  <TableCell className="text-center font-semibold">{toBn(m.serial || 0)}</TableCell>
+                  <TableCell className="text-center font-semibold">{toBn(formatMemberSerial(m, data.serialPrefix))}</TableCell>
                   <TableCell>
                     <div className="h-10 w-10 rounded-full bg-muted overflow-hidden flex items-center justify-center">
                       {m.photo ? <img src={m.photo} alt={m.name} className="h-full w-full object-cover" /> : <Users className="h-4 w-4 text-muted-foreground" />}
@@ -1122,7 +1124,7 @@ function MembersTab() {
                 </div>
               </div>
               <div className="grid grid-cols-2 gap-3 text-sm">
-                <Info label="সিরিয়াল নম্বর" value={toBn(viewMember.serial || 0)} />
+                <Info label="সিরিয়াল নম্বর" value={toBn(formatMemberSerial(viewMember, data.serialPrefix))} />
                 <Info label="পিতার নাম" value={viewMember.fatherName} />
                 <Info label="মাতার নাম" value={viewMember.motherName} />
                 <Info label="মোবাইল" value={viewMember.phone ? toBn(viewMember.phone) : ""} />
@@ -1271,6 +1273,7 @@ function EditMemberForm({ member, onSave, onCancel }: { member: Member; onSave: 
   const isCustomRelation = member.nominee?.relation && !NOMINEE_RELATIONS.includes(member.nominee.relation);
   const [form, setForm] = useState({
     serial: String(member.serial || ""),
+    category: member.category || "",
     name: member.name,
     fatherName: member.fatherName,
     motherName: member.motherName,
@@ -1297,7 +1300,7 @@ function EditMemberForm({ member, onSave, onCancel }: { member: Member; onSave: 
     const serialNum = form.serial ? parseInt(form.serial, 10) : 0;
     const finalRelation = form.nominee.relation === "অন্যান্য" ? form.nomineeCustomRelation.trim() : form.nominee.relation;
     const { nomineeCustomRelation, ...rest } = form;
-    onSave({ ...rest, serial: serialNum, nominee: { ...form.nominee, relation: finalRelation || "" } });
+    onSave({ ...rest, serial: serialNum, category: form.category.trim().toUpperCase(), nominee: { ...form.nominee, relation: finalRelation || "" } });
   };
 
   return (
@@ -1315,6 +1318,7 @@ function EditMemberForm({ member, onSave, onCancel }: { member: Member; onSave: 
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
         <div><Label>সিরিয়াল নম্বর</Label><Input type="number" value={form.serial} onChange={(e) => setForm({ ...form, serial: e.target.value })} /></div>
+        <div><Label>ক্যাটাগরি (A, B, C…)</Label><Input maxLength={3} value={form.category} onChange={(e) => setForm({ ...form, category: e.target.value.toUpperCase() })} placeholder="যেমন: A" /></div>
         <div><Label>নাম *</Label><Input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} /></div>
         <div><Label>মোবাইল নং</Label><Input value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} /></div>
         <div><Label>পিতার নাম</Label><Input value={form.fatherName} onChange={(e) => setForm({ ...form, fatherName: e.target.value })} /></div>
@@ -4627,6 +4631,7 @@ function SettingsTab() {
   const [name, setName] = useState(data.samitiName);
   const [address, setAddress] = useState(data.samitiAddress || "");
   const [estDate, setEstDate] = useState(data.establishedDate || "");
+  const [serialPrefix, setSerialPrefix] = useState(data.serialPrefix || "");
   const [logo, setLogo] = useState(data.samitiLogo || "");
   const [rate, setRate] = useState(String(data.settings.defaultInterestRate));
   const [dur, setDur] = useState(String(data.settings.defaultDurationMonths));
@@ -4663,6 +4668,7 @@ function SettingsTab() {
       samitiName: name.trim() || "আমাদের সমিতি",
       samitiAddress: address.trim(),
       establishedDate: estDate,
+      serialPrefix: serialPrefix.trim().toUpperCase(),
       samitiLogo: logo,
     });
     updateSettings({
@@ -4739,6 +4745,7 @@ function SettingsTab() {
           <div><Label>সমিতির নাম</Label><Input value={name} onChange={(e) => setName(e.target.value)} /></div>
           <div><Label>সমিতির ঠিকানা</Label><Textarea value={address} onChange={(e) => setAddress(e.target.value)} /></div>
           <div><Label>স্থাপিত</Label><Input value={estDate} onChange={(e) => setEstDate(e.target.value)} placeholder="যেমন: ২০১৫ সাল" /></div>
+          <div><Label>সিরিয়াল উপসর্গ (Prefix)</Label><Input value={serialPrefix} onChange={(e) => setSerialPrefix(e.target.value.toUpperCase())} maxLength={5} placeholder="যেমন: SK — সদস্য সিরিয়াল হবে SKA1, SKB26 …" /></div>
           <div><Label>ঋণের ডিফল্ট মুনাফার হার (% বার্ষিক)</Label><Input type="number" value={rate} onChange={(e) => setRate(e.target.value)} /></div>
           <div><Label>ঋণের ডিফল্ট মেয়াদ (মাস)</Label><Input type="number" value={dur} onChange={(e) => setDur(e.target.value)} /></div>
           <div>
