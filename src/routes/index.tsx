@@ -2549,6 +2549,10 @@ function LoansTab() {
         status: l.status === "active" ? "চলমান" : "পরিশোধিত",
       };
     });
+    const sumPrincipal = filteredLoans.reduce((s, l) => s + l.amount, 0);
+    const sumDue = filteredLoans.reduce((s, l) => s + loanTotalDue(l), 0);
+    const sumPaid = filteredLoans.reduce((s, l) => s + loanPaid(data.payments, l.id), 0);
+    const sumRemaining = filteredLoans.reduce((s, l) => s + Math.max(0, loanTotalDue(l) - loanPaid(data.payments, l.id)), 0);
     const html = `
       <table style="width:100%;border-collapse:collapse;font-size:13px;">
         <thead>
@@ -2583,6 +2587,17 @@ function LoansTab() {
             </tr>
           `).join("")}
         </tbody>
+        <tfoot>
+          <tr style="background:#f5f5f5;font-weight:bold;">
+            <td style="border:1px solid #ccc;padding:8px;" colspan="3">সর্বমোট</td>
+            <td style="border:1px solid #ccc;padding:8px;text-align:right;">${formatTk(sumPrincipal)}</td>
+            <td style="border:1px solid #ccc;padding:8px;text-align:right;">${formatTk(sumDue)}</td>
+            <td style="border:1px solid #ccc;padding:8px;" colspan="3"></td>
+            <td style="border:1px solid #ccc;padding:8px;text-align:right;">${formatTk(sumPaid)}</td>
+            <td style="border:1px solid #ccc;padding:8px;text-align:right;">${formatTk(sumRemaining)}</td>
+            <td style="border:1px solid #ccc;padding:8px;"></td>
+          </tr>
+        </tfoot>
       </table>
     `;
     w.document.write(`
