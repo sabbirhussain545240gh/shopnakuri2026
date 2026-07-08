@@ -4505,16 +4505,18 @@ const EXPENSE_CATS = ["স্টেশনারি", "মিটিং খরচ"
 function CashbookTab() {
   const { data, addTransaction, deleteTransaction } = useSamiti();
   const [open, setOpen] = useState(false);
-  const [form, setForm] = useState<{ type: "income" | "expense"; category: string; amount: string; date: string; note: string }>({
-    type: "income", category: "", amount: "", date: today(), note: "",
+  const [form, setForm] = useState<{ type: "income" | "expense"; category: string; customCategory: string; amount: string; date: string; note: string }>({
+    type: "income", category: "", customCategory: "", amount: "", date: today(), note: "",
   });
 
   const submit = () => {
     if (!form.category) { toast.error("ধরন নির্বাচন করুন"); return; }
+    const finalCat = form.category === "অন্যান্য" ? form.customCategory.trim() : form.category;
+    if (form.category === "অন্যান্য" && !finalCat) { toast.error("খাতের নাম লিখুন"); return; }
     const amt = Number(form.amount);
     if (!amt || amt <= 0) { toast.error("সঠিক পরিমাণ দিন"); return; }
-    addTransaction({ type: form.type, category: form.category, amount: amt, date: form.date, note: form.note });
-    setForm({ type: "income", category: "", amount: "", date: today(), note: "" });
+    addTransaction({ type: form.type, category: finalCat, amount: amt, date: form.date, note: form.note });
+    setForm({ type: "income", category: "", customCategory: "", amount: "", date: today(), note: "" });
     setOpen(false);
     toast.success("সংরক্ষিত হয়েছে");
   };
