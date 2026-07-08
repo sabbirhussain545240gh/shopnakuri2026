@@ -34,6 +34,7 @@ import { NotificationBell } from "@/components/NotificationBell";
 import { MemberPortal } from "@/components/MemberPortal";
 import { useServerFn } from "@tanstack/react-start";
 import { listPendingAccounts } from "@/lib/approval.functions";
+import { buildMemberCardHtml, printMemberCard, exportMemberCardJpeg, exportMemberCardPdf, type SamitiInfo } from "@/lib/member-card";
 
 function usePendingApprovalCount(isAdmin: boolean) {
   const fetchPending = useServerFn(listPendingAccounts);
