@@ -1412,7 +1412,7 @@ function buildMemberCardHtml(member: Member, samiti: SamitiInfo) {
       ]
     : [];
   const tableRows = (items: [string, string][]) =>
-    items.map(([k, v]) => `<tr><td style="padding:8px 12px;border:1px solid #ddd;background:#fafafa;font-weight:600;width:40%;">${k}</td><td style="padding:8px 12px;border:1px solid #ddd;">${v || "—"}</td></tr>`).join("");
+    items.map(([k, v]) => `<tr><td style="padding:8px 12px;border:1px solid #ddd;background:rgba(250,250,250,0.35);font-weight:600;width:40%;">${k}</td><td style="padding:8px 12px;border:1px solid #ddd;background:transparent;">${v || "—"}</td></tr>`).join("");
 
   const watermarkHtml = samiti.samitiLogo
     ? `<div style="position:absolute;inset:0;background-image:url('${samiti.samitiLogo}');background-repeat:no-repeat;background-position:center;background-size:70% auto;opacity:0.15;pointer-events:none;z-index:0;-webkit-print-color-adjust:exact;print-color-adjust:exact;"></div>`
