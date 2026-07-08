@@ -1273,6 +1273,7 @@ function EditMemberForm({ member, onSave, onCancel }: { member: Member; onSave: 
   const isCustomRelation = member.nominee?.relation && !NOMINEE_RELATIONS.includes(member.nominee.relation);
   const [form, setForm] = useState({
     serial: String(member.serial || ""),
+    category: member.category || "",
     name: member.name,
     fatherName: member.fatherName,
     motherName: member.motherName,
