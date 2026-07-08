@@ -4668,6 +4668,7 @@ function SettingsTab() {
       samitiName: name.trim() || "আমাদের সমিতি",
       samitiAddress: address.trim(),
       establishedDate: estDate,
+      serialPrefix: serialPrefix.trim().toUpperCase(),
       samitiLogo: logo,
     });
     updateSettings({
