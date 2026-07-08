@@ -130,6 +130,7 @@ export type SamitiData = {
   samitiLogo: string;
   samitiAddress: string;
   establishedDate: string;
+  serialPrefix?: string;
   settings: Settings;
 };
 
