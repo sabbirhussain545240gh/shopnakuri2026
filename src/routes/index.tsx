@@ -1238,6 +1238,7 @@ function MembersTab() {
                   </>
                 );
               })()}
+              </div>
             </div>
           )}
         </DialogContent>
