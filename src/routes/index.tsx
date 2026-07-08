@@ -1409,20 +1409,29 @@ function buildMemberCardHtml(member: Member, samiti: SamitiInfo) {
   const tableRows = (items: [string, string][]) =>
     items.map(([k, v]) => `<tr><td style="padding:8px 12px;border:1px solid #ddd;background:#fafafa;font-weight:600;width:40%;">${k}</td><td style="padding:8px 12px;border:1px solid #ddd;">${v || "—"}</td></tr>`).join("");
 
+  const watermarkHtml = samiti.samitiLogo
+    ? `<div style="position:absolute;inset:0;background-image:url('${samiti.samitiLogo}');background-repeat:no-repeat;background-position:center;background-size:70% auto;opacity:0.15;pointer-events:none;z-index:0;-webkit-print-color-adjust:exact;print-color-adjust:exact;"></div>`
+    : "";
   const inner = `
-    <div style="max-width:640px;margin:auto;">
-      ${headerHtml}
-      <div style="border:2px solid #333;padding:20px;border-radius:8px;">
-        <h2 style="text-align:center;margin:0 0 16px 0;font-size:20px;border-bottom:2px solid #333;padding-bottom:8px;">সদস্য তথ্য</h2>
-        <div style="display:flex;gap:20px;align-items:flex-start;margin-bottom:16px;">
-          ${photoHtml}
-          <div style="flex:1;">
-            <table style="width:100%;border-collapse:collapse;font-size:14px;">
-              ${tableRows(rows)}
-            </table>
+    <div style="max-width:640px;margin:auto;position:relative;">
+      ${watermarkHtml}
+      <div style="position:relative;z-index:1;">
+        ${headerHtml}
+        <div style="border:2px solid #333;padding:20px;border-radius:8px;position:relative;overflow:hidden;">
+          ${watermarkHtml}
+          <div style="position:relative;z-index:1;">
+            <h2 style="text-align:center;margin:0 0 16px 0;font-size:20px;border-bottom:2px solid #333;padding-bottom:8px;">সদস্য তথ্য</h2>
+            <div style="display:flex;gap:20px;align-items:flex-start;margin-bottom:16px;">
+              ${photoHtml}
+              <div style="flex:1;">
+                <table style="width:100%;border-collapse:collapse;font-size:14px;">
+                  ${tableRows(rows)}
+                </table>
+              </div>
+            </div>
+            ${nomineeRows.length ? `<h3 style="font-size:16px;border-bottom:1px solid #ccc;padding-bottom:6px;margin:16px 0 8px;">নমিনি তথ্য</h3><table style="width:100%;border-collapse:collapse;font-size:14px;">${tableRows(nomineeRows)}</table>` : ""}
           </div>
         </div>
-        ${nomineeRows.length ? `<h3 style="font-size:16px;border-bottom:1px solid #ccc;padding-bottom:6px;margin:16px 0 8px;">নমিনি তথ্য</h3><table style="width:100%;border-collapse:collapse;font-size:14px;">${tableRows(nomineeRows)}</table>` : ""}
       </div>
     </div>`;
   return inner;
