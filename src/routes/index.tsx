@@ -1054,7 +1054,7 @@ function MembersTab() {
             <TableBody>
               {data.members.map((m) => (
                 <TableRow key={m.id} className="cursor-pointer" onClick={() => setViewMember(m)}>
-                  <TableCell className="text-center font-semibold">{toBn(m.serial || 0)}</TableCell>
+                  <TableCell className="text-center font-semibold">{toBn(formatMemberSerial(m, data.serialPrefix))}</TableCell>
                   <TableCell>
                     <div className="h-10 w-10 rounded-full bg-muted overflow-hidden flex items-center justify-center">
                       {m.photo ? <img src={m.photo} alt={m.name} className="h-full w-full object-cover" /> : <Users className="h-4 w-4 text-muted-foreground" />}
