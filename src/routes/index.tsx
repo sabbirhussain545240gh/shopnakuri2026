@@ -1103,7 +1103,15 @@ function MembersTab() {
             )}
           </DialogHeader>
           {viewMember && (
-            <div className="space-y-4">
+            <div className="space-y-4 relative">
+              {data.samitiLogo && (
+                <div
+                  aria-hidden
+                  className="pointer-events-none absolute inset-0 bg-center bg-no-repeat opacity-10 z-0"
+                  style={{ backgroundImage: `url(${data.samitiLogo})`, backgroundSize: "70% auto" }}
+                />
+              )}
+              <div className="relative z-10 space-y-4">
               <div className="flex items-center gap-4">
                 <div className="h-24 w-24 rounded-lg bg-muted overflow-hidden flex items-center justify-center shrink-0">
                   {viewMember.photo ? <img src={viewMember.photo} alt={viewMember.name} className="h-full w-full object-cover" /> : <Users className="h-8 w-8 text-muted-foreground" />}
