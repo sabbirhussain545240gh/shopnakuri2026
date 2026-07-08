@@ -394,7 +394,7 @@ function MemberProfileCard({ member, data }: { member: NonNullable<MemberViewRes
       <CardContent>
         <div className="flex items-start gap-4">
           {member.photo ? (
-            <img src={member.photo} alt={member.name} className="h-20 w-20 rounded-xl object-cover ring-1 ring-border bg-white shrink-0" />
+            <img src={member.photo} alt={member.name} className="h-20 w-20 rounded-xl object-contain ring-1 ring-border bg-white shrink-0" />
           ) : (
             <div className="h-20 w-20 rounded-xl bg-primary/10 text-primary flex items-center justify-center font-bold text-2xl shrink-0">
               {member.name.charAt(0) || "স"}

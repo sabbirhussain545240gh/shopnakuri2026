@@ -42,7 +42,7 @@ export function buildMemberCardHtml(member: MemberCardInput, samiti: SamitiInfo)
       ${samiti.samitiLogo ? `<div style="width:100px;"></div>` : ""}
     </div>`;
   const photoHtml = member.photo
-    ? `<img src="${member.photo}" style="width:120px;height:120px;object-fit:cover;border-radius:8px;border:1px solid #ddd;" crossorigin="anonymous" />`
+    ? `<img src="${member.photo}" style="width:120px;height:120px;object-fit:contain;background:#fff;border-radius:8px;border:1px solid #ddd;" crossorigin="anonymous" />`
     : `<div style="width:120px;height:120px;border-radius:8px;border:1px solid #ddd;background:#f5f5f5;display:flex;align-items:center;justify-content:center;color:#888;font-size:12px;">ছবি নেই</div>`;
   const rows: [string, string][] = [
     ["সিরিয়াল নম্বর", toBn(member.serial || 0)],
