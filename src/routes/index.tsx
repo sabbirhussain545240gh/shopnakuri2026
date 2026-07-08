@@ -865,8 +865,9 @@ function MembersTab() {
 <style>
   body { font-family: "Segoe UI", "Noto Sans Bengali", sans-serif; margin: 0; padding: 24px; background: #fff; color: #111; position: relative; }
   p { margin: 0 0 16px; font-size: 14px; color: #555; text-align: center; }
-  table { width: 100%; border-collapse: collapse; font-size: 14px; }
-  th { background: #f3f4f6; border: 1px solid #ccc; padding: 10px; text-align: left; }
+  table { width: 100%; border-collapse: collapse; font-size: 14px; background: transparent; }
+  thead tr, tbody tr, td { background: transparent !important; }
+  th { background: rgba(243,244,246,0.35); border: 1px solid #ccc; padding: 10px; text-align: left; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
   th:nth-child(1), th:nth-child(6) { text-align: center; }
   @media print { body { padding: 0 12px; } .no-print { display: none; } }
   ${printBrandCss}
