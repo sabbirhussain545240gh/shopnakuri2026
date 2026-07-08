@@ -706,6 +706,7 @@ function MembersTab() {
   const [open, setOpen] = useState(false);
   const emptyForm = {
     serial: "",
+    category: "",
     name: "", fatherName: "", motherName: "", phone: "",
     birthDate: "", nid: "", address: "", photo: "",
     nominee: { name: "", relation: "", phone: "", nid: "" },
