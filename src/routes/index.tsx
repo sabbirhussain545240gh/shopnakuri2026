@@ -724,7 +724,7 @@ function MembersTab() {
 
   const onPhoto = (file?: File) => {
     if (!file) return;
-    if (file.size > 2 * 1024 * 1024) { toast.error("ছবি ২ MB এর কম হতে হবে"); return; }
+    if (file.size > 10 * 1024 * 1024) { toast.error("ছবি ১০ MB এর কম হতে হবে"); return; }
     const reader = new FileReader();
     reader.onload = () => setForm((f) => ({ ...f, photo: String(reader.result || "") }));
     reader.readAsDataURL(file);
@@ -1290,7 +1290,7 @@ function EditMemberForm({ member, onSave, onCancel }: { member: Member; onSave: 
 
   const onPhoto = (file?: File) => {
     if (!file) return;
-    if (file.size > 2 * 1024 * 1024) { toast.error("ছবি ২ MB এর কম হতে হবে"); return; }
+    if (file.size > 10 * 1024 * 1024) { toast.error("ছবি ১০ MB এর কম হতে হবে"); return; }
     const reader = new FileReader();
     reader.onload = () => setForm((f) => ({ ...f, photo: String(reader.result || "") }));
     reader.readAsDataURL(file);
