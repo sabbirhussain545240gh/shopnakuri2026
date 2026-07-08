@@ -10,6 +10,7 @@ export type Nominee = {
 export type Member = {
   id: string;
   serial: number;
+  category?: string;
   name: string;
   fatherName: string;
   motherName: string;
@@ -21,6 +22,14 @@ export type Member = {
   nominee: Nominee;
   joinDate: string;
 };
+
+export function formatMemberSerial(m: { serial?: number; category?: string } | null | undefined, prefix?: string): string {
+  if (!m) return "";
+  const pre = (prefix || "").toString().trim();
+  const cat = (m.category || "").toString().trim();
+  const n = m.serial || 0;
+  return `${pre}${cat}${n}`;
+}
 
 export type Deposit = {
   id: string;
