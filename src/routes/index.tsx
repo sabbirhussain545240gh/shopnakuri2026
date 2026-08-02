@@ -3124,6 +3124,15 @@ function LoansTab() {
                   <div><span className="text-destructive">বকেয়া:</span> {formatTk(Math.max(0, due - paid))}</div>
                   <div><span className="text-muted-foreground">অবস্থা:</span> {currentLoan.status === "active" ? "চলমান" : "পরিশোধিত"}</div>
                 </div>
+                {currentLoan.isJoint && currentLoan.coBorrower && (
+                  <div className="border-t pt-2">
+                    <div className="font-medium mb-1">যৌথ ঋণগ্রহীতা (বাহিরের ব্যক্তি)</div>
+                    <div>নাম: {currentLoan.coBorrower.name}{currentLoan.coBorrower.fatherName ? ` (পিতা: ${currentLoan.coBorrower.fatherName})` : ""}</div>
+                    <div>মোবাইল: {currentLoan.coBorrower.phone}</div>
+                    {currentLoan.coBorrower.nid && <div>NID: {currentLoan.coBorrower.nid}</div>}
+                    {currentLoan.coBorrower.address && <div>ঠিকানা: {currentLoan.coBorrower.address}</div>}
+                  </div>
+                )}
                 <div className="border-t pt-2">
                   <div className="font-medium mb-1">জামিনদার</div>
                   <div>সদস্য জামিনদার: {gm?.name ?? "—"}</div>
