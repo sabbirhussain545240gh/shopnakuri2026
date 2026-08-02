@@ -1422,6 +1422,9 @@ function buildLoanDetailHtml(
     ["অবস্থা", loan.status === "active" ? "চলমান" : "পরিশোধিত"],
   ];
   const guarantorRows: [string, string][] = [["সদস্য জামিনদার", guarantor?.name ?? "—"]];
+  if (loan.isJoint && loan.coBorrower) {
+    guarantorRows.push(["যৌথ ঋণগ্রহীতা (বাহিরের)", `${loan.coBorrower.name}${loan.coBorrower.fatherName ? ` (পিতা: ${loan.coBorrower.fatherName})` : ""} — ${loan.coBorrower.phone}${loan.coBorrower.nid ? ` | NID: ${loan.coBorrower.nid}` : ""}${loan.coBorrower.address ? ` | ${loan.coBorrower.address}` : ""}`]);
+  }
   if (loan.familyGuarantor) {
     guarantorRows.push(["পারিবারিক জামিনদার", `${loan.familyGuarantor.name} (${loan.familyGuarantor.relation}) — ${loan.familyGuarantor.phone}`]);
   }
@@ -2286,6 +2289,8 @@ function LoansTab() {
   const [form, setForm] = useState({ memberId: "", amount: "", interestRate: String(data.settings.defaultInterestRate), durationMonths: String(data.settings.defaultDurationMonths), date: today(), memberGuarantorId: "", familyGuarantorName: "", familyGuarantorRelation: "", familyGuarantorCustomRelation: "", familyGuarantorPhone: "" });
   const [payForm, setPayForm] = useState({ amount: "", date: today(), note: "" });
   const [receipt, setReceipt] = useState<null | { loan: Loan; memberName: string; memberSerial?: number; amount: number; date: string; paidAfter: number; remainingAfter: number; receiptNo: string; note?: string; logo?: string; loanNo?: number }>(null);
+  const [isJoint, setIsJoint] = useState(false);
+  const [coForm, setCoForm] = useState({ name: "", fatherName: "", phone: "", nid: "", address: "" });
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [loanSearch, setLoanSearch] = useState("");
   const [loanStatusFilter, setLoanStatusFilter] = useState<"all" | "active" | "closed">("all");
@@ -2308,6 +2313,10 @@ function LoansTab() {
     if (!form.familyGuarantorRelation.trim()) nextErrors.familyGuarantorRelation = "সম্পর্ক নির্বাচন করুন";
     if (form.familyGuarantorRelation === "অন্যান্য" && !form.familyGuarantorCustomRelation.trim()) nextErrors.familyGuarantorCustomRelation = "কাস্টম সম্পর্ক লিখুন";
     if (!form.familyGuarantorPhone.trim()) nextErrors.familyGuarantorPhone = "মোবাইল নম্বর দিন";
+    if (isJoint) {
+      if (!coForm.name.trim()) nextErrors.coName = "যৌথ ঋণগ্রহীতার নাম দিন";
+      if (!coForm.phone.trim()) nextErrors.coPhone = "মোবাইল নম্বর দিন";
+    }
 
     if (Object.keys(nextErrors).length > 0) {
       setErrors(nextErrors);
@@ -2323,8 +2332,18 @@ function LoansTab() {
       date: form.date,
       memberGuarantorId: form.memberGuarantorId,
       familyGuarantor: { name: form.familyGuarantorName.trim(), relation, phone: form.familyGuarantorPhone.trim() },
+      isJoint,
+      coBorrower: isJoint ? {
+        name: coForm.name.trim(),
+        fatherName: coForm.fatherName.trim() || undefined,
+        phone: coForm.phone.trim(),
+        nid: coForm.nid.trim() || undefined,
+        address: coForm.address.trim() || undefined,
+      } : undefined,
     });
     setForm({ memberId: "", amount: "", interestRate: String(data.settings.defaultInterestRate), durationMonths: String(data.settings.defaultDurationMonths), date: today(), memberGuarantorId: "", familyGuarantorName: "", familyGuarantorRelation: "", familyGuarantorCustomRelation: "", familyGuarantorPhone: "" });
+    setIsJoint(false);
+    setCoForm({ name: "", fatherName: "", phone: "", nid: "", address: "" });
     setErrors({});
     setOpen(false);
     toast.success("ঋণ প্রদান হয়েছে");
@@ -2670,6 +2689,39 @@ function LoansTab() {
                   </div>
                 );
               })()}
+              <div className="rounded-md border p-3 space-y-3">
+                <label className="flex items-center gap-2 text-sm font-medium cursor-pointer">
+                  <input type="checkbox" className="h-4 w-4 accent-current" checked={isJoint} onChange={(e) => setIsJoint(e.target.checked)} />
+                  যৌথভাবে ঋণ প্রদান (২য় জন বাহিরের ব্যক্তি)
+                </label>
+                {isJoint && (
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div className="sm:col-span-2 text-xs text-muted-foreground">১ম ঋণগ্রহীতা: সমিতির সদস্য (উপরে নির্বাচিত) · ২য় ঋণগ্রহীতা: বাহিরের ব্যক্তি</div>
+                    <div>
+                      <Label>২য় ঋণগ্রহীতার নাম *</Label>
+                      <Input className={errors.coName ? "border-destructive" : ""} value={coForm.name} onChange={(e) => { setCoForm({ ...coForm, name: e.target.value }); setErrors((p) => { const n = { ...p }; delete n.coName; return n; }); }} placeholder="নাম" />
+                      {errors.coName && <p className="text-xs text-destructive mt-1">{errors.coName}</p>}
+                    </div>
+                    <div>
+                      <Label>পিতার নাম</Label>
+                      <Input value={coForm.fatherName} onChange={(e) => setCoForm({ ...coForm, fatherName: e.target.value })} placeholder="পিতার নাম" />
+                    </div>
+                    <div>
+                      <Label>মোবাইল *</Label>
+                      <Input className={errors.coPhone ? "border-destructive" : ""} value={coForm.phone} onChange={(e) => { setCoForm({ ...coForm, phone: e.target.value }); setErrors((p) => { const n = { ...p }; delete n.coPhone; return n; }); }} placeholder="মোবাইল নম্বর" />
+                      {errors.coPhone && <p className="text-xs text-destructive mt-1">{errors.coPhone}</p>}
+                    </div>
+                    <div>
+                      <Label>NID</Label>
+                      <Input value={coForm.nid} onChange={(e) => setCoForm({ ...coForm, nid: e.target.value })} placeholder="জাতীয় পরিচয়পত্র নং" />
+                    </div>
+                    <div className="sm:col-span-2">
+                      <Label>ঠিকানা</Label>
+                      <Input value={coForm.address} onChange={(e) => setCoForm({ ...coForm, address: e.target.value })} placeholder="ঠিকানা" />
+                    </div>
+                  </div>
+                )}
+              </div>
               <div>
                 <Label>সদস্য জামিনদার *</Label>
                 <Select value={form.memberGuarantorId} onValueChange={(v) => setField("memberGuarantorId", v)}>
@@ -3072,6 +3124,15 @@ function LoansTab() {
                   <div><span className="text-destructive">বকেয়া:</span> {formatTk(Math.max(0, due - paid))}</div>
                   <div><span className="text-muted-foreground">অবস্থা:</span> {currentLoan.status === "active" ? "চলমান" : "পরিশোধিত"}</div>
                 </div>
+                {currentLoan.isJoint && currentLoan.coBorrower && (
+                  <div className="border-t pt-2">
+                    <div className="font-medium mb-1">যৌথ ঋণগ্রহীতা (বাহিরের ব্যক্তি)</div>
+                    <div>নাম: {currentLoan.coBorrower.name}{currentLoan.coBorrower.fatherName ? ` (পিতা: ${currentLoan.coBorrower.fatherName})` : ""}</div>
+                    <div>মোবাইল: {currentLoan.coBorrower.phone}</div>
+                    {currentLoan.coBorrower.nid && <div>NID: {currentLoan.coBorrower.nid}</div>}
+                    {currentLoan.coBorrower.address && <div>ঠিকানা: {currentLoan.coBorrower.address}</div>}
+                  </div>
+                )}
                 <div className="border-t pt-2">
                   <div className="font-medium mb-1">জামিনদার</div>
                   <div>সদস্য জামিনদার: {gm?.name ?? "—"}</div>
