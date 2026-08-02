@@ -2737,6 +2737,48 @@ function LoansTab() {
                   </div>
                 )}
               </div>
+              <div className="rounded-md border p-3 space-y-3">
+                <div className="flex items-center justify-between">
+                  <div className="text-sm font-medium">জামানত হিসেবে রাখা চেক</div>
+                  <Button type="button" size="sm" variant="outline" onClick={addChequeRow}>+ চেক যোগ করুন</Button>
+                </div>
+                {cheques.length === 0 && <p className="text-xs text-muted-foreground">সদস্যের কাছ থেকে জামানত হিসেবে রাখা ব্যাংকের নাম ও চেক নং যোগ করুন (একাধিক চেক যোগ করা যাবে)।</p>}
+                {cheques.map((c, i) => (
+                  <div key={i} className="rounded-md border p-3 space-y-2 bg-muted/30">
+                    <div className="flex items-center justify-between">
+                      <div className="text-xs font-semibold">চেক {toBn(i + 1)}</div>
+                      <Button type="button" size="sm" variant="ghost" className="h-7 text-destructive" onClick={() => removeChequeRow(i)}>মুছুন</Button>
+                    </div>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                      <div>
+                        <Label>ব্যাংকের নাম</Label>
+                        <Input value={c.bankName} onChange={(e) => updateChequeRow(i, "bankName", e.target.value)} placeholder="ব্যাংকের নাম" />
+                      </div>
+                      <div>
+                        <Label>শাখা</Label>
+                        <Input value={c.branch} onChange={(e) => updateChequeRow(i, "branch", e.target.value)} placeholder="শাখার নাম" />
+                      </div>
+                      <div>
+                        <Label>চেক নং</Label>
+                        <Input value={c.chequeNo} onChange={(e) => updateChequeRow(i, "chequeNo", e.target.value)} placeholder="চেক নম্বর" />
+                      </div>
+                      <div>
+                        <Label>হিসাব নং</Label>
+                        <Input value={c.accountNo} onChange={(e) => updateChequeRow(i, "accountNo", e.target.value)} placeholder="একাউন্ট নম্বর" />
+                      </div>
+                      <div>
+                        <Label>চেকের পরিমাণ (৳)</Label>
+                        <Input type="number" value={c.amount} onChange={(e) => updateChequeRow(i, "amount", e.target.value)} placeholder="0" />
+                      </div>
+                      <div>
+                        <Label>চেকের তারিখ</Label>
+                        <Input type="date" value={c.date} onChange={(e) => updateChequeRow(i, "date", e.target.value)} />
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+
               <div>
                 <Label>সদস্য জামিনদার *</Label>
                 <Select value={form.memberGuarantorId} onValueChange={(v) => setField("memberGuarantorId", v)}>
