@@ -49,6 +49,8 @@ export type Loan = {
   status: "active" | "closed";
   memberGuarantorId?: string;
   familyGuarantor?: { name: string; relation: string; phone: string };
+  isJoint?: boolean;
+  coBorrower?: { name: string; fatherName?: string; phone: string; nid?: string; address?: string };
 };
 
 export type LoanPayment = {

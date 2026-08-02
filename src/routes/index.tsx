@@ -1422,6 +1422,9 @@ function buildLoanDetailHtml(
     ["অবস্থা", loan.status === "active" ? "চলমান" : "পরিশোধিত"],
   ];
   const guarantorRows: [string, string][] = [["সদস্য জামিনদার", guarantor?.name ?? "—"]];
+  if (loan.isJoint && loan.coBorrower) {
+    guarantorRows.push(["যৌথ ঋণগ্রহীতা (বাহিরের)", `${loan.coBorrower.name}${loan.coBorrower.fatherName ? ` (পিতা: ${loan.coBorrower.fatherName})` : ""} — ${loan.coBorrower.phone}${loan.coBorrower.nid ? ` | NID: ${loan.coBorrower.nid}` : ""}${loan.coBorrower.address ? ` | ${loan.coBorrower.address}` : ""}`]);
+  }
   if (loan.familyGuarantor) {
     guarantorRows.push(["পারিবারিক জামিনদার", `${loan.familyGuarantor.name} (${loan.familyGuarantor.relation}) — ${loan.familyGuarantor.phone}`]);
   }
