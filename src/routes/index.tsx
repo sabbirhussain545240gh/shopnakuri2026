@@ -2344,10 +2344,21 @@ function LoansTab() {
         nid: coForm.nid.trim() || undefined,
         address: coForm.address.trim() || undefined,
       } : undefined,
+      cheques: cheques
+        .filter((c) => c.bankName.trim() || c.chequeNo.trim())
+        .map((c) => ({
+          bankName: c.bankName.trim(),
+          branch: c.branch.trim() || undefined,
+          chequeNo: c.chequeNo.trim(),
+          accountNo: c.accountNo.trim() || undefined,
+          amount: c.amount.trim() ? Number(c.amount) : undefined,
+          date: c.date || undefined,
+        })),
     });
     setForm({ memberId: "", amount: "", interestRate: String(data.settings.defaultInterestRate), durationMonths: String(data.settings.defaultDurationMonths), date: today(), memberGuarantorId: "", familyGuarantorName: "", familyGuarantorRelation: "", familyGuarantorCustomRelation: "", familyGuarantorPhone: "" });
     setIsJoint(false);
     setCoForm({ name: "", fatherName: "", phone: "", nid: "", address: "" });
+    setCheques([]);
     setErrors({});
     setOpen(false);
     toast.success("ঋণ প্রদান হয়েছে");
