@@ -39,6 +39,15 @@ export type Deposit = {
   note?: string;
 };
 
+export type CollateralCheque = {
+  bankName: string;
+  branch?: string;
+  chequeNo: string;
+  accountNo?: string;
+  amount?: number;
+  date?: string;
+};
+
 export type Loan = {
   id: string;
   memberId: string;
@@ -51,7 +60,9 @@ export type Loan = {
   familyGuarantor?: { name: string; relation: string; phone: string };
   isJoint?: boolean;
   coBorrower?: { name: string; fatherName?: string; phone: string; nid?: string; address?: string };
+  cheques?: CollateralCheque[];
 };
+
 
 export type LoanPayment = {
   id: string;
