@@ -3190,6 +3190,19 @@ function LoansTab() {
                     {currentLoan.coBorrower.address && <div>ঠিকানা: {currentLoan.coBorrower.address}</div>}
                   </div>
                 )}
+                {currentLoan.cheques && currentLoan.cheques.length > 0 && (
+                  <div className="border-t pt-2">
+                    <div className="font-medium mb-1">জামানত চেক ({toBn(currentLoan.cheques.length)})</div>
+                    {currentLoan.cheques.map((c, i) => (
+                      <div key={i}>
+                        {toBn(i + 1)}. {c.bankName}{c.branch ? ` (${c.branch})` : ""} — চেক নং: {c.chequeNo}
+                        {c.accountNo ? ` | হিসাব নং: ${c.accountNo}` : ""}
+                        {c.amount ? ` | ${formatTk(c.amount)}` : ""}
+                        {c.date ? ` | ${fmtDate(c.date)}` : ""}
+                      </div>
+                    ))}
+                  </div>
+                )}
                 <div className="border-t pt-2">
                   <div className="font-medium mb-1">জামিনদার</div>
                   <div>সদস্য জামিনদার: {gm?.name ?? "—"}</div>
