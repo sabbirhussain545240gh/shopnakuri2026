@@ -2689,6 +2689,39 @@ function LoansTab() {
                   </div>
                 );
               })()}
+              <div className="rounded-md border p-3 space-y-3">
+                <label className="flex items-center gap-2 text-sm font-medium cursor-pointer">
+                  <input type="checkbox" className="h-4 w-4 accent-current" checked={isJoint} onChange={(e) => setIsJoint(e.target.checked)} />
+                  যৌথভাবে ঋণ প্রদান (২য় জন বাহিরের ব্যক্তি)
+                </label>
+                {isJoint && (
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div className="sm:col-span-2 text-xs text-muted-foreground">১ম ঋণগ্রহীতা: সমিতির সদস্য (উপরে নির্বাচিত) · ২য় ঋণগ্রহীতা: বাহিরের ব্যক্তি</div>
+                    <div>
+                      <Label>২য় ঋণগ্রহীতার নাম *</Label>
+                      <Input className={errors.coName ? "border-destructive" : ""} value={coForm.name} onChange={(e) => { setCoForm({ ...coForm, name: e.target.value }); setErrors((p) => { const n = { ...p }; delete n.coName; return n; }); }} placeholder="নাম" />
+                      {errors.coName && <p className="text-xs text-destructive mt-1">{errors.coName}</p>}
+                    </div>
+                    <div>
+                      <Label>পিতার নাম</Label>
+                      <Input value={coForm.fatherName} onChange={(e) => setCoForm({ ...coForm, fatherName: e.target.value })} placeholder="পিতার নাম" />
+                    </div>
+                    <div>
+                      <Label>মোবাইল *</Label>
+                      <Input className={errors.coPhone ? "border-destructive" : ""} value={coForm.phone} onChange={(e) => { setCoForm({ ...coForm, phone: e.target.value }); setErrors((p) => { const n = { ...p }; delete n.coPhone; return n; }); }} placeholder="মোবাইল নম্বর" />
+                      {errors.coPhone && <p className="text-xs text-destructive mt-1">{errors.coPhone}</p>}
+                    </div>
+                    <div>
+                      <Label>NID</Label>
+                      <Input value={coForm.nid} onChange={(e) => setCoForm({ ...coForm, nid: e.target.value })} placeholder="জাতীয় পরিচয়পত্র নং" />
+                    </div>
+                    <div className="sm:col-span-2">
+                      <Label>ঠিকানা</Label>
+                      <Input value={coForm.address} onChange={(e) => setCoForm({ ...coForm, address: e.target.value })} placeholder="ঠিকানা" />
+                    </div>
+                  </div>
+                )}
+              </div>
               <div>
                 <Label>সদস্য জামিনদার *</Label>
                 <Select value={form.memberGuarantorId} onValueChange={(v) => setField("memberGuarantorId", v)}>
