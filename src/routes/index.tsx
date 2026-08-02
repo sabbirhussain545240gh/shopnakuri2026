@@ -2291,6 +2291,10 @@ function LoansTab() {
   const [receipt, setReceipt] = useState<null | { loan: Loan; memberName: string; memberSerial?: number; amount: number; date: string; paidAfter: number; remainingAfter: number; receiptNo: string; note?: string; logo?: string; loanNo?: number }>(null);
   const [isJoint, setIsJoint] = useState(false);
   const [coForm, setCoForm] = useState({ name: "", fatherName: "", phone: "", nid: "", address: "" });
+  const [cheques, setCheques] = useState<Array<{ bankName: string; branch: string; chequeNo: string; accountNo: string; amount: string; date: string }>>([]);
+  const addChequeRow = () => setCheques((p) => [...p, { bankName: "", branch: "", chequeNo: "", accountNo: "", amount: "", date: "" }]);
+  const updateChequeRow = (i: number, key: string, v: string) => setCheques((p) => p.map((c, idx) => (idx === i ? { ...c, [key]: v } : c)));
+  const removeChequeRow = (i: number) => setCheques((p) => p.filter((_, idx) => idx !== i));
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [loanSearch, setLoanSearch] = useState("");
   const [loanStatusFilter, setLoanStatusFilter] = useState<"all" | "active" | "closed">("all");
