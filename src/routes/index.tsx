@@ -1428,6 +1428,13 @@ function buildLoanDetailHtml(
   if (loan.familyGuarantor) {
     guarantorRows.push(["পারিবারিক জামিনদার", `${loan.familyGuarantor.name} (${loan.familyGuarantor.relation}) — ${loan.familyGuarantor.phone}`]);
   }
+  (loan.cheques ?? []).forEach((c, i) => {
+    guarantorRows.push([
+      `জামানত চেক ${toBn(i + 1)}`,
+      `${c.bankName}${c.branch ? ` (${c.branch})` : ""} — চেক নং: ${c.chequeNo}${c.accountNo ? ` | হিসাব নং: ${c.accountNo}` : ""}${c.amount ? ` | ${formatTk(c.amount)}` : ""}${c.date ? ` | ${fmtDate(c.date)}` : ""}`,
+    ]);
+  });
+
   const tableRows = (items: [string, string][]) =>
     items.map(([k, v]) => `<tr><td style="padding:6px 10px;border:1px solid #ddd;background:#fafafa;font-weight:600;width:40%;">${k}</td><td style="padding:6px 10px;border:1px solid #ddd;">${v || "—"}</td></tr>`).join("");
   const paymentRows = payments.length
