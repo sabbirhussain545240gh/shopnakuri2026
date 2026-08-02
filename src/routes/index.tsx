@@ -2289,6 +2289,8 @@ function LoansTab() {
   const [form, setForm] = useState({ memberId: "", amount: "", interestRate: String(data.settings.defaultInterestRate), durationMonths: String(data.settings.defaultDurationMonths), date: today(), memberGuarantorId: "", familyGuarantorName: "", familyGuarantorRelation: "", familyGuarantorCustomRelation: "", familyGuarantorPhone: "" });
   const [payForm, setPayForm] = useState({ amount: "", date: today(), note: "" });
   const [receipt, setReceipt] = useState<null | { loan: Loan; memberName: string; memberSerial?: number; amount: number; date: string; paidAfter: number; remainingAfter: number; receiptNo: string; note?: string; logo?: string; loanNo?: number }>(null);
+  const [isJoint, setIsJoint] = useState(false);
+  const [coForm, setCoForm] = useState({ name: "", fatherName: "", phone: "", nid: "", address: "" });
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [loanSearch, setLoanSearch] = useState("");
   const [loanStatusFilter, setLoanStatusFilter] = useState<"all" | "active" | "closed">("all");
@@ -2311,6 +2313,10 @@ function LoansTab() {
     if (!form.familyGuarantorRelation.trim()) nextErrors.familyGuarantorRelation = "সম্পর্ক নির্বাচন করুন";
     if (form.familyGuarantorRelation === "অন্যান্য" && !form.familyGuarantorCustomRelation.trim()) nextErrors.familyGuarantorCustomRelation = "কাস্টম সম্পর্ক লিখুন";
     if (!form.familyGuarantorPhone.trim()) nextErrors.familyGuarantorPhone = "মোবাইল নম্বর দিন";
+    if (isJoint) {
+      if (!coForm.name.trim()) nextErrors.coName = "যৌথ ঋণগ্রহীতার নাম দিন";
+      if (!coForm.phone.trim()) nextErrors.coPhone = "মোবাইল নম্বর দিন";
+    }
 
     if (Object.keys(nextErrors).length > 0) {
       setErrors(nextErrors);
@@ -2326,8 +2332,18 @@ function LoansTab() {
       date: form.date,
       memberGuarantorId: form.memberGuarantorId,
       familyGuarantor: { name: form.familyGuarantorName.trim(), relation, phone: form.familyGuarantorPhone.trim() },
+      isJoint,
+      coBorrower: isJoint ? {
+        name: coForm.name.trim(),
+        fatherName: coForm.fatherName.trim() || undefined,
+        phone: coForm.phone.trim(),
+        nid: coForm.nid.trim() || undefined,
+        address: coForm.address.trim() || undefined,
+      } : undefined,
     });
     setForm({ memberId: "", amount: "", interestRate: String(data.settings.defaultInterestRate), durationMonths: String(data.settings.defaultDurationMonths), date: today(), memberGuarantorId: "", familyGuarantorName: "", familyGuarantorRelation: "", familyGuarantorCustomRelation: "", familyGuarantorPhone: "" });
+    setIsJoint(false);
+    setCoForm({ name: "", fatherName: "", phone: "", nid: "", address: "" });
     setErrors({});
     setOpen(false);
     toast.success("ঋণ প্রদান হয়েছে");
