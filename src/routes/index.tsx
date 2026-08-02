@@ -1428,6 +1428,13 @@ function buildLoanDetailHtml(
   if (loan.familyGuarantor) {
     guarantorRows.push(["পারিবারিক জামিনদার", `${loan.familyGuarantor.name} (${loan.familyGuarantor.relation}) — ${loan.familyGuarantor.phone}`]);
   }
+  (loan.cheques ?? []).forEach((c, i) => {
+    guarantorRows.push([
+      `জামানত চেক ${toBn(i + 1)}`,
+      `${c.bankName}${c.branch ? ` (${c.branch})` : ""} — চেক নং: ${c.chequeNo}${c.accountNo ? ` | হিসাব নং: ${c.accountNo}` : ""}${c.amount ? ` | ${formatTk(c.amount)}` : ""}${c.date ? ` | ${fmtDate(c.date)}` : ""}`,
+    ]);
+  });
+
   const tableRows = (items: [string, string][]) =>
     items.map(([k, v]) => `<tr><td style="padding:6px 10px;border:1px solid #ddd;background:#fafafa;font-weight:600;width:40%;">${k}</td><td style="padding:6px 10px;border:1px solid #ddd;">${v || "—"}</td></tr>`).join("");
   const paymentRows = payments.length
@@ -2291,6 +2298,10 @@ function LoansTab() {
   const [receipt, setReceipt] = useState<null | { loan: Loan; memberName: string; memberSerial?: number; amount: number; date: string; paidAfter: number; remainingAfter: number; receiptNo: string; note?: string; logo?: string; loanNo?: number }>(null);
   const [isJoint, setIsJoint] = useState(false);
   const [coForm, setCoForm] = useState({ name: "", fatherName: "", phone: "", nid: "", address: "" });
+  const [cheques, setCheques] = useState<Array<{ bankName: string; branch: string; chequeNo: string; accountNo: string; amount: string; date: string }>>([]);
+  const addChequeRow = () => setCheques((p) => [...p, { bankName: "", branch: "", chequeNo: "", accountNo: "", amount: "", date: "" }]);
+  const updateChequeRow = (i: number, key: string, v: string) => setCheques((p) => p.map((c, idx) => (idx === i ? { ...c, [key]: v } : c)));
+  const removeChequeRow = (i: number) => setCheques((p) => p.filter((_, idx) => idx !== i));
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [loanSearch, setLoanSearch] = useState("");
   const [loanStatusFilter, setLoanStatusFilter] = useState<"all" | "active" | "closed">("all");
@@ -2340,10 +2351,21 @@ function LoansTab() {
         nid: coForm.nid.trim() || undefined,
         address: coForm.address.trim() || undefined,
       } : undefined,
+      cheques: cheques
+        .filter((c) => c.bankName.trim() || c.chequeNo.trim())
+        .map((c) => ({
+          bankName: c.bankName.trim(),
+          branch: c.branch.trim() || undefined,
+          chequeNo: c.chequeNo.trim(),
+          accountNo: c.accountNo.trim() || undefined,
+          amount: c.amount.trim() ? Number(c.amount) : undefined,
+          date: c.date || undefined,
+        })),
     });
     setForm({ memberId: "", amount: "", interestRate: String(data.settings.defaultInterestRate), durationMonths: String(data.settings.defaultDurationMonths), date: today(), memberGuarantorId: "", familyGuarantorName: "", familyGuarantorRelation: "", familyGuarantorCustomRelation: "", familyGuarantorPhone: "" });
     setIsJoint(false);
     setCoForm({ name: "", fatherName: "", phone: "", nid: "", address: "" });
+    setCheques([]);
     setErrors({});
     setOpen(false);
     toast.success("ঋণ প্রদান হয়েছে");
@@ -2722,6 +2744,48 @@ function LoansTab() {
                   </div>
                 )}
               </div>
+              <div className="rounded-md border p-3 space-y-3">
+                <div className="flex items-center justify-between">
+                  <div className="text-sm font-medium">জামানত হিসেবে রাখা চেক</div>
+                  <Button type="button" size="sm" variant="outline" onClick={addChequeRow}>+ চেক যোগ করুন</Button>
+                </div>
+                {cheques.length === 0 && <p className="text-xs text-muted-foreground">সদস্যের কাছ থেকে জামানত হিসেবে রাখা ব্যাংকের নাম ও চেক নং যোগ করুন (একাধিক চেক যোগ করা যাবে)।</p>}
+                {cheques.map((c, i) => (
+                  <div key={i} className="rounded-md border p-3 space-y-2 bg-muted/30">
+                    <div className="flex items-center justify-between">
+                      <div className="text-xs font-semibold">চেক {toBn(i + 1)}</div>
+                      <Button type="button" size="sm" variant="ghost" className="h-7 text-destructive" onClick={() => removeChequeRow(i)}>মুছুন</Button>
+                    </div>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                      <div>
+                        <Label>ব্যাংকের নাম</Label>
+                        <Input value={c.bankName} onChange={(e) => updateChequeRow(i, "bankName", e.target.value)} placeholder="ব্যাংকের নাম" />
+                      </div>
+                      <div>
+                        <Label>শাখা</Label>
+                        <Input value={c.branch} onChange={(e) => updateChequeRow(i, "branch", e.target.value)} placeholder="শাখার নাম" />
+                      </div>
+                      <div>
+                        <Label>চেক নং</Label>
+                        <Input value={c.chequeNo} onChange={(e) => updateChequeRow(i, "chequeNo", e.target.value)} placeholder="চেক নম্বর" />
+                      </div>
+                      <div>
+                        <Label>হিসাব নং</Label>
+                        <Input value={c.accountNo} onChange={(e) => updateChequeRow(i, "accountNo", e.target.value)} placeholder="একাউন্ট নম্বর" />
+                      </div>
+                      <div>
+                        <Label>চেকের পরিমাণ (৳)</Label>
+                        <Input type="number" value={c.amount} onChange={(e) => updateChequeRow(i, "amount", e.target.value)} placeholder="0" />
+                      </div>
+                      <div>
+                        <Label>চেকের তারিখ</Label>
+                        <Input type="date" value={c.date} onChange={(e) => updateChequeRow(i, "date", e.target.value)} />
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+
               <div>
                 <Label>সদস্য জামিনদার *</Label>
                 <Select value={form.memberGuarantorId} onValueChange={(v) => setField("memberGuarantorId", v)}>
@@ -3131,6 +3195,19 @@ function LoansTab() {
                     <div>মোবাইল: {currentLoan.coBorrower.phone}</div>
                     {currentLoan.coBorrower.nid && <div>NID: {currentLoan.coBorrower.nid}</div>}
                     {currentLoan.coBorrower.address && <div>ঠিকানা: {currentLoan.coBorrower.address}</div>}
+                  </div>
+                )}
+                {currentLoan.cheques && currentLoan.cheques.length > 0 && (
+                  <div className="border-t pt-2">
+                    <div className="font-medium mb-1">জামানত চেক ({toBn(currentLoan.cheques.length)})</div>
+                    {currentLoan.cheques.map((c, i) => (
+                      <div key={i}>
+                        {toBn(i + 1)}. {c.bankName}{c.branch ? ` (${c.branch})` : ""} — চেক নং: {c.chequeNo}
+                        {c.accountNo ? ` | হিসাব নং: ${c.accountNo}` : ""}
+                        {c.amount ? ` | ${formatTk(c.amount)}` : ""}
+                        {c.date ? ` | ${fmtDate(c.date)}` : ""}
+                      </div>
+                    ))}
                   </div>
                 )}
                 <div className="border-t pt-2">
