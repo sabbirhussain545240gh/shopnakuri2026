@@ -5238,6 +5238,15 @@ function ReconciliationTab() {
     };
   }, [data]);
 
+  const lastLoanEndDate = useMemo(() => {
+    if (!data.loans.length) return "";
+    const latest = [...data.loans].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())[0];
+    const d = new Date(latest.date);
+    if (isNaN(d.getTime())) return "";
+    d.setMonth(d.getMonth() + (latest.durationMonths || 0));
+    return toBn(d.toLocaleDateString("en-GB"));
+  }, [data.loans]);
+
   const rows = [
     { label: "মোট সঞ্চয়/চাদা জমা", value: totals.totalDeposit, type: "positive" as const },
     { label: "মোট ঋণ প্রদান", value: totals.totalLoanGiven, type: "negative" as const },
@@ -5248,8 +5257,9 @@ function ReconciliationTab() {
     { label: "সর্বমোট ঋণ প্রাপ্তি (আদায় + বকেয়া)", value: totals.totalLoanReceivable, type: "neutral" as const },
     { label: "নীট সম্পদ (জমা + আদায় + আয় - ব্যয় - ঋণ)", value: totals.netAssets, type: "neutral" as const },
     { label: "তহবিল ব্যালেন্স (নীট সম্পদ + বকেয়া)", value: totals.fundBalance, type: "neutral" as const },
-    { label: "মোট আয় (তহবিল ব্যালেন্স - জমা)", value: totals.grossIncome, type: totals.grossIncome >= 0 ? ("positive" as const) : ("negative" as const) },
+    { label: "মোট আয় (তহবিল ব্যালেন্স - জমা)", value: totals.grossIncome, hint: lastLoanEndDate ? `সর্বশেষ প্রদানকৃত ঋণের কিস্তি শেষ হবেঃ ${lastLoanEndDate}` : undefined, type: totals.grossIncome >= 0 ? ("positive" as const) : ("negative" as const) },
   ];
+
 
   const memberReconciliation = useMemo(() => {
     return data.members.map((m) => {
@@ -5276,7 +5286,12 @@ function ReconciliationTab() {
           <div className="grid gap-3">
             {rows.map((r) => (
               <div key={r.label} className="flex items-center justify-between rounded-lg border px-4 py-3">
-                <span className="text-sm font-medium">{r.label}</span>
+                <span className="text-sm font-medium">
+                  {r.label}
+                  {"hint" in r && r.hint ? (
+                    <span className="block text-xs font-normal text-muted-foreground mt-0.5">{r.hint}</span>
+                  ) : null}
+                </span>
                 <span className={cn(
                   "text-sm font-bold",
                   r.type === "positive" && "text-success",
