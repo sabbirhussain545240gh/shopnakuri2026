@@ -5286,7 +5286,12 @@ function ReconciliationTab() {
           <div className="grid gap-3">
             {rows.map((r) => (
               <div key={r.label} className="flex items-center justify-between rounded-lg border px-4 py-3">
-                <span className="text-sm font-medium">{r.label}</span>
+                <span className="text-sm font-medium">
+                  {r.label}
+                  {"hint" in r && r.hint ? (
+                    <span className="block text-xs font-normal text-muted-foreground mt-0.5">{r.hint}</span>
+                  ) : null}
+                </span>
                 <span className={cn(
                   "text-sm font-bold",
                   r.type === "positive" && "text-success",
