@@ -1169,20 +1169,26 @@ function MembersTab() {
                       <h4 className="font-semibold mb-2">জমার ইতিহাস ({toBn(memberDeposits.length)})</h4>
                       {memberDeposits.length === 0 ? (
                         <p className="text-sm text-muted-foreground">কোনো জমা নেই</p>
-                      ) : (
+                      ) : (() => {
+                        const seq = new Map<string, number>();
+                        [...memberDeposits]
+                          .sort((a, b) => (a.date < b.date ? -1 : a.date > b.date ? 1 : a.id < b.id ? -1 : 1))
+                          .forEach((d, i) => seq.set(d.id, i + 1));
+                        return (
                         <div className="max-h-48 overflow-y-auto rounded-md border">
                           <table className="w-full text-sm">
                             <thead className="bg-muted/50 sticky top-0">
-                              <tr><th className="text-left p-2">তারিখ</th><th className="text-right p-2">পরিমাণ</th><th className="text-left p-2">নোট</th></tr>
+                              <tr><th className="text-left p-2">তারিখ</th><th className="text-left p-2">রিসিপ্ট নং</th><th className="text-right p-2">পরিমাণ</th><th className="text-left p-2">নোট</th></tr>
                             </thead>
                             <tbody>
                               {[...memberDeposits].sort((a, b) => (b.date || "").localeCompare(a.date || "")).map((d) => (
-                                <tr key={d.id} className="border-t"><td className="p-2">{fmtDate(d.date)}</td><td className="p-2 text-right">{formatTk(d.amount)}</td><td className="p-2 text-muted-foreground">{d.note || "—"}</td></tr>
+                                <tr key={d.id} className="border-t"><td className="p-2">{fmtDate(d.date)}</td><td className="p-2 font-medium">CH-{toBn(viewMember.serial ?? 0)}-{toBn(seq.get(d.id) ?? 1)}</td><td className="p-2 text-right">{formatTk(d.amount)}</td><td className="p-2 text-muted-foreground">{d.note || "—"}</td></tr>
                               ))}
                             </tbody>
                           </table>
                         </div>
-                      )}
+                        );
+                      })()}
                     </div>
 
                     <div className="border-t pt-3">
