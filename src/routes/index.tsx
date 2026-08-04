@@ -5223,6 +5223,7 @@ function ReconciliationTab() {
     const totalLoanReceivable = data.loans.reduce((a, l) => a + loanTotalDue(l), 0);
     const netAssets = totalDeposit + totalRepaid + totalIncome - totalExpense - totalLoanGiven;
     const fundBalance = netAssets + outstanding;
+    const grossIncome = fundBalance - totalDeposit;
     return {
       totalDeposit,
       totalLoanGiven,
@@ -5233,6 +5234,7 @@ function ReconciliationTab() {
       totalLoanReceivable,
       netAssets,
       fundBalance,
+      grossIncome,
     };
   }, [data]);
 
