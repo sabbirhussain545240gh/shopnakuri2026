@@ -1486,6 +1486,8 @@ function printLoanDetail(
     <html><head><meta charset="utf-8" /><title>ঋণের বিস্তারিত - ${member?.name ?? ""}</title>
     <style>
       body { font-family: "Segoe UI", "Noto Sans Bengali", sans-serif; margin: 0; padding: 24px; background: #fff; color: #111; }
+      .ld-wm { position: absolute; inset: 0; background-repeat: no-repeat; background-position: center; background-size: 70% auto; opacity: 0.15; pointer-events: none; z-index: 0; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+      .ld-content { position: relative; z-index: 1; }
       @media print { body { padding: 0; } .no-print { display: none; } }
     </style></head>
     <body>
