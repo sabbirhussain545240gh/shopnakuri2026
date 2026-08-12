@@ -2308,7 +2308,18 @@ function LoansTab() {
   const [payFor, setPayFor] = useState<Loan | null>(null);
   const [editFor, setEditFor] = useState<Loan | null>(null);
   const [detailFor, setDetailFor] = useState<Loan | null>(null);
-  const [editForm, setEditForm] = useState({ memberId: "", amount: "", interestRate: "", durationMonths: "", date: "" });
+  const [editForm, setEditForm] = useState({ memberId: "", amount: "", interestRate: "", durationMonths: "", date: "", memberGuarantorId: "", familyGuarantorName: "", familyGuarantorRelation: "", familyGuarantorCustomRelation: "", familyGuarantorPhone: "" });
+  const [editIsJoint, setEditIsJoint] = useState(false);
+  const [editCoForm, setEditCoForm] = useState({ name: "", fatherName: "", phone: "", nid: "", address: "" });
+  const [editCheques, setEditCheques] = useState<Array<{ bankName: string; branch: string; chequeNo: string; accountNo: string; amount: string; date: string }>>([]);
+  const [editErrors, setEditErrors] = useState<Record<string, string>>({});
+  const editAddChequeRow = () => setEditCheques((p) => [...p, { bankName: "", branch: "", chequeNo: "", accountNo: "", amount: "", date: "" }]);
+  const editUpdateChequeRow = (i: number, key: string, v: string) => setEditCheques((p) => p.map((c, idx) => (idx === i ? { ...c, [key]: v } : c)));
+  const editRemoveChequeRow = (i: number) => setEditCheques((p) => p.filter((_, idx) => idx !== i));
+  const editSetField = (key: string, value: string) => {
+    setEditForm((prev) => ({ ...prev, [key]: value }));
+    setEditErrors((prev) => { const next = { ...prev }; delete next[key]; return next; });
+  };
   const [form, setForm] = useState({ memberId: "", amount: "", interestRate: String(data.settings.defaultInterestRate), durationMonths: String(data.settings.defaultDurationMonths), date: today(), memberGuarantorId: "", familyGuarantorName: "", familyGuarantorRelation: "", familyGuarantorCustomRelation: "", familyGuarantorPhone: "" });
   const [payForm, setPayForm] = useState({ amount: "", date: today(), note: "" });
   const [receipt, setReceipt] = useState<null | { loan: Loan; memberName: string; memberSerial?: number; amount: number; date: string; paidAfter: number; remainingAfter: number; receiptNo: string; note?: string; logo?: string; loanNo?: number }>(null);
