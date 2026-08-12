@@ -1441,25 +1441,31 @@ function buildLoanDetailHtml(
     ]);
   });
 
+  const watermarkHtml = samiti.samitiLogo
+    ? `<div class="ld-wm" style="background-image:url('${samiti.samitiLogo}')"></div>`
+    : "";
   const tableRows = (items: [string, string][]) =>
-    items.map(([k, v]) => `<tr><td style="padding:6px 10px;border:1px solid #ddd;background:#fafafa;font-weight:600;width:40%;">${k}</td><td style="padding:6px 10px;border:1px solid #ddd;">${v || "—"}</td></tr>`).join("");
+    items.map(([k, v]) => `<tr><td style="padding:6px 10px;border:1px solid #ddd;font-weight:600;width:40%;">${k}</td><td style="padding:6px 10px;border:1px solid #ddd;">${v || "—"}</td></tr>`).join("");
   const paymentRows = payments.length
     ? `<table style="width:100%;border-collapse:collapse;font-size:13px;margin-top:6px;">
-        <thead><tr><th style="text-align:left;padding:6px 10px;border:1px solid #ddd;background:#f0f0f0;">তারিখ</th><th style="text-align:right;padding:6px 10px;border:1px solid #ddd;background:#f0f0f0;">পরিমাণ</th></tr></thead>
+        <thead><tr><th style="text-align:left;padding:6px 10px;border:1px solid #ddd;background:#e5e7eb;">তারিখ</th><th style="text-align:right;padding:6px 10px;border:1px solid #ddd;background:#e5e7eb;">পরিমাণ</th></tr></thead>
         <tbody>${payments.map((p) => `<tr><td style="padding:6px 10px;border:1px solid #ddd;">${fmtDate(p.date)}</td><td style="padding:6px 10px;border:1px solid #ddd;text-align:right;">${formatTk(p.amount)}</td></tr>`).join("")}</tbody>
       </table>`
     : `<div style="color:#666;font-size:13px;">কোনও কিস্তি নেই।</div>`;
 
   return `
-    <div style="max-width:720px;margin:auto;">
-      ${headerHtml}
-      <div style="border:2px solid #333;padding:18px;border-radius:8px;">
-        <h2 style="text-align:center;margin:0 0 14px 0;font-size:18px;border-bottom:2px solid #333;padding-bottom:6px;">ঋণের বিস্তারিত</h2>
-        <table style="width:100%;border-collapse:collapse;font-size:14px;">${tableRows(rows)}</table>
-        <h3 style="font-size:15px;border-bottom:1px solid #ccc;padding-bottom:4px;margin:14px 0 6px;">জামিনদার</h3>
-        <table style="width:100%;border-collapse:collapse;font-size:14px;">${tableRows(guarantorRows)}</table>
-        <h3 style="font-size:15px;border-bottom:1px solid #ccc;padding-bottom:4px;margin:14px 0 6px;">কিস্তি (${toBn(payments.length)})</h3>
-        ${paymentRows}
+    <div style="max-width:720px;margin:auto;position:relative;">
+      ${watermarkHtml}
+      <div class="ld-content">
+        ${headerHtml}
+        <div style="border:2px solid #333;padding:18px;border-radius:8px;">
+          <h2 style="text-align:center;margin:0 0 14px 0;font-size:18px;border-bottom:2px solid #333;padding-bottom:6px;">ঋণের বিস্তারিত</h2>
+          <table style="width:100%;border-collapse:collapse;font-size:14px;">${tableRows(rows)}</table>
+          <h3 style="font-size:15px;border-bottom:1px solid #ccc;padding-bottom:4px;margin:14px 0 6px;">জামিনদার</h3>
+          <table style="width:100%;border-collapse:collapse;font-size:14px;">${tableRows(guarantorRows)}</table>
+          <h3 style="font-size:15px;border-bottom:1px solid #ccc;padding-bottom:4px;margin:14px 0 6px;">কিস্তি (${toBn(payments.length)})</h3>
+          ${paymentRows}
+        </div>
       </div>
     </div>`;
 }
