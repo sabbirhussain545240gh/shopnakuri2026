@@ -3223,21 +3223,22 @@ function LoansTab() {
       </Dialog>
 
       <Dialog open={!!editFor} onOpenChange={(o) => !o && setEditFor(null)}>
-        <DialogContent>
+        <DialogContent className="max-w-2xl">
           <DialogHeader><DialogTitle>ঋণ সম্পাদনা</DialogTitle></DialogHeader>
           <div className="space-y-3">
             <div>
               <Label>সদস্য</Label>
-              <Select value={editForm.memberId} onValueChange={(v) => setEditForm({ ...editForm, memberId: v })}>
-                <SelectTrigger><SelectValue placeholder="সদস্য নির্বাচন করুন" /></SelectTrigger>
+              <Select value={editForm.memberId} onValueChange={(v) => editSetField("memberId", v)}>
+                <SelectTrigger className={editErrors.memberId ? "border-destructive" : ""}><SelectValue placeholder="সদস্য নির্বাচন করুন" /></SelectTrigger>
                 <SelectContent>{data.members.map((m) => <SelectItem key={m.id} value={m.id}>{toBn(m.serial)} — {m.name}</SelectItem>)}</SelectContent>
               </Select>
+              {editErrors.memberId && <p className="text-xs text-destructive mt-1">{editErrors.memberId}</p>}
             </div>
             <div className="grid grid-cols-2 gap-3">
-              <div><Label>পরিমাণ</Label><Input type="number" value={editForm.amount} onChange={(e) => setEditForm({ ...editForm, amount: e.target.value })} /></div>
-              <div><Label>মুনাফার হার (%)</Label><Input type="number" value={editForm.interestRate} onChange={(e) => setEditForm({ ...editForm, interestRate: e.target.value })} /></div>
-              <div><Label>মেয়াদ (মাস)</Label><Input type="number" value={editForm.durationMonths} onChange={(e) => setEditForm({ ...editForm, durationMonths: e.target.value })} /></div>
-              <div><Label>তারিখ</Label><Input type="date" value={editForm.date} onChange={(e) => setEditForm({ ...editForm, date: e.target.value })} /></div>
+              <div><Label>পরিমাণ</Label><Input type="number" className={editErrors.amount ? "border-destructive" : ""} value={editForm.amount} onChange={(e) => editSetField("amount", e.target.value)} />{editErrors.amount && <p className="text-xs text-destructive mt-1">{editErrors.amount}</p>}</div>
+              <div><Label>মুনাফার হার (%)</Label><Input type="number" className={editErrors.interestRate ? "border-destructive" : ""} value={editForm.interestRate} onChange={(e) => editSetField("interestRate", e.target.value)} />{editErrors.interestRate && <p className="text-xs text-destructive mt-1">{editErrors.interestRate}</p>}</div>
+              <div><Label>মেয়াদ (মাস)</Label><Input type="number" className={editErrors.durationMonths ? "border-destructive" : ""} value={editForm.durationMonths} onChange={(e) => editSetField("durationMonths", e.target.value)} />{editErrors.durationMonths && <p className="text-xs text-destructive mt-1">{editErrors.durationMonths}</p>}</div>
+              <div><Label>তারিখ</Label><Input type="date" value={editForm.date} onChange={(e) => editSetField("date", e.target.value)} /></div>
             </div>
             {(() => {
               const amt = Number(editForm.amount) || 0;
@@ -3254,6 +3255,96 @@ function LoansTab() {
                 </div>
               );
             })()}
+            <div className="rounded-md border p-3 space-y-3">
+              <label className="flex items-center gap-2 text-sm font-medium cursor-pointer">
+                <input type="checkbox" className="h-4 w-4 accent-current" checked={editIsJoint} onChange={(e) => setEditIsJoint(e.target.checked)} />
+                যৌথভাবে ঋণ প্রদান (২য় জন বাহিরের ব্যক্তি)
+              </label>
+              {editIsJoint && (
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div className="sm:col-span-2 text-xs text-muted-foreground">১ম ঋণগ্রহীতা: সমিতির সদস্য (উপরে নির্বাচিত) · ২য় ঋণগ্রহীতা: বাহিরের ব্যক্তি</div>
+                  <div>
+                    <Label>২য় ঋণগ্রহীতার নাম *</Label>
+                    <Input className={editErrors.coName ? "border-destructive" : ""} value={editCoForm.name} onChange={(e) => { setEditCoForm({ ...editCoForm, name: e.target.value }); setEditErrors((p) => { const n = { ...p }; delete n.coName; return n; }); }} placeholder="নাম" />
+                    {editErrors.coName && <p className="text-xs text-destructive mt-1">{editErrors.coName}</p>}
+                  </div>
+                  <div><Label>পিতার নাম</Label><Input value={editCoForm.fatherName} onChange={(e) => setEditCoForm({ ...editCoForm, fatherName: e.target.value })} placeholder="পিতার নাম" /></div>
+                  <div>
+                    <Label>মোবাইল *</Label>
+                    <Input className={editErrors.coPhone ? "border-destructive" : ""} value={editCoForm.phone} onChange={(e) => { setEditCoForm({ ...editCoForm, phone: e.target.value }); setEditErrors((p) => { const n = { ...p }; delete n.coPhone; return n; }); }} placeholder="মোবাইল নম্বর" />
+                    {editErrors.coPhone && <p className="text-xs text-destructive mt-1">{editErrors.coPhone}</p>}
+                  </div>
+                  <div><Label>NID</Label><Input value={editCoForm.nid} onChange={(e) => setEditCoForm({ ...editCoForm, nid: e.target.value })} placeholder="জাতীয় পরিচয়পত্র নং" /></div>
+                  <div className="sm:col-span-2"><Label>ঠিকানা</Label><Input value={editCoForm.address} onChange={(e) => setEditCoForm({ ...editCoForm, address: e.target.value })} placeholder="ঠিকানা" /></div>
+                </div>
+              )}
+            </div>
+            <div className="rounded-md border p-3 space-y-3">
+              <div className="flex items-center justify-between">
+                <div className="text-sm font-medium">জামানত হিসেবে রাখা চেক</div>
+                <Button type="button" size="sm" variant="outline" onClick={editAddChequeRow}>+ চেক যোগ করুন</Button>
+              </div>
+              {editCheques.length === 0 && <p className="text-xs text-muted-foreground">সদস্যের কাছ থেকে জামানত হিসেবে রাখা ব্যাংকের নাম ও চেক নং যোগ করুন (একাধিক চেক যোগ করা যাবে)।</p>}
+              {editCheques.map((c, i) => (
+                <div key={i} className="rounded-md border p-3 space-y-2 bg-muted/30">
+                  <div className="flex items-center justify-between">
+                    <div className="text-xs font-semibold">চেক {toBn(i + 1)}</div>
+                    <Button type="button" size="sm" variant="ghost" className="h-7 text-destructive" onClick={() => editRemoveChequeRow(i)}>মুছুন</Button>
+                  </div>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div><Label>ব্যাংকের নাম</Label><Input value={c.bankName} onChange={(e) => editUpdateChequeRow(i, "bankName", e.target.value)} placeholder="ব্যাংকের নাম" /></div>
+                    <div><Label>শাখা</Label><Input value={c.branch} onChange={(e) => editUpdateChequeRow(i, "branch", e.target.value)} placeholder="শাখার নাম" /></div>
+                    <div><Label>চেক নং</Label><Input value={c.chequeNo} onChange={(e) => editUpdateChequeRow(i, "chequeNo", e.target.value)} placeholder="চেক নম্বর" /></div>
+                    <div><Label>হিসাব নং</Label><Input value={c.accountNo} onChange={(e) => editUpdateChequeRow(i, "accountNo", e.target.value)} placeholder="একাউন্ট নম্বর" /></div>
+                    <div><Label>চেকের পরিমাণ (৳)</Label><Input type="number" value={c.amount} onChange={(e) => editUpdateChequeRow(i, "amount", e.target.value)} placeholder="0" /></div>
+                    <div><Label>চেকের তারিখ</Label><Input type="date" value={c.date} onChange={(e) => editUpdateChequeRow(i, "date", e.target.value)} /></div>
+                  </div>
+                </div>
+              ))}
+            </div>
+            <div>
+              <Label>সদস্য জামিনদার *</Label>
+              <Select value={editForm.memberGuarantorId} onValueChange={(v) => editSetField("memberGuarantorId", v)}>
+                <SelectTrigger className={editErrors.memberGuarantorId ? "border-destructive" : ""}><SelectValue placeholder="জামিনদার সদস্য নির্বাচন করুন" /></SelectTrigger>
+                <SelectContent>{data.members.filter((m) => m.id !== editForm.memberId).map((m) => <SelectItem key={m.id} value={m.id}>{toBn(m.serial)} — {m.name}</SelectItem>)}</SelectContent>
+              </Select>
+              {editErrors.memberGuarantorId && <p className="text-xs text-destructive mt-1">{editErrors.memberGuarantorId}</p>}
+            </div>
+            <div>
+              <Label>পারিবারিক জামিনদার — নাম *</Label>
+              <Input className={editErrors.familyGuarantorName ? "border-destructive" : ""} value={editForm.familyGuarantorName} onChange={(e) => editSetField("familyGuarantorName", e.target.value)} placeholder="নাম" />
+              {editErrors.familyGuarantorName && <p className="text-xs text-destructive mt-1">{editErrors.familyGuarantorName}</p>}
+            </div>
+            <div>
+              <Label>পারিবারিক জামিনদার — সম্পর্ক *</Label>
+              <Select value={editForm.familyGuarantorRelation} onValueChange={(v) => editSetField("familyGuarantorRelation", v)}>
+                <SelectTrigger className={editErrors.familyGuarantorRelation ? "border-destructive" : ""}><SelectValue placeholder="সম্পর্ক নির্বাচন করুন" /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="বাবা">বাবা</SelectItem>
+                  <SelectItem value="মা">মা</SelectItem>
+                  <SelectItem value="ভাই">ভাই</SelectItem>
+                  <SelectItem value="বোন">বোন</SelectItem>
+                  <SelectItem value="স্বামী">স্বামী</SelectItem>
+                  <SelectItem value="স্ত্রী">স্ত্রী</SelectItem>
+                  <SelectItem value="পুত্র">পুত্র</SelectItem>
+                  <SelectItem value="কন্যা">কন্যা</SelectItem>
+                  <SelectItem value="অন্যান্য">অন্যান্য</SelectItem>
+                </SelectContent>
+              </Select>
+              {editErrors.familyGuarantorRelation && <p className="text-xs text-destructive mt-1">{editErrors.familyGuarantorRelation}</p>}
+            </div>
+            {editForm.familyGuarantorRelation === "অন্যান্য" && (
+              <div>
+                <Label>কাস্টম সম্পর্ক *</Label>
+                <Input className={editErrors.familyGuarantorCustomRelation ? "border-destructive" : ""} value={editForm.familyGuarantorCustomRelation} onChange={(e) => editSetField("familyGuarantorCustomRelation", e.target.value)} placeholder="সম্পর্ক লিখুন" />
+                {editErrors.familyGuarantorCustomRelation && <p className="text-xs text-destructive mt-1">{editErrors.familyGuarantorCustomRelation}</p>}
+              </div>
+            )}
+            <div>
+              <Label>পারিবারিক জামিনদার — মোবাইল *</Label>
+              <Input className={editErrors.familyGuarantorPhone ? "border-destructive" : ""} value={editForm.familyGuarantorPhone} onChange={(e) => editSetField("familyGuarantorPhone", e.target.value)} placeholder="মোবাইল নম্বর" />
+              {editErrors.familyGuarantorPhone && <p className="text-xs text-destructive mt-1">{editErrors.familyGuarantorPhone}</p>}
+            </div>
           </div>
           <DialogFooter><Button onClick={submitEdit}>সংরক্ষণ</Button></DialogFooter>
         </DialogContent>
