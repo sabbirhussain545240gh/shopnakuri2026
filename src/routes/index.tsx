@@ -2428,16 +2428,89 @@ function LoansTab() {
 
   const startEdit = (l: Loan) => {
     setEditFor(l);
-    setEditForm({ memberId: l.memberId, amount: String(l.amount), interestRate: String(l.interestRate), durationMonths: String(l.durationMonths), date: l.date });
+    const relationOptions = ["বাবা", "মা", "ভাই", "বোন", "স্বামী", "স্ত্রী", "পুত্র", "কন্যা"];
+    const fgRelation = l.familyGuarantor?.relation ?? "";
+    const isCustomRelation = fgRelation && !relationOptions.includes(fgRelation);
+    setEditForm({
+      memberId: l.memberId,
+      amount: String(l.amount),
+      interestRate: String(l.interestRate),
+      durationMonths: String(l.durationMonths),
+      date: l.date,
+      memberGuarantorId: l.memberGuarantorId ?? "",
+      familyGuarantorName: l.familyGuarantor?.name ?? "",
+      familyGuarantorRelation: isCustomRelation ? "অন্যান্য" : fgRelation,
+      familyGuarantorCustomRelation: isCustomRelation ? fgRelation : "",
+      familyGuarantorPhone: l.familyGuarantor?.phone ?? "",
+    });
+    setEditIsJoint(!!l.isJoint);
+    setEditCoForm({
+      name: l.coBorrower?.name ?? "",
+      fatherName: l.coBorrower?.fatherName ?? "",
+      phone: l.coBorrower?.phone ?? "",
+      nid: l.coBorrower?.nid ?? "",
+      address: l.coBorrower?.address ?? "",
+    });
+    setEditCheques((l.cheques ?? []).map((c) => ({
+      bankName: c.bankName ?? "",
+      branch: c.branch ?? "",
+      chequeNo: c.chequeNo ?? "",
+      accountNo: c.accountNo ?? "",
+      amount: c.amount ? String(c.amount) : "",
+      date: c.date ?? "",
+    })));
+    setEditErrors({});
   };
   const submitEdit = () => {
     if (!editFor) return;
     const amt = Number(editForm.amount);
     const rate = Number(editForm.interestRate);
     const dur = Number(editForm.durationMonths);
-    if (!editForm.memberId || !amt || amt <= 0 || isNaN(rate) || rate <= 0 || !dur) { toast.error("সঠিক তথ্য দিন"); return; }
-    updateLoan(editFor.id, { memberId: editForm.memberId, amount: amt, interestRate: rate, durationMonths: dur, date: editForm.date });
+    const nextErrors: Record<string, string> = {};
+    if (!editForm.memberId) nextErrors.memberId = "সদস্য নির্বাচন করুন";
+    if (!amt || amt <= 0) nextErrors.amount = "সঠিক পরিমাণ দিন";
+    if (isNaN(rate) || rate <= 0) nextErrors.interestRate = "সঠিক মুনাফার হার দিন";
+    if (!dur) nextErrors.durationMonths = "সঠিক মেয়াদ দিন";
+    if (!editForm.memberGuarantorId.trim()) nextErrors.memberGuarantorId = "সদস্য জামিনদার নির্বাচন করুন";
+    if (!editForm.familyGuarantorName.trim()) nextErrors.familyGuarantorName = "জামিনদারের নাম দিন";
+    if (!editForm.familyGuarantorRelation.trim()) nextErrors.familyGuarantorRelation = "সম্পর্ক নির্বাচন করুন";
+    if (editForm.familyGuarantorRelation === "অন্যান্য" && !editForm.familyGuarantorCustomRelation.trim()) nextErrors.familyGuarantorCustomRelation = "কাস্টম সম্পর্ক লিখুন";
+    if (!editForm.familyGuarantorPhone.trim()) nextErrors.familyGuarantorPhone = "মোবাইল নম্বর দিন";
+    if (editIsJoint) {
+      if (!editCoForm.name.trim()) nextErrors.coName = "যৌথ ঋণগ্রহীতার নাম দিন";
+      if (!editCoForm.phone.trim()) nextErrors.coPhone = "মোবাইল নম্বর দিন";
+    }
+    if (Object.keys(nextErrors).length > 0) { setEditErrors(nextErrors); return; }
+    const relation = editForm.familyGuarantorRelation === "অন্যান্য" ? editForm.familyGuarantorCustomRelation.trim() : editForm.familyGuarantorRelation.trim();
+    updateLoan(editFor.id, {
+      memberId: editForm.memberId,
+      amount: amt,
+      interestRate: rate,
+      durationMonths: dur,
+      date: editForm.date,
+      memberGuarantorId: editForm.memberGuarantorId,
+      familyGuarantor: { name: editForm.familyGuarantorName.trim(), relation, phone: editForm.familyGuarantorPhone.trim() },
+      isJoint: editIsJoint,
+      coBorrower: editIsJoint ? {
+        name: editCoForm.name.trim(),
+        fatherName: editCoForm.fatherName.trim() || undefined,
+        phone: editCoForm.phone.trim(),
+        nid: editCoForm.nid.trim() || undefined,
+        address: editCoForm.address.trim() || undefined,
+      } : undefined,
+      cheques: editCheques
+        .filter((c) => c.bankName.trim() || c.chequeNo.trim())
+        .map((c) => ({
+          bankName: c.bankName.trim(),
+          branch: c.branch.trim() || undefined,
+          chequeNo: c.chequeNo.trim(),
+          accountNo: c.accountNo.trim() || undefined,
+          amount: c.amount.trim() ? Number(c.amount) : undefined,
+          date: c.date || undefined,
+        })),
+    });
     setEditFor(null);
+    setEditErrors({});
     toast.success("ঋণ আপডেট হয়েছে");
   };
 
