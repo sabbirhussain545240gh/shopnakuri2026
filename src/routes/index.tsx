@@ -1520,7 +1520,9 @@ async function exportLoanDetailPdf(
     doc.write(`<!DOCTYPE html><html><head><meta charset="utf-8"><style>
       html,body{margin:0;padding:0;background:#ffffff;color:#111111;font-family:"Segoe UI","Noto Sans Bengali",Arial,sans-serif;}
       *{box-sizing:border-box;} h1,h2,h3,p,td,th,div{color:#111111;}
-    </style></head><body><div id="r" style="width:740px;padding:20px;background:#fff;">${inner}</div></body></html>`);
+      .ld-wm{position:absolute;inset:0;background-repeat:no-repeat;background-position:center;background-size:70% auto;opacity:0.15;pointer-events:none;z-index:0;-webkit-print-color-adjust:exact;print-color-adjust:exact;}
+      .ld-content{position:relative;z-index:1;}
+    </style></head><body><div id="r" style="width:740px;padding:20px;background:#fff;position:relative;">${inner}</div></body></html>`);
     doc.close();
     const target = doc.getElementById("r")!;
     const imgs = Array.from(target.querySelectorAll("img"));
