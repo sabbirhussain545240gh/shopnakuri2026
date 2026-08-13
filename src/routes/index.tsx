@@ -3404,11 +3404,11 @@ function LoansTab() {
                     <div>পারিবারিক: {currentLoan.familyGuarantor.name} ({currentLoan.familyGuarantor.relation}) — {currentLoan.familyGuarantor.phone}</div>
                   )}
                 </div>
-                {data.settings.loanTerms && data.settings.loanTerms.length > 0 && (
+                {currentLoan.loanTerms && currentLoan.loanTerms.length > 0 && (
                   <div className="border-t pt-2">
                     <div className="font-medium mb-1">ঋণের শর্তাবলী</div>
                     <ul className="list-decimal list-inside space-y-1 text-muted-foreground">
-                      {data.settings.loanTerms.map((term, i) => (
+                      {currentLoan.loanTerms.map((term, i) => (
                         <li key={i}>{term}</li>
                       ))}
                     </ul>
