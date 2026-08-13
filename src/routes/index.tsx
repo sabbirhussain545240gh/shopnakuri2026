@@ -1390,7 +1390,7 @@ function buildLoanDetailHtml(
   member: Member | undefined,
   guarantor: Member | undefined,
   payments: { id: string; date: string; amount: number }[],
-  samiti: SamitiInfo,
+  samiti: SamitiInfo & { loanTerms?: string[] },
 ) {
   const due = loanTotalDue(loan);
   const paid = payments.reduce((s, p) => s + p.amount, 0);
@@ -1460,11 +1460,11 @@ function buildLoanDetailHtml(
           <table style="width:100%;border-collapse:collapse;font-size:14px;">${tableRows(guarantorRows)}</table>
           <h3 style="font-size:15px;border-bottom:1px solid #ccc;padding-bottom:4px;margin:14px 0 6px;">কিস্তি (${toBn(payments.length)})</h3>
           ${paymentRows}
-          ${loan.loanTerms && loan.loanTerms.length > 0 ? `
+          ${(loan.loanTerms || samiti.loanTerms) && (loan.loanTerms || samiti.loanTerms)!.length > 0 ? `
             <div style="margin-top:16px;padding-top:10px;border-top:2px solid #333;">
               <div style="font-weight:600;font-size:15px;margin-bottom:6px;">ঋণের শর্তাবলী:</div>
               <ol style="margin:0;padding-left:20px;font-size:13px;color:#111;line-height:1.6;">
-                ${loan.loanTerms.map((t: string) => `<li style="margin-bottom:4px;">${t}</li>`).join("")}
+                ${(loan.loanTerms || samiti.loanTerms)!.map((t: string) => `<li style="margin-bottom:4px;">${t}</li>`).join("")}
               </ol>
             </div>
           ` : ""}
@@ -1479,7 +1479,7 @@ function printLoanDetail(
   member: Member | undefined,
   guarantor: Member | undefined,
   payments: { id: string; date: string; amount: number }[],
-  samiti: SamitiInfo,
+  samiti: SamitiInfo & { loanTerms?: string[] },
 ) {
   const w = window.open("", "_blank", "width=900,height=700");
   if (!w) return;
@@ -1510,7 +1510,7 @@ async function exportLoanDetailPdf(
   member: Member | undefined,
   guarantor: Member | undefined,
   payments: { id: string; date: string; amount: number }[],
-  samiti: SamitiInfo,
+  samiti: SamitiInfo & { loanTerms?: string[] },
 ) {
   const { default: html2canvasLib } = await import("html2canvas");
   const inner = buildLoanDetailHtml(loan, loanNo, member, guarantor, payments, samiti);
@@ -3422,6 +3422,16 @@ function LoansTab() {
                     </ul>
                   </div>
                 )}
+                {!currentLoan.loanTerms && data.settings.loanTerms && data.settings.loanTerms.length > 0 && (
+                  <div className="border-t pt-2">
+                    <div className="font-medium mb-1">ঋণের শর্তাবলী</div>
+                    <ul className="list-decimal list-inside space-y-1 text-muted-foreground">
+                      {data.settings.loanTerms.map((term, i) => (
+                        <li key={i}>{term}</li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
                 <div className="border-t pt-2">
                   <div className="font-medium mb-1">কিস্তি ({toBn(pays.length)})</div>
                   {pays.length === 0 ? (
@@ -3455,11 +3465,12 @@ function LoansTab() {
                   <Button
                     variant="outline"
                     onClick={() => {
-                      const samiti: SamitiInfo = {
+                      const samiti = {
                         samitiName: data.samitiName,
                         samitiLogo: data.samitiLogo,
                         samitiAddress: data.samitiAddress,
                         establishedDate: data.establishedDate,
+                        loanTerms: data.settings.loanTerms,
                       };
                       printLoanDetail(currentLoan, idx + 1, m, gm, pays, samiti);
                     }}
@@ -3469,11 +3480,12 @@ function LoansTab() {
                   <Button
                     variant="outline"
                     onClick={async () => {
-                      const samiti: SamitiInfo = {
+                      const samiti = {
                         samitiName: data.samitiName,
                         samitiLogo: data.samitiLogo,
                         samitiAddress: data.samitiAddress,
                         establishedDate: data.establishedDate,
+                        loanTerms: data.settings.loanTerms,
                       };
                       try {
                         await exportLoanDetailPdf(currentLoan, idx + 1, m, gm, pays, samiti);
