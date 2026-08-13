@@ -61,6 +61,7 @@ export type Loan = {
   isJoint?: boolean;
   coBorrower?: { name: string; fatherName?: string; phone: string; nid?: string; address?: string };
   cheques?: CollateralCheque[];
+  loanTerms?: string[];
 };
 
 
@@ -89,6 +90,7 @@ export type CommitteeMember = { role: string; name: string; phone: string; photo
 export type Settings = {
   defaultInterestRate: number;
   defaultDurationMonths: number;
+  loanTerms?: string[];
   notice?: string;
   goals?: Goal[];
   quotes?: Quote[];
