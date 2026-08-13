@@ -1413,11 +1413,11 @@ function buildLoanDetailHtml(
     ["মোবাইল", member?.phone ? toBn(member.phone) : "—"],
     ["মূল", formatTk(loan.amount)],
     ["মুনাফার হার", `${toBn(loan.interestRate)}%`],
+    ["মোট প্রদেয়", formatTk(due)],
     ["মেয়াদ", `${toBn(loan.durationMonths)} মাস`],
     ["মাসিক কিস্তি", formatTk(inst)],
     ["১ম কিস্তির তারিখ", fmtDate(addMonths(loan.date, 1))],
     ["ঋণ শেষ", fmtDate(addMonths(loan.date, loan.durationMonths))],
-    ["মোট প্রদেয়", formatTk(due)],
     ["পরিশোধ", formatTk(paid)],
     ["বকেয়া", formatTk(remaining)],
     ["অবস্থা", loan.status === "active" ? "চলমান" : "পরিশোধিত"],
@@ -3412,11 +3412,11 @@ function LoansTab() {
                   <div><span className="text-muted-foreground">মোবাইল:</span> {m?.phone ?? "—"}</div>
                   <div><span className="text-muted-foreground">মূল:</span> {formatTk(currentLoan.amount)}</div>
                   <div><span className="text-muted-foreground">মুনাফার হার:</span> {toBn(currentLoan.interestRate)}%</div>
+                  <div><span className="text-muted-foreground">মোট প্রদেয়:</span> {formatTk(due)}</div>
                   <div><span className="text-muted-foreground">মেয়াদ:</span> {toBn(currentLoan.durationMonths)} মাস</div>
                   <div><span className="text-muted-foreground">মাসিক কিস্তি:</span> {formatTk(monthlyInstallment(currentLoan.amount, currentLoan.interestRate, currentLoan.durationMonths))}</div>
                   <div><span className="text-muted-foreground">১ম কিস্তির তারিখ:</span> {fmtDate(addMonths(currentLoan.date, 1))}</div>
                   <div><span className="text-muted-foreground">ঋণ শেষ:</span> {fmtDate(addMonths(currentLoan.date, currentLoan.durationMonths))}</div>
-                  <div><span className="text-muted-foreground">মোট প্রদেয়:</span> {formatTk(due)}</div>
                   <div><span className="text-success">পরিশোধ:</span> {formatTk(paid)}</div>
                   <div><span className="text-destructive">বকেয়া:</span> {formatTk(Math.max(0, due - paid))}</div>
                   <div><span className="text-muted-foreground">অবস্থা:</span> {currentLoan.status === "active" ? "চলমান" : "পরিশোধিত"}</div>
