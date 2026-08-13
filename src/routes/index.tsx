@@ -159,7 +159,7 @@ const navItems = [
   { value: "dashboard", label: "ড্যাশবোর্ড", icon: LayoutDashboard },
   { value: "members", label: "সদস্য", icon: Users },
   { value: "savings", label: "সঞ্চয়/চাদা", icon: PiggyBank },
-  { value: "loans", label: "'''Do not make any visual modifications. The phrases I write are commands to understand what I want, not to be written down. Understand their content well, then execute what is required.'''\n                                        \n                                            \n                                            ঋণ ব্যবস্থাপনা", icon: HandCoins },
+  { value: "loans", label: "ঋণ ব্যবস্থাপনা", icon: HandCoins },
   { value: "installments", label: "কিস্তি আদায়", icon: Receipt },
   { value: "receipts", label: "কিস্তি রিসিপ্ট ইতিহাস", icon: FileText },
   { value: "deposits", label: "চাঁদা জমা ইতিহাস", icon: PiggyBank },
