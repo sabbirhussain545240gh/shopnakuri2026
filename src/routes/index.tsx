@@ -3453,66 +3453,61 @@ function LoansTab() {
                     <div>পারিবারিক: {currentLoan.familyGuarantor.name} ({currentLoan.familyGuarantor.relation}) — {currentLoan.familyGuarantor.phone}</div>
                   )}
                 </div>
-                {currentLoan.loanTerms && currentLoan.loanTerms.length > 0 && (
-                  <div className="border-t pt-2">
-                    <div className="font-medium mb-1">ঋণের শর্তাবলী</div>
-                    <ul className="list-decimal list-inside space-y-1 text-muted-foreground">
-                      {currentLoan.loanTerms.map((term, i) => (
-                        <li key={i}>{term}</li>
-                      ))}
-                    </ul>
+                <div className="border-t pt-3 flex gap-6">
+                  <div className="flex-1 min-w-0">
+                    <div className="font-medium mb-2 border-b pb-1">কিস্তি সিডিউল ও আদায়</div>
+                    <div className="overflow-x-auto">
+                      <Table>
+                        <TableHeader>
+                          <TableRow>
+                            <TableHead className="w-[50px] px-2">ক্র</TableHead>
+                            <TableHead className="px-2">তারিখ</TableHead>
+                            <TableHead className="text-right px-2">পরিমাণ</TableHead>
+                            <TableHead className="px-2 text-center">রিসিপ্ট</TableHead>
+                            <TableHead className="px-2 text-right">অবস্থা</TableHead>
+                          </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                          {Array.from({ length: currentLoan.durationMonths }).map((_, i) => {
+                            const monthNo = i + 1;
+                            const scheduledDate = addMonths(currentLoan.date, monthNo);
+                            const payment = pays[i];
+                            const isPaid = !!payment;
+                            const receiptNo = isPaid ? `KS-${toBn(idx + 1)}-${toBn(monthNo)}` : "—";
+                            
+                            return (
+                              <TableRow key={monthNo}>
+                                <TableCell className="px-2">{toBn(monthNo)}</TableCell>
+                                <TableCell className="px-2 text-xs">{fmtDate(scheduledDate)}</TableCell>
+                                <TableCell className="text-right px-2 text-xs">{formatTk(monthlyInstallment(currentLoan.amount, currentLoan.interestRate, currentLoan.durationMonths))}</TableCell>
+                                <TableCell className="px-2 text-center text-xs">{receiptNo}</TableCell>
+                                <TableCell className="px-2 text-right">
+                                  <span className={cn(
+                                    "text-[10px] font-bold px-1 rounded",
+                                    isPaid ? "text-success bg-success/10" : "text-destructive bg-destructive/10"
+                                  )}>
+                                    {isPaid ? "Paid" : "Unpaid"}
+                                  </span>
+                                </TableCell>
+                              </TableRow>
+                            );
+                          })}
+                        </TableBody>
+                      </Table>
+                    </div>
                   </div>
-                )}
-                {!currentLoan.loanTerms && data.settings.loanTerms && data.settings.loanTerms.length > 0 && (
-                  <div className="border-t pt-2">
-                    <div className="font-medium mb-1">ঋণের শর্তাবলী</div>
-                    <ul className="list-decimal list-inside space-y-1 text-muted-foreground">
-                      {data.settings.loanTerms.map((term, i) => (
-                        <li key={i}>{term}</li>
-                      ))}
-                    </ul>
-                  </div>
-                )}
-                <div className="border-t pt-2">
-                  <div className="font-medium mb-1">কিস্তি সিডিউল ও আদায়</div>
-                  <div className="overflow-x-auto">
-                    <Table>
-                      <TableHeader>
-                        <TableRow>
-                          <TableHead className="w-[60px]">ক্র নং</TableHead>
-                          <TableHead>জমার তারিখ</TableHead>
-                          <TableHead className="text-right">পরিমাণ</TableHead>
-                          <TableHead>রিসিপ্ট নং</TableHead>
-                          <TableHead>অবস্থা</TableHead>
-                        </TableRow>
-                      </TableHeader>
-                      <TableBody>
-                        {Array.from({ length: currentLoan.durationMonths }).map((_, i) => {
-                          const monthNo = i + 1;
-                          const scheduledDate = addMonths(currentLoan.date, monthNo);
-                          const payment = pays[i]; // Matching by sequence
-                          const isPaid = !!payment;
-                          const receiptNo = isPaid ? `KS-${toBn(idx + 1)}-${toBn(monthNo)}` : "—";
-                          
-                          return (
-                            <TableRow key={monthNo}>
-                              <TableCell>{toBn(monthNo)}</TableCell>
-                              <TableCell>{fmtDate(scheduledDate)}</TableCell>
-                              <TableCell className="text-right">{formatTk(monthlyInstallment(currentLoan.amount, currentLoan.interestRate, currentLoan.durationMonths))}</TableCell>
-                              <TableCell>{receiptNo}</TableCell>
-                              <TableCell>
-                                <span className={cn(
-                                  "font-bold",
-                                  isPaid ? "text-success" : "text-destructive"
-                                )}>
-                                  {isPaid ? "Paid" : "Unpaid"}
-                                </span>
-                              </TableCell>
-                            </TableRow>
-                          );
-                        })}
-                      </TableBody>
-                    </Table>
+                  
+                  <div className="flex-1 min-w-0 border-l pl-6">
+                    <div className="font-medium mb-2 border-b pb-1">ঋণের শর্তাবলী</div>
+                    {((currentLoan.loanTerms && currentLoan.loanTerms.length > 0) || (data.settings.loanTerms && data.settings.loanTerms.length > 0)) ? (
+                      <ul className="list-decimal list-inside space-y-1.5 text-xs text-muted-foreground">
+                        {(currentLoan.loanTerms || data.settings.loanTerms || []).map((term, i) => (
+                          <li key={i} className="leading-relaxed">{term}</li>
+                        ))}
+                      </ul>
+                    ) : (
+                      <div className="text-xs text-muted-foreground italic">কোনো শর্তাবলী পাওয়া যায়নি।</div>
+                    )}
                   </div>
                 </div>
                 <div className="border-t pt-3 flex flex-wrap justify-end gap-2">
