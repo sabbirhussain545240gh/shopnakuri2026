@@ -1483,7 +1483,7 @@ function buildLoanDetailHtml(
   };
 
   return `
-    <div style="max-width:840px;margin:auto;position:relative;">
+    <div style="max-width:840px;margin:0 auto;position:relative;">
       ${watermarkHtml}
       <div class="ld-content">
         ${headerHtml}
@@ -1529,15 +1529,12 @@ function printLoanDetail(
     <!DOCTYPE html>
     <html><head><meta charset="utf-8" /><title>ঋণের বিস্তারিত - ${member?.name ?? ""}</title>
     <style>
-      body { font-family: "Segoe UI", "Noto Sans Bengali", sans-serif; margin: 0; padding: 24px; background: #fff; color: #111; }
+      body { font-family: "Segoe UI", "Noto Sans Bengali", sans-serif; margin: 0; padding: 0; background: #fff; color: #111; }
       .ld-wm { position: absolute; inset: 0; background-repeat: no-repeat; background-position: center; background-size: 70% auto; opacity: 0.15; pointer-events: none; z-index: 0; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
       .ld-content { position: relative; z-index: 1; }
-      @media print { body { padding: 0; } .no-print { display: none; } }
+      @media print { .no-print { display: none; } }
     </style></head>
     <body>
-      <div class="no-print" style="margin-bottom:16px;display:flex;gap:8px;">
-        <button onclick="window.print()" style="padding:8px 16px;font-size:14px;cursor:pointer;">প্রিন্ট করুন</button>
-      </div>
       ${inner}
       <script>setTimeout(()=>window.print(),400)</script>
     </body></html>
