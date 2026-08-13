@@ -1460,7 +1460,7 @@ function buildLoanDetailHtml(
           <table style="width:100%;border-collapse:collapse;font-size:14px;">${tableRows(guarantorRows)}</table>
           <h3 style="font-size:15px;border-bottom:1px solid #ccc;padding-bottom:4px;margin:14px 0 6px;">কিস্তি (${toBn(payments.length)})</h3>
           ${paymentRows}
-          {(loan.loanTerms || samiti.loanTerms) && (loan.loanTerms || samiti.loanTerms)!.length > 0 ? `
+          ${(loan.loanTerms || samiti.loanTerms) && (loan.loanTerms || samiti.loanTerms)!.length > 0 ? `
             <div style="margin-top:16px;padding-top:10px;border-top:2px solid #333;">
               <div style="font-weight:600;font-size:15px;margin-bottom:6px;">ঋণের শর্তাবলী:</div>
               <ol style="margin:0;padding-left:20px;font-size:13px;color:#111;line-height:1.6;">
