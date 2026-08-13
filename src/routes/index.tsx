@@ -4852,6 +4852,8 @@ function SettingsTab() {
   const [logo, setLogo] = useState(data.samitiLogo || "");
   const [rate, setRate] = useState(String(data.settings.defaultInterestRate));
   const [dur, setDur] = useState(String(data.settings.defaultDurationMonths));
+  const [dateFormat, setDateFormat] = useState<DateFormat>(data.settings.dateFormat || DEFAULT_DATE_FORMAT);
+  const [timeFormat, setTimeFormat] = useState<TimeFormat>(data.settings.timeFormat || DEFAULT_TIME_FORMAT);
   const [notice, setNotice] = useState(data.settings.notice || "");
   const [goals, setGoals] = useState<Goal[]>(data.settings.goals && data.settings.goals.length > 0 ? data.settings.goals : DEFAULT_GOALS);
   const [quotes, setQuotes] = useState<Quote[]>(data.settings.quotes && data.settings.quotes.length > 0 ? data.settings.quotes : DEFAULT_QUOTES);
@@ -4891,6 +4893,8 @@ function SettingsTab() {
     updateSettings({
       defaultInterestRate: Number(rate) || 0,
       defaultDurationMonths: Number(dur) || 12,
+      dateFormat,
+      timeFormat,
       notice: notice.trim(),
       goals: goals.map((g) => ({ icon: g.icon.trim(), title: g.title.trim(), desc: g.desc.trim() })).filter((g) => g.title || g.desc),
       quotes: quotes.map((q) => ({ bn: q.bn.trim(), en: q.en.trim() })).filter((q) => q.bn || q.en),
@@ -4965,6 +4969,28 @@ function SettingsTab() {
           <div><Label>সিরিয়াল উপসর্গ (Prefix)</Label><Input value={serialPrefix} onChange={(e) => setSerialPrefix(e.target.value.toUpperCase())} maxLength={5} placeholder="যেমন: SK — সদস্য সিরিয়াল হবে SKA1, SKB26 …" /></div>
           <div><Label>ঋণের ডিফল্ট মুনাফার হার (% বার্ষিক)</Label><Input type="number" value={rate} onChange={(e) => setRate(e.target.value)} /></div>
           <div><Label>ঋণের ডিফল্ট মেয়াদ (মাস)</Label><Input type="number" value={dur} onChange={(e) => setDur(e.target.value)} /></div>
+          <div className="grid gap-3 sm:grid-cols-2">
+            <div>
+              <Label>তারিখের ফরম্যাট (সমগ্র অ্যাপে)</Label>
+              <Select value={dateFormat} onValueChange={(v) => setDateFormat(v as DateFormat)}>
+                <SelectTrigger><SelectValue placeholder="ফরম্যাট নির্বাচন করুন" /></SelectTrigger>
+                <SelectContent>
+                  {DATE_FORMAT_OPTIONS.map((o) => (<SelectItem key={o.value} value={o.value}>{o.label}</SelectItem>))}
+                </SelectContent>
+              </Select>
+              <p className="text-[11px] text-muted-foreground mt-1">নমুনা: {formatDateStr(today())}</p>
+            </div>
+            <div>
+              <Label>সময়ের ফরম্যাট</Label>
+              <Select value={timeFormat} onValueChange={(v) => setTimeFormat(v as TimeFormat)}>
+                <SelectTrigger><SelectValue placeholder="ফরম্যাট নির্বাচন করুন" /></SelectTrigger>
+                <SelectContent>
+                  {TIME_FORMAT_OPTIONS.map((o) => (<SelectItem key={o.value} value={o.value}>{o.label}</SelectItem>))}
+                </SelectContent>
+              </Select>
+              <p className="text-[11px] text-muted-foreground mt-1">নমুনা: {formatTimeStr()}</p>
+            </div>
+          </div>
           <div>
             <Label>ড্যাশবোর্ড নোটিশ (স্ক্রলিং)</Label>
             <Textarea value={notice} onChange={(e) => setNotice(e.target.value)} placeholder="যেমন: আগামী শনিবার মাসিক সভা — সবাইকে উপস্থিত থাকার অনুরোধ।" rows={3} />
