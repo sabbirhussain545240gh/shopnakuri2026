@@ -89,6 +89,7 @@ export type CommitteeMember = { role: string; name: string; phone: string; photo
 export type Settings = {
   defaultInterestRate: number;
   defaultDurationMonths: number;
+  loanTerms?: string[];
   notice?: string;
   goals?: Goal[];
   quotes?: Quote[];
