@@ -1441,12 +1441,46 @@ function buildLoanDetailHtml(
     : "";
   const tableRows = (items: [string, string][]) =>
     items.map(([k, v]) => `<tr><td style="padding:6px 10px;border:1px solid #ddd;font-weight:600;width:40%;">${k}</td><td style="padding:6px 10px;border:1px solid #ddd;">${v || "—"}</td></tr>`).join("");
-  const paymentRows = payments.length
-    ? `<table style="width:100%;border-collapse:collapse;font-size:13px;margin-top:6px;">
-        <thead><tr><th style="text-align:left;padding:6px 10px;border:1px solid #ddd;background:#e5e7eb;">তারিখ</th><th style="text-align:right;padding:6px 10px;border:1px solid #ddd;background:#e5e7eb;">পরিমাণ</th></tr></thead>
-        <tbody>${payments.map((p) => `<tr><td style="padding:6px 10px;border:1px solid #ddd;">${fmtDate(p.date)}</td><td style="padding:6px 10px;border:1px solid #ddd;text-align:right;">${formatTk(p.amount)}</td></tr>`).join("")}</tbody>
-      </table>`
-    : `<div style="color:#666;font-size:13px;">কোনও কিস্তি নেই।</div>`;
+  const scheduleHtml = () => {
+    const months = loan.durationMonths;
+    const items = [];
+    for (let i = 1; i <= months; i++) {
+      const scheduledDate = addMonths(loan.date, i);
+      const payment = payments[i - 1]; // Assuming one payment per month for simple matching
+      items.push({
+        no: i,
+        date: scheduledDate,
+        amount: inst,
+        paid: !!payment,
+        receiptNo: payment ? `KS-${loanNo}-${i}` : "" // Logic based on sequential index as in previous turns
+      });
+    }
+    return `
+      <table style="width:100%;border-collapse:collapse;font-size:12px;margin-top:6px;text-align:center;">
+        <thead>
+          <tr>
+            <th style="padding:6px;border:1px solid #ddd;background:#f3f4f6;">ক্র নং</th>
+            <th style="padding:6px;border:1px solid #ddd;background:#f3f4f6;">জমার তারিখ</th>
+            <th style="padding:6px;border:1px solid #ddd;background:#f3f4f6;">পরিমাণ</th>
+            <th style="padding:6px;border:1px solid #ddd;background:#f3f4f6;">রিসিপ্ট নং</th>
+            <th style="padding:6px;border:1px solid #ddd;background:#f3f4f6;">অবস্থা</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${items.map(item => `
+            <tr>
+              <td style="padding:6px;border:1px solid #ddd;">${toBn(item.no)}</td>
+              <td style="padding:6px;border:1px solid #ddd;">${fmtDate(item.date)}</td>
+              <td style="padding:6px;border:1px solid #ddd;">${formatTk(item.amount)}</td>
+              <td style="padding:6px;border:1px solid #ddd;">${item.receiptNo || "—"}</td>
+              <td style="padding:6px;border:1px solid #ddd;font-weight:bold;color:${item.paid ? "#16a34a" : "#dc2626"};">
+                ${item.paid ? "Paid" : "Unpaid"}
+              </td>
+            </tr>
+          `).join("")}
+        </tbody>
+      </table>`;
+  };
 
   return `
     <div style="max-width:720px;margin:auto;position:relative;">
