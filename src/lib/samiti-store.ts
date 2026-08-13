@@ -107,7 +107,74 @@ export type Settings = {
   committee?: CommitteeMember[];
   committeeSectionTitle?: string;
   committeeSectionSubtitle?: string;
+  dateFormat?: DateFormat;
+  timeFormat?: TimeFormat;
 };
+
+export type DateFormat = "DD/MM/YYYY" | "MM/DD/YYYY" | "YYYY/MM/DD" | "DD-MM-YYYY" | "DD MMM YYYY";
+export type TimeFormat = "12h" | "24h";
+
+export const DATE_FORMAT_OPTIONS: Array<{ value: DateFormat; label: string }> = [
+  { value: "DD/MM/YYYY", label: "DD/MM/YYYY (১৩/০৮/২০২৬)" },
+  { value: "MM/DD/YYYY", label: "MM/DD/YYYY (০৮/১৩/২০২৬)" },
+  { value: "YYYY/MM/DD", label: "YYYY/MM/DD (২০২৬/০৮/১৩)" },
+  { value: "DD-MM-YYYY", label: "DD-MM-YYYY (১৩-০৮-২০২৬)" },
+  { value: "DD MMM YYYY", label: "DD MMM YYYY (13 Aug 2026)" },
+];
+
+export const TIME_FORMAT_OPTIONS: Array<{ value: TimeFormat; label: string }> = [
+  { value: "12h", label: "১২ ঘণ্টা (03:22 PM)" },
+  { value: "24h", label: "২৪ ঘণ্টা (15:22)" },
+];
+
+export const DEFAULT_DATE_FORMAT: DateFormat = "DD/MM/YYYY";
+export const DEFAULT_TIME_FORMAT: TimeFormat = "12h";
+
+const EN_MONTHS_SHORT = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+
+export function getDateFormat(): DateFormat {
+  try { return getState().settings?.dateFormat || DEFAULT_DATE_FORMAT; } catch { return DEFAULT_DATE_FORMAT; }
+}
+export function getTimeFormat(): TimeFormat {
+  try { return getState().settings?.timeFormat || DEFAULT_TIME_FORMAT; } catch { return DEFAULT_TIME_FORMAT; }
+}
+
+/** Formats an ISO (YYYY-MM-DD) date string using the samiti-wide date format setting. */
+export function formatDateStr(s?: string, opts?: { bn?: boolean; fallback?: string }): string {
+  const fallback = opts?.fallback ?? "";
+  if (!s) return fallback;
+  const [y, m, d] = String(s).split("-");
+  if (!y || !m || !d) return String(s);
+  const dd = String(d).slice(0, 2).padStart(2, "0");
+  const mm = String(m).padStart(2, "0");
+  const fmt = getDateFormat();
+  let out: string;
+  switch (fmt) {
+    case "MM/DD/YYYY": out = `${mm}/${dd}/${y}`; break;
+    case "YYYY/MM/DD": out = `${y}/${mm}/${dd}`; break;
+    case "DD-MM-YYYY": out = `${dd}-${mm}-${y}`; break;
+    case "DD MMM YYYY": return `${dd} ${EN_MONTHS_SHORT[+mm - 1] || mm} ${y}`;
+    default: out = `${dd}/${mm}/${y}`;
+  }
+  return opts?.bn ? toBn(out) : out;
+}
+
+/** Formats a time using the samiti-wide time format setting. */
+export function formatTimeStr(input?: Date | string, opts?: { bn?: boolean }): string {
+  const dt = input instanceof Date ? input : input ? new Date(input) : new Date();
+  if (isNaN(dt.getTime())) return "";
+  let h = dt.getHours();
+  const min = String(dt.getMinutes()).padStart(2, "0");
+  let out: string;
+  if (getTimeFormat() === "12h") {
+    const ampm = h >= 12 ? "PM" : "AM";
+    h = h % 12 || 12;
+    out = `${String(h).padStart(2, "0")}:${min} ${ampm}`;
+  } else {
+    out = `${String(h).padStart(2, "0")}:${min}`;
+  }
+  return opts?.bn ? out.replace(/\d/g, (d) => "০১২৩৪৫৬৭৮৯"[+d]) : out;
+}
 
 
 export const DEFAULT_GOALS: Goal[] = [

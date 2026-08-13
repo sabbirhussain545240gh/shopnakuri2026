@@ -8,17 +8,14 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Loader2, HandCoins, PiggyBank, Receipt as ReceiptIcon, Printer, ImageDown, FileText, AlertTriangle, User, Phone, MapPin, Calendar, Hash, Eye, Users, TrendingUp, Wallet } from "lucide-react";
 import { SignOutButton, CloudStatusBadge } from "@/components/AuthGate";
 import { NotificationBell } from "@/components/NotificationBell";
-import { toBn, formatTk } from "@/lib/samiti-store";
+import { toBn, formatTk, formatDateStr } from "@/lib/samiti-store";
 import { buildReceiptQr } from "@/lib/receipt-qr";
 import { getMyMemberView, type MemberViewResponse, type MemberViewLoan, type MemberViewPayment, type MemberViewDeposit } from "@/lib/member-view.functions";
 import { printMemberCard, exportMemberCardPdf, exportMemberCardJpeg } from "@/lib/member-card";
 import { toast } from "sonner";
 
 function fmtDate(d: string) {
-  if (!d) return "—";
-  const [y, m, dd] = d.split("-");
-  if (!y || !m || !dd) return d;
-  return `${toBn(dd)}/${toBn(m)}/${toBn(y)}`;
+  return formatDateStr(d, { bn: true, fallback: "—" });
 }
 
 function monthlyInstallment(amount: number, rate: number, months: number) {
