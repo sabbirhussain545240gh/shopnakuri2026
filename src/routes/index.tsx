@@ -6518,7 +6518,7 @@ function buildReceiptHtml(r: { loan: Loan; memberName: string; amount: number; d
       <div style="margin-top:12px;padding-top:10px;border-top:1px solid #eee;">
         <div style="font-weight:600;font-size:12px;margin-bottom:4px;">ঋণের শর্তাবলী:</div>
         <ol style="margin:0;padding-left:16px;font-size:11px;color:#555;line-height:1.4;">
-          ${r.loan.loanTerms.map((t) => `<li>${t}</li>`).join("")}
+          ${r.loan.loanTerms.map((t: string) => `<li>${t}</li>`).join("")}
         </ol>
       </div>
     ` : ""}
