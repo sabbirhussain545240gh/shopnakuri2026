@@ -3403,6 +3403,16 @@ function LoansTab() {
                     <div>পারিবারিক: {currentLoan.familyGuarantor.name} ({currentLoan.familyGuarantor.relation}) — {currentLoan.familyGuarantor.phone}</div>
                   )}
                 </div>
+                {data.settings.loanTerms && data.settings.loanTerms.length > 0 && (
+                  <div className="border-t pt-2">
+                    <div className="font-medium mb-1">ঋণের শর্তাবলী</div>
+                    <ul className="list-decimal list-inside space-y-1 text-muted-foreground">
+                      {data.settings.loanTerms.map((term, i) => (
+                        <li key={i}>{term}</li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
                 <div className="border-t pt-2">
                   <div className="font-medium mb-1">কিস্তি ({toBn(pays.length)})</div>
                   {pays.length === 0 ? (
@@ -4872,6 +4882,7 @@ function SettingsTab() {
   const [goalsSectionTitle, setGoalsSectionTitle] = useState(data.settings.goalsSectionTitle || "");
   const [goalsSectionSubtitle, setGoalsSectionSubtitle] = useState(data.settings.goalsSectionSubtitle || "");
   const [quotesSectionTitle, setQuotesSectionTitle] = useState(data.settings.quotesSectionTitle || "");
+  const [loanTerms, setLoanTerms] = useState<string[]>(data.settings.loanTerms || []);
   const [confirmReset, setConfirmReset] = useState(false);
 
   const onLogo = (file?: File) => {
@@ -4913,6 +4924,7 @@ function SettingsTab() {
       committee: committee.map((c) => ({ role: c.role.trim(), name: c.name.trim(), phone: c.phone.trim(), photo: c.photo || "", signature: c.signature || "" })).filter((c) => c.role || c.name || c.phone),
       committeeSectionTitle: committeeSectionTitle.trim(),
       committeeSectionSubtitle: committeeSectionSubtitle.trim(),
+      loanTerms: loanTerms.map((t) => t.trim()).filter((t) => t),
     });
     toast.success("সেটিংস সংরক্ষিত হয়েছে");
   };
@@ -5324,6 +5336,56 @@ function SettingsTab() {
           <Button type="button" variant="outline" size="sm" onClick={() => setCommittee([...committee, { role: "", name: "", phone: "", photo: "", signature: "" }])}>
             <Plus className="h-4 w-4 mr-1" />নতুন কমিটি সদস্য
           </Button>
+          <Button onClick={saveGeneral} className="w-full">সংরক্ষণ</Button>
+        </CardContent>
+      </Card>
+
+      <Card className="md:col-span-2">
+        <CardHeader>
+          <CardTitle>ঋণের শর্তাবলী</CardTitle>
+          <CardDescription>ঋণ প্রদানের সময় রিসিপ্ট ও বিস্তারিত পেজে দেখানো শর্তাবলী সেট করুন</CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="space-y-3">
+            {loanTerms.map((term, i) => (
+              <div key={i} className="flex gap-2 items-start group">
+                <div className="flex-1 flex gap-2">
+                  <span className="mt-2.5 text-xs font-mono text-muted-foreground">{toBn(i + 1)}.</span>
+                  <Textarea
+                    rows={1}
+                    value={term}
+                    onChange={(e) => setLoanTerms(loanTerms.map((t, j) => (j === i ? e.target.value : t)))}
+                    placeholder="শর্ত লিখুন..."
+                    className="min-h-[40px] resize-none overflow-hidden"
+                    onInput={(e) => {
+                      const target = e.target as HTMLTextAreaElement;
+                      target.style.height = "auto";
+                      target.style.height = target.scrollHeight + "px";
+                    }}
+                  />
+                </div>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="icon"
+                  className="shrink-0 text-destructive opacity-0 group-hover:opacity-100 transition-opacity"
+                  onClick={() => setLoanTerms(loanTerms.filter((_, j) => j !== i))}
+                >
+                  <Trash2 className="h-4 w-4" />
+                </Button>
+              </div>
+            ))}
+          </div>
+          <div className="flex gap-2">
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={() => setLoanTerms([...loanTerms, ""])}
+            >
+              <Plus className="h-4 w-4 mr-1" />নতুন শর্ত যোগ করুন
+            </Button>
+          </div>
           <Button onClick={saveGeneral} className="w-full">সংরক্ষণ</Button>
         </CardContent>
       </Card>
@@ -6451,6 +6513,14 @@ function buildReceiptHtml(r: { loan: Loan; memberName: string; amount: number; d
       <div><span class="muted">মোট পরিশোধিত:</span> <b>${formatTk(r.paidAfter)}</b></div>
       <div><span class="muted">অবশিষ্ট বকেয়া:</span> <span class="due">${formatTk(r.remainingAfter)}</span></div>
     </div>
+    ${r.loan.loanTerms && r.loan.loanTerms.length > 0 ? `
+      <div style="margin-top:12px;padding-top:10px;border-top:1px solid #eee;">
+        <div style="font-weight:600;font-size:12px;margin-bottom:4px;">ঋণের শর্তাবলী:</div>
+        <ol style="margin:0;padding-left:16px;font-size:11px;color:#555;line-height:1.4;">
+          ${r.loan.loanTerms.map((t) => `<li>${t}</li>`).join("")}
+        </ol>
+      </div>
+    ` : ""}
     ${r.note ? `<div class="note"><span class="muted">নোট:</span> <b>${r.note.replace(/</g, "&lt;")}</b></div>` : ""}
     ${qrBlockHtml(qrDataUrl)}
     <div class="sign"><div>—————————<br/>গ্রহীতা</div>${treasurerSignHtml(treasurer)}</div>
