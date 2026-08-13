@@ -6514,14 +6514,6 @@ function buildReceiptHtml(r: { loan: Loan; memberName: string; amount: number; d
       <div><span class="muted">মোট পরিশোধিত:</span> <b>${formatTk(r.paidAfter)}</b></div>
       <div><span class="muted">অবশিষ্ট বকেয়া:</span> <span class="due">${formatTk(r.remainingAfter)}</span></div>
     </div>
-    ${r.loan.loanTerms && r.loan.loanTerms.length > 0 ? `
-      <div style="margin-top:12px;padding-top:10px;border-top:1px solid #eee;">
-        <div style="font-weight:600;font-size:12px;margin-bottom:4px;">ঋণের শর্তাবলী:</div>
-        <ol style="margin:0;padding-left:16px;font-size:11px;color:#555;line-height:1.4;">
-          ${r.loan.loanTerms.map((t: string) => `<li>${t}</li>`).join("")}
-        </ol>
-      </div>
-    ` : ""}
     ${r.note ? `<div class="note"><span class="muted">নোট:</span> <b>${r.note.replace(/</g, "&lt;")}</b></div>` : ""}
     ${qrBlockHtml(qrDataUrl)}
     <div class="sign"><div>—————————<br/>গ্রহীতা</div>${treasurerSignHtml(treasurer)}</div>
