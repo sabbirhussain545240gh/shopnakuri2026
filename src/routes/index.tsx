@@ -2363,6 +2363,7 @@ function LoansTab() {
       interestRate: rate,
       durationMonths: Number(form.durationMonths) || 12,
       date: form.date,
+      loanTerms: data.settings.loanTerms,
       memberGuarantorId: form.memberGuarantorId,
       familyGuarantor: { name: form.familyGuarantorName.trim(), relation, phone: form.familyGuarantorPhone.trim() },
       isJoint,
