@@ -1483,25 +1483,32 @@ function buildLoanDetailHtml(
   };
 
   return `
-    <div style="max-width:720px;margin:auto;position:relative;">
+    <div style="max-width:840px;margin:auto;position:relative;">
       ${watermarkHtml}
       <div class="ld-content">
         ${headerHtml}
-        <div style="border:2px solid #333;padding:18px;border-radius:8px;">
+        <div style="border:2px solid #333;padding:18px;border-radius:8px;background:rgba(255,255,255,0.7);">
           <h2 style="text-align:center;margin:0 0 14px 0;font-size:18px;border-bottom:2px solid #333;padding-bottom:6px;">ঋণের বিস্তারিত</h2>
-          <table style="width:100%;border-collapse:collapse;font-size:14px;">${tableRows(rows)}</table>
+          
+          <table style="width:100%;border-collapse:collapse;font-size:14px;margin-bottom:14px;">${tableRows(rows)}</table>
+          
           <h3 style="font-size:15px;border-bottom:1px solid #ccc;padding-bottom:4px;margin:14px 0 6px;">জামিনদার</h3>
-          <table style="width:100%;border-collapse:collapse;font-size:14px;">${tableRows(guarantorRows)}</table>
-          <h3 style="font-size:15px;border-bottom:1px solid #ccc;padding-bottom:4px;margin:14px 0 6px;">কিস্তি সিডিউল ও আদায়</h3>
-          ${scheduleHtml()}
-          ${(loan.loanTerms || samiti.loanTerms) && (loan.loanTerms || samiti.loanTerms)!.length > 0 ? `
-            <div style="margin-top:16px;padding-top:10px;border-top:2px solid #333;">
-              <div style="font-weight:600;font-size:15px;margin-bottom:6px;">ঋণের শর্তাবলী:</div>
-              <ol style="margin:0;padding-left:20px;font-size:13px;color:#111;line-height:1.6;">
-                ${(loan.loanTerms || samiti.loanTerms)!.map((t: string) => `<li style="margin-bottom:4px;">${t}</li>`).join("")}
-              </ol>
+          <table style="width:100%;border-collapse:collapse;font-size:14px;margin-bottom:14px;">${tableRows(guarantorRows)}</table>
+          
+          <div style="display:flex;gap:24px;margin-top:14px;align-items:flex-start;">
+            <div style="flex:1;">
+              <h3 style="font-size:15px;border-bottom:1px solid #ccc;padding-bottom:4px;margin:0 0 6px 0;">কিস্তি সিডিউল ও আদায়</h3>
+              ${scheduleHtml()}
             </div>
-          ` : ""}
+            <div style="flex:1;">
+              <h3 style="font-size:15px;border-bottom:1px solid #ccc;padding-bottom:4px;margin:0 0 6px 0;">ঋণের শর্তাবলী</h3>
+              ${(loan.loanTerms || samiti.loanTerms) && (loan.loanTerms || samiti.loanTerms)!.length > 0 ? `
+                <ol style="margin:0;padding-left:20px;font-size:13px;color:#111;line-height:1.6;">
+                  ${(loan.loanTerms || samiti.loanTerms)!.map((t: string) => `<li style="margin-bottom:4px;">${t}</li>`).join("")}
+                </ol>
+              ` : `<div style="font-size:13px;color:#666;">কোনো শর্তাবলী পাওয়া যায়নি।</div>`}
+            </div>
+          </div>
         </div>
       </div>
     </div>`;
