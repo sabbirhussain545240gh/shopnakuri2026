@@ -1483,7 +1483,7 @@ function buildLoanDetailHtml(
   };
 
   return `
-    <div style="max-width:840px;margin:auto;position:relative;">
+    <div style="max-width:840px;margin:0 auto;position:relative;">
       ${watermarkHtml}
       <div class="ld-content">
         ${headerHtml}
