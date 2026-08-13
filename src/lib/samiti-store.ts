@@ -61,6 +61,7 @@ export type Loan = {
   isJoint?: boolean;
   coBorrower?: { name: string; fatherName?: string; phone: string; nid?: string; address?: string };
   cheques?: CollateralCheque[];
+  loanTerms?: string[];
 };
 
 
