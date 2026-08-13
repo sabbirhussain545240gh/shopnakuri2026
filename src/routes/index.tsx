@@ -118,12 +118,7 @@ function RoleRouter() {
 
 const today = () => new Date().toISOString().slice(0, 10);
 const enMonths = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
-const fmtDate = (s: string) => {
-  if (!s) return "";
-  const [y, m, d] = s.split("-");
-  const dd = String(d).padStart(2, "0");
-  return `${dd} ${enMonths[+m - 1] || m} ${y}`;
-};
+const fmtDate = (s: string) => formatDateStr(s);
 const bnMonths = ["জানুয়ারি","ফেব্রুয়ারি","মার্চ","এপ্রিল","মে","জুন","জুলাই","আগস্ট","সেপ্টেম্বর","অক্টোবর","নভেম্বর","ডিসেম্বর"];
 const toBnDigits = (s: string | number) => String(s).replace(/[0-9]/g, (d) => "০১২৩৪৫৬৭৮৯"[+d]);
 const fmtMonthYearBn = (s: string) => {
