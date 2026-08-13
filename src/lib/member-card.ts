@@ -21,14 +21,7 @@ export type SamitiInfo = {
   establishedDate?: string;
 };
 
-const enMonths = ["January","February","March","April","May","June","July","August","September","October","November","December"];
-const fmtDate = (s?: string) => {
-  if (!s) return "";
-  const [y, m, d] = s.split("-");
-  if (!y || !m || !d) return s;
-  const dd = String(d).padStart(2, "0");
-  return `${dd} ${enMonths[+m - 1] || m} ${y}`;
-};
+const fmtDate = (s?: string) => formatDateStr(s);
 
 export function buildMemberCardHtml(member: MemberCardInput, samiti: SamitiInfo) {
   const headerHtml = `

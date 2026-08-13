@@ -18,10 +18,7 @@ function signBlock(label: string, c: CommitteeMember | null) {
 }
 
 function fmtDate(d: string) {
-  if (!d) return "—";
-  const [y, m, dd] = d.split("-");
-  if (!y || !m || !dd) return d;
-  return `${toBn(dd)}/${toBn(m)}/${toBn(y)}`;
+  return formatDateStr(d, { bn: true, fallback: "—" });
 }
 
 export const closureCss = `
