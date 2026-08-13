@@ -3467,19 +3467,46 @@ function LoansTab() {
                   </div>
                 )}
                 <div className="border-t pt-2">
-                  <div className="font-medium mb-1">কিস্তি ({toBn(pays.length)})</div>
-                  {pays.length === 0 ? (
-                    <p className="text-muted-foreground">কোনও কিস্তি নেই।</p>
-                  ) : (
+                  <div className="font-medium mb-1">কিস্তি সিডিউল ও আদায়</div>
+                  <div className="overflow-x-auto">
                     <Table>
-                      <TableHeader><TableRow><TableHead>তারিখ</TableHead><TableHead className="text-right">পরিমাণ</TableHead></TableRow></TableHeader>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead className="w-[60px]">ক্র নং</TableHead>
+                          <TableHead>জমার তারিখ</TableHead>
+                          <TableHead className="text-right">পরিমাণ</TableHead>
+                          <TableHead>রিসিপ্ট নং</TableHead>
+                          <TableHead>অবস্থা</TableHead>
+                        </TableRow>
+                      </TableHeader>
                       <TableBody>
-                        {pays.map((p) => (
-                          <TableRow key={p.id}><TableCell>{fmtDate(p.date)}</TableCell><TableCell className="text-right">{formatTk(p.amount)}</TableCell></TableRow>
-                        ))}
+                        {Array.from({ length: currentLoan.durationMonths }).map((_, i) => {
+                          const monthNo = i + 1;
+                          const scheduledDate = addMonths(currentLoan.date, monthNo);
+                          const payment = pays[i]; // Matching by sequence
+                          const isPaid = !!payment;
+                          const receiptNo = isPaid ? `KS-${toBn(idx + 1)}-${toBn(monthNo)}` : "—";
+                          
+                          return (
+                            <TableRow key={monthNo}>
+                              <TableCell>{toBn(monthNo)}</TableCell>
+                              <TableCell>{fmtDate(scheduledDate)}</TableCell>
+                              <TableCell className="text-right">{formatTk(monthlyInstallment(currentLoan.amount, currentLoan.interestRate, currentLoan.durationMonths))}</TableCell>
+                              <TableCell>{receiptNo}</TableCell>
+                              <TableCell>
+                                <span className={cn(
+                                  "font-bold",
+                                  isPaid ? "text-success" : "text-destructive"
+                                )}>
+                                  {isPaid ? "Paid" : "Unpaid"}
+                                </span>
+                              </TableCell>
+                            </TableRow>
+                          );
+                        })}
                       </TableBody>
                     </Table>
-                  )}
+                  </div>
                 </div>
                 <div className="border-t pt-3 flex flex-wrap justify-end gap-2">
                   <Button
