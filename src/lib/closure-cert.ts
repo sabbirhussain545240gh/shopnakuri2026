@@ -1,4 +1,4 @@
-import { toBn, formatTk, type CommitteeMember } from "@/lib/samiti-store";
+import { toBn, formatTk, formatDateStr, type CommitteeMember } from "@/lib/samiti-store";
 import { buildReceiptQr } from "@/lib/receipt-qr";
 
 function findCommittee(committee: CommitteeMember[] | undefined, keywords: string[]) {

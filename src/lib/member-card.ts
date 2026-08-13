@@ -1,4 +1,4 @@
-import { toBn } from "@/lib/samiti-store";
+import { toBn, formatDateStr } from "@/lib/samiti-store";
 
 export type MemberCardInput = {
   serial?: number;
