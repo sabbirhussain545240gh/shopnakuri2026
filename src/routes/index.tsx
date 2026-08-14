@@ -6467,7 +6467,11 @@ function printReport(p: ReportParams) {
     <style>
       body { font-family: "Segoe UI", "Noto Sans Bengali", sans-serif; margin: 0; padding: 24px; color: #111; background:#fff; position: relative; }
       h3 { margin: 16px 0 6px; font-size: 14px; }
-      @media print { body { padding: 0 !important; } .no-print { display: none !important; } }
+      @media print { 
+        body { padding: 0 !important; } 
+        .no-print { display: none !important; } 
+        .ps-wm, .ld-wm, .wm, .watermark { display: block !important; visibility: visible !important; opacity: 0.15 !important; -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+      }
       ${printBrandCss}
     </style></head>
     <body>
