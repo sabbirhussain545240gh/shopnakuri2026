@@ -788,6 +788,9 @@ function MembersTab() {
     for (const k of keys) {
       const v = row[k];
       if (v != null && String(v).trim() !== "") return String(v).trim();
+    }
+    return "";
+  };
 
   const downloadTemplate = () => {
     const headers = [
