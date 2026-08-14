@@ -38,7 +38,7 @@ export function buildMemberCardHtml(member: MemberCardInput, samiti: SamitiInfo)
     ? `<img src="${member.photo}" style="width:120px;height:120px;object-fit:contain;background:#fff;border-radius:8px;border:1px solid #ddd;" crossorigin="anonymous" />`
     : `<div style="width:120px;height:120px;border-radius:8px;border:1px solid #ddd;background:#f5f5f5;display:flex;align-items:center;justify-content:center;color:#888;font-size:12px;">ছবি নেই</div>`;
   const rows: [string, string][] = [
-    ["সিরিয়াল নম্বর", toBn(member.serial || 0)],
+    ["সিরিয়াল নম্বর", toBn(member.serial || 0)],
     ["নাম", member.name || ""],
     ["পিতার নাম", member.fatherName || ""],
     ["মাতার নাম", member.motherName || ""],
@@ -52,8 +52,8 @@ export function buildMemberCardHtml(member: MemberCardInput, samiti: SamitiInfo)
     ? [
         ["নমিনির নাম", member.nominee.name || ""],
         ["সম্পর্ক", member.nominee.relation || ""],
-        ["মোবাইল", member.nominee.phone ? toBn(member.nominee.phone) : ""],
-        ["NID / জন্ম সনদ", member.nominee.nid ? toBn(member.nominee.nid) : ""],
+        ["মোবাইল নং", member.nominee.phone ? toBn(member.nominee.phone) : ""],
+        ["NID / জন্ম সনদ নং", member.nominee.nid ? toBn(member.nominee.nid) : ""],
       ]
     : [];
   const tableRows = (items: [string, string][]) =>
