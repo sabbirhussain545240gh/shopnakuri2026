@@ -2851,7 +2851,7 @@ function SavingsTab() {
 
 // ===== Loans =====
 function LoansTab() {
-  const { data, addLoan, updateLoan, addPayment, closeLoan, refreshLoanStatus, deleteLoan } = useSamiti();
+  const { data, addLoan, updateLoan, addPayment, closeLoan, refreshLoanStatus, deleteLoan, updateSamitiInfo } = useSamiti();
   const [open, setOpen] = useState(false);
   const [payFor, setPayFor] = useState<Loan | null>(null);
   const [editFor, setEditFor] = useState<Loan | null>(null);
