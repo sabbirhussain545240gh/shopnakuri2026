@@ -1100,22 +1100,6 @@ function MembersTab() {
           </DialogContent>
         </Dialog>
 
-        <Dialog open={!!viewDoc} onOpenChange={(o) => !o && setViewDoc(null)}>
-          <DialogContent className="max-w-4xl max-h-[95vh] flex flex-col p-0 overflow-hidden">
-            <div className="flex items-center justify-between p-4 border-b bg-muted/30 print:hidden">
-              <div className="flex flex-col">
-                <DialogTitle className="text-base">{viewDoc?.name}</DialogTitle>
-                <DialogDescription className="text-xs">মালিক: {viewDoc?.owner}</DialogDescription>
-              </div>
-              <div className="flex items-center gap-2">
-                <Button size="sm" variant="outline" className="h-8" onClick={() => viewDoc && printNidFile(viewDoc.file, viewDoc.name, viewDoc.owner, data.samitiName, data.samitiLogo)}>
-                  <Printer className="h-4 w-4 mr-1.5" /> প্রিন্ট
-                </Button>
-                <Button size="sm" variant="ghost" className="h-8 w-8 p-0" onClick={() => setViewDoc(null)}>
-                  <X className="h-4 w-4" />
-                </Button>
-              </div>
-            </div>
             <div className="flex-1 overflow-auto bg-slate-100 p-4 md:p-8 flex items-center justify-center min-h-[400px]">
               {viewDoc && (
                 viewDoc.file.startsWith("data:application/pdf") ? (
