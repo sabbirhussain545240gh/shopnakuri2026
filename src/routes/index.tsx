@@ -1743,14 +1743,25 @@ function EditMemberForm({ member, onSave, onCancel }: { member: Member; onSave: 
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center gap-4">
+      <div className="flex flex-wrap items-center gap-4">
         <div className="h-24 w-24 rounded-lg border bg-muted overflow-hidden flex items-center justify-center shrink-0">
           {form.photo ? <img src={form.photo} alt="" className="h-full w-full object-contain bg-white" /> : <Users className="h-8 w-8 text-muted-foreground" />}
         </div>
-        <div className="space-y-2">
+        <div className="space-y-2 flex-1 min-w-[200px]">
           <Label>সদস্যের ছবি</Label>
           <Input type="file" accept="image/*" onChange={(e) => onPhoto(e.target.files?.[0])} />
-          {form.photo && <Button type="button" variant="ghost" size="sm" onClick={() => setForm({ ...form, photo: "" })}>ছবি সরান</Button>}
+          {form.photo && <Button type="button" variant="ghost" size="sm" onClick={() => setForm((f) => ({ ...f, photo: "" }))}>ছবি সরান</Button>}
+        </div>
+        <div className="space-y-2 flex-1 min-w-[200px]">
+          <Label>সদস্যের NID/জন্ম সনদ (স্ক্যান কপি)</Label>
+          <Input type="file" accept="image/*,application/pdf" onChange={(e) => {
+            const file = e.target.files?.[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = () => setForm((f) => ({ ...f, nidFile: String(reader.result || "") }));
+            reader.readAsDataURL(file);
+          }} />
+          {form.nidFile && <Button type="button" variant="ghost" size="sm" onClick={() => setForm((f) => ({ ...f, nidFile: "" }))}>ফাইল সরান</Button>}
         </div>
       </div>
 
