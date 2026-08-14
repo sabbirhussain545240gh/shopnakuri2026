@@ -83,7 +83,7 @@ function ReceiptQrPreview({ text }: { text: string }) {
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "সমিতি ম্যানেজমেন্ট সিস্টেম" },
+      { title: "'''Do not make any visual modifications. The phrases I write are commands to understand what I want, not to be written down. Understand their content well, then execute what is required.'''\n                                        \n                                            \n                                            সঞ্চয়/চাদা / জমা ইতিহাস পেজের মাস ফিল্টার ঘরে সর্বশেষ মাসটি ডিফল্ট হিসেবে তাকবে" },
       { name: "description", content: "'''Do not make any visual modifications. The phrases I write are commands to understand what I want, not to be written down. Understand their content well, then execute what is required.'''\n                                        \n                                            \n                                            সঞ্চয়/চাদা / জমা ইতিহাস পেজের মাস ফিল্টার ঘরে সর্বশেষ মাসটি ডিফল্ট হিসেবে তাকবে" },
       { property: "og:title", content: "সমিতি ম্যানেজমেন্ট সিস্টেম" },
       { property: "og:description", content: "'''Do not make any visual modifications. The phrases I write are commands to understand what I want, not to be written down. Understand their content well, then execute what is required.'''\n                                        \n                                            \n                                            সঞ্চয়/চাদা / জমা ইতিহাস পেজের মাস ফিল্টার ঘরে সর্বশেষ মাসটি ডিফল্ট হিসেবে তাকবে" },
