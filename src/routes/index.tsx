@@ -1320,26 +1320,40 @@ function MembersTab() {
                 <div className="text-center">
                   <div className="text-lg font-bold">{data.samitiName || "সমিতি"}</div>
                   <div className="text-xs text-muted-foreground">সঞ্চয় / চাদা জমা রিসিপ্ট</div>
-                </div>
-              </div>
-              <div className="grid grid-cols-2 gap-2">
-                <div><span className="text-muted-foreground">রিসিপ্ট নং:</span> <span className="font-medium">{depositReceipt.receiptNo}</span></div>
-                <div><span className="text-muted-foreground">তারিখ:</span> <span className="font-medium">{fmtDate(depositReceipt.date)}</span></div>
-                <div className="col-span-2"><span className="text-muted-foreground">সদস্য:</span> <span className="font-medium">{depositReceipt.memberName}</span></div>
-              </div>
-              <div className="mt-3 border-t pt-2 flex justify-between text-base">
-                <span className="font-medium">জমার পরিমাণ</span>
-                <span className="font-bold text-success">{formatTk(depositReceipt.amount)}</span>
-              </div>
-              {depositReceipt.note && (
-                <div className="mt-3 text-sm border-t pt-2">
-                  <span className="text-muted-foreground">নোট:</span> <span className="font-medium whitespace-pre-wrap">{depositReceipt.note}</span>
-                </div>
-              )}
-              <div className="mt-6 flex justify-between text-xs text-muted-foreground">
-                <div>—————————<br />গ্রহীতা</div>
-                <TreasurerSignBlock committee={data.settings.committee} />
-              </div>
+                  <div className="flex items-center justify-center gap-3 mb-3">
+                    {depositReceipt.logo && (
+                      <img src={depositReceipt.logo} alt="logo" className="h-12 w-12 object-contain rounded" />
+                    )}
+                    <div className="text-center">
+                      <div className="text-lg font-bold">{data.samitiName || "সমিতি"}</div>
+                      <div className="text-xs text-muted-foreground">সঞ্চয়/চাদা জমা রিসিপ্ট</div>
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-2 gap-2">
+                    <div><span className="text-muted-foreground">রিসিপ্ট নং:</span> <span className="font-medium">{depositReceipt.receiptNo}</span></div>
+                    <div><span className="text-muted-foreground">তারিখ:</span> <span className="font-medium">{fmtDate(depositReceipt.date)}</span></div>
+                    <div className="col-span-2"><span className="text-muted-foreground">সদস্য:</span> <span className="font-medium">{depositReceipt.memberSerial ? `${toBn(depositReceipt.memberSerial)}. ` : ""}{depositReceipt.memberName}</span></div>
+                  </div>
+                  <div className="mt-3 border-t pt-2 flex justify-between text-base">
+                    <span className="font-medium">জমার পরিমাণ</span>
+                    <span className="font-bold text-success">{formatTk(depositReceipt.amount)}</span>
+                  </div>
+                  <div className="mt-2 text-sm">
+                    <span className="text-muted-foreground">মোট সঞ্চয়:</span> <span className="font-medium">{formatTk(depositReceipt.totalAfter)}</span>
+                  </div>
+                  {depositReceipt.note && (
+                    <div className="mt-3 text-sm border-t pt-2">
+                      <span className="text-muted-foreground">নোট:</span> <span className="font-medium whitespace-pre-wrap">{depositReceipt.note}</span>
+                    </div>
+                  )}
+                  <ReceiptQrPreview text={buildQrText({
+                    memberName: depositReceipt.memberName, memberSerial: depositReceipt.memberSerial,
+                    date: depositReceipt.date, amount: depositReceipt.amount,
+                  })} />
+                  <div className="mt-6 flex justify-between text-xs text-muted-foreground">
+                    <div>—————————<br />গ্রহীতা</div>
+                    <TreasurerSignBlock committee={data.settings.committee} />
+                  </div>
             </div>
           )}
           <DialogFooter className="gap-2 flex-wrap">
