@@ -3331,8 +3331,74 @@ function LoansTab() {
           <CardTitle>ঋণ ব্যবস্থাপনা</CardTitle>
           <CardDescription>মোট {toBn(data.loans.length)}টি ঋণ</CardDescription>
         </div>
-        <Dialog open={open} onOpenChange={(o) => { setOpen(o); if (!o) setErrors({}); }}>
-          <DialogTrigger asChild><Button disabled={data.members.length === 0}><Plus className="h-4 w-4 mr-1" />নতুন ঋণ</Button></DialogTrigger>
+        <div className="flex items-center gap-2">
+          <Dialog>
+            <DialogTrigger asChild>
+              <Button variant="outline">
+                <Scale className="h-4 w-4 mr-1" />
+                ঋণের শর্ত
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="max-w-2xl">
+              <DialogHeader>
+                <DialogTitle>ঋণের শর্তাবলী</DialogTitle>
+                <DialogDescription>ঋণ প্রদানের সময় এই শর্তগুলো ডিফল্ট হিসেবে যুক্ত হবে</DialogDescription>
+              </DialogHeader>
+              <div className="space-y-4 py-4">
+                <div className="space-y-2">
+                  {(data.settings.loanTerms || []).map((term, i) => (
+                    <div key={i} className="flex gap-2 group items-start">
+                      <div className="flex-1">
+                        <Textarea
+                          value={term}
+                          onChange={(e) => {
+                            const newTerms = [...(data.settings.loanTerms || [])];
+                            newTerms[i] = e.target.value;
+                            s.updateSettings({ loanTerms: newTerms });
+                          }}
+                          className="min-h-[40px] resize-none overflow-hidden"
+                          onInput={(e) => {
+                            const target = e.target as HTMLTextAreaElement;
+                            target.style.height = "auto";
+                            target.style.height = target.scrollHeight + "px";
+                          }}
+                        />
+                      </div>
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="icon"
+                        className="shrink-0 text-destructive opacity-0 group-hover:opacity-100 transition-opacity"
+                        onClick={() => {
+                          const newTerms = (data.settings.loanTerms || []).filter((_, j) => j !== i);
+                          s.updateSettings({ loanTerms: newTerms });
+                        }}
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  ))}
+                  {(data.settings.loanTerms || []).length === 0 && (
+                    <p className="text-sm text-muted-foreground text-center py-4 border rounded-lg border-dashed">কোনও শর্ত যোগ করা নেই</p>
+                  )}
+                </div>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() => {
+                    const newTerms = [...(data.settings.loanTerms || []), ""];
+                    s.updateSettings({ loanTerms: newTerms });
+                  }}
+                >
+                  <Plus className="h-4 w-4 mr-1" />নতুন শর্ত যোগ করুন
+                </Button>
+              </div>
+            </DialogContent>
+          </Dialog>
+
+          <Dialog open={open} onOpenChange={(o) => { setOpen(o); if (!o) setErrors({}); }}>
+            <DialogTrigger asChild><Button disabled={data.members.length === 0}><Plus className="h-4 w-4 mr-1" />নতুন ঋণ</Button></DialogTrigger>
           <DialogContent>
             <DialogHeader><DialogTitle>নতুন ঋণ প্রদান</DialogTitle></DialogHeader>
             <div className="space-y-3">
@@ -3348,6 +3414,12 @@ function LoansTab() {
                 <div>
                   <Label>পরিমাণ *</Label>
                   <Input type="number" className={errors.amount ? "border-destructive" : ""} value={form.amount} onChange={(e) => setField("amount", e.target.value)} />
+                </div>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+      </div>
                   {errors.amount && <p className="text-xs text-destructive mt-1">{errors.amount}</p>}
                 </div>
                 <div>
