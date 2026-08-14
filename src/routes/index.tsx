@@ -6451,10 +6451,12 @@ function printReport(p: ReportParams) {
     <body>
       ${printWatermark(p.samitiLogo)}
       <div class="ps-content">
-      <div class="no-print" style="margin-bottom:12px;"><button onclick="window.print()" style="padding:8px 16px;font-size:14px;cursor:pointer;">প্রিন্ট করুন</button></div>
+      <div class="no-print" style="margin-bottom:12px;display:flex;gap:10px;">
+        <button onclick="window.print()" style="padding:8px 16px;font-size:14px;cursor:pointer;background:#0f172a;color:#fff;border:none;border-radius:4px;">প্রিন্ট করুন</button>
+        <button onclick="window.close()" style="padding:8px 16px;font-size:14px;cursor:pointer;background:#f1f5f9;border:1px solid #e2e8f0;border-radius:4px;">বাতিল</button>
+      </div>
       ${inner}
       </div>
-      <script>setTimeout(()=>window.print(),300)</script>
     </body></html>
   `);
   w.document.close();
