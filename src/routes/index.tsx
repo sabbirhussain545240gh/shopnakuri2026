@@ -1390,7 +1390,7 @@ function buildLoanDetailHtml(
   member: Member | undefined,
   guarantor: Member | undefined,
   payments: { id: string; date: string; amount: number }[],
-  samiti: SamitiInfo & { loanTerms?: string[] },
+  samiti: SamitiInfo & { loanTerms?: string[]; serialPrefix?: string },
 ) {
   const due = loanTotalDue(loan);
   const paid = payments.reduce((s, p) => s + p.amount, 0);
@@ -1409,7 +1409,7 @@ function buildLoanDetailHtml(
   const rows: [string, string][] = [
     ["ঋণ নং", toBn(loanNo)],
     ["তারিখ", fmtDate(loan.date)],
-    ["সদস্য", `${member?.name ?? "—"} (সদস্য নং ${member ? formatMemberSerial(member, data.serialPrefix) : "—"})`],
+    ["সদস্য", `${member?.name ?? "—"} (সদস্য নং ${member ? formatMemberSerial(member, samiti.serialPrefix) : "—"})`],
     ["মোবাইল", member?.phone ? toBn(member.phone) : "—"],
     ["মূল", formatTk(loan.amount)],
     ["মুনাফার হার", `${toBn(loan.interestRate)}%`],
