@@ -3061,8 +3061,8 @@ function LoansTab() {
               variant="outline"
               size="icon"
               title="পরিষ্কার"
-              disabled={!loanSearch && loanStatusFilter === "all"}
-              onClick={() => { setLoanSearch(""); setLoanStatusFilter("all"); }}
+              disabled={!loanSearch && loanStatusFilter === "active"}
+              onClick={() => { setLoanSearch(""); setLoanStatusFilter("active"); }}
             >
               <X className="h-4 w-4" />
             </Button>
