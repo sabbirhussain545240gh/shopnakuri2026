@@ -1,7 +1,8 @@
-import { toBn, formatDateStr } from "@/lib/samiti-store";
+import { toBn, formatDateStr, formatMemberSerial } from "@/lib/samiti-store";
 
 export type MemberCardInput = {
   serial?: number;
+  category?: string;
   name: string;
   fatherName?: string;
   motherName?: string;
@@ -19,6 +20,7 @@ export type SamitiInfo = {
   samitiLogo?: string;
   samitiAddress?: string;
   establishedDate?: string;
+  serialPrefix?: string;
 };
 
 const fmtDate = (s?: string) => formatDateStr(s);
@@ -38,7 +40,7 @@ export function buildMemberCardHtml(member: MemberCardInput, samiti: SamitiInfo)
     ? `<img src="${member.photo}" style="width:120px;height:120px;object-fit:contain;background:#fff;border-radius:8px;border:1px solid #ddd;" crossorigin="anonymous" />`
     : `<div style="width:120px;height:120px;border-radius:8px;border:1px solid #ddd;background:#f5f5f5;display:flex;align-items:center;justify-content:center;color:#888;font-size:12px;">ছবি নেই</div>`;
   const rows: [string, string][] = [
-    ["সিরিয়াল নম্বর", toBn(member.serial || 0)],
+    ["সিরিয়াল নম্বর", member.serial ? formatMemberSerial({ serial: member.serial, category: member.category }, samiti.serialPrefix) : ""],
     ["নাম", member.name || ""],
     ["পিতার নাম", member.fatherName || ""],
     ["মাতার নাম", member.motherName || ""],

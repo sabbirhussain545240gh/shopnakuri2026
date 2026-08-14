@@ -150,7 +150,7 @@ function RoleRouter() {
 const today = () => new Date().toISOString().slice(0, 10);
 const fmtDate = (s: string) => formatDateStr(s);
 const bnMonths = ["জানুয়ারি","ফেব্রুয়ারি","মার্চ","এপ্রিল","মে","জুন","জুলাই","আগস্ট","সেপ্টেম্বর","অক্টোবর","নভেম্বর","ডিসেম্বর"];
-const toBnDigits = (s: string | number) => String(s).replace(/[0-9]/g, (d) => "০১২৩৪৫৬৭৮৯"[+d]);
+const toBnDigits = (s: string | number) => toBn(s);
 const fmtMonthYearBn = (s: string) => {
   if (!s) return "";
   const [y, m] = s.split("-");
@@ -2355,7 +2355,7 @@ function SavingsTab() {
     const totalInst = collectionRows.reduce((sum, row) => sum + row.inst, 0);
     const rows = collectionRows.map(({ m, inst, due, hasLoan }) => `
       <tr>
-        <td class="c">${toBn(m.serial || 0)}</td>
+        <td class="c">${formatMemberSerial({ serial: m.serial, category: m.category }, data.serialPrefix)}</td>
         <td>${m.name}</td>
         <td class="r"></td>
         <td class="r">${hasLoan ? formatTk(due) : "—"}</td>
@@ -2435,7 +2435,7 @@ function SavingsTab() {
       head: [["Sl", "Name", "Monthly Chada", "Loan Due", "Installment", "Paid", "Signature"]],
       body: [
         ...collectionRows.map(({ m, inst, due, hasLoan }) => [
-          toBn(m.serial || 0),
+          formatMemberSerial({ serial: m.serial, category: m.category }, data.serialPrefix),
           m.name,
           "",
           hasLoan ? formatTk(due).replace("৳ ", "") : "—",
@@ -2471,7 +2471,7 @@ function SavingsTab() {
     targetDate.setMonth(targetDate.getMonth() + collectionMonthOffset);
     const monthLabel = targetDate.toLocaleDateString("bn-BD", { year: "numeric", month: "long" });
     const rows = collectionRows.map(({ m, inst, due, hasLoan }) => ({
-      "সি.নং": m.serial || 0,
+      "সি.নং": formatMemberSerial({ serial: m.serial, category: m.category }, data.serialPrefix),
       "সদস্যের নাম": m.name,
       "মাসিক চাদা": "",
       "বকেয়া ঋণ": hasLoan ? due : "—",
