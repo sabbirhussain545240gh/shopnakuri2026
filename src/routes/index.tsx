@@ -2392,7 +2392,7 @@ function LoansTab() {
   const [payForm, setPayForm] = useState({ amount: "", date: today(), note: "" });
   const [receipt, setReceipt] = useState<null | { loan: Loan; memberName: string; memberSerial?: number; amount: number; date: string; paidAfter: number; remainingAfter: number; receiptNo: string; note?: string; logo?: string; loanNo?: number }>(null);
   const [isJoint, setIsJoint] = useState(false);
-  const [coForm, setCoForm] = useState({ name: "", fatherName: "", phone: "", nid: "", address: "" });
+  const [coForm, setCoForm] = useState({ name: "", fatherName: "", motherName: "", birthDate: "", phone: "", nid: "", address: "" });
   const [cheques, setCheques] = useState<Array<{ bankName: string; branch: string; chequeNo: string; accountNo: string; amount: string; date: string }>>([]);
   const addChequeRow = () => setCheques((p) => [...p, { bankName: "", branch: "", chequeNo: "", accountNo: "", amount: "", date: "" }]);
   const updateChequeRow = (i: number, key: string, v: string) => setCheques((p) => p.map((c, idx) => (idx === i ? { ...c, [key]: v } : c)));
@@ -2443,6 +2443,8 @@ function LoansTab() {
       coBorrower: isJoint ? {
         name: coForm.name.trim(),
         fatherName: coForm.fatherName.trim() || undefined,
+        motherName: (coForm as any).motherName?.trim() || undefined,
+        birthDate: (coForm as any).birthDate || undefined,
         phone: coForm.phone.trim(),
         nid: coForm.nid.trim() || undefined,
         address: coForm.address.trim() || undefined,
@@ -2460,7 +2462,7 @@ function LoansTab() {
     });
     setForm({ memberId: "", amount: "", interestRate: String(data.settings.defaultInterestRate), durationMonths: String(data.settings.defaultDurationMonths), date: today(), memberGuarantorId: "", familyGuarantorName: "", familyGuarantorRelation: "", familyGuarantorCustomRelation: "", familyGuarantorPhone: "" });
     setIsJoint(false);
-    setCoForm({ name: "", fatherName: "", phone: "", nid: "", address: "" });
+    setCoForm({ name: "", fatherName: "", motherName: "", birthDate: "", phone: "", nid: "", address: "" });
     setCheques([]);
     setErrors({});
     setOpen(false);
@@ -2563,6 +2565,8 @@ function LoansTab() {
       coBorrower: editIsJoint ? {
         name: editCoForm.name.trim(),
         fatherName: editCoForm.fatherName.trim() || undefined,
+        motherName: (editCoForm as any).motherName?.trim() || undefined,
+        birthDate: (editCoForm as any).birthDate || undefined,
         phone: editCoForm.phone.trim(),
         nid: editCoForm.nid.trim() || undefined,
         address: editCoForm.address.trim() || undefined,
@@ -3483,7 +3487,8 @@ function LoansTab() {
                 {currentLoan.isJoint && currentLoan.coBorrower && (
                   <div className="border-t pt-2">
                     <div className="font-medium mb-1">যৌথ ঋণগ্রহীতা (বাহিরের ব্যক্তি)</div>
-                    <div>নাম: {currentLoan.coBorrower.name}{currentLoan.coBorrower.fatherName ? ` (পিতা: ${currentLoan.coBorrower.fatherName})` : ""}</div>
+                    <div>নাম: {currentLoan.coBorrower.name}{currentLoan.coBorrower.fatherName ? ` (পিতা: ${currentLoan.coBorrower.fatherName})` : ""}{currentLoan.coBorrower.motherName ? ` (মাতা: ${currentLoan.coBorrower.motherName})` : ""}</div>
+                    {currentLoan.coBorrower.birthDate && <div>জন্ম তারিখ: {fmtDate(currentLoan.coBorrower.birthDate)}</div>}
                     <div>মোবাইল: {currentLoan.coBorrower.phone}</div>
                     {currentLoan.coBorrower.nid && <div>NID: {currentLoan.coBorrower.nid}</div>}
                     {currentLoan.coBorrower.address && <div>ঠিকানা: {currentLoan.coBorrower.address}</div>}
