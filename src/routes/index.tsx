@@ -2077,12 +2077,33 @@ function PendingCollectRow({
 }) {
   const [amount, setAmount] = useState("");
   const [date, setDate] = useState(`${month}-${String(new Date().getDate()).padStart(2, "0")}`);
+  const { data } = useSamiti();
+
+  const handleDoubleClick = () => {
+    // Find last deposit amount for this member
+    const lastDeposit = [...data.deposits]
+      .filter(d => d.memberId === member.id)
+      .sort((a, b) => b.date.localeCompare(a.date))[0];
+    
+    if (lastDeposit) {
+      setAmount(String(lastDeposit.amount));
+    }
+  };
+
   return (
     <TableRow>
       <TableCell className="font-medium">{toBn(member.serial || 0)}</TableCell>
       <TableCell>{member.name}</TableCell>
       <TableCell>
-        <Input type="number" value={amount} onChange={(e) => setAmount(e.target.value)} placeholder="পরিমাণ" className="h-8" />
+        <Input 
+          type="number" 
+          value={amount} 
+          onChange={(e) => setAmount(e.target.value)} 
+          onDoubleClick={handleDoubleClick}
+          placeholder="পরিমাণ" 
+          className="h-8 cursor-pointer" 
+          title="ডাবল ক্লিক করলে আগের চাদার পরিমাণ বসে যাবে"
+        />
       </TableCell>
       <TableCell>
         <Input type="date" value={date} onChange={(e) => setDate(e.target.value)} className="h-8" />
