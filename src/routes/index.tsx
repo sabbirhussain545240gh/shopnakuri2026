@@ -2358,6 +2358,16 @@ function SavingsTab() {
       "আদায়কৃত কিস্তি": "",
       "স্বাক্ষর": "",
     }));
+    const totalInst = collectionRows.reduce((sum, row) => sum + row.inst, 0);
+    rows.push({
+      "সি.নং": "মোট",
+      "সদস্যের নাম": "",
+      "মাসিক চাদা": "",
+      "বকেয়া ঋণ": "",
+      "মাসিক কিস্তি": totalInst,
+      "আদায়কৃত কিস্তি": "",
+      "স্বাক্ষর": "",
+    } as any);
     const ws = XLSX.utils.json_to_sheet(rows);
     const wb = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb, ws, `কালেকশন ফর্ম ${monthLabel}`);
