@@ -6583,9 +6583,9 @@ function ReconciliationTab() {
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Plus className="h-5 w-5 text-primary" />
-            নতুন সমন্নয় / পেমেন্ট রেকর্ড
+            {isEditing ? "সমন্নয় রেকর্ড সম্পাদনা করুন" : "নতুন সমন্নয় / পেমেন্ট রেকর্ড"}
           </CardTitle>
-          <CardDescription>তহবিল সমন্নয়ের জন্য আয় বা ব্যয় যোগ করুন</CardDescription>
+          <CardDescription>{isEditing ? "লেনদেনের তথ্য পরিবর্তন করুন" : "তহবিল সমন্নয়ের জন্য আয় বা ব্যয় যোগ করুন"}</CardDescription>
         </CardHeader>
         <CardContent>
           <div className="grid gap-3 md:grid-cols-5">
@@ -6612,8 +6612,14 @@ function ReconciliationTab() {
               <Input value={form.note} onChange={(e) => setForm({ ...form, note: e.target.value })} placeholder="যেমনঃ ব্যাংক সমন্নয়, পুরাতন বকেয়া, ইত্যাদি" />
             </div>
           </div>
-          <div className="mt-4 flex justify-end">
-            <Button onClick={submitAdjust}><Plus className="h-4 w-4" /> যোগ করুন</Button>
+          <div className="mt-4 flex justify-end gap-2">
+            {isEditing && (
+              <Button variant="outline" onClick={cancelEdit}>বাতিল</Button>
+            )}
+            <Button onClick={submitAdjust}>
+              {isEditing ? <Pencil className="h-4 w-4 mr-1" /> : <Plus className="h-4 w-4 mr-1" />}
+              {isEditing ? "আপডেট করুন" : "যোগ করুন"}
+            </Button>
           </div>
 
           <div className="mt-6">
@@ -6645,9 +6651,14 @@ function ReconciliationTab() {
                         {t.type === "income" ? "+" : "−"} {formatTk(t.amount)}
                       </TableCell>
                       <TableCell>
-                        <Button variant="ghost" size="icon" onClick={() => { deleteTransaction(t.id); toast.success("মুছে ফেলা হয়েছে"); }}>
-                          <Trash2 className="h-4 w-4 text-destructive" />
-                        </Button>
+                        <div className="flex items-center gap-1">
+                          <Button variant="ghost" size="icon" onClick={() => startEditAdjust(t)}>
+                            <Pencil className="h-4 w-4 text-muted-foreground" />
+                          </Button>
+                          <Button variant="ghost" size="icon" onClick={() => { if (confirm("রেকর্ডটি মুছবেন?")) { deleteTransaction(t.id); toast.success("মুছে ফেলা হয়েছে"); } }}>
+                            <Trash2 className="h-4 w-4 text-destructive" />
+                          </Button>
+                        </div>
                       </TableCell>
                     </TableRow>
                   ))}
