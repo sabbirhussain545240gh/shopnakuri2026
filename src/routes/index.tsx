@@ -586,7 +586,15 @@ function Dashboard({ totals, memberCount, data, onNavigate }: any) {
         <h2 className="text-xs sm:text-sm font-semibold text-muted-foreground uppercase tracking-wide mb-3">সংক্ষিপ্ত পরিসংখ্যান</h2>
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
           <StatCard delay={100} label="মোট সদস্য" value={toBn(memberCount)} accent="bg-chart-4" icon={Users} hint="নিবন্ধিত সদস্য" />
-          <StatCard delay={160} label="মোট সঞ্চয়/চাদা" value={formatTk(totals.totalDeposit)} accent="bg-success" icon={PiggyBank} hint={`${toBn(data.deposits.length)}টি জমা`} />
+          <StatCard
+            delay={160}
+            label="মোট সঞ্চয়/চাদা"
+            value={formatTk(totals.totalDeposit)}
+            accent="bg-success"
+            icon={PiggyBank}
+            hint={`${toBn(data.deposits.length)}টি জমা`}
+            rightHint={`মোট আয়: ${formatTk(totals.closedLoanIncome + (totals.totalIncome - totals.totalExpense))}`}
+          />
           <StatCard delay={220} label="বকেয়া ঋণ" value={formatTk(totals.outstanding)} accent="bg-destructive" icon={AlertTriangle} hint={`${toBn(activeLoanCount)}টি চলমান ঋণ`} />
           <StatCard delay={280} label="হাতে নগদ" value={formatTk(totals.cashInHand)} accent="bg-primary" icon={Wallet} hint="বর্তমান তহবিল" />
         </div>
