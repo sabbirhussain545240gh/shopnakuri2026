@@ -3403,13 +3403,26 @@ function LoansTab() {
             <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
               <DialogHeader><DialogTitle>নতুন ঋণ প্রদান</DialogTitle></DialogHeader>
               <div className="space-y-4 py-4">
-                <div>
-                  <Label>সদস্য (সিরিয়াল ও নাম) *</Label>
-                  <Select value={form.memberId} onValueChange={(v) => setField("memberId", v)}>
-                    <SelectTrigger className={errors.memberId ? "border-destructive" : ""}><SelectValue placeholder="সদস্য নির্বাচন করুন" /></SelectTrigger>
-                    <SelectContent>{data.members.map((m) => <SelectItem key={m.id} value={m.id}>{toBn(m.serial)} — {m.name}</SelectItem>)}</SelectContent>
-                  </Select>
-                  {errors.memberId && <p className="text-xs text-destructive mt-1">{errors.memberId}</p>}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div>
+                    <Label>সদস্য (সিরিয়াল ও নাম) *</Label>
+                    <Select value={form.memberId} onValueChange={(v) => setField("memberId", v)}>
+                      <SelectTrigger className={errors.memberId ? "border-destructive" : ""}><SelectValue placeholder="সদস্য নির্বাচন করুন" /></SelectTrigger>
+                      <SelectContent>{data.members.map((m) => <SelectItem key={m.id} value={m.id}>{toBn(m.serial)} — {m.name}</SelectItem>)}</SelectContent>
+                    </Select>
+                    {errors.memberId && <p className="text-xs text-destructive mt-1">{errors.memberId}</p>}
+                  </div>
+                  <div>
+                    <Label>ঋণ চুক্তি ফরম / স্ক্যান কপি</Label>
+                    <Input type="file" accept="image/*,application/pdf" onChange={(e) => {
+                      const file = e.target.files?.[0];
+                      if (file) {
+                        const reader = new FileReader();
+                        reader.onload = () => setForm({ ...form, contractFile: String(reader.result) });
+                        reader.readAsDataURL(file);
+                      }
+                    }} />
+                  </div>
                 </div>
                 <div className="grid grid-cols-2 gap-3">
                   <div>
@@ -3478,6 +3491,17 @@ function LoansTab() {
                     <div className="sm:col-span-2">
                       <Label>ঠিকানা</Label>
                       <Input value={coForm.address} onChange={(e) => setCoForm({ ...coForm, address: e.target.value })} placeholder="ঠিকানা" />
+                    </div>
+                    <div>
+                      <Label>২য় ঋণগ্রহীতার NID কপি</Label>
+                      <Input type="file" accept="image/*,application/pdf" onChange={(e) => {
+                        const file = e.target.files?.[0];
+                        if (file) {
+                          const reader = new FileReader();
+                          reader.onload = () => setCoForm({ ...coForm, nidFile: String(reader.result) } as any);
+                          reader.readAsDataURL(file);
+                        }
+                      }} />
                     </div>
                   </div>
                 )}
@@ -3566,6 +3590,17 @@ function LoansTab() {
                 <Label>পারিবারিক জামিনদার — মোবাইল *</Label>
                 <Input className={errors.familyGuarantorPhone ? "border-destructive" : ""} value={form.familyGuarantorPhone} onChange={(e) => setField("familyGuarantorPhone", e.target.value)} placeholder="মোবাইল নম্বর" />
                 {errors.familyGuarantorPhone && <p className="text-xs text-destructive mt-1">{errors.familyGuarantorPhone}</p>}
+              </div>
+              <div>
+                <Label>পারিবারিক জামিনদারের NID কপি</Label>
+                <Input type="file" accept="image/*,application/pdf" onChange={(e) => {
+                  const file = e.target.files?.[0];
+                  if (file) {
+                    const reader = new FileReader();
+                    reader.onload = () => setField("familyGuarantorNidFile", String(reader.result));
+                    reader.readAsDataURL(file);
+                  }
+                }} />
               </div>
               </div>
               <DialogFooter><Button onClick={submit}>ঋণ প্রদান</Button></DialogFooter>
