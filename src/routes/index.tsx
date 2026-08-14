@@ -2306,6 +2306,7 @@ function SavingsTab() {
     const pdf = new jsPDF({ orientation: "landscape", unit: "pt", format: "a4" });
     const pageW = pdf.internal.pageSize.getWidth();
     const monthLabel = new Date().toLocaleDateString("bn-BD", { year: "numeric", month: "long" });
+    const totalInst = collectionRows.reduce((sum, row) => sum + row.inst, 0);
     pdf.setFontSize(14);
     pdf.text(data.samitiName || "সমিতি", pageW / 2, 28, { align: "center" });
     pdf.setFontSize(11);
@@ -2313,15 +2314,23 @@ function SavingsTab() {
     autoTable(pdf, {
       startY: 58,
       head: [["Sl", "Name", "Monthly Chada", "Loan Due", "Installment", "Paid", "Signature"]],
-      body: collectionRows.map(({ m, inst, due, hasLoan }) => [
-        toBn(m.serial || 0),
-        m.name,
-        "",
-        hasLoan ? formatTk(due).replace("৳ ", "") : "—",
-        hasLoan ? formatTk(inst).replace("৳ ", "") : "—",
-        "",
-        "",
-      ]),
+      body: [
+        ...collectionRows.map(({ m, inst, due, hasLoan }) => [
+          toBn(m.serial || 0),
+          m.name,
+          "",
+          hasLoan ? formatTk(due).replace("৳ ", "") : "—",
+          hasLoan ? formatTk(inst).replace("৳ ", "") : "—",
+          "",
+          "",
+        ]),
+        [
+          { content: "Total Installment Amount:", colSpan: 4, styles: { halign: "right", fontStyle: "bold" } },
+          { content: formatTk(totalInst).replace("৳ ", ""), styles: { halign: "right", fontStyle: "bold" } },
+          "",
+          ""
+        ]
+      ],
       styles: { font: "helvetica", fontSize: 9, cellPadding: 3, minCellHeight: 16 },
       headStyles: { fillColor: [52, 73, 94], textColor: 255, halign: "center" },
       columnStyles: {
