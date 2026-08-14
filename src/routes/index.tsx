@@ -5706,6 +5706,12 @@ function CashbookTab() {
   const { data, addTransaction, updateTransaction, deleteTransaction } = useSamiti();
   const [open, setOpen] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
+  
+  const [typeFilter, setTypeFilter] = useState<"all" | "income" | "expense">("all");
+  const [startDate, setStartDate] = useState("");
+  const [endDate, setEndDate] = useState("");
+  const [monthFilter, setMonthFilter] = useState("");
+  
   const [form, setForm] = useState<{ type: "income" | "expense"; category: string; customCategory: string; amount: string; date: string; note: string }>({
     type: "income", category: "", customCategory: "", amount: "", date: today(), note: "",
   });
@@ -5747,8 +5753,20 @@ function CashbookTab() {
     setOpen(false);
   };
 
-  const income = data.transactions.filter((t) => t.type === "income").reduce((a, t) => a + t.amount, 0);
-  const expense = data.transactions.filter((t) => t.type === "expense").reduce((a, t) => a + t.amount, 0);
+  const filteredTransactions = useMemo(() => {
+    return [...data.transactions]
+      .filter((t) => {
+        if (typeFilter !== "all" && t.type !== typeFilter) return false;
+        if (startDate && t.date < startDate) return false;
+        if (endDate && t.date > endDate) return false;
+        if (monthFilter && !t.date.startsWith(monthFilter)) return false;
+        return true;
+      })
+      .sort((a, b) => b.date.localeCompare(a.date));
+  }, [data.transactions, typeFilter, startDate, endDate, monthFilter]);
+
+  const income = filteredTransactions.filter((t) => t.type === "income").reduce((a, t) => a + t.amount, 0);
+  const expense = filteredTransactions.filter((t) => t.type === "expense").reduce((a, t) => a + t.amount, 0);
   const cats = form.type === "income" ? INCOME_CATS : EXPENSE_CATS;
 
   return (
@@ -5760,10 +5778,56 @@ function CashbookTab() {
       </div>
 
       <Card>
+        <CardContent className="pt-6">
+          <div className="flex flex-wrap items-end gap-3">
+            <div className="space-y-1.5 min-w-[120px]">
+              <Label>লেনদেনের ধরন</Label>
+              <Select value={typeFilter} onValueChange={(v: any) => setTypeFilter(v)}>
+                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">সব লেনদেন</SelectItem>
+                  <SelectItem value="income">আয়</SelectItem>
+                  <SelectItem value="expense">ব্যয়</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-1.5 min-w-[140px]">
+              <Label>মাস</Label>
+              <Input type="month" value={monthFilter} onChange={(e) => {
+                setMonthFilter(e.target.value);
+                setStartDate("");
+                setEndDate("");
+              }} />
+            </div>
+            <div className="space-y-1.5 min-w-[140px]">
+              <Label>শুরুর তারিখ</Label>
+              <Input type="date" value={startDate} onChange={(e) => {
+                setStartDate(e.target.value);
+                setMonthFilter("");
+              }} />
+            </div>
+            <div className="space-y-1.5 min-w-[140px]">
+              <Label>শেষ তারিখ</Label>
+              <Input type="date" value={endDate} onChange={(e) => {
+                setEndDate(e.target.value);
+                setMonthFilter("");
+              }} />
+            </div>
+            <Button variant="outline" onClick={() => {
+              setTypeFilter("all");
+              setStartDate("");
+              setEndDate("");
+              setMonthFilter("");
+            }}>রিসেট</Button>
+          </div>
+        </CardContent>
+      </Card>
+
+      <Card>
         <CardHeader className="flex flex-row items-center justify-between gap-2">
           <div>
             <CardTitle>আয়-ব্যয় খতিয়ান</CardTitle>
-            <CardDescription>মোট {toBn(data.transactions.length)}টি লেনদেন</CardDescription>
+            <CardDescription>ফিল্টার অনুযায়ী মোট {toBn(filteredTransactions.length)}টি লেনদেন</CardDescription>
           </div>
           <Dialog open={open} onOpenChange={(o) => {
             setOpen(o);
@@ -5803,8 +5867,8 @@ function CashbookTab() {
           </Dialog>
         </CardHeader>
         <CardContent>
-          {data.transactions.length === 0 ? (
-            <p className="text-sm text-muted-foreground text-center py-10">এখনও কোনও লেনদেন নেই।</p>
+          {filteredTransactions.length === 0 ? (
+            <p className="text-sm text-muted-foreground text-center py-10">ফিল্টার অনুযায়ী কোনও লেনদেন পাওয়া যায়নি।</p>
           ) : (
             <Table>
               <TableHeader>
@@ -5814,7 +5878,7 @@ function CashbookTab() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {[...data.transactions].sort((a, b) => b.date.localeCompare(a.date)).map((t) => (
+                {filteredTransactions.map((t) => (
                   <TableRow key={t.id}>
                     <TableCell>{fmtDate(t.date)}</TableCell>
                     <TableCell>
