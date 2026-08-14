@@ -4085,7 +4085,7 @@ function LoansTab() {
                   </div>
                   <div><Label>পিতার নাম</Label><Input value={editCoForm.fatherName} onChange={(e) => setEditCoForm({ ...editCoForm, fatherName: e.target.value })} placeholder="পিতার নাম" /></div>
                   <div><Label>মাতার নাম</Label><Input value={(editCoForm as any).motherName || ""} onChange={(e) => setEditCoForm({ ...editCoForm, motherName: e.target.value } as any)} placeholder="মাতার নাম" /></div>
-                  <div><Label>জন্ম তারিখ</Label><Input type="date" value={(editCoForm as any).birthDate || ""} onChange={(e) => setEditCoForm({ ...editCoForm, birthDate: e.target.value } as any)} /></div>
+                  <div><Label>জন্ম তারিখ</Label><Input type="text" placeholder={getDateFormat()} value={(editCoForm as any).birthDate ? fmtDate((editCoForm as any).birthDate) : ""} onChange={(e) => setEditCoForm({ ...editCoForm, birthDate: toIsoDate(e.target.value) } as any)} /></div>
                   <div>
                     <Label>মোবাইল *</Label>
                     <Input className={editErrors.coPhone ? "border-destructive" : ""} value={editCoForm.phone} onChange={(e) => { setEditCoForm({ ...editCoForm, phone: e.target.value }); setEditErrors((p) => { const n = { ...p }; delete n.coPhone; return n; }); }} placeholder="মোবাইল নম্বর" />
@@ -4114,7 +4114,7 @@ function LoansTab() {
                     <div><Label>চেক নং</Label><Input value={c.chequeNo} onChange={(e) => editUpdateChequeRow(i, "chequeNo", e.target.value)} placeholder="চেক নম্বর" /></div>
                     <div><Label>হিসাব নং</Label><Input value={c.accountNo} onChange={(e) => editUpdateChequeRow(i, "accountNo", e.target.value)} placeholder="একাউন্ট নম্বর" /></div>
                     <div><Label>চেকের পরিমাণ (৳)</Label><Input type="number" value={c.amount} onChange={(e) => editUpdateChequeRow(i, "amount", e.target.value)} placeholder="0" /></div>
-                    <div><Label>চেকের তারিখ</Label><Input type="date" value={c.date} onChange={(e) => editUpdateChequeRow(i, "date", e.target.value)} /></div>
+                    <div><Label>চেকের তারিখ</Label><Input type="text" placeholder={getDateFormat()} value={c.date ? fmtDate(c.date) : ""} onChange={(e) => editUpdateChequeRow(i, "date", toIsoDate(e.target.value))} /></div>
                   </div>
                 </div>
               ))}
