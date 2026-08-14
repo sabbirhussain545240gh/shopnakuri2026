@@ -771,6 +771,30 @@ function MembersTab() {
   const [actionForm, setActionForm] = useState({ memberId: "", loanId: "", amount: "", date: today(), note: "" });
   const [actionErrors, setActionErrors] = useState<Record<string, string>>({});
 
+  const nextSerial = data.members.length > 0 ? Math.max(...data.members.map((m) => m.serial || 0)) + 1 : 1;
+  useEffect(() => {
+    if (open) setForm((f) => ({ ...f, serial: String(nextSerial) }));
+  }, [open, nextSerial]);
+
+  const onPhoto = (file?: File) => {
+    if (!file) return;
+    if (file.size > 10 * 1024 * 1024) { toast.error("ছবি ১০ MB এর কম হতে হবে"); return; }
+    const reader = new FileReader();
+    reader.onload = () => setForm((f) => ({ ...f, photo: String(reader.result || "") }));
+    reader.readAsDataURL(file);
+  };
+
+  const submit = () => {
+    if (!form.name.trim()) { toast.error("নাম দিন"); return; }
+    const serialNum = form.serial ? parseInt(form.serial, 10) : 0;
+    const { nomineeCustomRelation, ...rest } = form;
+    const finalRelation = form.nominee.relation === "অন্যান্য" ? nomineeCustomRelation.trim() : form.nominee.relation;
+    addMember({ ...rest, serial: serialNum, category: form.category.trim().toUpperCase(), nominee: { ...form.nominee, relation: finalRelation || "" } });
+    setForm(emptyForm);
+    setOpen(false);
+    toast.success("সদস্য যোগ হয়েছে");
+  };
+
   const loanInfo = (loanId: string) => {
     const loan = data.loans.find((l) => l.id === loanId);
     if (!loan) return null;
