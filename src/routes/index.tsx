@@ -1245,7 +1245,7 @@ function MembersTab() {
                                   <div className="max-h-40 overflow-y-auto rounded border">
                                     <table className="w-full text-xs">
                                       <thead className="bg-muted/50 sticky top-0">
-                                        <tr><th className="text-left p-1.5">#</th><th className="text-left p-1.5">তারিখ</th><th className="text-right p-1.5">কিস্তি</th><th className="text-right p-1.5">বাকি</th></tr>
+                                        <tr><th className="text-left p-1.5">#</th><th className="text-left p-1.5">তারিখ</th><th className="text-left p-1.5">রিসিপ্ট নং</th><th className="text-right p-1.5">কিস্তি</th><th className="text-right p-1.5">বাকি</th><th className="text-center p-1.5">রিসিপ্ট</th></tr>
                                       </thead>
                                       <tbody>
                                         {(() => {
