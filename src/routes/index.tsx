@@ -1099,6 +1099,8 @@ function MembersTab() {
             <DialogFooter><Button onClick={submit}>সংরক্ষণ</Button></DialogFooter>
           </DialogContent>
         </Dialog>
+        </div>
+      </CardHeader>
       <CardContent>
         <div className="grid grid-cols-1 md:grid-cols-4 gap-3 mb-6 bg-muted/30 p-4 rounded-lg border">
           <div className="space-y-1.5">
