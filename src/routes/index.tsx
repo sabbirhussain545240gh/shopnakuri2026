@@ -1405,7 +1405,6 @@ function buildLoanDetailHtml(
         ${samiti.establishedDate ? `<div style="font-size:13px;color:#666;margin-top:4px;">স্থাপিত: ${samiti.establishedDate}</div>` : ""}
       </div>
       <div style="width:90px;display:flex;justify-content:flex-end;">
-        ${member?.photo ? `<img src="${member.photo}" style="width:85px;height:100px;object-fit:cover;border:1px solid #ddd;border-radius:4px;" crossorigin="anonymous" />` : ""}
       </div>
     </div>`;
   const rows: [string, string][] = [
