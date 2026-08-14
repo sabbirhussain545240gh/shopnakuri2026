@@ -1817,8 +1817,9 @@ function SavingsTab() {
 <body>
   ${data.samitiLogo ? `<div class="wm" style="background-image:url('${data.samitiLogo}')"></div>` : ""}
   <div class="content">
-  <div class="no-print" style="text-align:right;margin-bottom:6px;">
-    <button onclick="window.print()" style="padding:6px 14px;cursor:pointer;">প্রিন্ট করুন</button>
+  <div class="no-print" style="text-align:right;margin-bottom:6px;display:flex;justify-content:flex-end;gap:10px;">
+    <button onclick="window.print()" style="padding:6px 14px;cursor:pointer;background:#0f172a;color:#fff;border:none;border-radius:4px;">প্রিন্ট করুন</button>
+    <button onclick="window.close()" style="padding:6px 14px;cursor:pointer;background:#f1f5f9;border:1px solid #e2e8f0;border-radius:4px;">বাতিল</button>
   </div>
   <div class="hdr">
     ${data.samitiLogo ? `<img src="${data.samitiLogo}" alt="logo" />` : ""}
