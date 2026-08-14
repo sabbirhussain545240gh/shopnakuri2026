@@ -1469,7 +1469,7 @@ function MembersTab() {
                 </div>
                 <div className="space-y-2">
                   <Label>তারিখ</Label>
-                  <Input type="date" value={actionForm.date} onChange={(e) => setActionForm({ ...actionForm, date: e.target.value })} />
+                  <Input type="text" placeholder={getDateFormat()} value={actionForm.date ? fmtDate(actionForm.date) : ""} onChange={(e) => setActionForm({ ...actionForm, date: toIsoDate(e.target.value) })} />
                 </div>
                 <div className="space-y-2">
                   <Label>পরিমাণ (৳)</Label>
@@ -1522,7 +1522,7 @@ function MembersTab() {
                       </div>
                       <div className="space-y-2">
                         <Label>তারিখ</Label>
-                        <Input type="date" value={actionForm.date} onChange={(e) => setActionForm(p => ({ ...p, date: e.target.value }))} />
+                        <Input type="text" placeholder={getDateFormat()} value={actionForm.date ? fmtDate(actionForm.date) : ""} onChange={(e) => setActionForm(p => ({ ...p, date: toIsoDate(e.target.value) }))} />
                       </div>
                       <div className="space-y-2">
                         <Label>পরিমাণ (৳)</Label>
