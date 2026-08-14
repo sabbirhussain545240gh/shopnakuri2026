@@ -287,7 +287,11 @@ export function SignOutButton() {
 
 export function CloudStatusBadge() {
   const [status, setStatus] = useState(getCloudStatus());
+  const { pushToCloud } = useSamiti();
+  const [manualSaving, setManualSaving] = useState(false);
+
   useEffect(() => subscribeCloudStatus(() => setStatus(getCloudStatus())), []);
+  
   const map = {
     idle: { icon: CloudOff, text: "অফলাইন", cls: "text-muted-foreground" },
     loading: { icon: Loader2, text: "লোড হচ্ছে...", cls: "text-muted-foreground animate-spin" },
@@ -295,13 +299,42 @@ export function CloudStatusBadge() {
     saved: { icon: CheckCircle2, text: "ক্লাউডে সেভ", cls: "text-green-600" },
     error: { icon: AlertCircle, text: "সেভ ব্যর্থ", cls: "text-destructive" },
   } as const;
+  
   const it = map[status];
   const Icon = it.icon;
+
+  const handleManualSave = async () => {
+    if (manualSaving || status === "loading" || status === "saving") return;
+    setManualSaving(true);
+    try {
+      await pushToCloud();
+      toast.success("সফলভাবে ক্লাউডে সেভ করা হয়েছে");
+    } catch {
+      toast.error("ক্লাউডে সেভ করতে ব্যর্থ হয়েছে");
+    } finally {
+      setManualSaving(false);
+    }
+  };
+
   return (
-    <span className="inline-flex items-center gap-1.5 text-xs font-medium">
-      <Icon className={`h-3.5 w-3.5 ${it.cls}`} />
-      <span className={it.cls.replace("animate-spin", "")}>{it.text}</span>
-    </span>
+    <div className="flex items-center gap-2">
+      <span className="inline-flex items-center gap-1.5 text-xs font-medium">
+        <Icon className={`h-3.5 w-3.5 ${it.cls}`} />
+        <span className={it.cls.replace("animate-spin", "")}>{it.text}</span>
+      </span>
+      {(status === "saved" || status === "error" || status === "idle") && (
+        <Button 
+          variant="ghost" 
+          size="icon" 
+          className="h-6 w-6 rounded-full hover:bg-muted" 
+          onClick={handleManualSave}
+          disabled={manualSaving}
+          title="ম্যানুয়ালি সেভ করুন"
+        >
+          {manualSaving ? <Loader2 className="h-3 w-3 animate-spin" /> : <Cloud className="h-3 w-3 text-blue-500" />}
+        </Button>
+      )}
+    </div>
   );
 }
 
