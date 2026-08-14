@@ -1390,7 +1390,7 @@ function buildLoanDetailHtml(
   member: Member | undefined,
   guarantor: Member | undefined,
   payments: { id: string; date: string; amount: number }[],
-  samiti: SamitiInfo & { loanTerms?: string[] },
+  samiti: SamitiInfo & { loanTerms?: string[]; serialPrefix?: string },
 ) {
   const due = loanTotalDue(loan);
   const paid = payments.reduce((s, p) => s + p.amount, 0);
@@ -1409,7 +1409,7 @@ function buildLoanDetailHtml(
   const rows: [string, string][] = [
     ["ঋণ নং", toBn(loanNo)],
     ["তারিখ", fmtDate(loan.date)],
-    ["সদস্য", member?.name ?? "—"],
+    ["সদস্য", `${member?.name ?? "—"} (সদস্য নং ${member ? formatMemberSerial(member, samiti.serialPrefix) : "—"})`],
     ["মোবাইল", member?.phone ? toBn(member.phone) : "—"],
     ["মূল", formatTk(loan.amount)],
     ["মুনাফার হার", `${toBn(loan.interestRate)}%`],
@@ -1520,7 +1520,7 @@ function printLoanDetail(
   member: Member | undefined,
   guarantor: Member | undefined,
   payments: { id: string; date: string; amount: number }[],
-  samiti: SamitiInfo & { loanTerms?: string[] },
+  samiti: SamitiInfo & { loanTerms?: string[]; serialPrefix?: string },
 ) {
   const w = window.open("", "_blank", "width=900,height=700");
   if (!w) return;
@@ -1548,7 +1548,7 @@ async function exportLoanDetailPdf(
   member: Member | undefined,
   guarantor: Member | undefined,
   payments: { id: string; date: string; amount: number }[],
-  samiti: SamitiInfo & { loanTerms?: string[] },
+  samiti: SamitiInfo & { loanTerms?: string[]; serialPrefix?: string },
 ) {
   const { default: html2canvasLib } = await import("html2canvas");
   const inner = buildLoanDetailHtml(loan, loanNo, member, guarantor, payments, samiti);
@@ -3408,7 +3408,7 @@ function LoansTab() {
                 <div className="grid grid-cols-2 gap-2">
                   <div><span className="text-muted-foreground">ঋণ নং:</span> {toBn(idx + 1)}</div>
                   <div><span className="text-muted-foreground">তারিখ:</span> {fmtDate(currentLoan.date)}</div>
-                  <div><span className="text-muted-foreground">সদস্য:</span> {m?.name ?? "—"}</div>
+                  <div><span className="text-muted-foreground">সদস্য:</span> {m?.name ?? "—"} (সদস্য নং {m ? formatMemberSerial(m, data.serialPrefix) : "—"})</div>
                   <div><span className="text-muted-foreground">মোবাইল:</span> {m?.phone ?? "—"}</div>
                   <div><span className="text-muted-foreground">মূল:</span> {formatTk(currentLoan.amount)}</div>
                   <div><span className="text-muted-foreground">মুনাফার হার:</span> {toBn(currentLoan.interestRate)}%</div>
@@ -3531,6 +3531,7 @@ function LoansTab() {
                         samitiAddress: data.samitiAddress,
                         establishedDate: data.establishedDate,
                         loanTerms: data.settings.loanTerms,
+                        serialPrefix: data.serialPrefix,
                       };
                       printLoanDetail(currentLoan, idx + 1, m, gm, pays, samiti);
                     }}
@@ -3546,6 +3547,7 @@ function LoansTab() {
                         samitiAddress: data.samitiAddress,
                         establishedDate: data.establishedDate,
                         loanTerms: data.settings.loanTerms,
+                        serialPrefix: data.serialPrefix,
                       };
                       try {
                         await exportLoanDetailPdf(currentLoan, idx + 1, m, gm, pays, samiti);
