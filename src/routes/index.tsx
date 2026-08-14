@@ -3673,7 +3673,7 @@ function LoansTab() {
                 {errors.familyGuarantorPhone && <p className="text-xs text-destructive mt-1">{errors.familyGuarantorPhone}</p>}
               </div>
               </div>
-              <DialogFooter><Button onClick={submit}>ঋণ প্রদান</Button></DialogFooter>
+              <DialogFooter className="print:hidden"><Button onClick={submit}>ঋণ প্রদান</Button></DialogFooter>
             </DialogContent>
           </Dialog>
         </div>
