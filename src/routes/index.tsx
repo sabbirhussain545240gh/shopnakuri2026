@@ -698,7 +698,7 @@ function Dashboard({ totals, memberCount, data, onNavigate }: any) {
 
 // ===== Members =====
 function MembersTab() {
-  const { data, addMember, addMembers, updateMember, deleteMember } = useSamiti();
+  const { data, addMember, addMembers, updateMember, deleteMember, addDeposit, addPayment, closeLoan } = useSamiti();
   const [open, setOpen] = useState(false);
   const [searchSerial, setSearchSerial] = useState("");
   const [searchName, setSearchName] = useState("");
