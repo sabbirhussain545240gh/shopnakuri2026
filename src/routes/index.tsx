@@ -719,6 +719,19 @@ function MembersTab() {
   const [depositReceipt, setDepositReceipt] = useState<null | (DepositReceiptData & { id: string })>(null);
   const [installmentReceipt, setInstallmentReceipt] = useState<null | { loan: Loan; memberName: string; memberSerial?: number; amount: number; date: string; paidAfter: number; remainingAfter: number; receiptNo: string; note?: string; logo?: string; loanNo?: number }>(null);
   const [memberAction, setMemberAction] = useState<{ type: "deposit" | "installment"; memberId: string; loanId?: string } | null>(null);
+  const [actionForm, setActionForm] = useState({ memberId: "", loanId: "", amount: "", date: today(), note: "" });
+  const [actionErrors, setActionErrors] = useState<Record<string, string>>({});
+
+  const loanInfo = (loanId: string) => {
+    const loan = data.loans.find((l) => l.id === loanId);
+    if (!loan) return null;
+    const member = data.members.find((m) => m.id === loan.memberId);
+    const due = loanTotalDue(loan);
+    const paid = loanPaid(data.payments, loan.id);
+    const remaining = Math.max(0, due - paid);
+    const installment = loan.durationMonths > 0 ? due / loan.durationMonths : 0;
+    return { loan, member, due, paid, remaining, installment };
+  };
 
   const nextSerial = data.members.length > 0 ? Math.max(...data.members.map((m) => m.serial || 0)) + 1 : 1;
   useEffect(() => {
