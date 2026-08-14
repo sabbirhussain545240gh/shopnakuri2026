@@ -7005,7 +7005,7 @@ function ReconciliationTab() {
             </div>
             <div className="space-y-1.5">
               <Label>তারিখ</Label>
-              <Input type="date" value={form.date} onChange={(e) => setForm({ ...form, date: e.target.value })} />
+              <Input type="text" placeholder={getDateFormat()} value={form.date ? fmtDate(form.date) : ""} onChange={(e) => setForm({ ...form, date: toIsoDate(e.target.value) })} />
             </div>
             <div className="space-y-1.5 md:col-span-2">
               <Label>মন্তব্য</Label>
