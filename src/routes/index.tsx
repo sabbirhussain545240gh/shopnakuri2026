@@ -3566,10 +3566,11 @@ function LoansTab() {
                 <Input className={errors.familyGuarantorPhone ? "border-destructive" : ""} value={form.familyGuarantorPhone} onChange={(e) => setField("familyGuarantorPhone", e.target.value)} placeholder="মোবাইল নম্বর" />
                 {errors.familyGuarantorPhone && <p className="text-xs text-destructive mt-1">{errors.familyGuarantorPhone}</p>}
               </div>
-            </div>
-            <DialogFooter><Button onClick={submit}>ঋণ প্রদান</Button></DialogFooter>
-          </DialogContent>
-        </Dialog>
+              </div>
+              <DialogFooter><Button onClick={submit}>ঋণ প্রদান</Button></DialogFooter>
+            </DialogContent>
+          </Dialog>
+        </div>
         <div className="flex flex-wrap gap-2">
           <Button variant="outline" size="sm" onClick={printLoans} title="প্রিন্ট">
             <Printer className="h-4 w-4 mr-1" />প্রিন্ট
