@@ -4186,7 +4186,7 @@ function LoansTab() {
               {editErrors.familyGuarantorPhone && <p className="text-xs text-destructive mt-1">{editErrors.familyGuarantorPhone}</p>}
             </div>
           </div>
-          <DialogFooter><Button onClick={submitEdit}>সংরক্ষণ</Button></DialogFooter>
+          <DialogFooter className="print:hidden"><Button onClick={submitEdit}>সংরক্ষণ</Button></DialogFooter>
         </DialogContent>
       </Dialog>
 
