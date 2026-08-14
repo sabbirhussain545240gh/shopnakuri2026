@@ -2141,7 +2141,8 @@ function SavingsTab() {
     setFilterMemberId("all");
     setDateFrom("");
     setDateTo("");
-    setMonthFilter("all");
+    const months = Array.from(new Set(data.deposits.map((d) => d.date.slice(0, 7)))).sort((a, b) => b.localeCompare(a));
+    setMonthFilter(months[0] || "all");
   };
 
   const printDeposits = () => {
