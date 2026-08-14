@@ -1107,24 +1107,6 @@ function MembersTab() {
                     <div className="h-16 w-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto">
                       <FileText className="h-8 w-8 text-primary" />
                     </div>
-                    <h3 className="font-semibold text-lg">PDF ডকুমেন্ট</h3>
-                    <p className="text-sm text-muted-foreground leading-relaxed">এটি একটি PDF ফাইল। সম্পূর্ণ ফাইলটি দেখতে বা প্রিন্ট করতে নিচের বাটনে ক্লিক করুন।</p>
-                    <Button className="w-full" onClick={() => window.open(viewDoc.file, "_blank")}>
-                      <Download className="h-4 w-4 mr-2" /> PDF ডাউনলোড করুন
-                    </Button>
-                  </div>
-                ) : (
-                  <div className="relative group bg-white p-1 rounded-sm shadow-lg">
-                    <img src={viewDoc.file} alt={viewDoc.name} className="max-w-full h-auto object-contain block mx-auto" />
-                  </div>
-                )
-              )}
-            </div>
-            <div className="p-3 border-t bg-muted/30 flex justify-center print:hidden">
-              <Button variant="secondary" onClick={() => setViewDoc(null)} className="h-9">ফিরে যান</Button>
-            </div>
-          </DialogContent>
-        </Dialog>
 
         </div>
       </CardHeader>
