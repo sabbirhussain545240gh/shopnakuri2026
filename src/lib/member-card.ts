@@ -61,7 +61,9 @@ export function buildMemberCardHtml(member: MemberCardInput, samiti: SamitiInfo)
 
 
   const watermarkHtml = samiti.samitiLogo
-    ? `<div style="position:absolute;inset:0;background-image:url('${samiti.samitiLogo}');background-repeat:no-repeat;background-position:center;background-size:70% auto;opacity:0.15;pointer-events:none;z-index:0;-webkit-print-color-adjust:exact;print-color-adjust:exact;"></div>`
+    ? `<div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;pointer-events:none;z-index:0;">
+         <img src="${samiti.samitiLogo}" style="width:70%;height:auto;opacity:0.25;object-fit:contain;" crossorigin="anonymous" />
+       </div>`
     : "";
   return `
     <div style="max-width:640px;margin:auto;position:relative;">
