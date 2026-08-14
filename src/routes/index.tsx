@@ -83,10 +83,10 @@ function ReceiptQrPreview({ text }: { text: string }) {
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "'''Do not make any visual modifications. The phrases I write are commands to understand what I want, not to be written down. Understand their content well, then execute what is required.'''\n                                        \n                                            \n                                            কালেকশন ফর্ম  আগামি মাসের যেন তৈরি করতে পারি" },
-      { name: "description", content: "'''Do not make any visual modifications. The phrases I write are commands to understand what I want, not to be written down. Understand their content well, then execute what is required.'''\n                                        \n                                            \n                                            কালেকশন ফর্ম  আগামি মাসের যেন তৈরি করতে পারি" },
+      { title: "কালেকশন ফর্ম  আগামি মাসের যেন তৈরি করতে পারি" },
+      { name: "description", content: "কালেকশন ফর্ম  আগামি মাসের যেন তৈরি করতে পারি" },
       { property: "og:title", content: "সমিতি ম্যানেজমেন্ট সিস্টেম" },
-      { property: "og:description", content: "'''Do not make any visual modifications. The phrases I write are commands to understand what I want, not to be written down. Understand their content well, then execute what is required.'''\n                                        \n                                            \n                                            কালেকশন ফর্ম  আগামি মাসের যেন তৈরি করতে পারি" },
+      { property: "og:description", content: "কালেকশন ফর্ম  আগামি মাসের যেন তৈরি করতে পারি" },
     ],
   }),
   component: GatedApp,
@@ -2415,9 +2415,6 @@ function SavingsTab() {
           </Button>
           <Button variant="outline" size="sm" disabled={data.members.length === 0} onClick={downloadCollectionExcel}>
             <Download className="h-4 w-4 mr-1" />ফর্ম Excel
-          </Button>
-          <Button variant="outline" disabled={data.members.length < 2} onClick={replicateFromFirst}>
-            ১ নং অনুযায়ী সকলের চাঁদা
           </Button>
           <Dialog open={open} onOpenChange={setOpen}>
             <DialogTrigger asChild><Button disabled={data.members.length === 0}><Plus className="h-4 w-4 mr-1" />নতুন জমা</Button></DialogTrigger>
