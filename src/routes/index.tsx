@@ -1291,7 +1291,19 @@ function MembersTab() {
                             return (
                               <div key={loan.id} className="rounded-md border p-2">
                                 <div className="flex items-center justify-between flex-wrap gap-2 mb-2">
-                                  <div className="font-medium">ঋণ নং {toBn(no)} {loan.status === "closed" && <span className="text-xs text-green-600">(পরিশোধিত)</span>}</div>
+                                  <div className="flex items-center gap-2">
+                                    <div className="font-medium">ঋণ নং {toBn(no)} {loan.status === "closed" && <span className="text-xs text-green-600">(পরিশোধিত)</span>}</div>
+                                    {loan.status === "active" && (
+                                      <Button 
+                                        size="sm" 
+                                        variant="outline" 
+                                        className="h-6 text-[10px] px-2 py-0"
+                                        onClick={() => setMemberAction({ type: "installment", memberId: viewMember.id, loanId: loan.id })}
+                                      >
+                                        কিস্তি আদায়
+                                      </Button>
+                                    )}
+                                  </div>
                                   <div className="text-xs text-muted-foreground">তারিখ: {fmtDate(loan.date)}</div>
                                 </div>
                                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-xs mb-2">
