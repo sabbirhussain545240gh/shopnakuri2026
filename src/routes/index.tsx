@@ -712,6 +712,8 @@ function MembersTab() {
   const [form, setForm] = useState(emptyForm);
   const [viewMember, setViewMember] = useState<Member | null>(null);
   const [editMember, setEditMember] = useState<Member | null>(null);
+  const [depositReceipt, setDepositReceipt] = useState<null | { id: string; date: string; memberName: string; memberSerial?: number; amount: number; note?: string; receiptNo: string; logo?: string }>(null);
+  const [installmentReceipt, setInstallmentReceipt] = useState<null | { loan: Loan; memberName: string; memberSerial?: number; amount: number; date: string; paidAfter: number; remainingAfter: number; receiptNo: string; note?: string; logo?: string; loanNo?: number }>(null);
 
   const nextSerial = data.members.length > 0 ? Math.max(...data.members.map((m) => m.serial || 0)) + 1 : 1;
   useEffect(() => {
