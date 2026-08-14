@@ -2783,7 +2783,7 @@ function LoansTab() {
         @media print {
           body { padding: 0 !important; }
           .no-print { display: none !important; }
-          .ps-wm, .ld-wm, .wm, .watermark { display: block !important; visibility: visible !important; opacity: 0.15 !important; -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+          .ps-wm, .ld-wm, .wm, .watermark { display: block !important; visibility: visible !important; opacity: 0.25 !important; -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
           @page { size: A4 landscape; margin: 10mm; }
           @page { size: A4 landscape; margin: 10mm; }
         }
