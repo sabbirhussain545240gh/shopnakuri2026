@@ -1547,7 +1547,7 @@ function printLoanDetail(
       @media print { 
         body { padding: 0 !important; } 
         .no-print { display: none !important; } 
-        .ld-wm, .ps-wm, .wm, .watermark { display: block !important; visibility: visible !important; opacity: 0.25 !important; -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; } 
+        .ld-wm, .ps-wm, .wm, .watermark { position: fixed !important; inset: 0 !important; display: block !important; visibility: visible !important; opacity: 0.25 !important; -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; } 
       }
     </style></head>
     <body>
