@@ -4053,7 +4053,7 @@ function LoansTab() {
               <div><Label>পরিমাণ</Label><Input type="number" className={editErrors.amount ? "border-destructive" : ""} value={editForm.amount} onChange={(e) => editSetField("amount", e.target.value)} />{editErrors.amount && <p className="text-xs text-destructive mt-1">{editErrors.amount}</p>}</div>
               <div><Label>মুনাফার হার (%)</Label><Input type="number" className={editErrors.interestRate ? "border-destructive" : ""} value={editForm.interestRate} onChange={(e) => editSetField("interestRate", e.target.value)} />{editErrors.interestRate && <p className="text-xs text-destructive mt-1">{editErrors.interestRate}</p>}</div>
               <div><Label>মেয়াদ (মাস)</Label><Input type="number" className={editErrors.durationMonths ? "border-destructive" : ""} value={editForm.durationMonths} onChange={(e) => editSetField("durationMonths", e.target.value)} />{editErrors.durationMonths && <p className="text-xs text-destructive mt-1">{editErrors.durationMonths}</p>}</div>
-              <div><Label>তারিখ</Label><Input type="date" value={editForm.date} onChange={(e) => editSetField("date", e.target.value)} /></div>
+              <div><Label>তারিখ</Label><Input type="text" placeholder={getDateFormat()} value={editForm.date ? fmtDate(editForm.date) : ""} onChange={(e) => editSetField("date", toIsoDate(e.target.value))} /></div>
             </div>
             {(() => {
               const amt = Number(editForm.amount) || 0;
