@@ -2857,6 +2857,7 @@ function LoansTab() {
   const [editFor, setEditFor] = useState<Loan | null>(null);
   const [detailFor, setDetailFor] = useState<Loan | null>(null);
   const [editForm, setEditForm] = useState({ memberId: "", amount: "", interestRate: "", durationMonths: "", date: "", memberGuarantorId: "", familyGuarantorName: "", familyGuarantorRelation: "", familyGuarantorCustomRelation: "", familyGuarantorPhone: "", familyGuarantorNidFile: "", contractFile: "" });
+  const [editDocuments, setEditDocuments] = useState<Array<{ id: string; name: string; file: string }>>([]);
   const [editIsJoint, setEditIsJoint] = useState(false);
   const [editCoForm, setEditCoForm] = useState({ name: "", fatherName: "", phone: "", nid: "", address: "", motherName: "", birthDate: "", nidFile: "" });
   const [editCheques, setEditCheques] = useState<Array<{ bankName: string; branch: string; chequeNo: string; accountNo: string; amount: string; date: string }>>([]);
@@ -2869,6 +2870,7 @@ function LoansTab() {
     setEditErrors((prev) => { const next = { ...prev }; delete next[key]; return next; });
   };
   const [form, setForm] = useState({ memberId: "", amount: "", interestRate: String(data.settings.defaultInterestRate), durationMonths: String(data.settings.defaultDurationMonths), date: today(), memberGuarantorId: "", familyGuarantorName: "", familyGuarantorRelation: "", familyGuarantorCustomRelation: "", familyGuarantorPhone: "", familyGuarantorNidFile: "", contractFile: "" });
+  const [documents, setDocuments] = useState<Array<{ id: string; name: string; file: string }>>([]);
   const [payForm, setPayForm] = useState({ amount: "", date: today(), note: "" });
   const [receipt, setReceipt] = useState<null | { loan: Loan; memberName: string; memberSerial?: number; amount: number; date: string; paidAfter: number; remainingAfter: number; receiptNo: string; note?: string; logo?: string; loanNo?: number }>(null);
   const [isJoint, setIsJoint] = useState(false);

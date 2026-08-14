@@ -74,6 +74,7 @@ export type Loan = {
     nidFile?: string;
   };
   contractFile?: string;
+  documents?: Array<{ id: string; name: string; file: string }>;
   cheques?: CollateralCheque[];
   loanTerms?: string[];
 };
