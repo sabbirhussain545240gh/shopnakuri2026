@@ -865,7 +865,11 @@ function MembersTab() {
   thead tr, tbody tr, td { background: transparent !important; }
   th { background: rgba(243,244,246,0.35); border: 1px solid #ccc; padding: 10px; text-align: left; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
   th:nth-child(1), th:nth-child(6) { text-align: center; }
-  @media print { body { padding: 0 !important; } .no-print { display: none !important; } }
+  @media print { 
+    body { padding: 0 !important; } 
+    .no-print { display: none !important; } 
+    .ps-wm, .ld-wm, .wm, .watermark { display: block !important; visibility: visible !important; opacity: 0.15 !important; -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+  }
   ${printBrandCss}
 </style></head>
 <body>
