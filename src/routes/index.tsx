@@ -1376,6 +1376,124 @@ function MembersTab() {
         </DialogContent>
       </Dialog>
 
+      <Dialog open={!!memberAction} onOpenChange={(o) => !o && setMemberAction(null)}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>{memberAction?.type === "deposit" ? "চাদা আদায়" : "কিস্তি আদায়"}</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 pt-4">
+            {memberAction?.type === "deposit" && (
+              <div className="space-y-4">
+                <div className="text-sm font-medium p-3 bg-muted rounded-md flex justify-between items-center">
+                  <span>সদস্য: {data.members.find(m => m.id === memberAction.memberId)?.name}</span>
+                  <span className="text-xs text-muted-foreground">সিরিয়াল: {toBn(data.members.find(m => m.id === memberAction.memberId)?.serial || 0)}</span>
+                </div>
+                <div className="space-y-2">
+                  <Label>তারিখ</Label>
+                  <Input type="date" value={form.date} onChange={(e) => setForm({ ...form, date: e.target.value })} />
+                </div>
+                <div className="space-y-2">
+                  <Label>পরিমাণ (৳)</Label>
+                  <Input 
+                    type="number" 
+                    placeholder="৳ ০.০০" 
+                    value={form.amount} 
+                    onChange={(e) => setForm({ ...form, amount: e.target.value, memberId: memberAction.memberId })} 
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label>নোট (ঐচ্ছিক)</Label>
+                  <Input placeholder="কিছু লিখুন..." value={form.note} onChange={(e) => setForm({ ...form, note: e.target.value })} />
+                </div>
+                <Button className="w-full" onClick={() => {
+                  if (!form.amount) { toast.error("পরিমাণ দিন"); return; }
+                  const amt = Number(form.amount);
+                  addDeposit({ memberId: memberAction.memberId, amount: amt, date: form.date, note: form.note });
+                  const mem = data.members.find((x) => x.id === memberAction.memberId);
+                  const prevTotal = memberTotalDeposit(data.deposits, memberAction.memberId);
+                  const depositNo = data.deposits.filter((d) => d.memberId === memberAction.memberId).length + 1;
+                  setDepositReceipt({
+                    id: Math.random().toString(),
+                    date: form.date,
+                    memberName: mem?.name ?? "—",
+                    memberSerial: mem?.serial,
+                    amount: amt,
+                    totalAfter: prevTotal + amt,
+                    receiptNo: `CH-${toBn(mem?.serial ?? 0)}-${toBn(depositNo)}`,
+                    note: form.note.trim() || undefined,
+                    logo: data.samitiLogo || undefined,
+                  });
+                  setForm({ memberId: "", amount: "", date: today(), note: "" });
+                  setMemberAction(null);
+                  toast.success("জমা যোগ হয়েছে");
+                }}>সংরক্ষণ করুন</Button>
+              </div>
+            )}
+            {memberAction?.type === "installment" && (
+              <div className="space-y-4">
+                {(() => {
+                  const info = loanInfo(memberAction.loanId || "");
+                  if (!info) return null;
+                  return (
+                    <>
+                      <div className="text-sm space-y-1 p-3 bg-muted rounded-md">
+                        <div className="flex justify-between"><span>সদস্য:</span> <span className="font-medium">{info.member?.name}</span></div>
+                        <div className="flex justify-between text-xs text-muted-foreground"><span>বাকি পরিমাণ:</span> <span>{formatTk(info.remaining)}</span></div>
+                        <div className="flex justify-between text-xs text-muted-foreground"><span>কিস্তি পরিমাণ:</span> <span>{formatTk(info.installment)}</span></div>
+                      </div>
+                      <div className="space-y-2">
+                        <Label>তারিখ</Label>
+                        <Input type="date" value={form.date} onChange={(e) => setField("date", e.target.value)} />
+                      </div>
+                      <div className="space-y-2">
+                        <Label>পরিমাণ (৳)</Label>
+                        <Input 
+                          type="number" 
+                          placeholder={String(info.installment.toFixed(2))}
+                          value={form.amount} 
+                          onChange={(e) => {
+                            setField("amount", e.target.value);
+                            setForm(p => ({ ...p, loanId: memberAction.loanId || "" }));
+                          }} 
+                        />
+                        {errors.amount && <p className="text-[10px] text-destructive">{errors.amount}</p>}
+                      </div>
+                      <div className="space-y-2">
+                        <Label>নোট (ঐচ্ছিক)</Label>
+                        <Input placeholder="কিছু লিখুন..." value={form.note} onChange={(e) => setField("note", e.target.value)} />
+                      </div>
+                      <Button className="w-full" onClick={() => {
+                        const amt = Number(form.amount);
+                        if (!form.amount || amt <= 0) { toast.error("সঠিক পরিমাণ দিন"); return; }
+                        if (amt > info.remaining + 0.01) { toast.error("বকেয়ার চেয়ে বেশি"); return; }
+                        
+                        addPayment({ 
+                          loanId: memberAction.loanId || "", 
+                          amount: amt, 
+                          date: form.date, 
+                          note: form.note.trim() || undefined 
+                        });
+                        
+                        const newPaid = info.paid + amt;
+                        if (newPaid >= info.due - 0.01) {
+                          closeLoan(memberAction.loanId || "");
+                          toast.success("কিস্তি গৃহীত — ঋণ পরিশোধিত");
+                        } else {
+                          toast.success("কিস্তি গৃহীত");
+                        }
+                        
+                        setForm({ loanId: "", amount: "", date: today(), note: "" });
+                        setMemberAction(null);
+                      }}>কিস্তি সংগ্রহ করুন</Button>
+                    </>
+                  );
+                })()}
+              </div>
+            )}
+          </div>
+        </DialogContent>
+      </Dialog>
+
       <Dialog open={!!depositReceipt} onOpenChange={(o) => !o && setDepositReceipt(null)}>
         <DialogContent className="max-w-md">
           <DialogHeader><DialogTitle>জমা রিসিপ্ট</DialogTitle></DialogHeader>
