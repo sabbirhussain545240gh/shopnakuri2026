@@ -5769,6 +5769,71 @@ function CashbookTab() {
   const expense = filteredTransactions.filter((t) => t.type === "expense").reduce((a, t) => a + t.amount, 0);
   const cats = form.type === "income" ? INCOME_CATS : EXPENSE_CATS;
 
+  const exportCashbookCsv = () => {
+    let csv = "তারিখ,ধরন,খাত,পরিমাণ,মন্তব্য\n";
+    filteredTransactions.forEach((t) => {
+      csv += `${t.date},${t.type === "income" ? "আয়" : "ব্যয়"},"${t.category}",${t.amount},"${t.note || ""}"\n`;
+    });
+    const blob = new Blob(["\ufeff" + csv], { type: "text/csv;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `cashbook-${today()}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+    toast.success("CSV ডাউনলোড হয়েছে");
+  };
+
+  const exportCashbookPdf = async () => {
+    try {
+      toast.loading("PDF তৈরি হচ্ছে...", { id: "cashbook-pdf" });
+      const { default: jsPDF } = await import("jspdf");
+      const { default: autoTable } = await import("jspdf-autotable");
+      
+      const doc = new jsPDF();
+      
+      // Header
+      doc.setFontSize(18);
+      doc.text(data.samitiName, 14, 20);
+      doc.setFontSize(12);
+      doc.text("আয়-ব্যয় খতিয়ান", 14, 28);
+      
+      const filters = [];
+      if (typeFilter !== "all") filters.push(`ধরন: ${typeFilter === "income" ? "আয়" : "ব্যয়"}`);
+      if (monthFilter) filters.push(`মাস: ${monthFilter}`);
+      if (startDate) filters.push(`শুরু: ${startDate}`);
+      if (endDate) filters.push(`শেষ: ${endDate}`);
+      
+      if (filters.length > 0) {
+        doc.setFontSize(10);
+        doc.text(`ফিল্টার: ${filters.join(", ")}`, 14, 35);
+      }
+      
+      const tableData = filteredTransactions.map(t => [
+        t.date,
+        t.type === "income" ? "আয়" : "ব্যয়",
+        t.category,
+        t.note || "",
+        t.amount.toLocaleString("en-IN")
+      ]);
+      
+      (autoTable as any)(doc, {
+        startY: 40,
+        head: [["তারিখ", "ধরন", "খাত", "মন্তব্য", "পরিমাণ"]],
+        body: tableData,
+        theme: "striped",
+        headStyles: { fillColor: [15, 23, 42] },
+        styles: { font: "courier" } // Best effort for Bengali characters in basic jsPDF without custom fonts
+      });
+      
+      doc.save(`cashbook-${today()}.pdf`);
+      toast.success("PDF ডাউনলোড হয়েছে", { id: "cashbook-pdf" });
+    } catch (e) {
+      console.error(e);
+      toast.error("PDF তৈরিতে সমস্যা হয়েছে", { id: "cashbook-pdf" });
+    }
+  };
+
   return (
     <div className="space-y-4">
       <div className="grid grid-cols-3 gap-4">
@@ -5829,7 +5894,14 @@ function CashbookTab() {
             <CardTitle>আয়-ব্যয় খতিয়ান</CardTitle>
             <CardDescription>ফিল্টার অনুযায়ী মোট {toBn(filteredTransactions.length)}টি লেনদেন</CardDescription>
           </div>
-          <Dialog open={open} onOpenChange={(o) => {
+          <div className="flex items-center gap-2">
+            <Button variant="outline" size="sm" onClick={exportCashbookCsv} disabled={filteredTransactions.length === 0}>
+              <Download className="h-4 w-4 mr-1" />CSV
+            </Button>
+            <Button variant="outline" size="sm" onClick={exportCashbookPdf} disabled={filteredTransactions.length === 0}>
+              <FileText className="h-4 w-4 mr-1" />PDF
+            </Button>
+            <Dialog open={open} onOpenChange={(o) => {
             setOpen(o);
             if (!o) {
               setEditingId(null);
@@ -5864,7 +5936,8 @@ function CashbookTab() {
               </div>
               <DialogFooter><Button onClick={submit}>সংরক্ষণ</Button></DialogFooter>
             </DialogContent>
-          </Dialog>
+            </Dialog>
+          </div>
         </CardHeader>
         <CardContent>
           {filteredTransactions.length === 0 ? (
