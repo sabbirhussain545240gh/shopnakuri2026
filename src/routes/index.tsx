@@ -1405,7 +1405,6 @@ function buildLoanDetailHtml(
         ${samiti.establishedDate ? `<div style="font-size:13px;color:#666;margin-top:4px;">স্থাপিত: ${samiti.establishedDate}</div>` : ""}
       </div>
       <div style="width:90px;display:flex;justify-content:flex-end;">
-        ${member?.photo ? `<img src="${member.photo}" style="width:85px;height:100px;object-fit:cover;border:1px solid #ddd;border-radius:4px;" crossorigin="anonymous" />` : ""}
       </div>
     </div>`;
   const rows: [string, string][] = [
@@ -1492,7 +1491,14 @@ function buildLoanDetailHtml(
         <div style="border:2px solid #333;padding:18px;border-radius:8px;background:rgba(255,255,255,0.7);">
           <h2 style="text-align:center;margin:0 0 14px 0;font-size:18px;border-bottom:2px solid #333;padding-bottom:6px;">ঋণের বিস্তারিত</h2>
           
-          <table style="width:100%;border-collapse:collapse;font-size:14px;margin-bottom:14px;">${tableRows(rows)}</table>
+          <div style="display:flex;gap:20px;margin-bottom:14px;align-items:flex-start;">
+            <table style="flex:1;border-collapse:collapse;font-size:14px;">${tableRows(rows.slice(0, 4))}</table>
+            <div style="width:100px;text-align:center;padding:5px;border:1px solid #ddd;border-radius:4px;background:#f9f9f9;">
+              ${member?.photo ? `<img src="${member.photo}" style="width:90px;height:105px;object-fit:cover;display:block;margin:0 auto;" crossorigin="anonymous" />` : ""}
+              <div style="font-size:11px;margin-top:4px;color:#333;font-weight:bold;">ঋণীর ছবি</div>
+            </div>
+          </div>
+          <table style="width:100%;border-collapse:collapse;font-size:14px;margin-bottom:14px;">${tableRows(rows.slice(4))}</table>
           
           <h3 style="font-size:15px;border-bottom:1px solid #ccc;padding-bottom:4px;margin:14px 0 6px;">জামিনদার</h3>
           <table style="width:100%;border-collapse:collapse;font-size:14px;margin-bottom:14px;">${tableRows(guarantorRows)}</table>
@@ -3396,14 +3402,8 @@ function LoansTab() {
 
       <Dialog open={!!detailFor} onOpenChange={(o) => !o && setDetailFor(null)}>
         <DialogContent className="max-w-2xl">
-          <DialogHeader className="flex flex-row items-center justify-between pr-8">
+          <DialogHeader>
             <DialogTitle>ঋণের বিস্তারিত</DialogTitle>
-            {detailFor && (() => {
-              const m = data.members.find((x) => x.id === detailFor.memberId);
-              return m?.photo ? (
-                <img src={m.photo} alt={m.name} className="h-16 w-16 rounded-md object-cover border border-border" />
-              ) : null;
-            })()}
           </DialogHeader>
           {detailFor && (() => {
             const currentLoan = data.loans.find((x) => x.id === detailFor.id) ?? detailFor;
@@ -3415,11 +3415,24 @@ function LoansTab() {
             const idx = data.loans.findIndex((x) => x.id === currentLoan.id);
             return (
               <div className="space-y-3 text-sm">
+                <div className="flex gap-4 items-start border-b pb-3 mb-3">
+                  <div className="flex-1 grid grid-cols-2 gap-2">
+                    <div><span className="text-muted-foreground">ঋণ নং:</span> {toBn(idx + 1)}</div>
+                    <div><span className="text-muted-foreground">তারিখ:</span> {fmtDate(currentLoan.date)}</div>
+                    <div><span className="text-muted-foreground">সদস্য:</span> {m?.name ?? "—"} (সদস্য নং {m ? formatMemberSerial(m, data.serialPrefix) : "—"})</div>
+                    <div><span className="text-muted-foreground">মোবাইল:</span> {m?.phone ?? "—"}</div>
+                  </div>
+                  <div className="w-20 text-center flex flex-col items-center gap-1 border p-1 rounded bg-muted/30">
+                    {m?.photo ? (
+                      <img src={m.photo} alt={m.name} className="h-24 w-20 object-cover rounded" />
+                    ) : (
+                      <div className="h-24 w-20 bg-muted flex items-center justify-center rounded"><Users className="h-8 w-8 text-muted-foreground/50" /></div>
+                    )}
+                    <span className="text-[10px] font-bold">ঋণীর ছবি</span>
+                  </div>
+                </div>
+
                 <div className="grid grid-cols-2 gap-2">
-                  <div><span className="text-muted-foreground">ঋণ নং:</span> {toBn(idx + 1)}</div>
-                  <div><span className="text-muted-foreground">তারিখ:</span> {fmtDate(currentLoan.date)}</div>
-                  <div><span className="text-muted-foreground">সদস্য:</span> {m?.name ?? "—"} (সদস্য নং {m ? formatMemberSerial(m, data.serialPrefix) : "—"})</div>
-                  <div><span className="text-muted-foreground">মোবাইল:</span> {m?.phone ?? "—"}</div>
                   <div><span className="text-muted-foreground">মূল:</span> {formatTk(currentLoan.amount)}</div>
                   <div><span className="text-muted-foreground">মুনাফার হার:</span> {toBn(currentLoan.interestRate)}%</div>
                   <div><span className="text-muted-foreground">মোট প্রদেয়:</span> {formatTk(due)}</div>
