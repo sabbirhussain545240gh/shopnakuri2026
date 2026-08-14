@@ -5,6 +5,7 @@ export type Nominee = {
   relation: string;
   phone: string;
   nid: string;
+  nidFile?: string; // data URL or path
 };
 
 export type Member = {
@@ -17,6 +18,7 @@ export type Member = {
   phone: string;
   birthDate: string;
   nid: string;
+  nidFile?: string; // data URL or path
   address: string;
   photo: string; // data URL
   nominee: Nominee;
