@@ -1520,7 +1520,7 @@ function printLoanDetail(
   member: Member | undefined,
   guarantor: Member | undefined,
   payments: { id: string; date: string; amount: number }[],
-  samiti: SamitiInfo & { loanTerms?: string[] },
+  samiti: SamitiInfo & { loanTerms?: string[]; serialPrefix?: string },
 ) {
   const w = window.open("", "_blank", "width=900,height=700");
   if (!w) return;
@@ -1548,7 +1548,7 @@ async function exportLoanDetailPdf(
   member: Member | undefined,
   guarantor: Member | undefined,
   payments: { id: string; date: string; amount: number }[],
-  samiti: SamitiInfo & { loanTerms?: string[] },
+  samiti: SamitiInfo & { loanTerms?: string[]; serialPrefix?: string },
 ) {
   const { default: html2canvasLib } = await import("html2canvas");
   const inner = buildLoanDetailHtml(loan, loanNo, member, guarantor, payments, samiti);
