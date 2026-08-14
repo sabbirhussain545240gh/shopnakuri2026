@@ -1213,7 +1213,17 @@ function MembersTab() {
                     </div>
 
                     <div className="border-t pt-3">
-                      <h4 className="font-semibold mb-2">জমার ইতিহাস ({toBn(memberDeposits.length)})</h4>
+                      <div className="flex items-center justify-between mb-2">
+                        <h4 className="font-semibold">জমার ইতিহাস ({toBn(memberDeposits.length)})</h4>
+                        <Button 
+                          size="sm" 
+                          variant="outline" 
+                          className="h-8 text-xs gap-1"
+                          onClick={() => setMemberAction({ type: "deposit", memberId: viewMember.id })}
+                        >
+                          <Plus className="h-3 w-3" /> চাদা আদায়
+                        </Button>
+                      </div>
                       {memberDeposits.length === 0 ? (
                         <p className="text-sm text-muted-foreground">কোনো জমা নেই</p>
                       ) : (() => {
