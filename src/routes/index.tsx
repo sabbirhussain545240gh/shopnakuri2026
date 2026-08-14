@@ -6345,13 +6345,14 @@ function AdminTab() {
 const ADJUST_CATEGORY = "সমন্নয়";
 
 function ReconciliationTab() {
-  const { data, addTransaction, deleteTransaction, addPayment } = useSamiti();
-  const [form, setForm] = useState<{ type: "income" | "expense"; amount: string; date: string; note: string }>({
+  const { data, addTransaction, updateTransaction, deleteTransaction, addPayment } = useSamiti();
+  const [form, setForm] = useState<{ type: "income" | "expense"; amount: string; date: string; note: string; id?: string }>({
     type: "income", amount: "", date: today(), note: "",
   });
   const [loanForm, setLoanForm] = useState<{ loanId: string; amount: string; date: string; note: string }>({
     loanId: "", amount: "", date: today(), note: "সমন্নয়",
   });
+  const [isEditing, setIsEditing] = useState(false);
 
   const submitAdjust = () => {
     const amt = Number(form.amount);
