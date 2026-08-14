@@ -1973,12 +1973,12 @@ function printLoanDetail(
     <html><head><meta charset="utf-8" /><title>ঋণের বিস্তারিত - ${member?.name ?? ""}</title>
     <style>
       body { font-family: "Segoe UI", "Noto Sans Bengali", sans-serif; margin: 0; padding: 0; background: #fff; color: #111; }
-      .ld-wm { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 70%; height: auto; aspect-ratio: 1/1; background-repeat: no-repeat; background-position: center; background-size: contain; opacity: 0.15; pointer-events: none; z-index: 0; -webkit-print-color-adjust: exact; print-color-adjust: exact; display: block !important; visibility: visible !important; }
+      .ld-wm { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 70%; height: auto; aspect-ratio: 1/1; background-repeat: no-repeat; background-position: center; background-size: contain; opacity: 0.25; pointer-events: none; z-index: 0; -webkit-print-color-adjust: exact; print-color-adjust: exact; display: block !important; visibility: visible !important; }
       .ld-content { position: relative; z-index: 1; }
       @media print { 
         body { padding: 0 !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; } 
         .no-print { display: none !important; } 
-        .ld-wm { position: fixed !important; top: 50% !important; left: 50% !important; transform: translate(-50%, -50%) !important; display: block !important; visibility: visible !important; opacity: 0.15 !important; -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; } 
+        .ld-wm { position: fixed !important; top: 50% !important; left: 50% !important; transform: translate(-50%, -50%) !important; display: block !important; visibility: visible !important; opacity: 0.25 !important; -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; } 
       }
     </style></head>
     <body>
