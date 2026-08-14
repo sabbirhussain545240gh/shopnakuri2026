@@ -4832,7 +4832,7 @@ function InstallmentsTab() {
                     </div>
                     <div>
                       <Label>তারিখ *</Label>
-                      <Input type="date" className={errors.date ? "border-destructive" : ""} value={form.date} onChange={(e) => setField("date", e.target.value)} />
+                      <Input type="text" placeholder={getDateFormat()} className={errors.date ? "border-destructive" : ""} value={form.date ? fmtDate(form.date) : ""} onChange={(e) => setField("date", toIsoDate(e.target.value))} />
                       {errors.date && <p className="text-xs text-destructive mt-1">{errors.date}</p>}
                     </div>
                   </div>
