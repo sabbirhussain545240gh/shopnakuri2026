@@ -2235,6 +2235,7 @@ function SavingsTab() {
     const w = window.open("", "_blank", "width=1100,height=800");
     if (!w) return;
     const monthLabel = new Date().toLocaleDateString("bn-BD", { year: "numeric", month: "long" });
+    const totalInst = collectionRows.reduce((sum, row) => sum + row.inst, 0);
     const rows = collectionRows.map(({ m, inst, due, hasLoan }) => `
       <tr>
         <td class="c">${toBn(m.serial || 0)}</td>
