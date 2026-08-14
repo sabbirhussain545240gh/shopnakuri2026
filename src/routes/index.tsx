@@ -2235,6 +2235,7 @@ function SavingsTab() {
     const w = window.open("", "_blank", "width=1100,height=800");
     if (!w) return;
     const monthLabel = new Date().toLocaleDateString("bn-BD", { year: "numeric", month: "long" });
+    const totalInst = collectionRows.reduce((sum, row) => sum + row.inst, 0);
     const rows = collectionRows.map(({ m, inst, due, hasLoan }) => `
       <tr>
         <td class="c">${toBn(m.serial || 0)}</td>
@@ -2282,6 +2283,13 @@ function SavingsTab() {
       <th>সি.নং</th><th>সদস্যের নাম</th><th>মাসিক চাদা</th><th>বকেয়া ঋণ</th><th>মাসিক কিস্তি</th><th>আদায়কৃত কিস্তি</th><th>স্বাক্ষর</th>
     </tr></thead>
     <tbody>${rows}</tbody>
+    <tfoot>
+      <tr style="font-weight:bold; background:#f9fafb;">
+        <td colspan="4" class="r">সর্বমোট মাসিক কিস্তি</td>
+        <td class="r">${formatTk(totalInst)}</td>
+        <td colspan="2"></td>
+      </tr>
+    </tfoot>
   </table>
   <div class="foot">
     <div>কালেকটরের স্বাক্ষর: ____________________</div>
@@ -2298,6 +2306,7 @@ function SavingsTab() {
     const pdf = new jsPDF({ orientation: "landscape", unit: "pt", format: "a4" });
     const pageW = pdf.internal.pageSize.getWidth();
     const monthLabel = new Date().toLocaleDateString("bn-BD", { year: "numeric", month: "long" });
+    const totalInst = collectionRows.reduce((sum, row) => sum + row.inst, 0);
     pdf.setFontSize(14);
     pdf.text(data.samitiName || "সমিতি", pageW / 2, 28, { align: "center" });
     pdf.setFontSize(11);
@@ -2305,15 +2314,23 @@ function SavingsTab() {
     autoTable(pdf, {
       startY: 58,
       head: [["Sl", "Name", "Monthly Chada", "Loan Due", "Installment", "Paid", "Signature"]],
-      body: collectionRows.map(({ m, inst, due, hasLoan }) => [
-        toBn(m.serial || 0),
-        m.name,
-        "",
-        hasLoan ? formatTk(due).replace("৳ ", "") : "—",
-        hasLoan ? formatTk(inst).replace("৳ ", "") : "—",
-        "",
-        "",
-      ]),
+      body: [
+        ...collectionRows.map(({ m, inst, due, hasLoan }) => [
+          toBn(m.serial || 0),
+          m.name,
+          "",
+          hasLoan ? formatTk(due).replace("৳ ", "") : "—",
+          hasLoan ? formatTk(inst).replace("৳ ", "") : "—",
+          "",
+          "",
+        ]),
+        [
+          { content: "Total Installment Amount:", colSpan: 4, styles: { halign: "right", fontStyle: "bold" } },
+          { content: formatTk(totalInst).replace("৳ ", ""), styles: { halign: "right", fontStyle: "bold" } },
+          "",
+          ""
+        ]
+      ],
       styles: { font: "helvetica", fontSize: 9, cellPadding: 3, minCellHeight: 16 },
       headStyles: { fillColor: [52, 73, 94], textColor: 255, halign: "center" },
       columnStyles: {
@@ -2341,6 +2358,16 @@ function SavingsTab() {
       "আদায়কৃত কিস্তি": "",
       "স্বাক্ষর": "",
     }));
+    const totalInst = collectionRows.reduce((sum, row) => sum + row.inst, 0);
+    rows.push({
+      "সি.নং": "মোট",
+      "সদস্যের নাম": "",
+      "মাসিক চাদা": "",
+      "বকেয়া ঋণ": "",
+      "মাসিক কিস্তি": totalInst,
+      "আদায়কৃত কিস্তি": "",
+      "স্বাক্ষর": "",
+    } as any);
     const ws = XLSX.utils.json_to_sheet(rows);
     const wb = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb, ws, `কালেকশন ফর্ম ${monthLabel}`);
