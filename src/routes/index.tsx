@@ -202,6 +202,7 @@ function SamitiApp() {
     [allowed],
   );
   const [tab, setTab] = useState("dashboard");
+  const [viewDoc, setViewDoc] = useState<{ file: string; name: string; owner: string } | null>(null);
   useEffect(() => {
     if (!rolesLoading && !allowed.includes(tab as TabKey)) {
       setTab(allowed[0] ?? "dashboard");
@@ -708,6 +709,7 @@ function Dashboard({ totals, memberCount, data, onNavigate }: any) {
 // ===== Members =====
 function MembersTab() {
   const { data, addMember, addMembers, updateMember, deleteMember, addDeposit, addPayment, closeLoan } = useSamiti();
+  const [viewDoc, setViewDoc] = useState<{ file: string; name: string; owner: string } | null>(null);
   const [open, setOpen] = useState(false);
   const [searchSerial, setSearchSerial] = useState("");
   const [searchName, setSearchName] = useState("");
@@ -1230,7 +1232,7 @@ function MembersTab() {
                        variant="outline" 
                        size="sm" 
                        className="h-8 text-xs gap-1.5" 
-                       onClick={() => printNidFile(viewMember.nidFile!, "সদস্যের NID / জন্ম সনদ", viewMember.name, data.samitiName, data.samitiLogo)}
+                       onClick={() => setViewDoc({ file: viewMember.nidFile!, name: "সদস্যের NID / জন্ম সনদ", owner: viewMember.name })}
                      >
                        <FileText className="h-3.5 w-3.5" /> সদস্যের NID দেখুন ও প্রিন্ট
                      </Button>
@@ -1240,7 +1242,7 @@ function MembersTab() {
                        variant="outline" 
                        size="sm" 
                        className="h-8 text-xs gap-1.5" 
-                       onClick={() => printNidFile(viewMember.nominee!.nidFile!, "নমিনির NID / জন্ম সনদ", viewMember.name, data.samitiName, data.samitiLogo)}
+                       onClick={() => setViewDoc({ file: viewMember.nominee!.nidFile!, name: "নমিনির NID / জন্ম সনদ", owner: viewMember.name })}
                      >
                        <FileText className="h-3.5 w-3.5" /> নমিনির NID দেখুন ও প্রিন্ট
                      </Button>
@@ -3091,6 +3093,7 @@ function LoansTab() {
     toast.success("ঋণ আপডেট হয়েছে");
   };
 
+  const [viewDoc, setViewDoc] = useState<{ file: string; name: string; owner: string } | null>(null);
   const filteredLoans = useMemo(() => {
     const term = loanSearch.trim().toLowerCase();
     return data.loans.filter((l) => {
@@ -4281,7 +4284,7 @@ function LoansTab() {
                       <div className="flex items-center justify-between">
                         <div>পারিবারিক: {currentLoan.familyGuarantor.name} ({currentLoan.familyGuarantor.relation}) — {currentLoan.familyGuarantor.phone}</div>
                         {currentLoan.familyGuarantor.nidFile && (
-                          <Button variant="ghost" size="sm" className="h-7 text-xs" onClick={() => printNidFile(currentLoan.familyGuarantor!.nidFile!, "NID কপি", currentLoan.familyGuarantor!.name, data.samitiName, data.samitiLogo)}>
+                          <Button variant="ghost" size="sm" className="h-7 text-xs" onClick={() => setViewDoc({ file: currentLoan.familyGuarantor!.nidFile!, name: "NID কপি", owner: currentLoan.familyGuarantor!.name })}>
                             <FileText className="h-3 w-3 mr-1" /> NID
                           </Button>
                         )}
@@ -4291,8 +4294,8 @@ function LoansTab() {
                   {currentLoan.contractFile && (
                     <div className="flex flex-col items-center justify-center border-l pl-4">
                       <div className="font-medium mb-1">ডকুমেন্ট</div>
-                      <Button variant="outline" size="sm" className="w-full" onClick={() => printNidFile(currentLoan.contractFile!, "ঋণ চুক্তি ফরম", m?.name ?? "ঋণগ্রহীতা", data.samitiName, data.samitiLogo)}>
-                        <FileText className="h-4 w-4 mr-1" /> ঋণ চুক্তি ফরম দেখুন ও প্রিন্ট
+                      <Button variant="outline" size="sm" className="w-full" onClick={() => setViewDoc({ file: currentLoan.contractFile!, name: "ঋণ চুক্তি ফরম", owner: m?.name ?? "ঋণগ্রহীতা" })}>
+                        <FileText className="h-4 w-4 mr-1" /> ঋণ চুক্তি ফরম দেখুন
                       </Button>
                     </div>
                   )}
@@ -4307,7 +4310,7 @@ function LoansTab() {
                           variant="outline" 
                           size="sm" 
                           className="w-full text-left justify-start h-auto py-2" 
-                          onClick={() => printNidFile(doc.file, doc.name || "ডকুমেন্ট", m?.name ?? "সদস্য", data.samitiName, data.samitiLogo)}
+                          onClick={() => setViewDoc({ file: doc.file, name: doc.name || "ডকুমেন্ট", owner: m?.name ?? "সদস্য" })}
                         >
                           <FileText className="h-4 w-4 mr-2 shrink-0" />
                           <span className="truncate">{doc.name || "অজানা ডকুমেন্ট"}</span>
@@ -4324,7 +4327,7 @@ function LoansTab() {
                         {currentLoan.coBorrower.name} · পিতা: {currentLoan.coBorrower.fatherName || "—"} · মাতা: {currentLoan.coBorrower.motherName || "—"} · ফোন: {currentLoan.coBorrower.phone}
                       </div>
                       {currentLoan.coBorrower.nidFile && (
-                        <Button variant="ghost" size="sm" className="h-7 text-xs" onClick={() => printNidFile(currentLoan.coBorrower!.nidFile!, "NID কপি", currentLoan.coBorrower!.name, data.samitiName, data.samitiLogo)}>
+                        <Button variant="ghost" size="sm" className="h-7 text-xs" onClick={() => setViewDoc({ file: currentLoan.coBorrower!.nidFile!, name: "NID কপি", owner: currentLoan.coBorrower!.name })}>
                           <FileText className="h-3 w-3 mr-1" /> NID
                         </Button>
                       )}
@@ -4505,6 +4508,47 @@ function LoansTab() {
           <div className="p-3 border-t flex justify-end gap-2 print:hidden">
             <Button variant="outline" onClick={() => closureView && printClosureHtml(closureView)}><Printer className="h-4 w-4" /> প্রিন্ট</Button>
             <Button variant="ghost" onClick={() => setClosureView(null)}>বন্ধ</Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+      <Dialog open={!!viewDoc} onOpenChange={(o) => !o && setViewDoc(null)}>
+        <DialogContent className="max-w-4xl max-h-[95vh] flex flex-col p-0 overflow-hidden">
+          <div className="flex items-center justify-between p-4 border-b bg-muted/30 print:hidden">
+            <div className="flex flex-col">
+              <DialogTitle className="text-base">{viewDoc?.name}</DialogTitle>
+              <DialogDescription className="text-xs">মালিক: {viewDoc?.owner}</DialogDescription>
+            </div>
+            <div className="flex items-center gap-2">
+              <Button size="sm" variant="outline" className="h-8" onClick={() => viewDoc && printNidFile(viewDoc.file, viewDoc.name, viewDoc.owner, data.samitiName, data.samitiLogo)}>
+                <Printer className="h-4 w-4 mr-1.5" /> প্রিন্ট
+              </Button>
+              <Button size="sm" variant="ghost" className="h-8 w-8 p-0" onClick={() => setViewDoc(null)}>
+                <X className="h-4 w-4" />
+              </Button>
+            </div>
+          </div>
+          <div className="flex-1 overflow-auto bg-slate-100 p-4 md:p-8 flex items-center justify-center min-h-[400px]">
+            {viewDoc && (
+              viewDoc.file.startsWith("data:application/pdf") ? (
+                <div className="bg-white p-8 rounded-lg shadow-sm text-center space-y-4 max-w-sm">
+                  <div className="h-16 w-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto">
+                    <FileText className="h-8 w-8 text-primary" />
+                  </div>
+                  <h3 className="font-semibold text-lg">PDF ডকুমেন্ট</h3>
+                  <p className="text-sm text-muted-foreground leading-relaxed">এটি একটি PDF ফাইল। সম্পূর্ণ ফাইলটি দেখতে বা প্রিন্ট করতে নিচের বাটনে ক্লিক করুন।</p>
+                  <Button className="w-full" onClick={() => window.open(viewDoc.file, "_blank")}>
+                    <Download className="h-4 w-4 mr-2" /> PDF ডাউনলোড করুন
+                  </Button>
+                </div>
+              ) : (
+                <div className="relative group bg-white p-1 rounded-sm shadow-lg">
+                  <img src={viewDoc.file} alt={viewDoc.name} className="max-w-full h-auto object-contain block mx-auto" />
+                </div>
+              )
+            )}
+          </div>
+          <div className="p-3 border-t bg-muted/30 flex justify-center print:hidden">
+            <Button variant="secondary" onClick={() => setViewDoc(null)} className="h-9">ফিরে যান</Button>
           </div>
         </DialogContent>
       </Dialog>
@@ -7717,9 +7761,11 @@ function TreasurerSignBlock({ committee }: { committee?: CommitteeMember[] }) {
       {t.name && <div className="font-semibold text-foreground">{t.name}</div>}
       <div>{t.role || "কোষাধ্যক্ষ"}</div>
       {t.phone && <div>{toBn(t.phone)}</div>}
+
     </div>
   );
 }
+
 
 const qrBlockHtml = (qrDataUrl?: string) =>
   qrDataUrl
@@ -7854,4 +7900,7 @@ async function renderDepositReceiptCanvas(r: DepositReceiptData, samitiName: str
     document.body.removeChild(iframe);
   }
 }
+
+
+
 
