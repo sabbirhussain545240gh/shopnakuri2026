@@ -1397,14 +1397,16 @@ function buildLoanDetailHtml(
   const remaining = Math.max(0, due - paid);
   const inst = monthlyInstallment(loan.amount, loan.interestRate, loan.durationMonths);
   const headerHtml = `
-    <div style="display:flex;align-items:center;gap:16px;border-bottom:2px solid #333;padding-bottom:10px;margin-bottom:16px;">
+    <div style="display:flex;align-items:center;gap:16px;border-bottom:2px solid #333;padding-bottom:10px;margin-bottom:16px;position:relative;">
       ${samiti.samitiLogo ? `<img src="${samiti.samitiLogo}" style="width:90px;height:90px;object-fit:contain;" crossorigin="anonymous" />` : ""}
       <div style="flex:1;text-align:center;">
         <h1 style="margin:0;font-size:26px;">${samiti.samitiName}</h1>
         ${samiti.samitiAddress ? `<div style="font-size:14px;color:#444;margin-top:4px;">${samiti.samitiAddress}</div>` : ""}
         ${samiti.establishedDate ? `<div style="font-size:13px;color:#666;margin-top:4px;">স্থাপিত: ${samiti.establishedDate}</div>` : ""}
       </div>
-      ${samiti.samitiLogo ? `<div style="width:90px;"></div>` : ""}
+      <div style="width:90px;display:flex;justify-content:flex-end;">
+        ${member?.photo ? `<img src="${member.photo}" style="width:85px;height:100px;object-fit:cover;border:1px solid #ddd;border-radius:4px;" crossorigin="anonymous" />` : ""}
+      </div>
     </div>`;
   const rows: [string, string][] = [
     ["ঋণ নং", toBn(loanNo)],
@@ -3394,7 +3396,15 @@ function LoansTab() {
 
       <Dialog open={!!detailFor} onOpenChange={(o) => !o && setDetailFor(null)}>
         <DialogContent className="max-w-2xl">
-          <DialogHeader><DialogTitle>ঋণের বিস্তারিত</DialogTitle></DialogHeader>
+          <DialogHeader className="flex flex-row items-center justify-between pr-8">
+            <DialogTitle>ঋণের বিস্তারিত</DialogTitle>
+            {detailFor && (() => {
+              const m = data.members.find((x) => x.id === detailFor.memberId);
+              return m?.photo ? (
+                <img src={m.photo} alt={m.name} className="h-16 w-16 rounded-md object-cover border border-border" />
+              ) : null;
+            })()}
+          </DialogHeader>
           {detailFor && (() => {
             const currentLoan = data.loans.find((x) => x.id === detailFor.id) ?? detailFor;
             const m = data.members.find((x) => x.id === currentLoan.memberId);
