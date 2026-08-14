@@ -2283,6 +2283,13 @@ function SavingsTab() {
       <th>সি.নং</th><th>সদস্যের নাম</th><th>মাসিক চাদা</th><th>বকেয়া ঋণ</th><th>মাসিক কিস্তি</th><th>আদায়কৃত কিস্তি</th><th>স্বাক্ষর</th>
     </tr></thead>
     <tbody>${rows}</tbody>
+    <tfoot>
+      <tr style="font-weight:bold; background:#f9fafb;">
+        <td colspan="4" class="r">সর্বমোট মাসিক কিস্তি</td>
+        <td class="r">${formatTk(totalInst)}</td>
+        <td colspan="2"></td>
+      </tr>
+    </tfoot>
   </table>
   <div class="foot">
     <div>কালেকটরের স্বাক্ষর: ____________________</div>
