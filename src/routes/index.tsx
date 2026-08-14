@@ -3426,20 +3426,19 @@ function LoansTab() {
                     </Select>
                     {errors.memberId && <p className="text-xs text-destructive mt-1">{errors.memberId}</p>}
                   </div>
-                </div>
                   <div>
                     <Label>পরিমাণ *</Label>
                     <Input type="number" className={errors.amount ? "border-destructive" : ""} value={form.amount} onChange={(e) => setField("amount", e.target.value)} />
                     {errors.amount && <p className="text-xs text-destructive mt-1">{errors.amount}</p>}
                   </div>
-                <div>
-                  <Label>মুনাফার হার (%) *</Label>
-                  <Input type="number" className={errors.interestRate ? "border-destructive" : ""} value={form.interestRate} onChange={(e) => setField("interestRate", e.target.value)} />
-                  {errors.interestRate && <p className="text-xs text-destructive mt-1">{errors.interestRate}</p>}
+                  <div>
+                    <Label>মুনাফার হার (%) *</Label>
+                    <Input type="number" className={errors.interestRate ? "border-destructive" : ""} value={form.interestRate} onChange={(e) => setField("interestRate", e.target.value)} />
+                    {errors.interestRate && <p className="text-xs text-destructive mt-1">{errors.interestRate}</p>}
+                  </div>
+                  <div><Label>মেয়াদ (মাস)</Label><Input type="number" value={form.durationMonths} onChange={(e) => setForm({ ...form, durationMonths: e.target.value })} /></div>
+                  <div><Label>তারিখ</Label><Input type="date" value={form.date} onChange={(e) => setForm({ ...form, date: e.target.value })} /></div>
                 </div>
-                <div><Label>মেয়াদ (মাস)</Label><Input type="number" value={form.durationMonths} onChange={(e) => setForm({ ...form, durationMonths: e.target.value })} /></div>
-                <div><Label>তারিখ</Label><Input type="date" value={form.date} onChange={(e) => setForm({ ...form, date: e.target.value })} /></div>
-              </div>
               {(() => {
                 const amt = Number(form.amount) || 0;
                 const rate = Number(form.interestRate) || 0;
