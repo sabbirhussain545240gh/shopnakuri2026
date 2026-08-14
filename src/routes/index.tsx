@@ -808,9 +808,6 @@ function MembersTab() {
     }
     return "";
   };
-    }
-    return "";
-  };
 
   const downloadTemplate = () => {
     const headers = [
