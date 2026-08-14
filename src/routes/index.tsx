@@ -2435,7 +2435,7 @@ function SavingsTab() {
       head: [["Sl", "Name", "Monthly Chada", "Loan Due", "Installment", "Paid", "Signature"]],
       body: [
         ...collectionRows.map(({ m, inst, due, hasLoan }) => [
-          toBn(m.serial || 0),
+          formatMemberSerial({ serial: m.serial, category: m.category }, data.serialPrefix),
           m.name,
           "",
           hasLoan ? formatTk(due).replace("৳ ", "") : "—",
@@ -2471,7 +2471,7 @@ function SavingsTab() {
     targetDate.setMonth(targetDate.getMonth() + collectionMonthOffset);
     const monthLabel = targetDate.toLocaleDateString("bn-BD", { year: "numeric", month: "long" });
     const rows = collectionRows.map(({ m, inst, due, hasLoan }) => ({
-      "সি.নং": m.serial || 0,
+      "সি.নং": formatMemberSerial({ serial: m.serial, category: m.category }, data.serialPrefix),
       "সদস্যের নাম": m.name,
       "মাসিক চাদা": "",
       "বকেয়া ঋণ": hasLoan ? due : "—",
