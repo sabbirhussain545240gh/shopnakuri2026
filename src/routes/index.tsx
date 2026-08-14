@@ -2106,7 +2106,7 @@ function PendingCollectRow({
         />
       </TableCell>
       <TableCell>
-        <Input type="date" value={date} onChange={(e) => setDate(e.target.value)} className="h-8" />
+        <Input type="date" value={date} onChange={(e) => setDate(e.target.value)} className="h-8 w-[140px] text-xs" />
       </TableCell>
       <TableCell>
         <Button
@@ -2686,7 +2686,7 @@ function SavingsTab() {
                         <TableHead className="w-16">ক্র নং</TableHead>
                         <TableHead>নাম</TableHead>
                         <TableHead className="w-40 text-right">পরিমাণ (৳)</TableHead>
-                        <TableHead className="w-40">তারিখ</TableHead>
+                        <TableHead className="w-48">তারিখ</TableHead>
                         <TableHead className="w-32"></TableHead>
                       </TableRow>
                     </TableHeader>
