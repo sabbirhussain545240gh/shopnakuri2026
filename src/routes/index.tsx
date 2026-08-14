@@ -6951,7 +6951,7 @@ function ReconciliationTab() {
                 </div>
                 <div className="space-y-1.5">
                   <Label>তারিখ</Label>
-                  <Input type="date" value={loanForm.date} onChange={(e) => setLoanForm({ ...loanForm, date: e.target.value })} />
+                  <Input type="text" placeholder={getDateFormat()} value={loanForm.date ? fmtDate(loanForm.date) : ""} onChange={(e) => setLoanForm({ ...loanForm, date: toIsoDate(e.target.value) })} />
                 </div>
                 <div className="space-y-1.5">
                   <Label>মন্তব্য</Label>
