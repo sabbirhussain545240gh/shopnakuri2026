@@ -8,7 +8,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Loader2, HandCoins, PiggyBank, Receipt as ReceiptIcon, Printer, ImageDown, FileText, AlertTriangle, User, Phone, MapPin, Calendar, Hash, Eye, Users, TrendingUp, Wallet } from "lucide-react";
 import { SignOutButton, CloudStatusBadge } from "@/components/AuthGate";
 import { NotificationBell } from "@/components/NotificationBell";
-import { toBn, formatTk, formatDateStr } from "@/lib/samiti-store";
+import { toBn, formatTk, formatDateStr, getDateFormat } from "@/lib/samiti-store";
 import { buildReceiptQr } from "@/lib/receipt-qr";
 import { getMyMemberView, type MemberViewResponse, type MemberViewLoan, type MemberViewPayment, type MemberViewDeposit } from "@/lib/member-view.functions";
 import { printMemberCard, exportMemberCardPdf, exportMemberCardJpeg } from "@/lib/member-card";
@@ -17,6 +17,35 @@ import { toast } from "sonner";
 function fmtDate(d: string) {
   return formatDateStr(d, { bn: true, fallback: "—" });
 }
+
+const toIsoDate = (v: any): string => {
+  if (v == null || v === "") return "";
+  if (v instanceof Date) {
+    const y = v.getFullYear();
+    const m = String(v.getMonth() + 1).padStart(2, "0");
+    const d = String(v.getDate()).padStart(2, "0");
+    return `${y}-${m}-${d}`;
+  }
+  const s = String(v).trim();
+  if (/^\d{4}-\d{1,2}-\d{1,2}$/.test(s)) {
+    const [y, m, d] = s.split("-");
+    return `${y}-${m.padStart(2, "0")}-${d.padStart(2, "0")}`;
+  }
+  const m1 = s.match(/^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{2,4})$/);
+  if (m1) {
+    let [, d, m, y] = m1;
+    if (y.length === 2) y = "20" + y;
+    return `${y}-${m.padStart(2, "0")}-${d.padStart(2, "0")}`;
+  }
+  const dt = new Date(s);
+  if (!isNaN(dt.getTime())) {
+    const y = dt.getFullYear();
+    const m = String(dt.getMonth() + 1).padStart(2, "0");
+    const d = String(dt.getDate()).padStart(2, "0");
+    return `${y}-${m}-${d}`;
+  }
+  return "";
+};
 
 function monthlyInstallment(amount: number, rate: number, months: number) {
   if (!months || months <= 0) return 0;

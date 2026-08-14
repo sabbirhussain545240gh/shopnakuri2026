@@ -5,8 +5,8 @@ import * as XLSX from "xlsx";
 import {
   useSamiti, toBn, formatTk, memberTotalDeposit, loanPaid, loanTotalDue,
   DEFAULT_GOALS, DEFAULT_QUOTES, DEFAULT_MESSAGES, formatMemberSerial,
- formatDateStr, formatTimeStr, DATE_FORMAT_OPTIONS, TIME_FORMAT_OPTIONS, DEFAULT_DATE_FORMAT, DEFAULT_TIME_FORMAT,
- type Member, type Loan, type Deposit, type Goal, type Quote, type Message, type CommitteeMember, type DateFormat, type TimeFormat, type Transaction,
+  formatDateStr, formatTimeStr, DATE_FORMAT_OPTIONS, TIME_FORMAT_OPTIONS, DEFAULT_DATE_FORMAT, DEFAULT_TIME_FORMAT, getDateFormat,
+  type Member, type Loan, type Deposit, type Goal, type Quote, type Message, type CommitteeMember, type DateFormat, type TimeFormat, type Transaction,
 } from "@/lib/samiti-store";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -81,6 +81,35 @@ function ReceiptQrPreview({ text }: { text: string }) {
 }
 
 type ViewDoc = { file: string; name: string; owner: string; isGuarantor?: boolean };
+
+const toIsoDate = (v: any): string => {
+  if (v == null || v === "") return "";
+  if (v instanceof Date) {
+    const y = v.getFullYear();
+    const m = String(v.getMonth() + 1).padStart(2, "0");
+    const d = String(v.getDate()).padStart(2, "0");
+    return `${y}-${m}-${d}`;
+  }
+  const s = String(v).trim();
+  if (/^\d{4}-\d{1,2}-\d{1,2}$/.test(s)) {
+    const [y, m, d] = s.split("-");
+    return `${y}-${m.padStart(2, "0")}-${d.padStart(2, "0")}`;
+  }
+  const m1 = s.match(/^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{2,4})$/);
+  if (m1) {
+    let [, d, m, y] = m1;
+    if (y.length === 2) y = "20" + y;
+    return `${y}-${m.padStart(2, "0")}-${d.padStart(2, "0")}`;
+  }
+  const dt = new Date(s);
+  if (!isNaN(dt.getTime())) {
+    const y = dt.getFullYear();
+    const m = String(dt.getMonth() + 1).padStart(2, "0");
+    const d = String(dt.getDate()).padStart(2, "0");
+    return `${y}-${m}-${d}`;
+  }
+  return "";
+};
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -715,6 +744,7 @@ function Dashboard({ totals, memberCount, data, onNavigate }: any) {
 
 
 
+
 // ===== Members =====
 function MembersTab() {
   const { data, addMember, addMembers, updateMember, deleteMember, addDeposit, addPayment, closeLoan } = useSamiti();
@@ -733,6 +763,7 @@ function MembersTab() {
     nomineeCustomRelation: "",
     joinDate: today(),
   };
+
   const [form, setForm] = useState(emptyForm);
   const [viewMember, setViewMember] = useState<Member | null>(null);
   const [editMember, setEditMember] = useState<Member | null>(null);
@@ -741,17 +772,6 @@ function MembersTab() {
   const [memberAction, setMemberAction] = useState<{ type: "deposit" | "installment"; memberId: string; loanId?: string } | null>(null);
   const [actionForm, setActionForm] = useState({ memberId: "", loanId: "", amount: "", date: today(), note: "" });
   const [actionErrors, setActionErrors] = useState<Record<string, string>>({});
-
-  const loanInfo = (loanId: string) => {
-    const loan = data.loans.find((l) => l.id === loanId);
-    if (!loan) return null;
-    const member = data.members.find((m) => m.id === loan.memberId);
-    const due = loanTotalDue(loan);
-    const paid = loanPaid(data.payments, loan.id);
-    const remaining = Math.max(0, due - paid);
-    const installment = loan.durationMonths > 0 ? due / loan.durationMonths : 0;
-    return { loan, member, due, paid, remaining, installment };
-  };
 
   const nextSerial = data.members.length > 0 ? Math.max(...data.members.map((m) => m.serial || 0)) + 1 : 1;
   useEffect(() => {
@@ -777,36 +797,18 @@ function MembersTab() {
     toast.success("সদস্য যোগ হয়েছে");
   };
 
-  const fileInputRef = useRef<HTMLInputElement>(null);
-
-  const toIsoDate = (v: any): string => {
-    if (v == null || v === "") return "";
-    if (v instanceof Date) {
-      const y = v.getFullYear();
-      const m = String(v.getMonth() + 1).padStart(2, "0");
-      const d = String(v.getDate()).padStart(2, "0");
-      return `${y}-${m}-${d}`;
-    }
-    const s = String(v).trim();
-    if (/^\d{4}-\d{1,2}-\d{1,2}$/.test(s)) {
-      const [y, m, d] = s.split("-");
-      return `${y}-${m.padStart(2, "0")}-${d.padStart(2, "0")}`;
-    }
-    const m1 = s.match(/^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{2,4})$/);
-    if (m1) {
-      let [, d, m, y] = m1;
-      if (y.length === 2) y = "20" + y;
-      return `${y}-${m.padStart(2, "0")}-${d.padStart(2, "0")}`;
-    }
-    const dt = new Date(s);
-    if (!isNaN(dt.getTime())) {
-      const y = dt.getFullYear();
-      const m = String(dt.getMonth() + 1).padStart(2, "0");
-      const d = String(dt.getDate()).padStart(2, "0");
-      return `${y}-${m}-${d}`;
-    }
-    return "";
+  const loanInfo = (loanId: string) => {
+    const loan = data.loans.find((l) => l.id === loanId);
+    if (!loan) return null;
+    const member = data.members.find((m) => m.id === loan.memberId);
+    const due = loanTotalDue(loan);
+    const paid = loanPaid(data.payments, loan.id);
+    const remaining = Math.max(0, due - paid);
+    const installment = loan.durationMonths > 0 ? due / loan.durationMonths : 0;
+    return { loan, member, due, paid, remaining, installment };
   };
+
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const pick = (row: any, keys: string[]): string => {
     for (const k of keys) {
@@ -1060,11 +1062,11 @@ function MembersTab() {
                 <div><Label>মোবাইল নং</Label><Input value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} /></div>
                 <div><Label>পিতার নাম</Label><Input value={form.fatherName} onChange={(e) => setForm({ ...form, fatherName: e.target.value })} /></div>
                 <div><Label>মাতার নাম</Label><Input value={form.motherName} onChange={(e) => setForm({ ...form, motherName: e.target.value })} /></div>
-                <div><Label>জন্ম তারিখ</Label><Input type="date" value={form.birthDate} onChange={(e) => setForm({ ...form, birthDate: e.target.value })} /></div>
+                <div><Label>জন্ম তারিখ</Label><Input type="text" placeholder={getDateFormat()} value={form.birthDate ? fmtDate(form.birthDate) : ""} onChange={(e) => setForm({ ...form, birthDate: toIsoDate(e.target.value) })} /></div>
                 <div><Label>NID / জন্ম সনদ নং</Label><Input value={form.nid} onChange={(e) => setForm({ ...form, nid: e.target.value })} /></div>
               </div>
               <div><Label>ঠিকানা</Label><Textarea value={form.address} onChange={(e) => setForm({ ...form, address: e.target.value })} /></div>
-              <div><Label>যোগদানের তারিখ</Label><Input type="date" value={form.joinDate} onChange={(e) => setForm({ ...form, joinDate: e.target.value })} /></div>
+              <div><Label>যোগদানের তারিখ</Label><Input type="text" placeholder={getDateFormat()} value={form.joinDate ? fmtDate(form.joinDate) : ""} onChange={(e) => setForm({ ...form, joinDate: toIsoDate(e.target.value) })} /></div>
 
               <div className="border-t pt-3">
                 <h4 className="font-semibold mb-2 text-foreground">নমিনি তথ্য</h4>
@@ -1772,11 +1774,11 @@ function EditMemberForm({ member, onSave, onCancel }: { member: Member; onSave: 
         <div><Label>মোবাইল নং</Label><Input value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} /></div>
         <div><Label>পিতার নাম</Label><Input value={form.fatherName} onChange={(e) => setForm({ ...form, fatherName: e.target.value })} /></div>
         <div><Label>মাতার নাম</Label><Input value={form.motherName} onChange={(e) => setForm({ ...form, motherName: e.target.value })} /></div>
-        <div><Label>জন্ম তারিখ</Label><Input type="date" value={form.birthDate} onChange={(e) => setForm({ ...form, birthDate: e.target.value })} /></div>
+        <div><Label>জন্ম তারিখ</Label><Input type="text" placeholder={getDateFormat()} value={form.birthDate ? fmtDate(form.birthDate) : ""} onChange={(e) => setForm({ ...form, birthDate: toIsoDate(e.target.value) })} /></div>
         <div><Label>NID / জন্ম সনদ নং</Label><Input value={form.nid} onChange={(e) => setForm({ ...form, nid: e.target.value })} /></div>
       </div>
       <div><Label>ঠিকানা</Label><Textarea value={form.address} onChange={(e) => setForm({ ...form, address: e.target.value })} /></div>
-      <div><Label>যোগদানের তারিখ</Label><Input type="date" value={form.joinDate} onChange={(e) => setForm({ ...form, joinDate: e.target.value })} /></div>
+      <div><Label>যোগদানের তারিখ</Label><Input type="text" placeholder={getDateFormat()} value={form.joinDate ? fmtDate(form.joinDate) : ""} onChange={(e) => setForm({ ...form, joinDate: toIsoDate(e.target.value) })} /></div>
 
       <div className="border-t pt-3">
         <h4 className="font-semibold mb-2 text-foreground">নমিনি তথ্য</h4>
@@ -2106,7 +2108,7 @@ function PendingCollectRow({
         />
       </TableCell>
       <TableCell>
-        <Input type="date" value={date} onChange={(e) => setDate(e.target.value)} className="h-8 w-[140px] text-xs" />
+        <Input type="text" placeholder={getDateFormat()} value={date ? fmtDate(date) : ""} onChange={(e) => setDate(toIsoDate(e.target.value))} className="h-8 w-[140px] text-xs" />
       </TableCell>
       <TableCell>
         <Button
@@ -3504,7 +3506,7 @@ function LoansTab() {
                     {errors.interestRate && <p className="text-xs text-destructive mt-1">{errors.interestRate}</p>}
                   </div>
                   <div><Label>মেয়াদ (মাস)</Label><Input type="number" value={form.durationMonths} onChange={(e) => setForm({ ...form, durationMonths: e.target.value })} /></div>
-                  <div><Label>তারিখ</Label><Input type="date" value={form.date} onChange={(e) => setForm({ ...form, date: e.target.value })} /></div>
+                  <div><Label>তারিখ</Label><Input type="text" placeholder={getDateFormat()} value={form.date ? fmtDate(form.date) : ""} onChange={(e) => setForm({ ...form, date: toIsoDate(e.target.value) })} /></div>
                 </div>
               {(() => {
                 const amt = Number(form.amount) || 0;
@@ -3544,7 +3546,7 @@ function LoansTab() {
                     </div>
                     <div>
                       <Label>জন্ম তারিখ</Label>
-                      <Input type="date" value={(coForm as any).birthDate || ""} onChange={(e) => setCoForm({ ...coForm, birthDate: e.target.value } as any)} />
+                      <Input type="text" placeholder={getDateFormat()} value={(coForm as any).birthDate ? fmtDate((coForm as any).birthDate) : ""} onChange={(e) => setCoForm({ ...coForm, birthDate: toIsoDate(e.target.value) } as any)} />
                     </div>
                     <div>
                       <Label>মোবাইল *</Label>
@@ -3597,7 +3599,7 @@ function LoansTab() {
                       </div>
                       <div>
                         <Label>চেকের তারিখ</Label>
-                        <Input type="date" value={c.date} onChange={(e) => updateChequeRow(i, "date", e.target.value)} />
+                        <div><Label>চেকের তারিখ</Label><Input type="text" placeholder={getDateFormat()} value={c.date ? fmtDate(c.date) : ""} onChange={(e) => updateChequeRow(i, "date", toIsoDate(e.target.value))} /></div>
                       </div>
                     </div>
                   </div>
@@ -4051,7 +4053,7 @@ function LoansTab() {
               <div><Label>পরিমাণ</Label><Input type="number" className={editErrors.amount ? "border-destructive" : ""} value={editForm.amount} onChange={(e) => editSetField("amount", e.target.value)} />{editErrors.amount && <p className="text-xs text-destructive mt-1">{editErrors.amount}</p>}</div>
               <div><Label>মুনাফার হার (%)</Label><Input type="number" className={editErrors.interestRate ? "border-destructive" : ""} value={editForm.interestRate} onChange={(e) => editSetField("interestRate", e.target.value)} />{editErrors.interestRate && <p className="text-xs text-destructive mt-1">{editErrors.interestRate}</p>}</div>
               <div><Label>মেয়াদ (মাস)</Label><Input type="number" className={editErrors.durationMonths ? "border-destructive" : ""} value={editForm.durationMonths} onChange={(e) => editSetField("durationMonths", e.target.value)} />{editErrors.durationMonths && <p className="text-xs text-destructive mt-1">{editErrors.durationMonths}</p>}</div>
-              <div><Label>তারিখ</Label><Input type="date" value={editForm.date} onChange={(e) => editSetField("date", e.target.value)} /></div>
+              <div><Label>তারিখ</Label><Input type="text" placeholder={getDateFormat()} value={editForm.date ? fmtDate(editForm.date) : ""} onChange={(e) => editSetField("date", toIsoDate(e.target.value))} /></div>
             </div>
             {(() => {
               const amt = Number(editForm.amount) || 0;
@@ -4083,7 +4085,7 @@ function LoansTab() {
                   </div>
                   <div><Label>পিতার নাম</Label><Input value={editCoForm.fatherName} onChange={(e) => setEditCoForm({ ...editCoForm, fatherName: e.target.value })} placeholder="পিতার নাম" /></div>
                   <div><Label>মাতার নাম</Label><Input value={(editCoForm as any).motherName || ""} onChange={(e) => setEditCoForm({ ...editCoForm, motherName: e.target.value } as any)} placeholder="মাতার নাম" /></div>
-                  <div><Label>জন্ম তারিখ</Label><Input type="date" value={(editCoForm as any).birthDate || ""} onChange={(e) => setEditCoForm({ ...editCoForm, birthDate: e.target.value } as any)} /></div>
+                  <div><Label>জন্ম তারিখ</Label><Input type="text" placeholder={getDateFormat()} value={(editCoForm as any).birthDate ? fmtDate((editCoForm as any).birthDate) : ""} onChange={(e) => setEditCoForm({ ...editCoForm, birthDate: toIsoDate(e.target.value) } as any)} /></div>
                   <div>
                     <Label>মোবাইল *</Label>
                     <Input className={editErrors.coPhone ? "border-destructive" : ""} value={editCoForm.phone} onChange={(e) => { setEditCoForm({ ...editCoForm, phone: e.target.value }); setEditErrors((p) => { const n = { ...p }; delete n.coPhone; return n; }); }} placeholder="মোবাইল নম্বর" />
@@ -4112,7 +4114,7 @@ function LoansTab() {
                     <div><Label>চেক নং</Label><Input value={c.chequeNo} onChange={(e) => editUpdateChequeRow(i, "chequeNo", e.target.value)} placeholder="চেক নম্বর" /></div>
                     <div><Label>হিসাব নং</Label><Input value={c.accountNo} onChange={(e) => editUpdateChequeRow(i, "accountNo", e.target.value)} placeholder="একাউন্ট নম্বর" /></div>
                     <div><Label>চেকের পরিমাণ (৳)</Label><Input type="number" value={c.amount} onChange={(e) => editUpdateChequeRow(i, "amount", e.target.value)} placeholder="0" /></div>
-                    <div><Label>চেকের তারিখ</Label><Input type="date" value={c.date} onChange={(e) => editUpdateChequeRow(i, "date", e.target.value)} /></div>
+                    <div><Label>চেকের তারিখ</Label><Input type="text" placeholder={getDateFormat()} value={c.date ? fmtDate(c.date) : ""} onChange={(e) => editUpdateChequeRow(i, "date", toIsoDate(e.target.value))} /></div>
                   </div>
                 </div>
               ))}
@@ -6082,15 +6084,15 @@ function CashbookTab() {
             </div>
             <div className="space-y-1.5 min-w-[140px]">
               <Label>শুরুর তারিখ</Label>
-              <Input type="date" value={startDate} onChange={(e) => {
-                setStartDate(e.target.value);
+              <Input type="text" placeholder={getDateFormat()} value={startDate ? fmtDate(startDate) : ""} onChange={(e) => {
+                setStartDate(toIsoDate(e.target.value));
                 setMonthFilter("");
               }} />
             </div>
             <div className="space-y-1.5 min-w-[140px]">
               <Label>শেষ তারিখ</Label>
-              <Input type="date" value={endDate} onChange={(e) => {
-                setEndDate(e.target.value);
+              <Input type="text" placeholder={getDateFormat()} value={endDate ? fmtDate(endDate) : ""} onChange={(e) => {
+                setEndDate(toIsoDate(e.target.value));
                 setMonthFilter("");
               }} />
             </div>
@@ -6150,7 +6152,7 @@ function CashbookTab() {
                   <div><Label>খাতের নাম *</Label><Input value={form.customCategory} onChange={(e) => setForm({ ...form, customCategory: e.target.value })} placeholder="খাতের নাম লিখুন" /></div>
                 )}
                 <div><Label>পরিমাণ *</Label><Input type="number" value={form.amount} onChange={(e) => setForm({ ...form, amount: e.target.value })} /></div>
-                <div><Label>তারিখ</Label><Input type="date" value={form.date} onChange={(e) => setForm({ ...form, date: e.target.value })} /></div>
+                <div><Label>তারিখ</Label><Input type="text" placeholder={getDateFormat()} value={form.date ? fmtDate(form.date) : ""} onChange={(e) => setForm({ ...form, date: toIsoDate(e.target.value) })} /></div>
                 <div><Label>মন্তব্য</Label><Input value={form.note} onChange={(e) => setForm({ ...form, note: e.target.value })} /></div>
               </div>
               <DialogFooter><Button onClick={submit}>সংরক্ষণ</Button></DialogFooter>
@@ -6949,7 +6951,7 @@ function ReconciliationTab() {
                 </div>
                 <div className="space-y-1.5">
                   <Label>তারিখ</Label>
-                  <Input type="date" value={loanForm.date} onChange={(e) => setLoanForm({ ...loanForm, date: e.target.value })} />
+                  <Input type="text" placeholder={getDateFormat()} value={loanForm.date ? fmtDate(loanForm.date) : ""} onChange={(e) => setLoanForm({ ...loanForm, date: toIsoDate(e.target.value) })} />
                 </div>
                 <div className="space-y-1.5">
                   <Label>মন্তব্য</Label>
@@ -7003,7 +7005,7 @@ function ReconciliationTab() {
             </div>
             <div className="space-y-1.5">
               <Label>তারিখ</Label>
-              <Input type="date" value={form.date} onChange={(e) => setForm({ ...form, date: e.target.value })} />
+              <Input type="text" placeholder={getDateFormat()} value={form.date ? fmtDate(form.date) : ""} onChange={(e) => setForm({ ...form, date: toIsoDate(e.target.value) })} />
             </div>
             <div className="space-y-1.5 md:col-span-2">
               <Label>মন্তব্য</Label>
