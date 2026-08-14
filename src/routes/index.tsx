@@ -3102,7 +3102,7 @@ function LoansTab() {
     toast.success("ঋণ আপডেট হয়েছে");
   };
 
-  const [viewDoc, setViewDoc] = useState<{ file: string; name: string; owner: string } | null>(null);
+  const [viewDoc, setViewDoc] = useState<ViewDoc | null>(null);
   const filteredLoans = useMemo(() => {
     const term = loanSearch.trim().toLowerCase();
     return data.loans.filter((l) => {
