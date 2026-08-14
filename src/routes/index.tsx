@@ -5769,6 +5769,114 @@ function CashbookTab() {
   const expense = filteredTransactions.filter((t) => t.type === "expense").reduce((a, t) => a + t.amount, 0);
   const cats = form.type === "income" ? INCOME_CATS : EXPENSE_CATS;
 
+  const handlePrintCashbook = () => {
+    const title = `আয়-ব্যয় খতিয়ান (${typeFilter === "income" ? "আয়" : typeFilter === "expense" ? "ব্যয়" : "সব লেনদেন"})`;
+    let subtitle = "";
+    if (monthFilter) subtitle = `মাস: ${fmtMonthYearBn(monthFilter)}`;
+    else if (startDate && endDate) subtitle = `${fmtDate(startDate)} হতে ${fmtDate(endDate)}`;
+    else if (startDate) subtitle = `${fmtDate(startDate)} হতে`;
+    else if (endDate) subtitle = `পর্যন্ত ${fmtDate(endDate)}`;
+
+    const html = `
+      <!DOCTYPE html>
+      <html>
+        <head>
+          <meta charset="utf-8">
+          <title>${title}</title>
+          <style>
+            ${printBrandCss}
+            body { font-family: 'Segoe UI', 'Noto Sans Bengali', Arial, sans-serif; padding: 20px; color: #111; }
+            table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+            th, td { border: 1px solid #ddd; padding: 10px; text-align: left; font-size: 13px; }
+            th { background-color: #f8f9fa; font-weight: bold; }
+            .text-right { text-align: right; }
+            .font-bold { font-weight: bold; }
+            .income { color: #15803d; }
+            .expense { color: #b91c1c; }
+            .summary-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; margin: 20px 0; border: 1px solid #ddd; padding: 15px; border-radius: 8px; }
+            .summary-item { text-align: center; }
+            .summary-label { font-size: 12px; color: #666; margin-bottom: 4px; }
+            .summary-value { font-size: 18px; font-weight: bold; }
+            @media print {
+              .no-print { display: none; }
+              body { padding: 0; }
+            }
+          </style>
+        </head>
+        <body>
+          <div class="no-print" style="margin-bottom: 20px; display: flex; gap: 10px;">
+            <button onclick="window.print()" style="padding: 8px 16px; cursor: pointer; background: #0f172a; color: #fff; border: none; border-radius: 4px;">প্রিন্ট করুন</button>
+            <button onclick="window.close()" style="padding: 8px 16px; cursor: pointer; background: #f1f5f9; border: 1px solid #cbd5e1; border-radius: 4px;">বাতিল</button>
+          </div>
+          
+          ${printWatermark(data.samitiLogo)}
+          <div class="ps-content">
+            ${printHeader(data.samitiName, data.samitiLogo, title, data.samitiAddress, data.establishedDate)}
+            ${subtitle ? `<div style="text-align:center; font-size:14px; margin-top:-8px; margin-bottom:15px;">${subtitle}</div>` : ""}
+            
+            <div class="summary-grid">
+              <div class="summary-item">
+                <div class="summary-label">মোট আয়</div>
+                <div class="summary-value income">${formatTk(income)}</div>
+              </div>
+              <div class="summary-item">
+                <div class="summary-label">মোট ব্যয়</div>
+                <div class="summary-value expense">${formatTk(expense)}</div>
+              </div>
+              <div class="summary-item">
+                <div class="summary-label">অবশিষ্ট</div>
+                <div class="summary-value">${formatTk(income - expense)}</div>
+              </div>
+            </div>
+
+            <table>
+              <thead>
+                <tr>
+                  <th>তারিখ</th>
+                  <th>ধরন</th>
+                  <th>খাত</th>
+                  <th>মন্তব্য</th>
+                  <th class="text-right">পরিমাণ</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${filteredTransactions.map(t => `
+                  <tr>
+                    <td>${fmtDate(t.date)}</td>
+                    <td>${t.type === "income" ? "আয়" : "ব্যয়"}</td>
+                    <td class="font-bold">${t.category}</td>
+                    <td>${t.note || "—"}</td>
+                    <td class="text-right font-bold ${t.type === "income" ? "income" : "expense"}">
+                      ${t.type === "income" ? "+" : "−"} ${formatTk(t.amount)}
+                    </td>
+                  </tr>
+                `).join("")}
+              </tbody>
+              <tfoot>
+                <tr>
+                  <td colspan="4" class="text-right font-bold">সর্বমোট ফলাফল</td>
+                  <td class="text-right font-bold">${formatTk(income - expense)}</td>
+                </tr>
+              </tfoot>
+            </table>
+            
+            <div style="margin-top: 50px; display: flex; justify-content: space-between; font-size: 12px;">
+              <div style="text-align:center">—————————<br/>প্রস্তুতকারী</div>
+              <div style="text-align:center">—————————<br/>সভাপতি</div>
+              <div style="text-align:center">—————————<br/>কোষাধ্যক্ষ</div>
+            </div>
+          </div>
+        </body>
+      </html>
+    `;
+
+    const w = window.open("", "_blank", "width=850,height=900");
+    if (w) {
+      w.document.write(html);
+      w.document.close();
+    }
+  };
+
   const exportCashbookCsv = () => {
     let csv = "তারিখ,ধরন,খাত,পরিমাণ,মন্তব্য\n";
     filteredTransactions.forEach((t) => {
@@ -5900,6 +6008,9 @@ function CashbookTab() {
             </Button>
             <Button variant="outline" size="sm" onClick={exportCashbookPdf} disabled={filteredTransactions.length === 0}>
               <FileText className="h-4 w-4 mr-1" />PDF
+            </Button>
+            <Button variant="outline" size="sm" onClick={handlePrintCashbook} disabled={filteredTransactions.length === 0}>
+              <Printer className="h-4 w-4 mr-1" />প্রিন্ট
             </Button>
             <Dialog open={open} onOpenChange={(o) => {
             setOpen(o);
