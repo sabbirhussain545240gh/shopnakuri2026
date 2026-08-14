@@ -1403,40 +1403,40 @@ function MembersTab() {
                 </div>
                 <div className="space-y-2">
                   <Label>তারিখ</Label>
-                  <Input type="date" value={form.date} onChange={(e) => setForm({ ...form, date: e.target.value })} />
+                  <Input type="date" value={actionForm.date} onChange={(e) => setActionForm({ ...actionForm, date: e.target.value })} />
                 </div>
                 <div className="space-y-2">
                   <Label>পরিমাণ (৳)</Label>
                   <Input 
                     type="number" 
                     placeholder="৳ ০.০০" 
-                    value={form.amount} 
-                    onChange={(e) => setForm({ ...form, amount: e.target.value, memberId: memberAction.memberId })} 
+                    value={actionForm.amount} 
+                    onChange={(e) => setActionForm({ ...actionForm, amount: e.target.value })} 
                   />
                 </div>
                 <div className="space-y-2">
                   <Label>নোট (ঐচ্ছিক)</Label>
-                  <Input placeholder="কিছু লিখুন..." value={form.note} onChange={(e) => setForm({ ...form, note: e.target.value })} />
+                  <Input placeholder="কিছু লিখুন..." value={actionForm.note} onChange={(e) => setActionForm({ ...actionForm, note: e.target.value })} />
                 </div>
                 <Button className="w-full" onClick={() => {
-                  if (!form.amount) { toast.error("পরিমাণ দিন"); return; }
-                  const amt = Number(form.amount);
-                  addDeposit({ memberId: memberAction.memberId, amount: amt, date: form.date, note: form.note });
+                  if (!actionForm.amount) { toast.error("পরিমাণ দিন"); return; }
+                  const amt = Number(actionForm.amount);
+                  addDeposit({ memberId: memberAction.memberId, amount: amt, date: actionForm.date, note: actionForm.note });
                   const mem = data.members.find((x) => x.id === memberAction.memberId);
                   const prevTotal = memberTotalDeposit(data.deposits, memberAction.memberId);
                   const depositNo = data.deposits.filter((d) => d.memberId === memberAction.memberId).length + 1;
                   setDepositReceipt({
                     id: Math.random().toString(),
-                    date: form.date,
+                    date: actionForm.date,
                     memberName: mem?.name ?? "—",
                     memberSerial: mem?.serial,
                     amount: amt,
                     totalAfter: prevTotal + amt,
                     receiptNo: `CH-${toBn(mem?.serial ?? 0)}-${toBn(depositNo)}`,
-                    note: form.note.trim() || undefined,
+                    note: actionForm.note.trim() || undefined,
                     logo: data.samitiLogo || undefined,
                   });
-                  setForm({ memberId: "", amount: "", date: today(), note: "" });
+                  setActionForm({ memberId: "", loanId: "", amount: "", date: today(), note: "" });
                   setMemberAction(null);
                   toast.success("জমা যোগ হয়েছে");
                 }}>সংরক্ষণ করুন</Button>
@@ -1456,35 +1456,32 @@ function MembersTab() {
                       </div>
                       <div className="space-y-2">
                         <Label>তারিখ</Label>
-                        <Input type="date" value={form.date} onChange={(e) => setField("date", e.target.value)} />
+                        <Input type="date" value={actionForm.date} onChange={(e) => setActionForm(p => ({ ...p, date: e.target.value }))} />
                       </div>
                       <div className="space-y-2">
                         <Label>পরিমাণ (৳)</Label>
                         <Input 
                           type="number" 
                           placeholder={String(info.installment.toFixed(2))}
-                          value={form.amount} 
-                          onChange={(e) => {
-                            setField("amount", e.target.value);
-                            setForm(p => ({ ...p, loanId: memberAction.loanId || "" }));
-                          }} 
+                          value={actionForm.amount} 
+                          onChange={(e) => setActionForm(p => ({ ...p, amount: e.target.value }))} 
                         />
-                        {errors.amount && <p className="text-[10px] text-destructive">{errors.amount}</p>}
+                        {actionErrors.amount && <p className="text-[10px] text-destructive">{actionErrors.amount}</p>}
                       </div>
                       <div className="space-y-2">
                         <Label>নোট (ঐচ্ছিক)</Label>
-                        <Input placeholder="কিছু লিখুন..." value={form.note} onChange={(e) => setField("note", e.target.value)} />
+                        <Input placeholder="কিছু লিখুন..." value={actionForm.note} onChange={(e) => setActionForm(p => ({ ...p, note: e.target.value }))} />
                       </div>
                       <Button className="w-full" onClick={() => {
-                        const amt = Number(form.amount);
-                        if (!form.amount || amt <= 0) { toast.error("সঠিক পরিমাণ দিন"); return; }
+                        const amt = Number(actionForm.amount);
+                        if (!actionForm.amount || amt <= 0) { toast.error("সঠিক পরিমাণ দিন"); return; }
                         if (amt > info.remaining + 0.01) { toast.error("বকেয়ার চেয়ে বেশি"); return; }
                         
                         addPayment({ 
                           loanId: memberAction.loanId || "", 
                           amount: amt, 
-                          date: form.date, 
-                          note: form.note.trim() || undefined 
+                          date: actionForm.date, 
+                          note: actionForm.note.trim() || undefined 
                         });
                         
                         const newPaid = info.paid + amt;
@@ -1495,7 +1492,7 @@ function MembersTab() {
                           toast.success("কিস্তি গৃহীত");
                         }
                         
-                        setForm({ loanId: "", amount: "", date: today(), note: "" });
+                        setActionForm({ memberId: "", loanId: "", amount: "", date: today(), note: "" });
                         setMemberAction(null);
                       }}>কিস্তি সংগ্রহ করুন</Button>
                     </>
