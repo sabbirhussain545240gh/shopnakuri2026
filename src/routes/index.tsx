@@ -4380,7 +4380,7 @@ function LoansTab() {
                     )}
                   </div>
                 </div>
-                <div className="border-t pt-3 flex flex-wrap justify-end gap-2">
+                <div className="border-t pt-3 flex flex-wrap justify-end gap-2 print:hidden">
                   <Button
                     variant="outline"
                     onClick={() => {
