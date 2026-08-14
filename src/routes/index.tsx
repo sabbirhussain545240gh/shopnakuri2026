@@ -1409,7 +1409,7 @@ function buildLoanDetailHtml(
   const rows: [string, string][] = [
     ["ঋণ নং", toBn(loanNo)],
     ["তারিখ", fmtDate(loan.date)],
-    ["সদস্য", member?.name ?? "—"],
+    ["সদস্য", `${member?.name ?? "—"} (সদস্য নং ${member ? formatMemberSerial(member.serial, member.category) : "—"})`],
     ["মোবাইল", member?.phone ? toBn(member.phone) : "—"],
     ["মূল", formatTk(loan.amount)],
     ["মুনাফার হার", `${toBn(loan.interestRate)}%`],
@@ -3408,7 +3408,7 @@ function LoansTab() {
                 <div className="grid grid-cols-2 gap-2">
                   <div><span className="text-muted-foreground">ঋণ নং:</span> {toBn(idx + 1)}</div>
                   <div><span className="text-muted-foreground">তারিখ:</span> {fmtDate(currentLoan.date)}</div>
-                  <div><span className="text-muted-foreground">সদস্য:</span> {m?.name ?? "—"}</div>
+                  <div><span className="text-muted-foreground">সদস্য:</span> {m?.name ?? "—"} (সদস্য নং {m ? formatMemberSerial(m.serial, m.category) : "—"})</div>
                   <div><span className="text-muted-foreground">মোবাইল:</span> {m?.phone ?? "—"}</div>
                   <div><span className="text-muted-foreground">মূল:</span> {formatTk(currentLoan.amount)}</div>
                   <div><span className="text-muted-foreground">মুনাফার হার:</span> {toBn(currentLoan.interestRate)}%</div>
