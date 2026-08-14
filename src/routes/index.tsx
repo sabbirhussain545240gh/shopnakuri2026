@@ -83,10 +83,10 @@ function ReceiptQrPreview({ text }: { text: string }) {
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "'''Do not make any visual modifications. The phrases I write are commands to understand what I want, not to be written down. Understand their content well, then execute what is required.'''\n                                        \n                                            \n                                            সদস্য তালিকায় সার্চ অপশন দিন- সি.নং , নাম, মোবাইল,NID/জন্ম সনদ  আলাদা আলাদা ঘর দিয়ে" },
-      { name: "description", content: "'''Do not make any visual modifications. The phrases I write are commands to understand what I want, not to be written down. Understand their content well, then execute what is required.'''\n                                        \n                                            \n                                            সদস্য তালিকায় সার্চ অপশন দিন- সি.নং , নাম, মোবাইল,NID/জন্ম সনদ  আলাদা আলাদা ঘর দিয়ে" },
+      { title: "'''Do not make any visual modifications. The phrases I write are commands to understand what I want, not to be written down. Understand their content well, then execute what is required.'''\n                                        \n                                            \n                                            কালেকশন ফর্ম  আগামি মাসের যেন তৈরি করতে পারি" },
+      { name: "description", content: "'''Do not make any visual modifications. The phrases I write are commands to understand what I want, not to be written down. Understand their content well, then execute what is required.'''\n                                        \n                                            \n                                            কালেকশন ফর্ম  আগামি মাসের যেন তৈরি করতে পারি" },
       { property: "og:title", content: "সমিতি ম্যানেজমেন্ট সিস্টেম" },
-      { property: "og:description", content: "'''Do not make any visual modifications. The phrases I write are commands to understand what I want, not to be written down. Understand their content well, then execute what is required.'''\n                                        \n                                            \n                                            সদস্য তালিকায় সার্চ অপশন দিন- সি.নং , নাম, মোবাইল,NID/জন্ম সনদ  আলাদা আলাদা ঘর দিয়ে" },
+      { property: "og:description", content: "'''Do not make any visual modifications. The phrases I write are commands to understand what I want, not to be written down. Understand their content well, then execute what is required.'''\n                                        \n                                            \n                                            কালেকশন ফর্ম  আগামি মাসের যেন তৈরি করতে পারি" },
     ],
   }),
   component: GatedApp,
@@ -2020,6 +2020,7 @@ function PendingCollectRow({
 function SavingsTab() {
   const { data, addDeposit, addDeposits, updateDeposit, deleteDeposit } = useSamiti();
   const [open, setOpen] = useState(false);
+  const [collectionMonthOffset, setCollectionMonthOffset] = useState(0);
   const [form, setForm] = useState({ memberId: "", amount: "", date: today(), note: "" });
   const [search, setSearch] = useState("");
   const [filterMemberId, setFilterMemberId] = useState<string>("all");
@@ -2234,7 +2235,9 @@ function SavingsTab() {
   const printCollectionForm = () => {
     const w = window.open("", "_blank", "width=1100,height=800");
     if (!w) return;
-    const monthLabel = new Date().toLocaleDateString("bn-BD", { year: "numeric", month: "long" });
+    const targetDate = new Date();
+    targetDate.setMonth(targetDate.getMonth() + collectionMonthOffset);
+    const monthLabel = targetDate.toLocaleDateString("bn-BD", { year: "numeric", month: "long" });
     const totalInst = collectionRows.reduce((sum, row) => sum + row.inst, 0);
     const rows = collectionRows.map(({ m, inst, due, hasLoan }) => `
       <tr>
@@ -2305,7 +2308,9 @@ function SavingsTab() {
     const { default: autoTable } = await import("jspdf-autotable");
     const pdf = new jsPDF({ orientation: "landscape", unit: "pt", format: "a4" });
     const pageW = pdf.internal.pageSize.getWidth();
-    const monthLabel = new Date().toLocaleDateString("bn-BD", { year: "numeric", month: "long" });
+    const targetDate = new Date();
+    targetDate.setMonth(targetDate.getMonth() + collectionMonthOffset);
+    const monthLabel = targetDate.toLocaleDateString("bn-BD", { year: "numeric", month: "long" });
     const totalInst = collectionRows.reduce((sum, row) => sum + row.inst, 0);
     pdf.setFontSize(14);
     pdf.text(data.samitiName || "সমিতি", pageW / 2, 28, { align: "center" });
@@ -2348,7 +2353,9 @@ function SavingsTab() {
   };
 
   const downloadCollectionExcel = () => {
-    const monthLabel = new Date().toLocaleDateString("bn-BD", { year: "numeric", month: "long" });
+    const targetDate = new Date();
+    targetDate.setMonth(targetDate.getMonth() + collectionMonthOffset);
+    const monthLabel = targetDate.toLocaleDateString("bn-BD", { year: "numeric", month: "long" });
     const rows = collectionRows.map(({ m, inst, due, hasLoan }) => ({
       "সি.নং": m.serial || 0,
       "সদস্যের নাম": m.name,
@@ -2383,6 +2390,20 @@ function SavingsTab() {
           <CardDescription>মোট {toBn(data.deposits.length)}টি লেনদেন</CardDescription>
         </div>
         <div className="flex items-center gap-2 flex-wrap">
+          <div className="flex items-center gap-1.5 mr-2 bg-muted/50 p-1 px-2 rounded-md border text-xs">
+            <span className="text-muted-foreground">ফর্মের মাস:</span>
+            <Select value={String(collectionMonthOffset)} onValueChange={(v) => setCollectionMonthOffset(Number(v))}>
+              <SelectTrigger className="h-7 w-32 border-none bg-transparent focus:ring-0 shadow-none">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="-1">গত মাস</SelectItem>
+                <SelectItem value="0">চলতি মাস</SelectItem>
+                <SelectItem value="1">আগামী মাস</SelectItem>
+                <SelectItem value="2">২ মাস পর</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
           <Button variant="outline" size="sm" disabled={data.deposits.length === 0} onClick={printDeposits}>
             <Printer className="h-4 w-4 mr-1" />প্রিন্ট তালিকা
           </Button>
