@@ -3531,6 +3531,7 @@ function LoansTab() {
                         samitiAddress: data.samitiAddress,
                         establishedDate: data.establishedDate,
                         loanTerms: data.settings.loanTerms,
+                        serialPrefix: data.serialPrefix,
                       };
                       printLoanDetail(currentLoan, idx + 1, m, gm, pays, samiti);
                     }}
@@ -3546,6 +3547,7 @@ function LoansTab() {
                         samitiAddress: data.samitiAddress,
                         establishedDate: data.establishedDate,
                         loanTerms: data.settings.loanTerms,
+                        serialPrefix: data.serialPrefix,
                       };
                       try {
                         await exportLoanDetailPdf(currentLoan, idx + 1, m, gm, pays, samiti);
