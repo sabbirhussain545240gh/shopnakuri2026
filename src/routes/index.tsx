@@ -698,7 +698,7 @@ function Dashboard({ totals, memberCount, data, onNavigate }: any) {
 
 // ===== Members =====
 function MembersTab() {
-  const { data, addMember, addMembers, updateMember, deleteMember } = useSamiti();
+  const { data, addMember, addMembers, updateMember, deleteMember, addDeposit, addPayment, closeLoan } = useSamiti();
   const [open, setOpen] = useState(false);
   const [searchSerial, setSearchSerial] = useState("");
   const [searchName, setSearchName] = useState("");
@@ -718,6 +718,20 @@ function MembersTab() {
   const [editMember, setEditMember] = useState<Member | null>(null);
   const [depositReceipt, setDepositReceipt] = useState<null | (DepositReceiptData & { id: string })>(null);
   const [installmentReceipt, setInstallmentReceipt] = useState<null | { loan: Loan; memberName: string; memberSerial?: number; amount: number; date: string; paidAfter: number; remainingAfter: number; receiptNo: string; note?: string; logo?: string; loanNo?: number }>(null);
+  const [memberAction, setMemberAction] = useState<{ type: "deposit" | "installment"; memberId: string; loanId?: string } | null>(null);
+  const [actionForm, setActionForm] = useState({ memberId: "", loanId: "", amount: "", date: today(), note: "" });
+  const [actionErrors, setActionErrors] = useState<Record<string, string>>({});
+
+  const loanInfo = (loanId: string) => {
+    const loan = data.loans.find((l) => l.id === loanId);
+    if (!loan) return null;
+    const member = data.members.find((m) => m.id === loan.memberId);
+    const due = loanTotalDue(loan);
+    const paid = loanPaid(data.payments, loan.id);
+    const remaining = Math.max(0, due - paid);
+    const installment = loan.durationMonths > 0 ? due / loan.durationMonths : 0;
+    return { loan, member, due, paid, remaining, installment };
+  };
 
   const nextSerial = data.members.length > 0 ? Math.max(...data.members.map((m) => m.serial || 0)) + 1 : 1;
   useEffect(() => {
@@ -1212,7 +1226,17 @@ function MembersTab() {
                     </div>
 
                     <div className="border-t pt-3">
-                      <h4 className="font-semibold mb-2">জমার ইতিহাস ({toBn(memberDeposits.length)})</h4>
+                      <div className="flex items-center justify-between mb-2">
+                        <h4 className="font-semibold">জমার ইতিহাস ({toBn(memberDeposits.length)})</h4>
+                        <Button 
+                          size="sm" 
+                          variant="outline" 
+                          className="h-8 text-xs gap-1"
+                          onClick={() => setMemberAction({ type: "deposit", memberId: viewMember.id })}
+                        >
+                          <Plus className="h-3 w-3" /> চাদা আদায়
+                        </Button>
+                      </div>
                       {memberDeposits.length === 0 ? (
                         <p className="text-sm text-muted-foreground">কোনো জমা নেই</p>
                       ) : (() => {
@@ -1280,7 +1304,19 @@ function MembersTab() {
                             return (
                               <div key={loan.id} className="rounded-md border p-2">
                                 <div className="flex items-center justify-between flex-wrap gap-2 mb-2">
-                                  <div className="font-medium">ঋণ নং {toBn(no)} {loan.status === "closed" && <span className="text-xs text-green-600">(পরিশোধিত)</span>}</div>
+                                  <div className="flex items-center gap-2">
+                                    <div className="font-medium">ঋণ নং {toBn(no)} {loan.status === "closed" && <span className="text-xs text-green-600">(পরিশোধিত)</span>}</div>
+                                    {loan.status === "active" && (
+                                      <Button 
+                                        size="sm" 
+                                        variant="outline" 
+                                        className="h-6 text-[10px] px-2 py-0"
+                                        onClick={() => setMemberAction({ type: "installment", memberId: viewMember.id, loanId: loan.id })}
+                                      >
+                                        কিস্তি আদায়
+                                      </Button>
+                                    )}
+                                  </div>
                                   <div className="text-xs text-muted-foreground">তারিখ: {fmtDate(loan.date)}</div>
                                 </div>
                                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-xs mb-2">
@@ -1350,6 +1386,121 @@ function MembersTab() {
               </div>
             </div>
           )}
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={!!memberAction} onOpenChange={(o) => !o && setMemberAction(null)}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>{memberAction?.type === "deposit" ? "চাদা আদায়" : "কিস্তি আদায়"}</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 pt-4">
+            {memberAction?.type === "deposit" && (
+              <div className="space-y-4">
+                <div className="text-sm font-medium p-3 bg-muted rounded-md flex justify-between items-center">
+                  <span>সদস্য: {data.members.find(m => m.id === memberAction.memberId)?.name}</span>
+                  <span className="text-xs text-muted-foreground">সিরিয়াল: {toBn(data.members.find(m => m.id === memberAction.memberId)?.serial || 0)}</span>
+                </div>
+                <div className="space-y-2">
+                  <Label>তারিখ</Label>
+                  <Input type="date" value={actionForm.date} onChange={(e) => setActionForm({ ...actionForm, date: e.target.value })} />
+                </div>
+                <div className="space-y-2">
+                  <Label>পরিমাণ (৳)</Label>
+                  <Input 
+                    type="number" 
+                    placeholder="৳ ০.০০" 
+                    value={actionForm.amount} 
+                    onChange={(e) => setActionForm({ ...actionForm, amount: e.target.value })} 
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label>নোট (ঐচ্ছিক)</Label>
+                  <Input placeholder="কিছু লিখুন..." value={actionForm.note} onChange={(e) => setActionForm({ ...actionForm, note: e.target.value })} />
+                </div>
+                <Button className="w-full" onClick={() => {
+                  if (!actionForm.amount) { toast.error("পরিমাণ দিন"); return; }
+                  const amt = Number(actionForm.amount);
+                  addDeposit({ memberId: memberAction.memberId, amount: amt, date: actionForm.date, note: actionForm.note });
+                  const mem = data.members.find((x) => x.id === memberAction.memberId);
+                  const prevTotal = memberTotalDeposit(data.deposits, memberAction.memberId);
+                  const depositNo = data.deposits.filter((d) => d.memberId === memberAction.memberId).length + 1;
+                  setDepositReceipt({
+                    id: Math.random().toString(),
+                    date: actionForm.date,
+                    memberName: mem?.name ?? "—",
+                    memberSerial: mem?.serial,
+                    amount: amt,
+                    totalAfter: prevTotal + amt,
+                    receiptNo: `CH-${toBn(mem?.serial ?? 0)}-${toBn(depositNo)}`,
+                    note: actionForm.note.trim() || undefined,
+                    logo: data.samitiLogo || undefined,
+                  });
+                  setActionForm({ memberId: "", loanId: "", amount: "", date: today(), note: "" });
+                  setMemberAction(null);
+                  toast.success("জমা যোগ হয়েছে");
+                }}>সংরক্ষণ করুন</Button>
+              </div>
+            )}
+            {memberAction?.type === "installment" && (
+              <div className="space-y-4">
+                {(() => {
+                  const info = loanInfo(memberAction.loanId || "");
+                  if (!info) return null;
+                  return (
+                    <>
+                      <div className="text-sm space-y-1 p-3 bg-muted rounded-md">
+                        <div className="flex justify-between"><span>সদস্য:</span> <span className="font-medium">{info.member?.name}</span></div>
+                        <div className="flex justify-between text-xs text-muted-foreground"><span>বাকি পরিমাণ:</span> <span>{formatTk(info.remaining)}</span></div>
+                        <div className="flex justify-between text-xs text-muted-foreground"><span>কিস্তি পরিমাণ:</span> <span>{formatTk(info.installment)}</span></div>
+                      </div>
+                      <div className="space-y-2">
+                        <Label>তারিখ</Label>
+                        <Input type="date" value={actionForm.date} onChange={(e) => setActionForm(p => ({ ...p, date: e.target.value }))} />
+                      </div>
+                      <div className="space-y-2">
+                        <Label>পরিমাণ (৳)</Label>
+                        <Input 
+                          type="number" 
+                          placeholder={String(info.installment.toFixed(2))}
+                          value={actionForm.amount} 
+                          onChange={(e) => setActionForm(p => ({ ...p, amount: e.target.value }))} 
+                        />
+                        {actionErrors.amount && <p className="text-[10px] text-destructive">{actionErrors.amount}</p>}
+                      </div>
+                      <div className="space-y-2">
+                        <Label>নোট (ঐচ্ছিক)</Label>
+                        <Input placeholder="কিছু লিখুন..." value={actionForm.note} onChange={(e) => setActionForm(p => ({ ...p, note: e.target.value }))} />
+                      </div>
+                      <Button className="w-full" onClick={() => {
+                        const amt = Number(actionForm.amount);
+                        if (!actionForm.amount || amt <= 0) { toast.error("সঠিক পরিমাণ দিন"); return; }
+                        if (amt > info.remaining + 0.01) { toast.error("বকেয়ার চেয়ে বেশি"); return; }
+                        
+                        addPayment({ 
+                          loanId: memberAction.loanId || "", 
+                          amount: amt, 
+                          date: actionForm.date, 
+                          note: actionForm.note.trim() || undefined 
+                        });
+                        
+                        const newPaid = info.paid + amt;
+                        if (newPaid >= info.due - 0.01) {
+                          closeLoan(memberAction.loanId || "");
+                          toast.success("কিস্তি গৃহীত — ঋণ পরিশোধিত");
+                        } else {
+                          toast.success("কিস্তি গৃহীত");
+                        }
+                        
+                        setActionForm({ memberId: "", loanId: "", amount: "", date: today(), note: "" });
+                        setMemberAction(null);
+                      }}>কিস্তি সংগ্রহ করুন</Button>
+                    </>
+                  );
+                })()}
+              </div>
+            )}
+          </div>
         </DialogContent>
       </Dialog>
 
