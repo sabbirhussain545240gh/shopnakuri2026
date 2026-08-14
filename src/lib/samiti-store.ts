@@ -551,6 +551,12 @@ export function useSamiti() {
   const addTransaction = useCallback((t: Omit<Transaction, "id">) => {
     setState({ ...getState(), transactions: [...getState().transactions, { ...t, id: crypto.randomUUID() }] });
   }, []);
+  const updateTransaction = useCallback((id: string, updates: Partial<Omit<Transaction, "id">>) => {
+    setState({
+      ...getState(),
+      transactions: getState().transactions.map((t) => (t.id === id ? { ...t, ...updates } : t)),
+    });
+  }, []);
   const deleteTransaction = useCallback((id: string) => {
     setState({ ...getState(), transactions: getState().transactions.filter((x) => x.id !== id) });
   }, []);
@@ -570,7 +576,7 @@ export function useSamiti() {
     addMember, addMembers, updateMember, deleteMember,
     addDeposit, addDeposits, updateDeposit, deleteDeposit,
     addLoan, updateLoan, addPayment, updatePayment, deletePayment, closeLoan, refreshLoanStatus, deleteLoan,
-    addTransaction, deleteTransaction,
+    addTransaction, updateTransaction, deleteTransaction,
     updateSettings, resetAll, importData,
     pushToCloud,
   };

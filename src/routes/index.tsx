@@ -6,7 +6,7 @@ import {
   useSamiti, toBn, formatTk, memberTotalDeposit, loanPaid, loanTotalDue,
   DEFAULT_GOALS, DEFAULT_QUOTES, DEFAULT_MESSAGES, formatMemberSerial,
  formatDateStr, formatTimeStr, DATE_FORMAT_OPTIONS, TIME_FORMAT_OPTIONS, DEFAULT_DATE_FORMAT, DEFAULT_TIME_FORMAT,
- type Member, type Loan, type Deposit, type Goal, type Quote, type Message, type CommitteeMember, type DateFormat, type TimeFormat,
+ type Member, type Loan, type Deposit, type Goal, type Quote, type Message, type CommitteeMember, type DateFormat, type TimeFormat, type Transaction,
 } from "@/lib/samiti-store";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -6345,20 +6345,38 @@ function AdminTab() {
 const ADJUST_CATEGORY = "সমন্নয়";
 
 function ReconciliationTab() {
-  const { data, addTransaction, deleteTransaction, addPayment } = useSamiti();
-  const [form, setForm] = useState<{ type: "income" | "expense"; amount: string; date: string; note: string }>({
+  const { data, addTransaction, updateTransaction, deleteTransaction, addPayment } = useSamiti();
+  const [form, setForm] = useState<{ type: "income" | "expense"; amount: string; date: string; note: string; id?: string }>({
     type: "income", amount: "", date: today(), note: "",
   });
   const [loanForm, setLoanForm] = useState<{ loanId: string; amount: string; date: string; note: string }>({
     loanId: "", amount: "", date: today(), note: "সমন্নয়",
   });
+  const [isEditing, setIsEditing] = useState(false);
+
+  const startEditAdjust = (t: Transaction) => {
+    setForm({ type: t.type, amount: String(t.amount), date: t.date, note: t.note || "", id: t.id });
+    setIsEditing(true);
+    // Scroll to top of tab if possible or just rely on state
+  };
+
+  const cancelEdit = () => {
+    setForm({ type: "income", amount: "", date: today(), note: "" });
+    setIsEditing(false);
+  };
 
   const submitAdjust = () => {
     const amt = Number(form.amount);
     if (!amt || amt <= 0) { toast.error("সঠিক পরিমাণ দিন"); return; }
-    addTransaction({ type: form.type, category: ADJUST_CATEGORY, amount: amt, date: form.date, note: form.note });
-    setForm({ type: "income", amount: "", date: today(), note: "" });
-    toast.success("সমন্নয় রেকর্ড সংরক্ষিত হয়েছে");
+    if (isEditing && form.id) {
+      updateTransaction(form.id, { type: form.type, amount: amt, date: form.date, note: form.note });
+      toast.success("সমন্নয় রেকর্ড আপডেট করা হয়েছে");
+      cancelEdit();
+    } else {
+      addTransaction({ type: form.type, category: ADJUST_CATEGORY, amount: amt, date: form.date, note: form.note });
+      setForm({ type: "income", amount: "", date: today(), note: "" });
+      toast.success("সমন্নয় রেকর্ড সংরক্ষিত হয়েছে");
+    }
   };
 
   const activeLoansWithDue = useMemo(() => {
@@ -6565,9 +6583,9 @@ function ReconciliationTab() {
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Plus className="h-5 w-5 text-primary" />
-            নতুন সমন্নয় / পেমেন্ট রেকর্ড
+            {isEditing ? "সমন্নয় রেকর্ড সম্পাদনা করুন" : "নতুন সমন্নয় / পেমেন্ট রেকর্ড"}
           </CardTitle>
-          <CardDescription>তহবিল সমন্নয়ের জন্য আয় বা ব্যয় যোগ করুন</CardDescription>
+          <CardDescription>{isEditing ? "লেনদেনের তথ্য পরিবর্তন করুন" : "তহবিল সমন্নয়ের জন্য আয় বা ব্যয় যোগ করুন"}</CardDescription>
         </CardHeader>
         <CardContent>
           <div className="grid gap-3 md:grid-cols-5">
@@ -6594,8 +6612,14 @@ function ReconciliationTab() {
               <Input value={form.note} onChange={(e) => setForm({ ...form, note: e.target.value })} placeholder="যেমনঃ ব্যাংক সমন্নয়, পুরাতন বকেয়া, ইত্যাদি" />
             </div>
           </div>
-          <div className="mt-4 flex justify-end">
-            <Button onClick={submitAdjust}><Plus className="h-4 w-4" /> যোগ করুন</Button>
+          <div className="mt-4 flex justify-end gap-2">
+            {isEditing && (
+              <Button variant="outline" onClick={cancelEdit}>বাতিল</Button>
+            )}
+            <Button onClick={submitAdjust}>
+              {isEditing ? <Pencil className="h-4 w-4 mr-1" /> : <Plus className="h-4 w-4 mr-1" />}
+              {isEditing ? "আপডেট করুন" : "যোগ করুন"}
+            </Button>
           </div>
 
           <div className="mt-6">
@@ -6627,9 +6651,14 @@ function ReconciliationTab() {
                         {t.type === "income" ? "+" : "−"} {formatTk(t.amount)}
                       </TableCell>
                       <TableCell>
-                        <Button variant="ghost" size="icon" onClick={() => { deleteTransaction(t.id); toast.success("মুছে ফেলা হয়েছে"); }}>
-                          <Trash2 className="h-4 w-4 text-destructive" />
-                        </Button>
+                        <div className="flex items-center gap-1">
+                          <Button variant="ghost" size="icon" onClick={() => startEditAdjust(t)}>
+                            <Pencil className="h-4 w-4 text-muted-foreground" />
+                          </Button>
+                          <Button variant="ghost" size="icon" onClick={() => { if (confirm("রেকর্ডটি মুছবেন?")) { deleteTransaction(t.id); toast.success("মুছে ফেলা হয়েছে"); } }}>
+                            <Trash2 className="h-4 w-4 text-destructive" />
+                          </Button>
+                        </div>
                       </TableCell>
                     </TableRow>
                   ))}
