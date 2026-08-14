@@ -744,34 +744,6 @@ function Dashboard({ totals, memberCount, data, onNavigate }: any) {
 
 
 
-const toIsoDate = (v: any): string => {
-  if (v == null || v === "") return "";
-  if (v instanceof Date) {
-    const y = v.getFullYear();
-    const m = String(v.getMonth() + 1).padStart(2, "0");
-    const d = String(v.getDate()).padStart(2, "0");
-    return `${y}-${m}-${d}`;
-  }
-  const s = String(v).trim();
-  if (/^\d{4}-\d{1,2}-\d{1,2}$/.test(s)) {
-    const [y, m, d] = s.split("-");
-    return `${y}-${m.padStart(2, "0")}-${d.padStart(2, "0")}`;
-  }
-  const m1 = s.match(/^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{2,4})$/);
-  if (m1) {
-    let [, d, m, y] = m1;
-    if (y.length === 2) y = "20" + y;
-    return `${y}-${m.padStart(2, "0")}-${d.padStart(2, "0")}`;
-  }
-  const dt = new Date(s);
-  if (!isNaN(dt.getTime())) {
-    const y = dt.getFullYear();
-    const m = String(dt.getMonth() + 1).padStart(2, "0");
-    const d = String(dt.getDate()).padStart(2, "0");
-    return `${y}-${m}-${d}`;
-  }
-  return "";
-};
 
 // ===== Members =====
 function MembersTab() {
