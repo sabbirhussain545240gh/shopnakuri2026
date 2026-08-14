@@ -209,6 +209,7 @@ function SamitiApp() {
     }
   }, [allowed, rolesLoading, tab]);
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [viewDoc, setViewDoc] = useState<{ file: string; name: string; owner: string } | null>(null);
   const isAdmin = roles.includes("admin");
   const pendingApprovals = usePendingApprovalCount(isAdmin);
   
