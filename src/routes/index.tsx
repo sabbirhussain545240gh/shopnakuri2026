@@ -2677,7 +2677,11 @@ function LoansTab() {
       <html><head><meta charset="utf-8" /><title>ঋণ ব্যবস্থাপনা - ${data.samitiName || "সমিতি"}</title>
       <style>
         body { font-family: "Segoe UI", "Noto Sans Bengali", sans-serif; margin: 0; padding: 24px; color: #111; background:#fff; position: relative; }
-        @media print { body { padding: 0 !important; } .no-print { display: none !important; } }
+        @media print { 
+          body { padding: 0 !important; } 
+          .no-print { display: none !important; } 
+          .ps-wm, .ld-wm, .wm, .watermark { display: block !important; visibility: visible !important; opacity: 0.15 !important; -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+        }
         ${printBrandCss}
       </style></head>
       <body>
