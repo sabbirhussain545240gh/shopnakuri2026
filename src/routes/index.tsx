@@ -4553,7 +4553,11 @@ function DepositsHistoryTab() {
   const [minAmount, setMinAmount] = useState("");
   const [maxAmount, setMaxAmount] = useState("");
   const [sortBy, setSortBy] = useState<"date_desc" | "date_asc" | "amount_desc" | "amount_asc">("date_desc");
-  const [monthFilter, setMonthFilter] = useState<string>("all");
+  const [monthFilter, setMonthFilter] = useState<string>(() => {
+    if (data.deposits.length === 0) return "all";
+    const dates = data.deposits.map(d => d.date.slice(0, 7));
+    return dates.sort((a, b) => (a < b ? 1 : -1))[0] || "all";
+  });
   const [editId, setEditId] = useState<string | null>(null);
   const [editForm, setEditForm] = useState({ memberId: "", amount: "", date: today(), note: "" });
   const [editMemberOpen, setEditMemberOpen] = useState(false);
