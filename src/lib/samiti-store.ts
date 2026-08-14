@@ -59,7 +59,7 @@ export type Loan = {
   memberGuarantorId?: string;
   familyGuarantor?: { name: string; relation: string; phone: string };
   isJoint?: boolean;
-  coBorrower?: { name: string; fatherName?: string; phone: string; nid?: string; address?: string };
+  coBorrower?: { name: string; fatherName?: string; motherName?: string; birthDate?: string; phone: string; nid?: string; address?: string };
   cheques?: CollateralCheque[];
   loanTerms?: string[];
 };

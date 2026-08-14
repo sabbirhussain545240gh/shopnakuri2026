@@ -2890,7 +2890,7 @@ function LoansTab() {
               <div className="rounded-md border p-3 space-y-3">
                 <label className="flex items-center gap-2 text-sm font-medium cursor-pointer">
                   <input type="checkbox" className="h-4 w-4 accent-current" checked={isJoint} onChange={(e) => setIsJoint(e.target.checked)} />
-                  যৌথভাবে ঋণ প্রদান (২য় জন বাহিরের ব্যক্তি)
+                  যৌথভাবে ঋণ প্রদান (২য় জন বাহিরের ব্যক্তির মাতার নাম এবং জন্ম তারিখ সংরক্ষনের অপশন দিন)
                 </label>
                 {isJoint && (
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -2903,6 +2903,14 @@ function LoansTab() {
                     <div>
                       <Label>পিতার নাম</Label>
                       <Input value={coForm.fatherName} onChange={(e) => setCoForm({ ...coForm, fatherName: e.target.value })} placeholder="পিতার নাম" />
+                    </div>
+                    <div>
+                      <Label>মাতার নাম</Label>
+                      <Input value={(coForm as any).motherName || ""} onChange={(e) => setCoForm({ ...coForm, motherName: e.target.value } as any)} placeholder="মাতার নাম" />
+                    </div>
+                    <div>
+                      <Label>জন্ম তারিখ</Label>
+                      <Input type="date" value={(coForm as any).birthDate || ""} onChange={(e) => setCoForm({ ...coForm, birthDate: e.target.value } as any)} />
                     </div>
                     <div>
                       <Label>মোবাইল *</Label>
@@ -3334,7 +3342,7 @@ function LoansTab() {
             <div className="rounded-md border p-3 space-y-3">
               <label className="flex items-center gap-2 text-sm font-medium cursor-pointer">
                 <input type="checkbox" className="h-4 w-4 accent-current" checked={editIsJoint} onChange={(e) => setEditIsJoint(e.target.checked)} />
-                যৌথভাবে ঋণ প্রদান (২য় জন বাহিরের ব্যক্তি)
+                যৌথভাবে ঋণ প্রদান (২য় জন বাহিরের ব্যক্তির মাতার নাম এবং জন্ম তারিখ সংরক্ষনের অপশন দিন)
               </label>
               {editIsJoint && (
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -3345,6 +3353,8 @@ function LoansTab() {
                     {editErrors.coName && <p className="text-xs text-destructive mt-1">{editErrors.coName}</p>}
                   </div>
                   <div><Label>পিতার নাম</Label><Input value={editCoForm.fatherName} onChange={(e) => setEditCoForm({ ...editCoForm, fatherName: e.target.value })} placeholder="পিতার নাম" /></div>
+                  <div><Label>মাতার নাম</Label><Input value={(editCoForm as any).motherName || ""} onChange={(e) => setEditCoForm({ ...editCoForm, motherName: e.target.value } as any)} placeholder="মাতার নাম" /></div>
+                  <div><Label>জন্ম তারিখ</Label><Input type="date" value={(editCoForm as any).birthDate || ""} onChange={(e) => setEditCoForm({ ...editCoForm, birthDate: e.target.value } as any)} /></div>
                   <div>
                     <Label>মোবাইল *</Label>
                     <Input className={editErrors.coPhone ? "border-destructive" : ""} value={editCoForm.phone} onChange={(e) => { setEditCoForm({ ...editCoForm, phone: e.target.value }); setEditErrors((p) => { const n = { ...p }; delete n.coPhone; return n; }); }} placeholder="মোবাইল নম্বর" />
