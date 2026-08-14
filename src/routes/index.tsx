@@ -708,8 +708,8 @@ function MembersTab() {
     serial: "",
     category: "",
     name: "", fatherName: "", motherName: "", phone: "",
-    birthDate: "", nid: "", address: "", photo: "",
-    nominee: { name: "", relation: "", phone: "", nid: "" },
+    birthDate: "", nid: "", nidFile: "", address: "", photo: "",
+    nominee: { name: "", relation: "", phone: "", nid: "", nidFile: "" },
     nomineeCustomRelation: "",
     joinDate: today(),
   };
@@ -1009,15 +1009,26 @@ function MembersTab() {
           <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
             <DialogHeader><DialogTitle>নতুন সদস্য যোগ করুন</DialogTitle></DialogHeader>
             <div className="space-y-4">
-              {/* Photo */}
-              <div className="flex items-center gap-4">
+              {/* Photo & NID */}
+              <div className="flex flex-wrap items-center gap-4">
                 <div className="h-24 w-24 rounded-lg border bg-muted overflow-hidden flex items-center justify-center shrink-0">
                   {form.photo ? <img src={form.photo} alt="" className="h-full w-full object-contain bg-white" /> : <Users className="h-8 w-8 text-muted-foreground" />}
                 </div>
-                <div className="space-y-2">
+                <div className="space-y-2 flex-1 min-w-[200px]">
                   <Label>সদস্যের ছবি</Label>
                   <Input type="file" accept="image/*" onChange={(e) => onPhoto(e.target.files?.[0])} />
                   {form.photo && <Button type="button" variant="ghost" size="sm" onClick={() => setForm({ ...form, photo: "" })}>ছবি সরান</Button>}
+                </div>
+                <div className="space-y-2 flex-1 min-w-[200px]">
+                  <Label>সদস্যের NID/জন্ম সনদ (স্ক্যান কপি)</Label>
+                  <Input type="file" accept="image/*,application/pdf" onChange={(e) => {
+                    const file = e.target.files?.[0];
+                    if (!file) return;
+                    const reader = new FileReader();
+                    reader.onload = () => setForm({ ...form, nidFile: String(reader.result || "") });
+                    reader.readAsDataURL(file);
+                  }} />
+                  {form.nidFile && <Button type="button" variant="ghost" size="sm" onClick={() => setForm({ ...form, nidFile: "" })}>ফাইল সরান</Button>}
                 </div>
               </div>
 
@@ -1060,7 +1071,18 @@ function MembersTab() {
                     <div><Label>কাস্টম সম্পর্ক</Label><Input value={form.nomineeCustomRelation} onChange={(e) => setForm({ ...form, nomineeCustomRelation: e.target.value })} placeholder="সম্পর্ক লিখুন" /></div>
                   )}
                   <div><Label>মোবাইল</Label><Input value={form.nominee.phone} onChange={(e) => setForm({ ...form, nominee: { ...form.nominee, phone: e.target.value } })} /></div>
-                  <div><Label>NID / জন্ম সনদ</Label><Input value={form.nominee.nid} onChange={(e) => setForm({ ...form, nominee: { ...form.nominee, nid: e.target.value } })} /></div>
+                  <div><Label>নমিনির NID / জন্ম সনদ</Label><Input value={form.nominee.nid} onChange={(e) => setForm({ ...form, nominee: { ...form.nominee, nid: e.target.value } })} /></div>
+                  <div className="col-span-2">
+                    <Label>নমিনির NID/জন্ম সনদ (স্ক্যান কপি)</Label>
+                    <Input type="file" accept="image/*,application/pdf" onChange={(e) => {
+                      const file = e.target.files?.[0];
+                      if (!file) return;
+                      const reader = new FileReader();
+                      reader.onload = () => setForm({ ...form, nominee: { ...form.nominee, nidFile: String(reader.result || "") } });
+                      reader.readAsDataURL(file);
+                    }} />
+                    {form.nominee.nidFile && <Button type="button" variant="ghost" size="sm" onClick={() => setForm({ ...form, nominee: { ...form.nominee, nidFile: "" } })}>ফাইল সরান</Button>}
+                  </div>
                 </div>
               </div>
             </div>
@@ -1192,8 +1214,29 @@ function MembersTab() {
                 <Info label="মাতার নাম" value={viewMember.motherName} />
                 <Info label="মোবাইল" value={viewMember.phone ? toBn(viewMember.phone) : ""} />
                 <Info label="জন্ম তারিখ" value={viewMember.birthDate ? fmtDate(viewMember.birthDate) : ""} />
-                <Info label="NID / জন্ম সনদ" value={viewMember.nid ? toBn(viewMember.nid) : ""} />
-                <Info label="ঠিকানা" value={viewMember.address} className="col-span-2" />
+                 <Info label="NID / জন্ম সনদ" value={viewMember.nid ? toBn(viewMember.nid) : ""} />
+                 <div className="col-span-2 space-y-1">
+                   <Label className="text-xs text-muted-foreground">সদস্যের NID কপি</Label>
+                   {viewMember.nidFile ? (
+                     <div className="mt-1">
+                       {viewMember.nidFile.startsWith("data:application/pdf") ? (
+                         <Button variant="outline" size="sm" className="h-8" onClick={() => window.open(viewMember.nidFile, "_blank")}>
+                           <FileText className="h-3.5 w-3.5 mr-1" /> PDF দেখুন
+                         </Button>
+                       ) : (
+                         <div className="relative group cursor-zoom-in" onClick={() => window.open(viewMember.nidFile, "_blank")}>
+                           <img src={viewMember.nidFile} alt="NID" className="max-h-32 rounded border bg-white" />
+                           <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center rounded">
+                             <Eye className="h-6 w-6 text-white" />
+                           </div>
+                         </div>
+                       )}
+                     </div>
+                   ) : (
+                     <p className="text-xs text-muted-foreground/60 italic">সংরক্ষিত নেই</p>
+                   )}
+                 </div>
+                 <Info label="ঠিকানা" value={viewMember.address} className="col-span-2" />
               </div>
               <div className="border-t pt-3">
                 <h4 className="font-semibold mb-2">নমিনি তথ্য</h4>
@@ -1201,7 +1244,28 @@ function MembersTab() {
                   <Info label="নাম" value={viewMember.nominee?.name} />
                   <Info label="সম্পর্ক" value={viewMember.nominee?.relation} />
                   <Info label="মোবাইল" value={viewMember.nominee?.phone ? toBn(viewMember.nominee.phone) : ""} />
-                  <Info label="NID / জন্ম সনদ" value={viewMember.nominee?.nid ? toBn(viewMember.nominee.nid) : ""} />
+                   <Info label="NID / জন্ম সনদ" value={viewMember.nominee?.nid ? toBn(viewMember.nominee.nid) : ""} />
+                   <div className="col-span-2 space-y-1">
+                     <Label className="text-xs text-muted-foreground">নমিনির NID কপি</Label>
+                     {viewMember.nominee?.nidFile ? (
+                       <div className="mt-1">
+                         {viewMember.nominee.nidFile.startsWith("data:application/pdf") ? (
+                           <Button variant="outline" size="sm" className="h-8" onClick={() => window.open(viewMember.nominee!.nidFile!, "_blank")}>
+                             <FileText className="h-3.5 w-3.5 mr-1" /> PDF দেখুন
+                           </Button>
+                         ) : (
+                           <div className="relative group cursor-zoom-in" onClick={() => window.open(viewMember.nominee!.nidFile!, "_blank")}>
+                             <img src={viewMember.nominee.nidFile} alt="Nominee NID" className="max-h-32 rounded border bg-white" />
+                             <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center rounded">
+                               <Eye className="h-6 w-6 text-white" />
+                             </div>
+                           </div>
+                         )}
+                       </div>
+                     ) : (
+                       <p className="text-xs text-muted-foreground/60 italic">সংরক্ষিত নেই</p>
+                     )}
+                   </div>
                 </div>
               </div>
               {(() => {
