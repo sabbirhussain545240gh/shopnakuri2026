@@ -36,6 +36,7 @@ import { MemberPortal } from "@/components/MemberPortal";
 import { useServerFn } from "@tanstack/react-start";
 import { listPendingAccounts } from "@/lib/approval.functions";
 import { buildMemberCardHtml, printMemberCard, exportMemberCardJpeg, exportMemberCardPdf, type SamitiInfo } from "@/lib/member-card";
+import { printNidFile } from "@/lib/nid-print";
 
 function usePendingApprovalCount(isAdmin: boolean) {
   const fetchPending = useServerFn(listPendingAccounts);
@@ -1221,7 +1222,7 @@ function MembersTab() {
                        variant="outline" 
                        size="sm" 
                        className="h-8 text-xs gap-1.5" 
-                       onClick={() => window.open(viewMember.nidFile, "_blank")}
+                       onClick={() => printNidFile(viewMember.nidFile!, "সদস্যের NID / জন্ম সনদ", viewMember.name, data.samitiName, data.samitiLogo)}
                      >
                        <FileText className="h-3.5 w-3.5" /> সদস্যের NID দেখুন ও প্রিন্ট
                      </Button>
@@ -1231,7 +1232,7 @@ function MembersTab() {
                        variant="outline" 
                        size="sm" 
                        className="h-8 text-xs gap-1.5" 
-                       onClick={() => window.open(viewMember.nominee!.nidFile!, "_blank")}
+                       onClick={() => printNidFile(viewMember.nominee!.nidFile!, "নমিনির NID / জন্ম সনদ", viewMember.name, data.samitiName, data.samitiLogo)}
                      >
                        <FileText className="h-3.5 w-3.5" /> নমিনির NID দেখুন ও প্রিন্ট
                      </Button>
