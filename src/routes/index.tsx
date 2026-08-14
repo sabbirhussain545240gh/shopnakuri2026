@@ -2563,7 +2563,7 @@ function SavingsTab() {
                   </Popover>
                 </div>
                 <div><Label>পরিমাণ (টাকা) *</Label><Input type="number" value={form.amount} onChange={(e) => setForm({ ...form, amount: e.target.value })} /></div>
-                <div><Label>তারিখ</Label><Input type="date" value={form.date} onChange={(e) => setForm({ ...form, date: e.target.value })} /></div>
+                <div><Label>তারিখ</Label><Input type="text" placeholder={getDateFormat()} value={form.date ? fmtDate(form.date) : ""} onChange={(e) => setForm({ ...form, date: toIsoDate(e.target.value) })} /></div>
                 <div><Label>মন্তব্য</Label><Input value={form.note} onChange={(e) => setForm({ ...form, note: e.target.value })} /></div>
               </div>
               <DialogFooter><Button onClick={submit}>সংরক্ষণ</Button></DialogFooter>
@@ -2601,7 +2601,7 @@ function SavingsTab() {
                   </Popover>
                 </div>
                 <div><Label>পরিমাণ (টাকা) *</Label><Input type="number" value={editForm.amount} onChange={(e) => setEditForm({ ...editForm, amount: e.target.value })} /></div>
-                <div><Label>তারিখ</Label><Input type="date" value={editForm.date} onChange={(e) => setEditForm({ ...editForm, date: e.target.value })} /></div>
+                <div><Label>তারিখ</Label><Input type="text" placeholder={getDateFormat()} value={editForm.date ? fmtDate(editForm.date) : ""} onChange={(e) => setEditForm({ ...editForm, date: toIsoDate(e.target.value) })} /></div>
                 <div><Label>মন্তব্য</Label><Input value={editForm.note} onChange={(e) => setEditForm({ ...editForm, note: e.target.value })} /></div>
               </div>
               <DialogFooter>
@@ -2634,11 +2634,11 @@ function SavingsTab() {
             </div>
             <div className="flex flex-col gap-1">
               <Label className="text-xs">শুরুর তারিখ</Label>
-              <Input type="date" value={dateFrom} onChange={(e) => setDateFrom(e.target.value)} className="h-8 w-40 text-xs" />
+              <Input type="text" placeholder={getDateFormat()} value={dateFrom ? fmtDate(dateFrom) : ""} onChange={(e) => setDateFrom(toIsoDate(e.target.value))} className="h-8 w-40 text-xs" />
             </div>
             <div className="flex flex-col gap-1">
               <Label className="text-xs">শেষ তারিখ</Label>
-              <Input type="date" value={dateTo} onChange={(e) => setDateTo(e.target.value)} className="h-8 w-40 text-xs" />
+              <Input type="text" placeholder={getDateFormat()} value={dateTo ? fmtDate(dateTo) : ""} onChange={(e) => setDateTo(toIsoDate(e.target.value))} className="h-8 w-40 text-xs" />
             </div>
             <div className="flex flex-col gap-1">
               <Label className="text-xs">মাস</Label>
