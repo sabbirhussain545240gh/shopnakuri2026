@@ -6050,55 +6050,6 @@ function SettingsTab() {
         </CardContent>
       </Card>
 
-      <Card className="md:col-span-2">
-        <CardHeader>
-          <CardTitle>ঋণের শর্তাবলী</CardTitle>
-          <CardDescription>ঋণ প্রদানের সময় রিসিপ্ট ও বিস্তারিত পেজে দেখানো শর্তাবলী সেট করুন</CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="space-y-3">
-            {loanTerms.map((term, i) => (
-              <div key={i} className="flex gap-2 items-start group">
-                <div className="flex-1 flex gap-2">
-                  <span className="mt-2.5 text-xs font-mono text-muted-foreground">{toBn(i + 1)}.</span>
-                  <Textarea
-                    rows={1}
-                    value={term}
-                    onChange={(e) => setLoanTerms(loanTerms.map((t, j) => (j === i ? e.target.value : t)))}
-                    placeholder="শর্ত লিখুন..."
-                    className="min-h-[40px] resize-none overflow-hidden"
-                    onInput={(e) => {
-                      const target = e.target as HTMLTextAreaElement;
-                      target.style.height = "auto";
-                      target.style.height = target.scrollHeight + "px";
-                    }}
-                  />
-                </div>
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="icon"
-                  className="shrink-0 text-destructive opacity-0 group-hover:opacity-100 transition-opacity"
-                  onClick={() => setLoanTerms(loanTerms.filter((_, j) => j !== i))}
-                >
-                  <Trash2 className="h-4 w-4" />
-                </Button>
-              </div>
-            ))}
-          </div>
-          <div className="flex gap-2">
-            <Button
-              type="button"
-              variant="outline"
-              size="sm"
-              onClick={() => setLoanTerms([...loanTerms, ""])}
-            >
-              <Plus className="h-4 w-4 mr-1" />নতুন শর্ত যোগ করুন
-            </Button>
-          </div>
-          <Button onClick={saveGeneral} className="w-full">সংরক্ষণ</Button>
-        </CardContent>
-      </Card>
 
 
       <Card>
