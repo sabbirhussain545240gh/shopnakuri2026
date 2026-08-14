@@ -202,6 +202,7 @@ function SamitiApp() {
     [allowed],
   );
   const [tab, setTab] = useState("dashboard");
+  const [viewDoc, setViewDoc] = useState<{ file: string; name: string; owner: string } | null>(null);
   useEffect(() => {
     if (!rolesLoading && !allowed.includes(tab as TabKey)) {
       setTab(allowed[0] ?? "dashboard");
@@ -4280,8 +4281,8 @@ function LoansTab() {
                     {currentLoan.familyGuarantor && (
                       <div className="flex items-center justify-between">
                         <div>পারিবারিক: {currentLoan.familyGuarantor.name} ({currentLoan.familyGuarantor.relation}) — {currentLoan.familyGuarantor.phone}</div>
-                        {current_loan.familyGuarantor.nidFile && (
-                          <Button variant="ghost" size="sm" className="h-7 text-xs" onClick={() => setViewDoc({ file: current_loan.familyGuarantor!.nidFile!, name: "NID কপি", owner: current_loan.familyGuarantor!.name })}>
+                        {currentLoan.familyGuarantor.nidFile && (
+                          <Button variant="ghost" size="sm" className="h-7 text-xs" onClick={() => setViewDoc({ file: currentLoan.familyGuarantor!.nidFile!, name: "NID কপি", owner: currentLoan.familyGuarantor!.name })}>
                             <FileText className="h-3 w-3 mr-1" /> NID
                           </Button>
                         )}
@@ -4291,7 +4292,7 @@ function LoansTab() {
                   {currentLoan.contractFile && (
                     <div className="flex flex-col items-center justify-center border-l pl-4">
                       <div className="font-medium mb-1">ডকুমেন্ট</div>
-                      <Button variant="outline" size="sm" className="w-full" onClick={() => setViewDoc({ file: current_loan.contractFile!, name: "ঋণ চুক্তি ফরম", owner: m?.name ?? "ঋণগ্রহীতা" })}>
+                      <Button variant="outline" size="sm" className="w-full" onClick={() => setViewDoc({ file: currentLoan.contractFile!, name: "ঋণ চুক্তি ফরম", owner: m?.name ?? "ঋণগ্রহীতা" })}>
                         <FileText className="h-4 w-4 mr-1" /> ঋণ চুক্তি ফরম দেখুন
                       </Button>
                     </div>
@@ -4323,8 +4324,8 @@ function LoansTab() {
                       <div>
                         {currentLoan.coBorrower.name} · পিতা: {currentLoan.coBorrower.fatherName || "—"} · মাতা: {currentLoan.coBorrower.motherName || "—"} · ফোন: {currentLoan.coBorrower.phone}
                       </div>
-                      {current_loan.coBorrower.nidFile && (
-                        <Button variant="ghost" size="sm" className="h-7 text-xs" onClick={() => setViewDoc({ file: current_loan.coBorrower!.nidFile!, name: "NID কপি", owner: current_loan.coBorrower!.name })}>
+                      {currentLoan.coBorrower.nidFile && (
+                        <Button variant="ghost" size="sm" className="h-7 text-xs" onClick={() => setViewDoc({ file: currentLoan.coBorrower!.nidFile!, name: "NID কপি", owner: currentLoan.coBorrower!.name })}>
                           <FileText className="h-3 w-3 mr-1" /> NID
                         </Button>
                       )}
@@ -7717,9 +7718,52 @@ function TreasurerSignBlock({ committee }: { committee?: CommitteeMember[] }) {
       {t.name && <div className="font-semibold text-foreground">{t.name}</div>}
       <div>{t.role || "কোষাধ্যক্ষ"}</div>
       {t.phone && <div>{toBn(t.phone)}</div>}
+
+      <Dialog open={!!viewDoc} onOpenChange={(o) => !o && setViewDoc(null)}>
+        <DialogContent className="max-w-4xl max-h-[95vh] flex flex-col p-0 overflow-hidden">
+          <div className="flex items-center justify-between p-4 border-b bg-muted/30 print:hidden">
+            <div className="flex flex-col">
+              <DialogTitle className="text-base">{viewDoc?.name}</DialogTitle>
+              <DialogDescription className="text-xs">মালিক: {viewDoc?.owner}</DialogDescription>
+            </div>
+            <div className="flex items-center gap-2">
+              <Button size="sm" variant="outline" className="h-8" onClick={() => viewDoc && printNidFile(viewDoc.file, viewDoc.name, viewDoc.owner, data.samitiName, data.samitiLogo)}>
+                <Printer className="h-4 w-4 mr-1.5" /> প্রিন্ট
+              </Button>
+              <Button size="sm" variant="ghost" className="h-8 w-8 p-0" onClick={() => setViewDoc(null)}>
+                <X className="h-4 w-4" />
+              </Button>
+            </div>
+          </div>
+          <div className="flex-1 overflow-auto bg-slate-100 p-4 md:p-8 flex items-center justify-center min-h-[400px]">
+            {viewDoc && (
+              viewDoc.file.startsWith("data:application/pdf") ? (
+                <div className="bg-white p-8 rounded-lg shadow-sm text-center space-y-4 max-w-sm">
+                  <div className="h-16 w-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto">
+                    <FileText className="h-8 w-8 text-primary" />
+                  </div>
+                  <h3 className="font-semibold text-lg">PDF ডকুমেন্ট</h3>
+                  <p className="text-sm text-muted-foreground leading-relaxed">এটি একটি PDF ফাইল। সম্পূর্ণ ফাইলটি দেখতে বা প্রিন্ট করতে নিচের বাটনে ক্লিক করুন।</p>
+                  <Button className="w-full" onClick={() => window.open(viewDoc.file, "_blank")}>
+                    <Download className="h-4 w-4 mr-2" /> PDF ডাউনলোড করুন
+                  </Button>
+                </div>
+              ) : (
+                <div className="relative group bg-white p-1 rounded-sm shadow-lg">
+                  <img src={viewDoc.file} alt={viewDoc.name} className="max-w-full h-auto object-contain block mx-auto" />
+                </div>
+              )
+            )}
+          </div>
+          <div className="p-3 border-t bg-muted/30 flex justify-center print:hidden">
+            <Button variant="secondary" onClick={() => setViewDoc(null)} className="h-9">ফিরে যান</Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
+
 
 const qrBlockHtml = (qrDataUrl?: string) =>
   qrDataUrl
