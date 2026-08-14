@@ -3415,11 +3415,24 @@ function LoansTab() {
             const idx = data.loans.findIndex((x) => x.id === currentLoan.id);
             return (
               <div className="space-y-3 text-sm">
+                <div className="flex gap-4 items-start border-b pb-3 mb-3">
+                  <div className="flex-1 grid grid-cols-2 gap-2">
+                    <div><span className="text-muted-foreground">ঋণ নং:</span> {toBn(idx + 1)}</div>
+                    <div><span className="text-muted-foreground">তারিখ:</span> {fmtDate(currentLoan.date)}</div>
+                    <div><span className="text-muted-foreground">সদস্য:</span> {m?.name ?? "—"} (সদস্য নং {m ? formatMemberSerial(m, data.serialPrefix) : "—"})</div>
+                    <div><span className="text-muted-foreground">মোবাইল:</span> {m?.phone ?? "—"}</div>
+                  </div>
+                  <div className="w-20 text-center flex flex-col items-center gap-1 border p-1 rounded bg-muted/30">
+                    {m?.photo ? (
+                      <img src={m.photo} alt={m.name} className="h-24 w-20 object-cover rounded" />
+                    ) : (
+                      <div className="h-24 w-20 bg-muted flex items-center justify-center rounded"><Users className="h-8 w-8 text-muted-foreground/50" /></div>
+                    )}
+                    <span className="text-[10px] font-bold">ঋণীর ছবি</span>
+                  </div>
+                </div>
+
                 <div className="grid grid-cols-2 gap-2">
-                  <div><span className="text-muted-foreground">ঋণ নং:</span> {toBn(idx + 1)}</div>
-                  <div><span className="text-muted-foreground">তারিখ:</span> {fmtDate(currentLoan.date)}</div>
-                  <div><span className="text-muted-foreground">সদস্য:</span> {m?.name ?? "—"} (সদস্য নং {m ? formatMemberSerial(m, data.serialPrefix) : "—"})</div>
-                  <div><span className="text-muted-foreground">মোবাইল:</span> {m?.phone ?? "—"}</div>
                   <div><span className="text-muted-foreground">মূল:</span> {formatTk(currentLoan.amount)}</div>
                   <div><span className="text-muted-foreground">মুনাফার হার:</span> {toBn(currentLoan.interestRate)}%</div>
                   <div><span className="text-muted-foreground">মোট প্রদেয়:</span> {formatTk(due)}</div>
