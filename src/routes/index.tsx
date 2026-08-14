@@ -1192,17 +1192,20 @@ function MembersTab() {
                                   <td className="p-2 text-muted-foreground">{d.note || "—"}</td>
                                   <td className="p-2 text-center">
                                     <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => {
-                                      const r = {
+                                      const totalAfter = memberDeposits
+                                        .filter((dx) => dx.date < d.date || (dx.date === d.date && dx.id <= d.id))
+                                        .reduce((s, dx) => s + dx.amount, 0);
+                                      setDepositReceipt({
                                         id: d.id,
                                         date: d.date,
                                         memberName: viewMember.name,
                                         memberSerial: viewMember.serial,
                                         amount: d.amount,
-                                        note: d.note,
+                                        totalAfter,
                                         receiptNo,
-                                        logo: data.samitiLogo
-                                      };
-                                      setDepositReceipt(r);
+                                        note: d.note,
+                                        logo: data.samitiLogo,
+                                      });
                                     }}>
                                       <Receipt className="h-3.5 w-3.5 text-primary" />
                                     </Button>
