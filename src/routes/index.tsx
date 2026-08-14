@@ -6,7 +6,7 @@ import {
   useSamiti, toBn, formatTk, memberTotalDeposit, loanPaid, loanTotalDue,
   DEFAULT_GOALS, DEFAULT_QUOTES, DEFAULT_MESSAGES, formatMemberSerial,
  formatDateStr, formatTimeStr, DATE_FORMAT_OPTIONS, TIME_FORMAT_OPTIONS, DEFAULT_DATE_FORMAT, DEFAULT_TIME_FORMAT,
- type Member, type Loan, type Deposit, type Goal, type Quote, type Message, type CommitteeMember, type DateFormat, type TimeFormat,
+ type Member, type Loan, type Deposit, type Goal, type Quote, type Message, type CommitteeMember, type DateFormat, type TimeFormat, type Transaction,
 } from "@/lib/samiti-store";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
