@@ -4191,7 +4191,7 @@ function LoansTab() {
       </Dialog>
 
       <Dialog open={!!detailFor} onOpenChange={(o) => !o && setDetailFor(null)}>
-        <DialogContent className="max-w-2xl">
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>ঋণের বিস্তারিত</DialogTitle>
           </DialogHeader>
