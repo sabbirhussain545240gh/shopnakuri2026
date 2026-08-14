@@ -1256,8 +1256,32 @@ function MembersTab() {
                                               <tr key={p.id} className="border-t">
                                                 <td className="p-1.5">{toBn(i + 1)}</td>
                                                 <td className="p-1.5">{fmtDate(p.date)}</td>
+                                                <td className="p-1.5 font-mono text-[10px]">{`KS-${toBn(no)}-${toBn(i + 1)}`}</td>
                                                 <td className="p-1.5 text-right">{formatTk(p.amount)}</td>
                                                 <td className="p-1.5 text-right">{formatTk(Math.max(0, due - running))}</td>
+                                                <td className="p-1.5 text-center">
+                                                  <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => {
+                                                    const paidAfter = insts
+                                                      .filter((px, idx) => px.date < p.date || (px.date === p.date && idx <= i))
+                                                      .reduce((s, px) => s + px.amount, 0);
+                                                    const remainingAfter = Math.max(0, due - paidAfter);
+                                                    setInstallmentReceipt({
+                                                      loan,
+                                                      memberName: viewMember.name,
+                                                      memberSerial: viewMember.serial,
+                                                      amount: p.amount,
+                                                      date: p.date,
+                                                      paidAfter,
+                                                      remainingAfter,
+                                                      receiptNo: `KS-${toBn(no)}-${toBn(i + 1)}`,
+                                                      note: p.note,
+                                                      logo: data.samitiLogo,
+                                                      loanNo: no,
+                                                    });
+                                                  }}>
+                                                    <Receipt className="h-3 w-3 text-primary" />
+                                                  </Button>
+                                                </td>
                                               </tr>
                                             );
                                           });
