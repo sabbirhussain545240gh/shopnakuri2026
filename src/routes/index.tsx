@@ -1884,7 +1884,7 @@ function SavingsTab() {
   td.r { text-align: right; }
   tbody tr { height: 22px; }
   .foot { display:flex; justify-content: space-between; font-size: 12px; margin-top: 14px; }
-  @media print { .no-print { display: none; } body { padding: 0 12px; } }
+  @media print { body { padding: 0 !important; } .no-print { display: none !important; } }
   ${printBrandCss}
 </style></head>
 <body>
