@@ -3399,27 +3399,22 @@ function LoansTab() {
 
           <Dialog open={open} onOpenChange={(o) => { setOpen(o); if (!o) setErrors({}); }}>
             <DialogTrigger asChild><Button disabled={data.members.length === 0}><Plus className="h-4 w-4 mr-1" />নতুন ঋণ</Button></DialogTrigger>
-          <DialogContent>
-            <DialogHeader><DialogTitle>নতুন ঋণ প্রদান</DialogTitle></DialogHeader>
-            <div className="space-y-3">
-              <div>
-                <Label>সদস্য (সিরিয়াল ও নাম) *</Label>
-                <Select value={form.memberId} onValueChange={(v) => setField("memberId", v)}>
-                  <SelectTrigger className={errors.memberId ? "border-destructive" : ""}><SelectValue placeholder="সদস্য নির্বাচন করুন" /></SelectTrigger>
-                  <SelectContent>{data.members.map((m) => <SelectItem key={m.id} value={m.id}>{toBn(m.serial)} — {m.name}</SelectItem>)}</SelectContent>
-                </Select>
-                {errors.memberId && <p className="text-xs text-destructive mt-1">{errors.memberId}</p>}
-              </div>
-              <div className="grid grid-cols-2 gap-3">
+            <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+              <DialogHeader><DialogTitle>নতুন ঋণ প্রদান</DialogTitle></DialogHeader>
+              <div className="space-y-4 py-4">
                 <div>
-                  <Label>পরিমাণ *</Label>
-                  <Input type="number" className={errors.amount ? "border-destructive" : ""} value={form.amount} onChange={(e) => setField("amount", e.target.value)} />
+                  <Label>সদস্য (সিরিয়াল ও নাম) *</Label>
+                  <Select value={form.memberId} onValueChange={(v) => setField("memberId", v)}>
+                    <SelectTrigger className={errors.memberId ? "border-destructive" : ""}><SelectValue placeholder="সদস্য নির্বাচন করুন" /></SelectTrigger>
+                    <SelectContent>{data.members.map((m) => <SelectItem key={m.id} value={m.id}>{toBn(m.serial)} — {m.name}</SelectItem>)}</SelectContent>
+                  </Select>
+                  {errors.memberId && <p className="text-xs text-destructive mt-1">{errors.memberId}</p>}
                 </div>
-              </div>
-            </div>
-          </DialogContent>
-        </Dialog>
-      </div>
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <Label>পরিমাণ *</Label>
+                    <Input type="number" className={errors.amount ? "border-destructive" : ""} value={form.amount} onChange={(e) => setField("amount", e.target.value)} />
+
                   {errors.amount && <p className="text-xs text-destructive mt-1">{errors.amount}</p>}
                 </div>
                 <div>
