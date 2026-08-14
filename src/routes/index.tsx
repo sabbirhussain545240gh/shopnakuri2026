@@ -1812,7 +1812,7 @@ function SavingsTab() {
   td.c { text-align: center; }
   td.r { text-align: right; }
   tfoot td { font-weight: bold; background: #f3f4f6; }
-  @media print { .no-print { display: none; } body { padding: 0; } }
+  @media print { body { padding: 0 !important; } .no-print { display: none !important; } }
 </style></head>
 <body>
   ${data.samitiLogo ? `<div class="wm" style="background-image:url('${data.samitiLogo}')"></div>` : ""}
