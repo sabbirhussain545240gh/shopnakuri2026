@@ -80,6 +80,7 @@ function ReceiptQrPreview({ text }: { text: string }) {
   );
 }
 
+type ViewDoc = { file: string; name: string; owner: string; isGuarantor?: boolean };
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -202,7 +203,7 @@ function SamitiApp() {
     [allowed],
   );
   const [tab, setTab] = useState("dashboard");
-  const [viewDoc, setViewDoc] = useState<{ file: string; name: string; owner: string; isGuarantor?: boolean } | null>(null);
+  const [viewDoc, setViewDoc] = useState<ViewDoc | null>(null);
   useEffect(() => {
     if (!rolesLoading && !allowed.includes(tab as TabKey)) {
       setTab(allowed[0] ?? "dashboard");
@@ -586,7 +587,15 @@ function Dashboard({ totals, memberCount, data, onNavigate }: any) {
         <h2 className="text-xs sm:text-sm font-semibold text-muted-foreground uppercase tracking-wide mb-3">সংক্ষিপ্ত পরিসংখ্যান</h2>
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
           <StatCard delay={100} label="মোট সদস্য" value={toBn(memberCount)} accent="bg-chart-4" icon={Users} hint="নিবন্ধিত সদস্য" />
-          <StatCard delay={160} label="মোট সঞ্চয়/চাদা" value={formatTk(totals.totalDeposit)} accent="bg-success" icon={PiggyBank} hint={`${toBn(data.deposits.length)}টি জমা`} />
+          <StatCard
+            delay={160}
+            label="মোট সঞ্চয়/চাদা"
+            value={formatTk(totals.totalDeposit)}
+            accent="bg-success"
+            icon={PiggyBank}
+            hint={`${toBn(data.deposits.length)}টি জমা`}
+            rightHint={`মোট আয়: ${formatTk(totals.closedLoanIncome + (totals.totalIncome - totals.totalExpense))}`}
+          />
           <StatCard delay={220} label="বকেয়া ঋণ" value={formatTk(totals.outstanding)} accent="bg-destructive" icon={AlertTriangle} hint={`${toBn(activeLoanCount)}টি চলমান ঋণ`} />
           <StatCard delay={280} label="হাতে নগদ" value={formatTk(totals.cashInHand)} accent="bg-primary" icon={Wallet} hint="বর্তমান তহবিল" />
         </div>
@@ -709,7 +718,7 @@ function Dashboard({ totals, memberCount, data, onNavigate }: any) {
 // ===== Members =====
 function MembersTab() {
   const { data, addMember, addMembers, updateMember, deleteMember, addDeposit, addPayment, closeLoan } = useSamiti();
-  const [viewDoc, setViewDoc] = useState<{ file: string; name: string; owner: string } | null>(null);
+  const [viewDoc, setViewDoc] = useState<ViewDoc | null>(null);
   const [open, setOpen] = useState(false);
   const [searchSerial, setSearchSerial] = useState("");
   const [searchName, setSearchName] = useState("");
@@ -3093,7 +3102,7 @@ function LoansTab() {
     toast.success("ঋণ আপডেট হয়েছে");
   };
 
-  const [viewDoc, setViewDoc] = useState<{ file: string; name: string; owner: string } | null>(null);
+  const [viewDoc, setViewDoc] = useState<ViewDoc | null>(null);
   const filteredLoans = useMemo(() => {
     const term = loanSearch.trim().toLowerCase();
     return data.loans.filter((l) => {
