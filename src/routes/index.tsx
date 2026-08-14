@@ -2761,8 +2761,8 @@ function LoansTab() {
       <style>
         body { font-family: "Segoe UI", "Noto Sans Bengali", sans-serif; margin: 0; padding: 24px; color: #111; background:#fff; position: relative; }
         @media print {
-          body { padding: 0 12px; }
-          .no-print { display: none; }
+          body { padding: 0 !important; }
+          .no-print { display: none !important; }
           @page { size: A4 landscape; margin: 10mm; }
         }
         ${printBrandCss}
