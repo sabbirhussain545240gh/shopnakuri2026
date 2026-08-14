@@ -80,6 +80,7 @@ function ReceiptQrPreview({ text }: { text: string }) {
   );
 }
 
+type ViewDoc = { file: string; name: string; owner: string; isGuarantor?: boolean };
 
 export const Route = createFileRoute("/")({
   head: () => ({
