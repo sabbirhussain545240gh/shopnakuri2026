@@ -3402,14 +3402,8 @@ function LoansTab() {
 
       <Dialog open={!!detailFor} onOpenChange={(o) => !o && setDetailFor(null)}>
         <DialogContent className="max-w-2xl">
-          <DialogHeader className="flex flex-row items-center justify-between pr-8">
+          <DialogHeader>
             <DialogTitle>ঋণের বিস্তারিত</DialogTitle>
-            {detailFor && (() => {
-              const m = data.members.find((x) => x.id === detailFor.memberId);
-              return m?.photo ? (
-                <img src={m.photo} alt={m.name} className="h-16 w-16 rounded-md object-cover border border-border" />
-              ) : null;
-            })()}
           </DialogHeader>
           {detailFor && (() => {
             const currentLoan = data.loans.find((x) => x.id === detailFor.id) ?? detailFor;
