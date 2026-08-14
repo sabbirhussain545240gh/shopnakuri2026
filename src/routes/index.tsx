@@ -420,7 +420,7 @@ function StatCard({ label, value, accent, icon: Icon, hint, rightHint, delay = 0
         <p className="text-2xl md:text-3xl font-bold mt-2 text-foreground tracking-tight tabular-nums">{value}</p>
         {(hint || rightHint) && (
           <div className="flex items-center justify-between gap-2 mt-1">
-            {hint && <p className="text-xs text-muted-foreground">{hint}</p>}
+            {hint && <p className={cn("text-xs font-medium", hint.includes("ঘাটতি") ? "text-destructive" : "text-muted-foreground")}>{hint}</p>}
             {rightHint && <p className="text-xs font-medium text-success">{rightHint}</p>}
           </div>
         )}
