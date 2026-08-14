@@ -865,7 +865,7 @@ function MembersTab() {
   thead tr, tbody tr, td { background: transparent !important; }
   th { background: rgba(243,244,246,0.35); border: 1px solid #ccc; padding: 10px; text-align: left; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
   th:nth-child(1), th:nth-child(6) { text-align: center; }
-  @media print { body { padding: 0 12px; } .no-print { display: none; } }
+  @media print { body { padding: 0 !important; } .no-print { display: none !important; } }
   ${printBrandCss}
 </style></head>
 <body>
