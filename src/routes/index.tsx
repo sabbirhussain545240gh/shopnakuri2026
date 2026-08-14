@@ -1540,7 +1540,7 @@ function printLoanDetail(
       body { font-family: "Segoe UI", "Noto Sans Bengali", sans-serif; margin: 0; padding: 0; background: #fff; color: #111; }
       .ld-wm { position: absolute; inset: 0; background-repeat: no-repeat; background-position: center; background-size: 70% auto; opacity: 0.15; pointer-events: none; z-index: 0; -webkit-print-color-adjust: exact; print-color-adjust: exact; display: block !important; visibility: visible !important; }
       .ld-content { position: relative; z-index: 1; }
-      @media print { body { padding: 0 !important; } .no-print { display: none !important; } }
+      @media print { body { padding: 0 !important; } .no-print { display: none !important; } .ld-wm { display: block !important; visibility: visible !important; opacity: 0.15 !important; -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; } }
     </style></head>
     <body>
       <div class="no-print" style="margin:16px auto;max-width:840px;display:flex;gap:10px;padding:0 20px;">
