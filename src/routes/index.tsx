@@ -1820,7 +1820,11 @@ function SavingsTab() {
   td.c { text-align: center; }
   td.r { text-align: right; }
   tfoot td { font-weight: bold; background: #f3f4f6; }
-  @media print { body { padding: 0 !important; } .no-print { display: none !important; } }
+  @media print { 
+    body { padding: 0 !important; } 
+    .no-print { display: none !important; } 
+    .wm, .ps-wm, .ld-wm, .watermark { display: block !important; visibility: visible !important; opacity: 0.15 !important; -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; } 
+  }
 </style></head>
 <body>
   ${data.samitiLogo ? `<div class="wm" style="background-image:url('${data.samitiLogo}')"></div>` : ""}
