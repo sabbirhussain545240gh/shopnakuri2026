@@ -5,8 +5,8 @@ import * as XLSX from "xlsx";
 import {
   useSamiti, toBn, formatTk, memberTotalDeposit, loanPaid, loanTotalDue,
   DEFAULT_GOALS, DEFAULT_QUOTES, DEFAULT_MESSAGES, formatMemberSerial,
- formatDateStr, formatTimeStr, DATE_FORMAT_OPTIONS, TIME_FORMAT_OPTIONS, DEFAULT_DATE_FORMAT, DEFAULT_TIME_FORMAT,
- type Member, type Loan, type Deposit, type Goal, type Quote, type Message, type CommitteeMember, type DateFormat, type TimeFormat, type Transaction,
+  formatDateStr, formatTimeStr, DATE_FORMAT_OPTIONS, TIME_FORMAT_OPTIONS, DEFAULT_DATE_FORMAT, DEFAULT_TIME_FORMAT, getDateFormat,
+  type Member, type Loan, type Deposit, type Goal, type Quote, type Message, type CommitteeMember, type DateFormat, type TimeFormat, type Transaction,
 } from "@/lib/samiti-store";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -740,6 +740,35 @@ function MembersTab() {
   const [installmentReceipt, setInstallmentReceipt] = useState<null | { loan: Loan; memberName: string; memberSerial?: number; amount: number; date: string; paidAfter: number; remainingAfter: number; receiptNo: string; note?: string; logo?: string; loanNo?: number }>(null);
   const [memberAction, setMemberAction] = useState<{ type: "deposit" | "installment"; memberId: string; loanId?: string } | null>(null);
   const [actionForm, setActionForm] = useState({ memberId: "", loanId: "", amount: "", date: today(), note: "" });
+
+  const toIsoDate = (v: any): string => {
+    if (v == null || v === "") return "";
+    if (v instanceof Date) {
+      const y = v.getFullYear();
+      const m = String(v.getMonth() + 1).padStart(2, "0");
+      const d = String(v.getDate()).padStart(2, "0");
+      return `${y}-${m}-${d}`;
+    }
+    const s = String(v).trim();
+    if (/^\d{4}-\d{1,2}-\d{1,2}$/.test(s)) {
+      const [y, m, d] = s.split("-");
+      return `${y}-${m.padStart(2, "0")}-${d.padStart(2, "0")}`;
+    }
+    const m1 = s.match(/^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{2,4})$/);
+    if (m1) {
+      let [, d, m, y] = m1;
+      if (y.length === 2) y = "20" + y;
+      return `${y}-${m.padStart(2, "0")}-${d.padStart(2, "0")}`;
+    }
+    const dt = new Date(s);
+    if (!isNaN(dt.getTime())) {
+      const y = dt.getFullYear();
+      const m = String(dt.getMonth() + 1).padStart(2, "0");
+      const d = String(dt.getDate()).padStart(2, "0");
+      return `${y}-${m}-${d}`;
+    }
+    return "";
+  };
   const [actionErrors, setActionErrors] = useState<Record<string, string>>({});
 
   const loanInfo = (loanId: string) => {
@@ -1060,11 +1089,11 @@ function MembersTab() {
                 <div><Label>মোবাইল নং</Label><Input value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} /></div>
                 <div><Label>পিতার নাম</Label><Input value={form.fatherName} onChange={(e) => setForm({ ...form, fatherName: e.target.value })} /></div>
                 <div><Label>মাতার নাম</Label><Input value={form.motherName} onChange={(e) => setForm({ ...form, motherName: e.target.value })} /></div>
-                <div><Label>জন্ম তারিখ</Label><Input type="date" value={form.birthDate} onChange={(e) => setForm({ ...form, birthDate: e.target.value })} /></div>
+                <div><Label>জন্ম তারিখ</Label><Input type="text" placeholder={getDateFormat()} value={form.birthDate ? fmtDate(form.birthDate) : ""} onChange={(e) => setForm({ ...form, birthDate: toIsoDate(e.target.value) })} /></div>
                 <div><Label>NID / জন্ম সনদ নং</Label><Input value={form.nid} onChange={(e) => setForm({ ...form, nid: e.target.value })} /></div>
               </div>
               <div><Label>ঠিকানা</Label><Textarea value={form.address} onChange={(e) => setForm({ ...form, address: e.target.value })} /></div>
-              <div><Label>যোগদানের তারিখ</Label><Input type="date" value={form.joinDate} onChange={(e) => setForm({ ...form, joinDate: e.target.value })} /></div>
+              <div><Label>যোগদানের তারিখ</Label><Input type="text" placeholder={getDateFormat()} value={form.joinDate ? fmtDate(form.joinDate) : ""} onChange={(e) => setForm({ ...form, joinDate: toIsoDate(e.target.value) })} /></div>
 
               <div className="border-t pt-3">
                 <h4 className="font-semibold mb-2 text-foreground">নমিনি তথ্য</h4>
@@ -2106,7 +2135,7 @@ function PendingCollectRow({
         />
       </TableCell>
       <TableCell>
-        <Input type="date" value={date} onChange={(e) => setDate(e.target.value)} className="h-8 w-[140px] text-xs" />
+        <Input type="text" placeholder={getDateFormat()} value={date ? fmtDate(date) : ""} onChange={(e) => setDate(toIsoDate(e.target.value))} className="h-8 w-[140px] text-xs" />
       </TableCell>
       <TableCell>
         <Button
@@ -3504,7 +3533,7 @@ function LoansTab() {
                     {errors.interestRate && <p className="text-xs text-destructive mt-1">{errors.interestRate}</p>}
                   </div>
                   <div><Label>মেয়াদ (মাস)</Label><Input type="number" value={form.durationMonths} onChange={(e) => setForm({ ...form, durationMonths: e.target.value })} /></div>
-                  <div><Label>তারিখ</Label><Input type="date" value={form.date} onChange={(e) => setForm({ ...form, date: e.target.value })} /></div>
+                  <div><Label>তারিখ</Label><Input type="text" placeholder={getDateFormat()} value={form.date ? fmtDate(form.date) : ""} onChange={(e) => setForm({ ...form, date: toIsoDate(e.target.value) })} /></div>
                 </div>
               {(() => {
                 const amt = Number(form.amount) || 0;
@@ -3544,7 +3573,7 @@ function LoansTab() {
                     </div>
                     <div>
                       <Label>জন্ম তারিখ</Label>
-                      <Input type="date" value={(coForm as any).birthDate || ""} onChange={(e) => setCoForm({ ...coForm, birthDate: e.target.value } as any)} />
+                      <Input type="text" placeholder={getDateFormat()} value={(coForm as any).birthDate ? fmtDate((coForm as any).birthDate) : ""} onChange={(e) => setCoForm({ ...coForm, birthDate: toIsoDate(e.target.value) } as any)} />
                     </div>
                     <div>
                       <Label>মোবাইল *</Label>
