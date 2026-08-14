@@ -3057,9 +3057,11 @@ function LoansTab() {
         phone: editCoForm.phone.trim(),
         nid: editCoForm.nid.trim() || undefined,
         address: editCoForm.address.trim() || undefined,
+        nidFile: editCoForm.nidFile || undefined,
         updatedAt: new Date().toISOString(),
         updatedBy: "Admin", // In a real app, this would be the logged-in user's name/ID
       } : undefined,
+      contractFile: editForm.contractFile || undefined,
       cheques: editCheques
         .filter((c) => c.bankName.trim() || c.chequeNo.trim())
         .map((c) => ({
