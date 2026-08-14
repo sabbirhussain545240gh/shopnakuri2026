@@ -2943,8 +2943,10 @@ function LoansTab() {
           amount: c.amount.trim() ? Number(c.amount) : undefined,
           date: c.date || undefined,
         })),
+      documents,
     });
     setForm({ memberId: "", amount: "", interestRate: String(data.settings.defaultInterestRate), durationMonths: String(data.settings.defaultDurationMonths), date: today(), memberGuarantorId: "", familyGuarantorName: "", familyGuarantorRelation: "", familyGuarantorCustomRelation: "", familyGuarantorPhone: "", familyGuarantorNidFile: "", contractFile: "" });
+    setDocuments([]);
     setIsJoint(false);
     setCoForm({ name: "", fatherName: "", motherName: "", birthDate: "", phone: "", nid: "", address: "", nidFile: "" });
     setCheques([]);
@@ -3074,6 +3076,7 @@ function LoansTab() {
           amount: c.amount.trim() ? Number(c.amount) : undefined,
           date: c.date || undefined,
         })),
+      documents: editDocuments,
     });
     setEditFor(null);
     setEditErrors({});
@@ -3423,17 +3426,6 @@ function LoansTab() {
                     </Select>
                     {errors.memberId && <p className="text-xs text-destructive mt-1">{errors.memberId}</p>}
                   </div>
-                  <div>
-                    <Label>ঋণ চুক্তি ফরম / স্ক্যান কপি</Label>
-                    <Input type="file" accept="image/*,application/pdf" onChange={(e) => {
-                      const file = e.target.files?.[0];
-                      if (file) {
-                        const reader = new FileReader();
-                        reader.onload = () => setForm({ ...form, contractFile: String(reader.result) });
-                        reader.readAsDataURL(file);
-                      }
-                    }} />
-                  </div>
                 </div>
                 <div className="grid grid-cols-2 gap-3">
                   <div>
@@ -3503,17 +3495,6 @@ function LoansTab() {
                       <Label>ঠিকানা</Label>
                       <Input value={coForm.address} onChange={(e) => setCoForm({ ...coForm, address: e.target.value })} placeholder="ঠিকানা" />
                     </div>
-                    <div>
-                      <Label>২য় ঋণগ্রহীতার NID কপি</Label>
-                      <Input type="file" accept="image/*,application/pdf" onChange={(e) => {
-                        const file = e.target.files?.[0];
-                        if (file) {
-                          const reader = new FileReader();
-                          reader.onload = () => setCoForm({ ...coForm, nidFile: String(reader.result) } as any);
-                          reader.readAsDataURL(file);
-                        }
-                      }} />
-                    </div>
                   </div>
                 )}
               </div>
@@ -3555,7 +3536,99 @@ function LoansTab() {
                         <Input type="date" value={c.date} onChange={(e) => updateChequeRow(i, "date", e.target.value)} />
                       </div>
                     </div>
+              </div>
+              
+              <div className="rounded-md border p-4 space-y-4">
+                <div className="flex items-center justify-between border-b pb-2">
+                  <div className="font-semibold text-base flex items-center gap-2">
+                    <FileText className="h-5 w-5 text-primary" />
+                    প্রয়োজনীয় ডকুমেন্ট আপলোড
                   </div>
+                  <Button type="button" size="sm" variant="outline" onClick={() => setDocuments(p => [...p, { id: crypto.randomUUID(), name: "", file: "" }])}>
+                    <Plus className="h-4 w-4 mr-1" /> ডকুমেন্ট যোগ করুন
+                  </Button>
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div>
+                    <Label className="text-xs">ঋণ চুক্তি ফরম / স্ক্যান কপি</Label>
+                    <Input type="file" accept="image/*,application/pdf" className="h-8 text-xs" onChange={(e) => {
+                      const file = e.target.files?.[0];
+                      if (file) {
+                        const reader = new FileReader();
+                        reader.onload = () => setForm({ ...form, contractFile: String(reader.result) });
+                        reader.readAsDataURL(file);
+                      }
+                    }} />
+                  </div>
+                  {isJoint && (
+                    <div>
+                      <Label className="text-xs">২য় ঋণগ্রহীতার NID কপি</Label>
+                      <Input type="file" accept="image/*,application/pdf" className="h-8 text-xs" onChange={(e) => {
+                        const file = e.target.files?.[0];
+                        if (file) {
+                          const reader = new FileReader();
+                          reader.onload = () => setCoForm({ ...coForm, nidFile: String(reader.result) } as any);
+                          reader.readAsDataURL(file);
+                        }
+                      }} />
+                    </div>
+                  )}
+                  <div>
+                    <Label className="text-xs">পারিবারিক জামিনদারের NID কপি</Label>
+                    <Input type="file" accept="image/*,application/pdf" className="h-8 text-xs" onChange={(e) => {
+                      const file = e.target.files?.[0];
+                      if (file) {
+                        const reader = new FileReader();
+                        reader.onload = () => setField("familyGuarantorNidFile", String(reader.result));
+                        reader.readAsDataURL(file);
+                      }
+                    }} />
+                  </div>
+                </div>
+
+                {documents.length > 0 && (
+                  <div className="space-y-3 pt-2">
+                    {documents.map((doc, idx) => (
+                      <div key={doc.id} className="flex gap-2 items-end bg-muted/20 p-2 rounded-md border border-dashed">
+                        <div className="flex-1">
+                          <Label className="text-xs">ডকুমেন্টের নাম</Label>
+                          <Input 
+                            placeholder="যেমন: জমির খতিয়ান, বিদ্যুৎ বিল..." 
+                            value={doc.name} 
+                            className="h-8 text-xs"
+                            onChange={(e) => setDocuments(p => p.map(d => d.id === doc.id ? { ...d, name: e.target.value } : d))}
+                          />
+                        </div>
+                        <div className="flex-1">
+                          <Label className="text-xs">ফাইল আপলোড</Label>
+                          <Input 
+                            type="file" 
+                            accept="image/*,application/pdf" 
+                            className="h-8 text-xs"
+                            onChange={(e) => {
+                              const file = e.target.files?.[0];
+                              if (file) {
+                                const reader = new FileReader();
+                                reader.onload = () => setDocuments(p => p.map(d => d.id === doc.id ? { ...d, file: String(reader.result) } : d));
+                                reader.readAsDataURL(file);
+                              }
+                            }}
+                          />
+                        </div>
+                        <Button 
+                          type="button" 
+                          variant="ghost" 
+                          size="icon" 
+                          className="h-8 w-8 text-destructive"
+                          onClick={() => setDocuments(p => p.filter(d => d.id !== doc.id))}
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
                 ))}
               </div>
 
@@ -3601,17 +3674,6 @@ function LoansTab() {
                 <Label>পারিবারিক জামিনদার — মোবাইল *</Label>
                 <Input className={errors.familyGuarantorPhone ? "border-destructive" : ""} value={form.familyGuarantorPhone} onChange={(e) => setField("familyGuarantorPhone", e.target.value)} placeholder="মোবাইল নম্বর" />
                 {errors.familyGuarantorPhone && <p className="text-xs text-destructive mt-1">{errors.familyGuarantorPhone}</p>}
-              </div>
-              <div>
-                <Label>পারিবারিক জামিনদারের NID কপি</Label>
-                <Input type="file" accept="image/*,application/pdf" onChange={(e) => {
-                  const file = e.target.files?.[0];
-                  if (file) {
-                    const reader = new FileReader();
-                    reader.onload = () => setField("familyGuarantorNidFile", String(reader.result));
-                    reader.readAsDataURL(file);
-                  }
-                }} />
               </div>
               </div>
               <DialogFooter><Button onClick={submit}>ঋণ প্রদান</Button></DialogFooter>
@@ -3920,17 +3982,6 @@ function LoansTab() {
                 </Select>
                 {editErrors.memberId && <p className="text-xs text-destructive mt-1">{editErrors.memberId}</p>}
               </div>
-              <div>
-                <Label>ঋণ চুক্তি ফরম / স্ক্যান কপি</Label>
-                <Input type="file" accept="image/*,application/pdf" onChange={(e) => {
-                  const file = e.target.files?.[0];
-                  if (file) {
-                    const reader = new FileReader();
-                    reader.onload = () => editSetField("contractFile", String(reader.result));
-                    reader.readAsDataURL(file);
-                  }
-                }} />
-              </div>
             </div>
             <div className="grid grid-cols-2 gap-3">
               <div><Label>পরিমাণ</Label><Input type="number" className={editErrors.amount ? "border-destructive" : ""} value={editForm.amount} onChange={(e) => editSetField("amount", e.target.value)} />{editErrors.amount && <p className="text-xs text-destructive mt-1">{editErrors.amount}</p>}</div>
@@ -3976,17 +4027,6 @@ function LoansTab() {
                   </div>
                   <div><Label>NID</Label><Input value={editCoForm.nid} onChange={(e) => setEditCoForm({ ...editCoForm, nid: e.target.value })} placeholder="জাতীয় পরিচয়পত্র নং" /></div>
                   <div><Label>ঠিকানা</Label><Input value={editCoForm.address} onChange={(e) => setEditCoForm({ ...editCoForm, address: e.target.value })} placeholder="ঠিকানা" /></div>
-                  <div>
-                    <Label>২য় ঋণগ্রহীতার NID কপি</Label>
-                    <Input type="file" accept="image/*,application/pdf" onChange={(e) => {
-                      const file = e.target.files?.[0];
-                      if (file) {
-                        const reader = new FileReader();
-                        reader.onload = () => setEditCoForm({ ...editCoForm, nidFile: String(reader.result) } as any);
-                        reader.readAsDataURL(file);
-                      }
-                    }} />
-                  </div>
                 </div>
               )}
             </div>
@@ -4010,7 +4050,99 @@ function LoansTab() {
                     <div><Label>চেকের পরিমাণ (৳)</Label><Input type="number" value={c.amount} onChange={(e) => editUpdateChequeRow(i, "amount", e.target.value)} placeholder="0" /></div>
                     <div><Label>চেকের তারিখ</Label><Input type="date" value={c.date} onChange={(e) => editUpdateChequeRow(i, "date", e.target.value)} /></div>
                   </div>
+            </div>
+
+            <div className="rounded-md border p-4 space-y-4">
+              <div className="flex items-center justify-between border-b pb-2">
+                <div className="font-semibold text-base flex items-center gap-2">
+                  <FileText className="h-5 w-5 text-primary" />
+                  প্রয়োজনীয় ডকুমেন্ট আপলোড (এডিট)
                 </div>
+                <Button type="button" size="sm" variant="outline" onClick={() => setEditDocuments(p => [...p, { id: crypto.randomUUID(), name: "", file: "" }])}>
+                  <Plus className="h-4 w-4 mr-1" /> ডকুমেন্ট যোগ করুন
+                </Button>
+              </div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <Label className="text-xs">ঋণ চুক্তি ফরম / স্ক্যান কপি</Label>
+                  <Input type="file" accept="image/*,application/pdf" className="h-8 text-xs" onChange={(e) => {
+                    const file = e.target.files?.[0];
+                    if (file) {
+                      const reader = new FileReader();
+                      reader.onload = () => editSetField("contractFile", String(reader.result));
+                      reader.readAsDataURL(file);
+                    }
+                  }} />
+                </div>
+                {editIsJoint && (
+                  <div>
+                    <Label className="text-xs">২য় ঋণগ্রহীতার NID কপি</Label>
+                    <Input type="file" accept="image/*,application/pdf" className="h-8 text-xs" onChange={(e) => {
+                      const file = e.target.files?.[0];
+                      if (file) {
+                        const reader = new FileReader();
+                        reader.onload = () => setEditCoForm({ ...editCoForm, nidFile: String(reader.result) } as any);
+                        reader.readAsDataURL(file);
+                      }
+                    }} />
+                  </div>
+                )}
+                <div>
+                  <Label className="text-xs">পারিবারিক জামিনদারের NID কপি</Label>
+                  <Input type="file" accept="image/*,application/pdf" className="h-8 text-xs" onChange={(e) => {
+                    const file = e.target.files?.[0];
+                    if (file) {
+                      const reader = new FileReader();
+                      reader.onload = () => editSetField("familyGuarantorNidFile", String(reader.result));
+                      reader.readAsDataURL(file);
+                    }
+                  }} />
+                </div>
+              </div>
+
+              {editDocuments.length > 0 && (
+                <div className="space-y-3 pt-2">
+                  {editDocuments.map((doc) => (
+                    <div key={doc.id} className="flex gap-2 items-end bg-muted/20 p-2 rounded-md border border-dashed">
+                      <div className="flex-1">
+                        <Label className="text-xs">ডকুমেন্টের নাম</Label>
+                        <Input 
+                          placeholder="ডকুমেন্টের নাম লিখুন" 
+                          value={doc.name} 
+                          className="h-8 text-xs"
+                          onChange={(e) => setEditDocuments(p => p.map(d => d.id === doc.id ? { ...d, name: e.target.value } : d))}
+                        />
+                      </div>
+                      <div className="flex-1">
+                        <Label className="text-xs">ফাইল আপলোড</Label>
+                        <Input 
+                          type="file" 
+                          accept="image/*,application/pdf" 
+                          className="h-8 text-xs"
+                          onChange={(e) => {
+                            const file = e.target.files?.[0];
+                            if (file) {
+                              const reader = new FileReader();
+                              reader.onload = () => setEditDocuments(p => p.map(d => d.id === doc.id ? { ...d, file: String(reader.result) } : d));
+                              reader.readAsDataURL(file);
+                            }
+                          }}
+                        />
+                      </div>
+                      <Button 
+                        type="button" 
+                        variant="ghost" 
+                        size="icon" 
+                        className="h-8 w-8 text-destructive"
+                        onClick={() => setEditDocuments(p => p.filter(d => d.id !== doc.id))}
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
               ))}
             </div>
             <div>
@@ -4055,17 +4187,6 @@ function LoansTab() {
               <Label>পারিবারিক জামিনদার — মোবাইল *</Label>
               <Input className={editErrors.familyGuarantorPhone ? "border-destructive" : ""} value={editForm.familyGuarantorPhone} onChange={(e) => editSetField("familyGuarantorPhone", e.target.value)} placeholder="মোবাইল নম্বর" />
               {editErrors.familyGuarantorPhone && <p className="text-xs text-destructive mt-1">{editErrors.familyGuarantorPhone}</p>}
-            </div>
-            <div>
-              <Label>পারিবারিক জামিনদারের NID কপি</Label>
-              <Input type="file" accept="image/*,application/pdf" onChange={(e) => {
-                const file = e.target.files?.[0];
-                if (file) {
-                  const reader = new FileReader();
-                  reader.onload = () => editSetField("familyGuarantorNidFile", String(reader.result));
-                  reader.readAsDataURL(file);
-                }
-              }} />
             </div>
           </div>
           <DialogFooter><Button onClick={submitEdit}>সংরক্ষণ</Button></DialogFooter>
@@ -4168,7 +4289,26 @@ function LoansTab() {
                       <Button variant="outline" size="sm" className="w-full" onClick={() => printNidFile(currentLoan.contractFile!, "ঋণ চুক্তি ফরম", m?.name ?? "ঋণগ্রহীতা", data.samitiName, data.samitiLogo)}>
                         <FileText className="h-4 w-4 mr-1" /> ঋণ চুক্তি ফরম দেখুন ও প্রিন্ট
                       </Button>
+                </div>
+                {currentLoan.documents && currentLoan.documents.length > 0 && (
+                  <div className="border-t pt-2">
+                    <div className="font-medium mb-2 text-center">অন্যান্য ডকুমেন্টসমূহ</div>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                      {currentLoan.documents.map((doc) => (
+                        <Button 
+                          key={doc.id}
+                          variant="outline" 
+                          size="sm" 
+                          className="w-full text-left justify-start h-auto py-2" 
+                          onClick={() => printNidFile(doc.file, doc.name || "ডকুমেন্ট", m?.name ?? "সদস্য", data.samitiName, data.samitiLogo)}
+                        >
+                          <FileText className="h-4 w-4 mr-2 shrink-0" />
+                          <span className="truncate">{doc.name || "অজানা ডকুমেন্ট"}</span>
+                        </Button>
+                      ))}
                     </div>
+                  </div>
+                )}
                   )}
                 </div>
                 {currentLoan.isJoint && currentLoan.coBorrower && (
