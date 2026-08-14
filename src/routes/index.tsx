@@ -203,7 +203,7 @@ function SamitiApp() {
     [allowed],
   );
   const [tab, setTab] = useState("dashboard");
-  const [viewDoc, setViewDoc] = useState<{ file: string; name: string; owner: string; isGuarantor?: boolean } | null>(null);
+  const [viewDoc, setViewDoc] = useState<ViewDoc | null>(null);
   useEffect(() => {
     if (!rolesLoading && !allowed.includes(tab as TabKey)) {
       setTab(allowed[0] ?? "dashboard");
