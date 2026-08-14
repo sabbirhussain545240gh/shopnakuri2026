@@ -4118,7 +4118,7 @@ function LoansTab() {
                       <div className="flex items-center justify-between">
                         <div>পারিবারিক: {currentLoan.familyGuarantor.name} ({currentLoan.familyGuarantor.relation}) — {currentLoan.familyGuarantor.phone}</div>
                         {currentLoan.familyGuarantor.nidFile && (
-                          <Button variant="ghost" size="sm" className="h-7 text-xs" onClick={() => printNidFile(currentLoan.familyGuarantor!.nidFile!, currentLoan.familyGuarantor!.name, "পারিবারিক জামিনদার")}>
+                          <Button variant="ghost" size="sm" className="h-7 text-xs" onClick={() => printNidFile(currentLoan.familyGuarantor!.nidFile!, "NID কপি", currentLoan.familyGuarantor!.name, data.samitiName, data.samitiLogo)}>
                             <FileText className="h-3 w-3 mr-1" /> NID
                           </Button>
                         )}
@@ -4128,7 +4128,7 @@ function LoansTab() {
                   {currentLoan.contractFile && (
                     <div className="flex flex-col items-center justify-center border-l pl-4">
                       <div className="font-medium mb-1">ডকুমেন্ট</div>
-                      <Button variant="outline" size="sm" className="w-full" onClick={() => printNidFile(currentLoan.contractFile!, m?.name ?? "ঋণগ্রহীতা", "ঋণ চুক্তি ফরম")}>
+                      <Button variant="outline" size="sm" className="w-full" onClick={() => printNidFile(currentLoan.contractFile!, "ঋণ চুক্তি ফরম", m?.name ?? "ঋণগ্রহীতা", data.samitiName, data.samitiLogo)}>
                         <FileText className="h-4 w-4 mr-1" /> ঋণ চুক্তি ফরম দেখুন ও প্রিন্ট
                       </Button>
                     </div>
@@ -4142,7 +4142,7 @@ function LoansTab() {
                         {currentLoan.coBorrower.name} · পিতা: {currentLoan.coBorrower.fatherName || "—"} · মাতা: {currentLoan.coBorrower.motherName || "—"} · ফোন: {currentLoan.coBorrower.phone}
                       </div>
                       {currentLoan.coBorrower.nidFile && (
-                        <Button variant="ghost" size="sm" className="h-7 text-xs" onClick={() => printNidFile(currentLoan.coBorrower!.nidFile!, currentLoan.coBorrower!.name, "২য় ঋণগ্রহীতা")}>
+                        <Button variant="ghost" size="sm" className="h-7 text-xs" onClick={() => printNidFile(currentLoan.coBorrower!.nidFile!, "NID কপি", currentLoan.coBorrower!.name, data.samitiName, data.samitiLogo)}>
                           <FileText className="h-3 w-3 mr-1" /> NID
                         </Button>
                       )}
