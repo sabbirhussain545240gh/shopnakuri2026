@@ -5703,11 +5703,29 @@ const INCOME_CATS = ["সদস্য ফি", "ভর্তি ফি", "অন
 const EXPENSE_CATS = ["স্টেশনারি", "মিটিং খরচ", "যাতায়াত", "ভাড়া", "বিল", "অন্যান্য"];
 
 function CashbookTab() {
-  const { data, addTransaction, deleteTransaction } = useSamiti();
+  const { data, addTransaction, updateTransaction, deleteTransaction } = useSamiti();
   const [open, setOpen] = useState(false);
+  const [editingId, setEditingId] = useState<string | null>(null);
   const [form, setForm] = useState<{ type: "income" | "expense"; category: string; customCategory: string; amount: string; date: string; note: string }>({
     type: "income", category: "", customCategory: "", amount: "", date: today(), note: "",
   });
+
+  const startEdit = (t: Transaction) => {
+    const isIncome = t.type === "income";
+    const baseCats = isIncome ? INCOME_CATS : EXPENSE_CATS;
+    const isOther = !baseCats.includes(t.category);
+    
+    setForm({
+      type: t.type,
+      category: isOther ? "অন্যান্য" : t.category,
+      customCategory: isOther ? t.category : "",
+      amount: String(t.amount),
+      date: t.date,
+      note: t.note || "",
+    });
+    setEditingId(t.id);
+    setOpen(true);
+  };
 
   const submit = () => {
     if (!form.category) { toast.error("ধরন নির্বাচন করুন"); return; }
@@ -5715,10 +5733,18 @@ function CashbookTab() {
     if (form.category === "অন্যান্য" && !finalCat) { toast.error("খাতের নাম লিখুন"); return; }
     const amt = Number(form.amount);
     if (!amt || amt <= 0) { toast.error("সঠিক পরিমাণ দিন"); return; }
-    addTransaction({ type: form.type, category: finalCat, amount: amt, date: form.date, note: form.note });
+    
+    if (editingId) {
+      updateTransaction(editingId, { type: form.type, category: finalCat, amount: amt, date: form.date, note: form.note });
+      toast.success("হালনাগাদ করা হয়েছে");
+    } else {
+      addTransaction({ type: form.type, category: finalCat, amount: amt, date: form.date, note: form.note });
+      toast.success("সংরক্ষিত হয়েছে");
+    }
+    
     setForm({ type: "income", category: "", customCategory: "", amount: "", date: today(), note: "" });
+    setEditingId(null);
     setOpen(false);
-    toast.success("সংরক্ষিত হয়েছে");
   };
 
   const income = data.transactions.filter((t) => t.type === "income").reduce((a, t) => a + t.amount, 0);
@@ -5739,10 +5765,16 @@ function CashbookTab() {
             <CardTitle>আয়-ব্যয় খতিয়ান</CardTitle>
             <CardDescription>মোট {toBn(data.transactions.length)}টি লেনদেন</CardDescription>
           </div>
-          <Dialog open={open} onOpenChange={setOpen}>
-            <DialogTrigger asChild><Button><Plus className="h-4 w-4 mr-1" />নতুন লেনদেন</Button></DialogTrigger>
+          <Dialog open={open} onOpenChange={(o) => {
+            setOpen(o);
+            if (!o) {
+              setEditingId(null);
+              setForm({ type: "income", category: "", customCategory: "", amount: "", date: today(), note: "" });
+            }
+          }}>
+            <DialogTrigger asChild><Button onClick={() => setEditingId(null)}><Plus className="h-4 w-4 mr-1" />নতুন লেনদেন</Button></DialogTrigger>
             <DialogContent>
-              <DialogHeader><DialogTitle>আয় বা ব্যয় যোগ করুন</DialogTitle></DialogHeader>
+              <DialogHeader><DialogTitle>{editingId ? "লেনদেন সম্পাদনা" : "আয় বা ব্যয় যোগ করুন"}</DialogTitle></DialogHeader>
               <div className="space-y-3">
                 <div className="grid grid-cols-2 gap-2">
                   <Button type="button" variant={form.type === "income" ? "default" : "outline"} onClick={() => setForm({ ...form, type: "income", category: "", customCategory: "" })}>
@@ -5795,10 +5827,20 @@ function CashbookTab() {
                     <TableCell className={`text-right font-semibold ${t.type === "income" ? "text-success" : "text-destructive"}`}>
                       {t.type === "income" ? "+" : "−"} {formatTk(t.amount)}
                     </TableCell>
-                    <TableCell>
-                      <Button variant="ghost" size="icon" onClick={() => { deleteTransaction(t.id); toast.success("মুছে ফেলা হয়েছে"); }}>
-                        <Trash2 className="h-4 w-4 text-destructive" />
-                      </Button>
+                    <TableCell className="text-right">
+                      <div className="flex justify-end gap-1">
+                        <Button variant="ghost" size="icon" onClick={() => startEdit(t)}>
+                          <Pencil className="h-4 w-4 text-muted-foreground" />
+                        </Button>
+                        <Button variant="ghost" size="icon" onClick={() => { 
+                          if (confirm("আপনি কি নিশ্চিতভাবে এই লেনদেনটি মুছে ফেলতে চান?")) {
+                            deleteTransaction(t.id); 
+                            toast.success("মুছে ফেলা হয়েছে"); 
+                          }
+                        }}>
+                          <Trash2 className="h-4 w-4 text-destructive" />
+                        </Button>
+                      </div>
                     </TableCell>
                   </TableRow>
                 ))}
