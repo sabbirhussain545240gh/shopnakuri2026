@@ -2636,124 +2636,150 @@ function SavingsTab() {
               {toBn(filteredDeposits.length)}টি / মোট {formatTk(filteredDeposits.reduce((s, d) => s + d.amount, 0))}
             </div>
           </div>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>রিসিপ্ট নং</TableHead>
-                <TableHead>তারিখ</TableHead>
-                <TableHead>
-                  <div className="relative">
-                    <Search className="absolute left-2 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
-                    <Input
-                      placeholder="সদস্য সার্চ..."
-                      value={search}
-                      onChange={(e) => setSearch(e.target.value)}
-                      className="pl-7 h-7 text-xs w-40"
-                    />
-                  </div>
-                </TableHead>
-                <TableHead>মন্তব্য</TableHead>
-                <TableHead className="text-right">পরিমাণ</TableHead>
-                <TableHead></TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {filteredDeposits.map((d) => {
-                const m = data.members.find((x) => x.id === d.memberId);
-                const q = search.trim().toLowerCase();
-                const nameText = m?.name ?? "—";
-                let highlightedName: React.ReactNode = nameText;
-                if (q && nameText !== "—") {
-                  const lower = nameText.toLowerCase();
-                  const idx = lower.indexOf(q);
-                  if (idx !== -1) {
-                    highlightedName = (
-                      <>
-                        {nameText.slice(0, idx)}
-                        <mark className="bg-yellow-200 dark:bg-yellow-700 rounded px-0.5">
-                          {nameText.slice(idx, idx + q.length)}
-                        </mark>
-                        {nameText.slice(idx + q.length)}
-                      </>
-                    );
-                  }
-                }
-                return (
-                  <TableRow key={d.id}>
-                    <TableCell className="font-mono text-xs">{receiptNoFor(d)}</TableCell>
-                    <TableCell>{fmtDate(d.date)}</TableCell>
-                    <TableCell className="font-medium">{toBn(m?.serial || 0)}. {highlightedName}</TableCell>
-                    <TableCell className="text-muted-foreground">{d.note || "—"}</TableCell>
-                    <TableCell className="text-right font-semibold text-success">{formatTk(d.amount)}</TableCell>
-                    <TableCell>
-                      <div className="flex items-center gap-1">
-                        <Button variant="ghost" size="icon" onClick={() => startEdit(d)}>
-                          <Pencil className="h-4 w-4 text-muted-foreground" />
-                        </Button>
-                        <Button variant="ghost" size="icon" onClick={() => { deleteDeposit(d.id); toast.success("মুছে ফেলা হয়েছে"); }}>
-                          <Trash2 className="h-4 w-4 text-destructive" />
-                        </Button>
-                      </div>
-                    </TableCell>
-                  </TableRow>
-                );
-              })}
-            </TableBody>
-          </Table>
-          {monthFilter !== "all" && (() => {
-            const paidIds = new Set(
-              data.deposits.filter((d) => d.date.slice(0, 7) === monthFilter).map((d) => d.memberId),
-            );
-            const pending = [...data.members]
-              .filter((m) => !paidIds.has(m.id))
-              .sort((a, b) => (a.serial || 0) - (b.serial || 0));
-            if (pending.length === 0) return (
-              <div className="mt-4 text-sm text-center text-success">এই মাসে সকল সদস্য জমা দিয়েছেন ✓</div>
-            );
-            return (
-              <div className="mt-6">
-                <div className="text-sm font-semibold mb-2 text-destructive">
-                  ⚠ জমা হয়নি ({toBn(pending.length)} জন) — {monthFilter}
+          <div className="space-y-6">
+            {monthFilter !== "all" && (() => {
+              const paidIds = new Set(
+                data.deposits.filter((d) => d.date.slice(0, 7) === monthFilter).map((d) => d.memberId),
+              );
+              const pending = [...data.members]
+                .filter((m) => !paidIds.has(m.id))
+                .sort((a, b) => (a.serial || 0) - (b.serial || 0));
+              
+              if (pending.length === 0) return (
+                <div className="text-sm text-center text-success py-2 border rounded-md bg-success/5">
+                  এই মাসে সকল সদস্য জমা দিয়েছেন ✓
                 </div>
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead className="w-16">ক্র নং</TableHead>
-                      <TableHead>নাম</TableHead>
-                      <TableHead className="w-40">পরিমাণ (৳)</TableHead>
-                      <TableHead className="w-40">তারিখ</TableHead>
-                      <TableHead className="w-32"></TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {pending.map((m) => (
-                      <PendingCollectRow
-                        key={m.id}
-                        member={m}
-                        month={monthFilter}
-                        onCollect={(amount, date, note) => {
-                          addDeposit({ memberId: m.id, amount, date, note });
-                          const prevTotal = memberTotalDeposit(data.deposits, m.id);
-                          const depositNo = data.deposits.filter((d) => d.memberId === m.id).length + 1;
-                          setReceipt({
-                            memberName: m.name,
-                            memberSerial: m.serial,
-                            amount,
-                            date,
-                            totalAfter: prevTotal + amount,
-                            receiptNo: `CH-${toBn(m.serial ?? 0)}-${toBn(depositNo)}`,
-                            note: note || undefined,
-                            logo: data.samitiLogo || undefined,
-                          });
-                          toast.success("জমা যোগ হয়েছে");
-                        }}
-                      />
-                    ))}
-                  </TableBody>
-                </Table>
+              );
+              
+              return (
+                <div className="border rounded-md overflow-hidden bg-destructive/5 border-destructive/20">
+                  <div className="bg-destructive/10 px-4 py-2 border-b border-destructive/20 flex items-center justify-between">
+                    <div className="text-sm font-bold text-destructive flex items-center gap-2">
+                      <AlertTriangle className="h-4 w-4" />
+                      জমা হয়নি ({toBn(pending.length)} জন) — {fmtMonthYearBn(monthFilter)}
+                    </div>
+                  </div>
+                  <Table>
+                    <TableHeader className="bg-destructive/5">
+                      <TableRow>
+                        <TableHead className="w-16">ক্র নং</TableHead>
+                        <TableHead>নাম</TableHead>
+                        <TableHead className="w-40 text-right">পরিমাণ (৳)</TableHead>
+                        <TableHead className="w-40">তারিখ</TableHead>
+                        <TableHead className="w-32"></TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {pending.map((m) => (
+                        <PendingCollectRow
+                          key={m.id}
+                          member={m}
+                          month={monthFilter}
+                          onCollect={(amount, date, note) => {
+                            addDeposit({ memberId: m.id, amount, date, note });
+                            const prevTotal = memberTotalDeposit(data.deposits, m.id);
+                            const depositNo = data.deposits.filter((d) => d.memberId === m.id).length + 1;
+                            setReceipt({
+                              memberName: m.name,
+                              memberSerial: m.serial,
+                              amount,
+                              date,
+                              totalAfter: prevTotal + amount,
+                              receiptNo: `CH-${toBn(m.serial ?? 0)}-${toBn(depositNo)}`,
+                              note: note || undefined,
+                              logo: data.samitiLogo || undefined,
+                            });
+                            toast.success("জমা যোগ হয়েছে");
+                          }}
+                        />
+                      ))}
+                    </TableBody>
+                  </Table>
+                </div>
+              );
+            })()}
+
+            <div className="border rounded-md overflow-hidden">
+              <div className="bg-muted/50 px-4 py-2 border-b flex items-center justify-between">
+                <div className="text-sm font-semibold text-foreground flex items-center gap-2">
+                  <History className="h-4 w-4" />
+                  জমা হয়েছে ({toBn(filteredDeposits.length)} জন)
+                </div>
               </div>
-            );
-          })()}
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>রিসিপ্ট নং</TableHead>
+                    <TableHead>তারিখ</TableHead>
+                    <TableHead>
+                      <div className="relative">
+                        <Search className="absolute left-2 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
+                        <Input
+                          placeholder="সদস্য সার্চ..."
+                          value={search}
+                          onChange={(e) => setSearch(e.target.value)}
+                          className="pl-7 h-7 text-xs w-40"
+                        />
+                      </div>
+                    </TableHead>
+                    <TableHead>মন্তব্য</TableHead>
+                    <TableHead className="text-right">পরিমাণ</TableHead>
+                    <TableHead></TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {filteredDeposits.length === 0 ? (
+                    <TableRow>
+                      <TableCell colSpan={6} className="text-center py-10 text-muted-foreground">
+                        এই ফিল্টারে কোনও জমা পাওয়া যায়নি।
+                      </TableCell>
+                    </TableRow>
+                  ) : (
+                    filteredDeposits.map((d) => {
+                      const m = data.members.find((x) => x.id === d.memberId);
+                      const q = search.trim().toLowerCase();
+                      const nameText = m?.name ?? "—";
+                      let highlightedName: React.ReactNode = nameText;
+                      if (q && nameText !== "—") {
+                        const lower = nameText.toLowerCase();
+                        const idx = lower.indexOf(q);
+                        if (idx !== -1) {
+                          highlightedName = (
+                            <>
+                              {nameText.slice(0, idx)}
+                              <mark className="bg-yellow-200 dark:bg-yellow-700 rounded px-0.5">
+                                {nameText.slice(idx, idx + q.length)}
+                              </mark>
+                              {nameText.slice(idx + q.length)}
+                            </>
+                          );
+                        }
+                      }
+                      return (
+                        <TableRow key={d.id}>
+                          <TableCell className="font-mono text-xs">{receiptNoFor(d)}</TableCell>
+                          <TableCell>{fmtDate(d.date)}</TableCell>
+                          <TableCell className="font-medium">{toBn(m?.serial || 0)}. {highlightedName}</TableCell>
+                          <TableCell className="text-muted-foreground">{d.note || "—"}</TableCell>
+                          <TableCell className="text-right font-semibold text-success">{formatTk(d.amount)}</TableCell>
+                          <TableCell>
+                            <div className="flex items-center gap-1">
+                              <Button variant="ghost" size="icon" onClick={() => startEdit(d)}>
+                                <Pencil className="h-4 w-4 text-muted-foreground" />
+                              </Button>
+                              <Button variant="ghost" size="icon" onClick={() => { deleteDeposit(d.id); toast.success("মুছে ফেলা হয়েছে"); }}>
+                                <Trash2 className="h-4 w-4 text-destructive" />
+                              </Button>
+                            </div>
+                          </TableCell>
+                        </TableRow>
+                      );
+                    })
+                  )}
+                </TableBody>
+              </Table>
+            </div>
+          </div>
           </>
         )}
       </CardContent>
