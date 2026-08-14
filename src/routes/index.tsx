@@ -4280,8 +4280,8 @@ function LoansTab() {
                     {currentLoan.familyGuarantor && (
                       <div className="flex items-center justify-between">
                         <div>পারিবারিক: {currentLoan.familyGuarantor.name} ({currentLoan.familyGuarantor.relation}) — {currentLoan.familyGuarantor.phone}</div>
-                        {currentLoan.familyGuarantor.nidFile && (
-                          <Button variant="ghost" size="sm" className="h-7 text-xs" onClick={() => printNidFile(currentLoan.familyGuarantor!.nidFile!, "NID কপি", currentLoan.familyGuarantor!.name, data.samitiName, data.samitiLogo)}>
+                        {current_loan.familyGuarantor.nidFile && (
+                          <Button variant="ghost" size="sm" className="h-7 text-xs" onClick={() => setViewDoc({ file: current_loan.familyGuarantor!.nidFile!, name: "NID কপি", owner: current_loan.familyGuarantor!.name })}>
                             <FileText className="h-3 w-3 mr-1" /> NID
                           </Button>
                         )}
@@ -4291,8 +4291,8 @@ function LoansTab() {
                   {currentLoan.contractFile && (
                     <div className="flex flex-col items-center justify-center border-l pl-4">
                       <div className="font-medium mb-1">ডকুমেন্ট</div>
-                      <Button variant="outline" size="sm" className="w-full" onClick={() => printNidFile(currentLoan.contractFile!, "ঋণ চুক্তি ফরম", m?.name ?? "ঋণগ্রহীতা", data.samitiName, data.samitiLogo)}>
-                        <FileText className="h-4 w-4 mr-1" /> ঋণ চুক্তি ফরম দেখুন ও প্রিন্ট
+                      <Button variant="outline" size="sm" className="w-full" onClick={() => setViewDoc({ file: current_loan.contractFile!, name: "ঋণ চুক্তি ফরম", owner: m?.name ?? "ঋণগ্রহীতা" })}>
+                        <FileText className="h-4 w-4 mr-1" /> ঋণ চুক্তি ফরম দেখুন
                       </Button>
                     </div>
                   )}
@@ -4307,7 +4307,7 @@ function LoansTab() {
                           variant="outline" 
                           size="sm" 
                           className="w-full text-left justify-start h-auto py-2" 
-                          onClick={() => printNidFile(doc.file, doc.name || "ডকুমেন্ট", m?.name ?? "সদস্য", data.samitiName, data.samitiLogo)}
+                          onClick={() => setViewDoc({ file: doc.file, name: doc.name || "ডকুমেন্ট", owner: m?.name ?? "সদস্য" })}
                         >
                           <FileText className="h-4 w-4 mr-2 shrink-0" />
                           <span className="truncate">{doc.name || "অজানা ডকুমেন্ট"}</span>
@@ -4323,8 +4323,8 @@ function LoansTab() {
                       <div>
                         {currentLoan.coBorrower.name} · পিতা: {currentLoan.coBorrower.fatherName || "—"} · মাতা: {currentLoan.coBorrower.motherName || "—"} · ফোন: {currentLoan.coBorrower.phone}
                       </div>
-                      {currentLoan.coBorrower.nidFile && (
-                        <Button variant="ghost" size="sm" className="h-7 text-xs" onClick={() => printNidFile(currentLoan.coBorrower!.nidFile!, "NID কপি", currentLoan.coBorrower!.name, data.samitiName, data.samitiLogo)}>
+                      {current_loan.coBorrower.nidFile && (
+                        <Button variant="ghost" size="sm" className="h-7 text-xs" onClick={() => setViewDoc({ file: current_loan.coBorrower!.nidFile!, name: "NID কপি", owner: current_loan.coBorrower!.name })}>
                           <FileText className="h-3 w-3 mr-1" /> NID
                         </Button>
                       )}
