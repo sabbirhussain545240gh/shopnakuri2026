@@ -1719,6 +1719,7 @@ function EditMemberForm({ member, onSave, onCancel }: { member: Member; onSave: 
     nid: member.nid,
     address: member.address,
     photo: member.photo,
+    nidFile: member.nidFile || "",
     nominee: { ...member.nominee, relation: isCustomRelation ? "অন্যান্য" : member.nominee?.relation || "" },
     nomineeCustomRelation: isCustomRelation ? member.nominee.relation : "",
     joinDate: member.joinDate,
@@ -1792,6 +1793,17 @@ function EditMemberForm({ member, onSave, onCancel }: { member: Member; onSave: 
           )}
           <div><Label>মোবাইল</Label><Input value={form.nominee.phone} onChange={(e) => setForm({ ...form, nominee: { ...form.nominee, phone: e.target.value } })} /></div>
           <div><Label>NID / জন্ম সনদ</Label><Input value={form.nominee.nid} onChange={(e) => setForm({ ...form, nominee: { ...form.nominee, nid: e.target.value } })} /></div>
+          <div className="col-span-2">
+            <Label>নমিনির NID/জন্ম সনদ (স্ক্যান কপি)</Label>
+            <Input type="file" accept="image/*,application/pdf" onChange={(e) => {
+              const file = e.target.files?.[0];
+              if (!file) return;
+              const reader = new FileReader();
+              reader.onload = () => setForm({ ...form, nominee: { ...form.nominee, nidFile: String(reader.result || "") } });
+              reader.readAsDataURL(file);
+            }} />
+            {form.nominee.nidFile && <Button type="button" variant="ghost" size="sm" onClick={() => setForm({ ...form, nominee: { ...form.nominee, nidFile: "" } })}>ফাইল সরান</Button>}
+          </div>
         </div>
       </div>
 
