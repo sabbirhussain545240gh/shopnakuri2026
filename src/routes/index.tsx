@@ -2538,7 +2538,7 @@ function SavingsTab() {
                   {Array.from(new Set(data.deposits.map((d) => d.date.slice(0, 7))))
                     .sort((a, b) => b.localeCompare(a))
                     .map((ym) => (
-                      <SelectItem key={ym} value={ym}>{ym}</SelectItem>
+                      <SelectItem key={ym} value={ym}>{fmtMonthYearBn(ym)}</SelectItem>
                     ))}
                 </SelectContent>
               </Select>
