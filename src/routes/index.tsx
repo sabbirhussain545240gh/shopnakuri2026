@@ -22,7 +22,7 @@ import { Badge } from "@/components/ui/badge";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Textarea } from "@/components/ui/textarea";
-import { Users, PiggyBank, HandCoins, LayoutDashboard, Trash2, Plus, CheckCircle2, Pencil, Settings as SettingsIcon, Wallet, Download, Upload, AlertTriangle, TrendingUp, TrendingDown, Menu, Printer, FileText, Receipt, Search, Eye, Share, ImageDown, Check, ChevronsUpDown, ShieldCheck, Loader2, ArrowRight, Banknote, QrCode, RefreshCw, X, Scale, Calendar as CalendarIcon } from "lucide-react";
+import { Users, PiggyBank, HandCoins, LayoutDashboard, Trash2, Plus, CheckCircle2, Pencil, Settings as SettingsIcon, Wallet, Download, Upload, AlertTriangle, TrendingUp, TrendingDown, Menu, Printer, FileText, Receipt, Search, Eye, Share, ImageDown, Check, ChevronsUpDown, ShieldCheck, Loader2, ArrowRight, Banknote, QrCode, RefreshCw, X, Scale, Calendar as CalendarIcon, History } from "lucide-react";
 import { Calendar } from "@/components/ui/calendar";
 import { toast } from "sonner";
 import { AuthGate, SignOutButton, CloudStatusBadge } from "@/components/AuthGate";
@@ -2570,6 +2570,8 @@ function LoansTab() {
         phone: editCoForm.phone.trim(),
         nid: editCoForm.nid.trim() || undefined,
         address: editCoForm.address.trim() || undefined,
+        updatedAt: new Date().toISOString(),
+        updatedBy: "Admin", // In a real app, this would be the logged-in user's name/ID
       } : undefined,
       cheques: editCheques
         .filter((c) => c.bankName.trim() || c.chequeNo.trim())
@@ -3485,8 +3487,16 @@ function LoansTab() {
                   <div><span className="text-muted-foreground">অবস্থা:</span> {currentLoan.status === "active" ? "চলমান" : "পরিশোধিত"}</div>
                 </div>
                 {currentLoan.isJoint && currentLoan.coBorrower && (
-                  <div className="border-t pt-2">
-                    <div className="font-medium mb-1">যৌথ ঋণগ্রহীতা (বাহিরের ব্যক্তি)</div>
+                  <div className="border-t pt-2 space-y-1">
+                    <div className="flex justify-between items-center mb-1">
+                      <div className="font-medium">যৌথ ঋণগ্রহীতা (বাহিরের ব্যক্তি)</div>
+                      {(currentLoan.coBorrower as any).updatedAt && (
+                        <div className="text-[10px] text-muted-foreground bg-muted px-1.5 py-0.5 rounded flex items-center gap-1">
+                          <History className="h-3 w-3" />
+                          সর্বশেষ আপডেট: {fmtDate((currentLoan.coBorrower as any).updatedAt)} {formatTimeStr((currentLoan.coBorrower as any).updatedAt)} ({(currentLoan.coBorrower as any).updatedBy || "Admin"})
+                        </div>
+                      )}
+                    </div>
                     <div>নাম: {currentLoan.coBorrower.name}{currentLoan.coBorrower.fatherName ? ` (পিতা: ${currentLoan.coBorrower.fatherName})` : ""}{currentLoan.coBorrower.motherName ? ` (মাতা: ${currentLoan.coBorrower.motherName})` : ""}</div>
                     {currentLoan.coBorrower.birthDate && <div>জন্ম তারিখ: {fmtDate(currentLoan.coBorrower.birthDate)}</div>}
                     <div>মোবাইল: {currentLoan.coBorrower.phone}</div>
