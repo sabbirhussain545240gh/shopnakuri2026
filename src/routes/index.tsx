@@ -712,6 +712,8 @@ function MembersTab() {
   const [form, setForm] = useState(emptyForm);
   const [viewMember, setViewMember] = useState<Member | null>(null);
   const [editMember, setEditMember] = useState<Member | null>(null);
+  const [depositReceipt, setDepositReceipt] = useState<null | { id: string; date: string; memberName: string; memberSerial?: number; amount: number; note?: string; receiptNo: string; logo?: string }>(null);
+  const [installmentReceipt, setInstallmentReceipt] = useState<null | { loan: Loan; memberName: string; memberSerial?: number; amount: number; date: string; paidAfter: number; remainingAfter: number; receiptNo: string; note?: string; logo?: string; loanNo?: number }>(null);
 
   const nextSerial = data.members.length > 0 ? Math.max(...data.members.map((m) => m.serial || 0)) + 1 : 1;
   useEffect(() => {
@@ -1177,12 +1179,37 @@ function MembersTab() {
                         <div className="max-h-48 overflow-y-auto rounded-md border">
                           <table className="w-full text-sm">
                             <thead className="bg-muted/50 sticky top-0">
-                              <tr><th className="text-left p-2">তারিখ</th><th className="text-left p-2">রিসিপ্ট নং</th><th className="text-right p-2">পরিমাণ</th><th className="text-left p-2">নোট</th></tr>
+                              <tr><th className="text-left p-2">তারিখ</th><th className="text-left p-2">রিসিপ্ট নং</th><th className="text-right p-2">পরিমাণ</th><th className="text-left p-2">নোট</th><th className="text-center p-2">রিসিপ্ট</th></tr>
                             </thead>
                             <tbody>
-                              {[...memberDeposits].sort((a, b) => (b.date || "").localeCompare(a.date || "")).map((d) => (
-                                <tr key={d.id} className="border-t"><td className="p-2">{fmtDate(d.date)}</td><td className="p-2 font-medium">CH-{toBn(viewMember.serial ?? 0)}-{toBn(seq.get(d.id) ?? 1)}</td><td className="p-2 text-right">{formatTk(d.amount)}</td><td className="p-2 text-muted-foreground">{d.note || "—"}</td></tr>
-                              ))}
+                              {[...memberDeposits].sort((a, b) => (b.date || "").localeCompare(a.date || "")).map((d) => {
+                                const receiptNo = `CH-${toBn(viewMember.serial ?? 0)}-${toBn(seq.get(d.id) ?? 1)}`;
+                                return (
+                                <tr key={d.id} className="border-t">
+                                  <td className="p-2">{fmtDate(d.date)}</td>
+                                  <td className="p-2 font-medium">{receiptNo}</td>
+                                  <td className="p-2 text-right">{formatTk(d.amount)}</td>
+                                  <td className="p-2 text-muted-foreground">{d.note || "—"}</td>
+                                  <td className="p-2 text-center">
+                                    <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => {
+                                      const r = {
+                                        id: d.id,
+                                        date: d.date,
+                                        memberName: viewMember.name,
+                                        memberSerial: viewMember.serial,
+                                        amount: d.amount,
+                                        note: d.note,
+                                        receiptNo,
+                                        logo: data.samitiLogo
+                                      };
+                                      setDepositReceipt(r);
+                                    }}>
+                                      <Receipt className="h-3.5 w-3.5 text-primary" />
+                                    </Button>
+                                  </td>
+                                </tr>
+                                );
+                              })}
                             </tbody>
                           </table>
                         </div>
@@ -1218,7 +1245,7 @@ function MembersTab() {
                                   <div className="max-h-40 overflow-y-auto rounded border">
                                     <table className="w-full text-xs">
                                       <thead className="bg-muted/50 sticky top-0">
-                                        <tr><th className="text-left p-1.5">#</th><th className="text-left p-1.5">তারিখ</th><th className="text-right p-1.5">কিস্তি</th><th className="text-right p-1.5">বাকি</th></tr>
+                                        <tr><th className="text-left p-1.5">#</th><th className="text-left p-1.5">তারিখ</th><th className="text-left p-1.5">রিসিপ্ট নং</th><th className="text-right p-1.5">কিস্তি</th><th className="text-right p-1.5">বাকি</th><th className="text-center p-1.5">রিসিপ্ট</th></tr>
                                       </thead>
                                       <tbody>
                                         {(() => {
@@ -1229,8 +1256,32 @@ function MembersTab() {
                                               <tr key={p.id} className="border-t">
                                                 <td className="p-1.5">{toBn(i + 1)}</td>
                                                 <td className="p-1.5">{fmtDate(p.date)}</td>
+                                                <td className="p-1.5 font-mono text-[10px]">{`KS-${toBn(no)}-${toBn(i + 1)}`}</td>
                                                 <td className="p-1.5 text-right">{formatTk(p.amount)}</td>
                                                 <td className="p-1.5 text-right">{formatTk(Math.max(0, due - running))}</td>
+                                                <td className="p-1.5 text-center">
+                                                  <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => {
+                                                    const paidAfter = insts
+                                                      .filter((px, idx) => px.date < p.date || (px.date === p.date && idx <= i))
+                                                      .reduce((s, px) => s + px.amount, 0);
+                                                    const remainingAfter = Math.max(0, due - paidAfter);
+                                                    setInstallmentReceipt({
+                                                      loan,
+                                                      memberName: viewMember.name,
+                                                      memberSerial: viewMember.serial,
+                                                      amount: p.amount,
+                                                      date: p.date,
+                                                      paidAfter,
+                                                      remainingAfter,
+                                                      receiptNo: `KS-${toBn(no)}-${toBn(i + 1)}`,
+                                                      note: p.note,
+                                                      logo: data.samitiLogo,
+                                                      loanNo: no,
+                                                    });
+                                                  }}>
+                                                    <Receipt className="h-3 w-3 text-primary" />
+                                                  </Button>
+                                                </td>
                                               </tr>
                                             );
                                           });
@@ -1251,6 +1302,137 @@ function MembersTab() {
               </div>
             </div>
           )}
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={!!depositReceipt} onOpenChange={(o) => !o && setDepositReceipt(null)}>
+        <DialogContent className="max-w-md">
+          <DialogHeader><DialogTitle>জমা রিসিপ্ট</DialogTitle></DialogHeader>
+          {depositReceipt && (
+            <div className="border rounded-md p-4 text-sm bg-card">
+              <div className="flex items-center justify-center gap-3 mb-3">
+                {depositReceipt.logo && (
+                  <img src={depositReceipt.logo} alt="logo" className="h-12 w-12 object-contain rounded" />
+                )}
+                <div className="text-center">
+                  <div className="text-lg font-bold">{data.samitiName || "সমিতি"}</div>
+                  <div className="text-xs text-muted-foreground">সঞ্চয় / চাদা জমা রিসিপ্ট</div>
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-2">
+                <div><span className="text-muted-foreground">রিসিপ্ট নং:</span> <span className="font-medium">{depositReceipt.receiptNo}</span></div>
+                <div><span className="text-muted-foreground">তারিখ:</span> <span className="font-medium">{fmtDate(depositReceipt.date)}</span></div>
+                <div className="col-span-2"><span className="text-muted-foreground">সদস্য:</span> <span className="font-medium">{depositReceipt.memberName}</span></div>
+              </div>
+              <div className="mt-3 border-t pt-2 flex justify-between text-base">
+                <span className="font-medium">জমার পরিমাণ</span>
+                <span className="font-bold text-success">{formatTk(depositReceipt.amount)}</span>
+              </div>
+              {depositReceipt.note && (
+                <div className="mt-3 text-sm border-t pt-2">
+                  <span className="text-muted-foreground">নোট:</span> <span className="font-medium whitespace-pre-wrap">{depositReceipt.note}</span>
+                </div>
+              )}
+              <div className="mt-6 flex justify-between text-xs text-muted-foreground">
+                <div>—————————<br />গ্রহীতা</div>
+                <TreasurerSignBlock committee={data.settings.committee} />
+              </div>
+            </div>
+          )}
+          <DialogFooter className="gap-2 flex-wrap">
+            <Button variant="outline" onClick={() => setDepositReceipt(null)}>বন্ধ</Button>
+            <Button onClick={() => {
+              if (!depositReceipt) return;
+              const t = findTreasurer(data.settings.committee);
+              const html = `
+                <div class="r" style="padding:20px;border:1px solid #eee;max-width:400px;margin:auto;">
+                  <div style="text-align:center;margin-bottom:15px;">
+                    ${depositReceipt.logo ? `<img src="${depositReceipt.logo}" style="height:50px;margin-bottom:5px;"/><br/>` : ""}
+                    <div style="font-size:18px;font-weight:bold;">${data.samitiName}</div>
+                    <div style="font-size:12px;color:#666;">সঞ্চয় / চাদা জমা রিসিপ্ট</div>
+                  </div>
+                  <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;font-size:13px;margin-bottom:15px;">
+                    <div>রিসিপ্ট নং: <b>${depositReceipt.receiptNo}</b></div>
+                    <div>তারিখ: <b>${fmtDate(depositReceipt.date)}</b></div>
+                    <div style="grid-column:span 2;">সদস্য: <b>${depositReceipt.memberName}</b></div>
+                  </div>
+                  <div style="display:flex;justify-content:space-between;font-size:16px;font-weight:bold;border-top:1px solid #eee;padding-top:10px;margin-bottom:10px;">
+                    <span>জমার পরিমাণ</span>
+                    <span style="color:green;">${formatTk(depositReceipt.amount)}</span>
+                  </div>
+                  ${depositReceipt.note ? `<div style="font-size:12px;color:#666;margin-bottom:20px;">নোট: ${depositReceipt.note}</div>` : ""}
+                  <div style="display:flex;justify-content:space-between;margin-top:30px;font-size:11px;color:#666;">
+                    <div>—————————<br/>গ্রহীতা</div>
+                    <div style="text-align:right;">
+                      ${t?.signature ? `<img src="${t.signature}" style="height:35px;display:block;margin-left:auto;"/>` : `<div style="height:35px;"></div>`}
+                      <b>${t?.name || ""}</b><br/>${t?.role || "কোষাধ্যক্ষ"}
+                    </div>
+                  </div>
+                </div>
+              `;
+              const w = window.open("", "_blank", "width=500,height=600");
+              if (w) {
+                w.document.write(`<!DOCTYPE html><html><head><meta charset="utf-8"><title>রিসিপ্ট</title><style>body{font-family:sans-serif;padding:20px;} @media print{.no-print{display:none;}}</style></head><body><div class="no-print" style="margin-bottom:15px;"><button onclick="window.print()">প্রিন্ট</button></div>${html}</body></html>`);
+                w.document.close();
+              }
+            }}><Printer className="h-4 w-4 mr-1" />প্রিন্ট</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={!!installmentReceipt} onOpenChange={(o) => !o && setInstallmentReceipt(null)}>
+        <DialogContent className="max-w-md">
+          <DialogHeader><DialogTitle>কিস্তি রিসিপ্ট</DialogTitle></DialogHeader>
+          {installmentReceipt && (
+            <div className="border rounded-md p-4 text-sm bg-card">
+              <div className="flex items-center justify-center gap-3 mb-3">
+                {installmentReceipt.logo && (
+                  <img src={installmentReceipt.logo} alt="logo" className="h-12 w-12 object-contain rounded" />
+                )}
+                <div className="text-center">
+                  <div className="text-lg font-bold">{data.samitiName || "সমিতি"}</div>
+                  <div className="text-xs text-muted-foreground">কিস্তি প্রাপ্তি রিসিপ্ট</div>
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-2">
+                <div><span className="text-muted-foreground">রিসিপ্ট নং:</span> <span className="font-medium">{installmentReceipt.receiptNo}</span></div>
+                <div><span className="text-muted-foreground">তারিখ:</span> <span className="font-medium">{fmtDate(installmentReceipt.date)}</span></div>
+                <div className="col-span-2"><span className="text-muted-foreground">সদস্য:</span> <span className="font-medium">{installmentReceipt.memberName}{installmentReceipt.loanNo ? ` (ঋণ নং ${toBn(installmentReceipt.loanNo)})` : ""}</span></div>
+                <div><span className="text-muted-foreground">ঋণ মূল:</span> {formatTk(installmentReceipt.loan.amount)}</div>
+                <div><span className="text-muted-foreground">মেয়াদ:</span> {toBn(installmentReceipt.loan.durationMonths)} মাস</div>
+              </div>
+              <div className="mt-3 border-t pt-2 flex justify-between text-base">
+                <span className="font-medium">প্রাপ্ত কিস্তি</span>
+                <span className="font-bold text-success">{formatTk(installmentReceipt.amount)}</span>
+              </div>
+              <div className="mt-2 grid grid-cols-2 gap-2 text-sm">
+                <div><span className="text-muted-foreground">মোট পরিশোধিত:</span> <span className="font-medium">{formatTk(installmentReceipt.paidAfter)}</span></div>
+                <div><span className="text-muted-foreground">অবশিষ্ট বকেয়া:</span> <span className="font-semibold text-destructive">{formatTk(installmentReceipt.remainingAfter)}</span></div>
+              </div>
+              {installmentReceipt.note && (
+                <div className="mt-3 text-sm border-t pt-2">
+                  <span className="text-muted-foreground">নোট:</span> <span className="font-medium whitespace-pre-wrap">{installmentReceipt.note}</span>
+                </div>
+              )}
+              <div className="mt-6 flex justify-between text-xs text-muted-foreground">
+                <div>—————————<br />গ্রহীতা</div>
+                <TreasurerSignBlock committee={data.settings.committee} />
+              </div>
+            </div>
+          )}
+          <DialogFooter className="gap-2 flex-wrap">
+            <Button variant="outline" onClick={() => setInstallmentReceipt(null)}>বন্ধ</Button>
+            <Button onClick={async () => {
+              if (!installmentReceipt) return;
+              const qrDataUrl = await buildInstallmentQr(installmentReceipt, data.samitiName || "সমিতি");
+              const html = buildReceiptHtml(installmentReceipt, data.samitiName || "সমিতি", qrDataUrl, findTreasurer(data.settings.committee));
+              const w = window.open("", "_blank", "width=600,height=800");
+              if (!w) return;
+              w.document.write(`<!DOCTYPE html><html><head><meta charset="utf-8"><title>রিসিপ্ট</title><style>${receiptCss}</style></head><body><div class="no-print" style="margin-bottom:12px;display:flex;gap:10px;"><button onclick="window.print()" style="padding:8px 16px;font-size:14px;cursor:pointer;background:#0f172a;color:#fff;border:none;border-radius:4px;">প্রিন্ট করুন</button><button onclick="window.close()" style="padding:8px 16px;font-size:14px;cursor:pointer;background:#f1f5f9;border:1px solid #e2e8f0;border-radius:4px;">বাতিল</button></div>${html}</body></html>`);
+              w.document.close();
+              w.focus();
+            }}><Printer className="h-4 w-4 mr-1" />প্রিন্ট</Button>
+          </DialogFooter>
         </DialogContent>
       </Dialog>
 
