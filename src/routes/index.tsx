@@ -1101,7 +1101,7 @@ function MembersTab() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {data.members.map((m) => (
+              {filteredMembers.map((m) => (
                 <TableRow key={m.id} className="cursor-pointer" onClick={() => setViewMember(m)}>
                   <TableCell className="text-center font-semibold">{toBn(formatMemberSerial(m, data.serialPrefix))}</TableCell>
                   <TableCell>
