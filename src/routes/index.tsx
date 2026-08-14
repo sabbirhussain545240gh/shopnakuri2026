@@ -2770,8 +2770,9 @@ function LoansTab() {
       <body>
         ${printWatermark(data.samitiLogo)}
         <div class="ps-content">
-        <div class="no-print" style="margin-bottom:16px; display:flex; gap:8px;">
-          <button onclick="window.print()" style="padding:8px 16px;font-size:14px;cursor:pointer;">প্রিন্ট / PDF সংরক্ষণ</button>
+        <div class="no-print" style="margin-bottom:16px; display:flex; gap:10px;">
+          <button onclick="window.print()" style="padding:8px 16px;font-size:14px;cursor:pointer;background:#0f172a;color:#fff;border:none;border-radius:4px;">প্রিন্ট / PDF সংরক্ষণ</button>
+          <button onclick="window.close()" style="padding:8px 16px;font-size:14px;cursor:pointer;background:#f1f5f9;border:1px solid #e2e8f0;border-radius:4px;">বাতিল</button>
         </div>
         ${printHeader(data.samitiName, data.samitiLogo, `ঋণ ব্যবস্থাপনা — মোট ${toBn(filteredLoans.length)}টি ঋণ | তারিখ: ${fmtDate(today())}`, data.samitiAddress, data.establishedDate)}
         ${html}
