@@ -3427,13 +3427,11 @@ function LoansTab() {
                     {errors.memberId && <p className="text-xs text-destructive mt-1">{errors.memberId}</p>}
                   </div>
                 </div>
-                <div className="grid grid-cols-2 gap-3">
                   <div>
                     <Label>পরিমাণ *</Label>
                     <Input type="number" className={errors.amount ? "border-destructive" : ""} value={form.amount} onChange={(e) => setField("amount", e.target.value)} />
-
-                  {errors.amount && <p className="text-xs text-destructive mt-1">{errors.amount}</p>}
-                </div>
+                    {errors.amount && <p className="text-xs text-destructive mt-1">{errors.amount}</p>}
+                  </div>
                 <div>
                   <Label>মুনাফার হার (%) *</Label>
                   <Input type="number" className={errors.interestRate ? "border-destructive" : ""} value={form.interestRate} onChange={(e) => setField("interestRate", e.target.value)} />
@@ -3674,7 +3672,6 @@ function LoansTab() {
                 <Label>পারিবারিক জামিনদার — মোবাইল *</Label>
                 <Input className={errors.familyGuarantorPhone ? "border-destructive" : ""} value={form.familyGuarantorPhone} onChange={(e) => setField("familyGuarantorPhone", e.target.value)} placeholder="মোবাইল নম্বর" />
                 {errors.familyGuarantorPhone && <p className="text-xs text-destructive mt-1">{errors.familyGuarantorPhone}</p>}
-              </div>
               </div>
               <DialogFooter><Button onClick={submit}>ঋণ প্রদান</Button></DialogFooter>
             </DialogContent>
