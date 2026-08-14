@@ -1454,7 +1454,7 @@ function MembersTab() {
           )}
         </DialogContent>
       </Dialog>
-    </Card>
+    </>
   );
 }
 
