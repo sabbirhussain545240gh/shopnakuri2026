@@ -2674,7 +2674,6 @@ function LoansTab() {
         ${printHeader(data.samitiName, data.samitiLogo, `ঋণ ব্যবস্থাপনা — মোট ${toBn(filteredLoans.length)}টি ঋণ | প্রিন্ট তারিখ: ${fmtDate(today())}`, data.samitiAddress, data.establishedDate)}
         ${html}
         </div>
-        <script>setTimeout(()=>window.print(),300)</script>
       </body></html>
     `);
     w.document.close();
