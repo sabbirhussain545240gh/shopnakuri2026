@@ -18,7 +18,7 @@ export function printNidFile(fileData: string, label: string, memberName: string
           body {
             margin: 0;
             padding: 0;
-            font-family: 'SutonnyMJ', Arial, sans-serif;
+            font-family: 'Hind Siliguri', 'Noto Sans Bengali', Arial, sans-serif;
             color: #333;
             background-color: white;
           }
