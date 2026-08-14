@@ -2399,7 +2399,7 @@ function LoansTab() {
   const removeChequeRow = (i: number) => setCheques((p) => p.filter((_, idx) => idx !== i));
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [loanSearch, setLoanSearch] = useState("");
-  const [loanStatusFilter, setLoanStatusFilter] = useState<"all" | "active" | "closed">("all");
+  const [loanStatusFilter, setLoanStatusFilter] = useState<"all" | "active" | "closed">("active");
   const [closureView, setClosureView] = useState<string | null>(null);
 
   const setField = (key: string, value: string) => {
