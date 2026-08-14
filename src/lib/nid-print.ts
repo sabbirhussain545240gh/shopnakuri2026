@@ -1,6 +1,6 @@
 import { Member } from "./samiti-store";
 
-export function printNidFile(fileData: string, label: string, memberName: string, samitiName: string, logo?: string) {
+export function printNidFile(fileData: string, label: string, ownerName: string, samitiName: string, logo?: string, isGuarantor: boolean = false) {
   const win = window.open("", "_blank");
   if (!win) return;
 
@@ -9,7 +9,7 @@ export function printNidFile(fileData: string, label: string, memberName: string
   win.document.write(`
     <html>
       <head>
-        <title>${label} - ${memberName}</title>
+        <title>${label} - ${ownerName}</title>
         <style>
           @page {
             size: A4;
@@ -125,7 +125,7 @@ export function printNidFile(fileData: string, label: string, memberName: string
           
           <div class="doc-info">
             <h2>${label}</h2>
-            <p>সদস্যের নাম: ${memberName}</p>
+            <p>${isGuarantor ? 'জামিনদারের নাম' : 'সদস্যের নাম'}: ${ownerName}</p>
           </div>
 
           <div class="file-container">

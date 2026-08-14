@@ -202,7 +202,7 @@ function SamitiApp() {
     [allowed],
   );
   const [tab, setTab] = useState("dashboard");
-  const [viewDoc, setViewDoc] = useState<{ file: string; name: string; owner: string } | null>(null);
+  const [viewDoc, setViewDoc] = useState<{ file: string; name: string; owner: string; isGuarantor?: boolean } | null>(null);
   useEffect(() => {
     if (!rolesLoading && !allowed.includes(tab as TabKey)) {
       setTab(allowed[0] ?? "dashboard");
@@ -4284,7 +4284,7 @@ function LoansTab() {
                       <div className="flex items-center justify-between">
                         <div>পারিবারিক: {currentLoan.familyGuarantor.name} ({currentLoan.familyGuarantor.relation}) — {currentLoan.familyGuarantor.phone}</div>
                         {currentLoan.familyGuarantor.nidFile && (
-                          <Button variant="ghost" size="sm" className="h-7 text-xs" onClick={() => setViewDoc({ file: currentLoan.familyGuarantor!.nidFile!, name: "NID কপি", owner: currentLoan.familyGuarantor!.name })}>
+                          <Button variant="ghost" size="sm" className="h-7 text-xs" onClick={() => setViewDoc({ file: currentLoan.familyGuarantor!.nidFile!, name: "NID কপি", owner: currentLoan.familyGuarantor!.name, isGuarantor: true })}>
                             <FileText className="h-3 w-3 mr-1" /> NID
                           </Button>
                         )}
@@ -4327,7 +4327,7 @@ function LoansTab() {
                         {currentLoan.coBorrower.name} · পিতা: {currentLoan.coBorrower.fatherName || "—"} · মাতা: {currentLoan.coBorrower.motherName || "—"} · ফোন: {currentLoan.coBorrower.phone}
                       </div>
                       {currentLoan.coBorrower.nidFile && (
-                        <Button variant="ghost" size="sm" className="h-7 text-xs" onClick={() => setViewDoc({ file: currentLoan.coBorrower!.nidFile!, name: "NID কপি", owner: currentLoan.coBorrower!.name })}>
+                        <Button variant="ghost" size="sm" className="h-7 text-xs" onClick={() => setViewDoc({ file: currentLoan.coBorrower!.nidFile!, name: "NID কপি", owner: currentLoan.coBorrower!.name, isGuarantor: true })}>
                           <FileText className="h-3 w-3 mr-1" /> NID
                         </Button>
                       )}
@@ -4519,7 +4519,7 @@ function LoansTab() {
               <DialogDescription className="text-xs">মালিক: {viewDoc?.owner}</DialogDescription>
             </div>
             <div className="flex items-center gap-2">
-              <Button size="sm" variant="outline" className="h-8" onClick={() => viewDoc && printNidFile(viewDoc.file, viewDoc.name, viewDoc.owner, data.samitiName, data.samitiLogo)}>
+              <Button size="sm" variant="outline" className="h-8" onClick={() => viewDoc && printNidFile(viewDoc.file, viewDoc.name, viewDoc.owner, data.samitiName, data.samitiLogo, viewDoc.isGuarantor)}>
                 <Printer className="h-4 w-4 mr-1.5" /> প্রিন্ট
               </Button>
               <Button size="sm" variant="ghost" className="h-8 w-8 p-0" onClick={() => setViewDoc(null)}>
