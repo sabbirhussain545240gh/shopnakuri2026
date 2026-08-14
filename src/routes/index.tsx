@@ -1504,16 +1504,16 @@ function buildLoanDetailHtml(
           </div>
           <table style="width:100%;border-collapse:collapse;font-size:14px;margin-bottom:14px;">${tableRows(rows.slice(4))}</table>
           
-          <h3 style="font-size:15px;border-bottom:1px solid #ccc;padding-bottom:4px;margin:14px 0 6px;">জামিনদার</h3>
+          <h3 style="font-size:15px;border-bottom:1px solid #ccc;padding-bottom:4px;margin:14px 0 6px;text-align:center;">জামিনদার</h3>
           <table style="width:100%;border-collapse:collapse;font-size:14px;margin-bottom:14px;">${tableRows(guarantorRows)}</table>
           
           <div style="display:flex;gap:24px;margin-top:14px;align-items:flex-start;">
             <div style="flex:1;">
-              <h3 style="font-size:15px;border-bottom:1px solid #ccc;padding-bottom:4px;margin:0 0 6px 0;">কিস্তি সিডিউল ও আদায়</h3>
+              <h3 style="font-size:15px;border-bottom:1px solid #ccc;padding-bottom:4px;margin:0 0 6px 0;text-align:center;">কিস্তি সিডিউল ও আদায়</h3>
               ${scheduleHtml()}
             </div>
             <div style="flex:1;">
-              <h3 style="font-size:15px;border-bottom:1px solid #ccc;padding-bottom:4px;margin:0 0 6px 0;">ঋণের শর্তাবলী</h3>
+              <h3 style="font-size:15px;border-bottom:1px solid #ccc;padding-bottom:4px;margin:0 0 6px 0;text-align:center;">ঋণের শর্তাবলী</h3>
               ${(loan.loanTerms || samiti.loanTerms) && (loan.loanTerms || samiti.loanTerms)!.length > 0 ? `
                 <ol style="margin:0;padding-left:20px;font-size:13px;color:#111;line-height:1.6;">
                   ${(loan.loanTerms || samiti.loanTerms)!.map((t: string) => `<li style="margin-bottom:4px;">${t}</li>`).join("")}
@@ -3493,7 +3493,7 @@ function LoansTab() {
                   </div>
                 )}
                 <div className="border-t pt-2">
-                  <div className="font-medium mb-1">জামিনদার</div>
+                  <div className="font-medium mb-1 text-center">জামিনদার</div>
                   <div>সদস্য জামিনদার: {gm?.name ?? "—"}{gm ? ` (সদস্য নং ${formatMemberSerial(gm, data.serialPrefix)})` : ""}</div>
                   {currentLoan.familyGuarantor && (
                     <div>পারিবারিক: {currentLoan.familyGuarantor.name} ({currentLoan.familyGuarantor.relation}) — {currentLoan.familyGuarantor.phone}</div>
@@ -3501,7 +3501,7 @@ function LoansTab() {
                 </div>
                 <div className="border-t pt-3 flex gap-6">
                   <div className="flex-1 min-w-0">
-                    <div className="font-medium mb-2 border-b pb-1">কিস্তি সিডিউল ও আদায়</div>
+                    <div className="font-medium mb-2 border-b pb-1 text-center">কিস্তি সিডিউল ও আদায়</div>
                     <div className="overflow-x-auto">
                       <Table>
                         <TableHeader>
@@ -3544,7 +3544,7 @@ function LoansTab() {
                   </div>
                   
                   <div className="flex-1 min-w-0 border-l pl-6">
-                    <div className="font-medium mb-2 border-b pb-1">ঋণের শর্তাবলী</div>
+                    <div className="font-medium mb-2 border-b pb-1 text-center">ঋণের শর্তাবলী</div>
                     {((currentLoan.loanTerms && currentLoan.loanTerms.length > 0) || (data.settings.loanTerms && data.settings.loanTerms.length > 0)) ? (
                       <ul className="list-decimal list-inside space-y-1.5 text-xs text-muted-foreground">
                         {(currentLoan.loanTerms || data.settings.loanTerms || []).map((term, i) => (
