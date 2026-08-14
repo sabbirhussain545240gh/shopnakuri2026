@@ -700,6 +700,10 @@ function Dashboard({ totals, memberCount, data, onNavigate }: any) {
 function MembersTab() {
   const { data, addMember, addMembers, updateMember, deleteMember } = useSamiti();
   const [open, setOpen] = useState(false);
+  const [searchSerial, setSearchSerial] = useState("");
+  const [searchName, setSearchName] = useState("");
+  const [searchPhone, setSearchPhone] = useState("");
+  const [searchNid, setSearchNid] = useState("");
   const emptyForm = {
     serial: "",
     category: "",
