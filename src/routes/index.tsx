@@ -865,7 +865,7 @@ function MembersTab() {
   thead tr, tbody tr, td { background: transparent !important; }
   th { background: rgba(243,244,246,0.35); border: 1px solid #ccc; padding: 10px; text-align: left; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
   th:nth-child(1), th:nth-child(6) { text-align: center; }
-  @media print { body { padding: 0 12px; } .no-print { display: none; } }
+  @media print { body { padding: 0 !important; } .no-print { display: none !important; } }
   ${printBrandCss}
 </style></head>
 <body>
@@ -1540,7 +1540,7 @@ function printLoanDetail(
       body { font-family: "Segoe UI", "Noto Sans Bengali", sans-serif; margin: 0; padding: 0; background: #fff; color: #111; }
       .ld-wm { position: absolute; inset: 0; background-repeat: no-repeat; background-position: center; background-size: 70% auto; opacity: 0.15; pointer-events: none; z-index: 0; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
       .ld-content { position: relative; z-index: 1; }
-      @media print { .no-print { display: none; } }
+      @media print { body { padding: 0 !important; } .no-print { display: none !important; } }
     </style></head>
     <body>
       <div class="no-print" style="margin:16px auto;max-width:840px;display:flex;gap:10px;padding:0 20px;">
@@ -1812,7 +1812,7 @@ function SavingsTab() {
   td.c { text-align: center; }
   td.r { text-align: right; }
   tfoot td { font-weight: bold; background: #f3f4f6; }
-  @media print { .no-print { display: none; } body { padding: 0; } }
+  @media print { body { padding: 0 !important; } .no-print { display: none !important; } }
 </style></head>
 <body>
   ${data.samitiLogo ? `<div class="wm" style="background-image:url('${data.samitiLogo}')"></div>` : ""}
@@ -1884,7 +1884,7 @@ function SavingsTab() {
   td.r { text-align: right; }
   tbody tr { height: 22px; }
   .foot { display:flex; justify-content: space-between; font-size: 12px; margin-top: 14px; }
-  @media print { .no-print { display: none; } body { padding: 0 12px; } }
+  @media print { body { padding: 0 !important; } .no-print { display: none !important; } }
   ${printBrandCss}
 </style></head>
 <body>
@@ -2661,7 +2661,7 @@ function LoansTab() {
       <html><head><meta charset="utf-8" /><title>ঋণ ব্যবস্থাপনা - ${data.samitiName || "সমিতি"}</title>
       <style>
         body { font-family: "Segoe UI", "Noto Sans Bengali", sans-serif; margin: 0; padding: 24px; color: #111; background:#fff; position: relative; }
-        @media print { body { padding: 0 12px; } .no-print { display: none; } }
+        @media print { body { padding: 0 !important; } .no-print { display: none !important; } }
         ${printBrandCss}
       </style></head>
       <body>
@@ -2761,8 +2761,8 @@ function LoansTab() {
       <style>
         body { font-family: "Segoe UI", "Noto Sans Bengali", sans-serif; margin: 0; padding: 24px; color: #111; background:#fff; position: relative; }
         @media print {
-          body { padding: 0 12px; }
-          .no-print { display: none; }
+          body { padding: 0 !important; }
+          .no-print { display: none !important; }
           @page { size: A4 landscape; margin: 10mm; }
         }
         ${printBrandCss}
@@ -4554,7 +4554,7 @@ function DepositsHistoryTab() {
               const w = window.open("", "_blank"); if (!w) return;
               const rowsHtml = paidMembersList.map((m, i) => `<tr><td style="text-align:center">${toBn(i+1)}</td><td style="text-align:center">${toBn(m.serial || 0)}</td><td>${m.name}</td><td style="text-align:right">${formatTk(m.paidAmount)}</td></tr>`).join("");
               const totalPaid = paidMembersList.reduce((s, m) => s + m.paidAmount, 0);
-              w.document.write(`<!DOCTYPE html><html><head><meta charset="utf-8"><title>পরিশোধিত তালিকা - ${fmtMonth(monthFilter)}</title><style>body{font-family:"Segoe UI","Noto Sans Bengali",sans-serif;padding:20px;position:relative;}h3{text-align:center;margin:4px 0;color:#047857;}table{width:100%;border-collapse:collapse;margin-top:12px;}th,td{border:1px solid #ccc;padding:6px 8px;font-size:13px;}th{background:#d1fae5;}@media print{.no-print{display:none;}body{padding:0 12px;}}${printBrandCss}</style></head><body>${printWatermark(data.samitiLogo)}<div class="ps-content"><div class="no-print" style="margin-bottom:12px;text-align:center;display:flex;justify-content:center;gap:10px;"><button onclick="window.print()" style="padding:8px 16px;cursor:pointer;background:#0f172a;color:#fff;border:none;border-radius:4px;">প্রিন্ট করুন</button><button onclick="window.close()" style="padding:8px 16px;cursor:pointer;background:#f1f5f9;border:1px solid #e2e8f0;border-radius:4px;">বাতিল</button></div>${printHeader(data.samitiName, data.samitiLogo, `✓ ${fmtMonth(monthFilter)} মাসে পরিশোধিত সদস্য তালিকা (${toBn(paidMembersList.length)} জন)`, data.samitiAddress, data.establishedDate)}<table><thead><tr><th>ক্রম</th><th>সদস্য নং</th><th>নাম</th><th>পরিমাণ</th></tr></thead><tbody>${rowsHtml}<tr><td colspan="3" style="text-align:right;font-weight:bold">মোট</td><td style="text-align:right;font-weight:bold">${formatTk(totalPaid)}</td></tr></tbody></table></div></body></html>`);
+              w.document.write(`<!DOCTYPE html><html><head><meta charset="utf-8"><title>পরিশোধিত তালিকা - ${fmtMonth(monthFilter)}</title><style>body{font-family:"Segoe UI","Noto Sans Bengali",sans-serif;padding:20px;position:relative;}h3{text-align:center;margin:4px 0;color:#047857;}table{width:100%;border-collapse:collapse;margin-top:12px;}th,td{border:1px solid #ccc;padding:6px 8px;font-size:13px;}th{background:#d1fae5;}@media print{body{padding:0 !important;}.no-print{display:none !important;}}${printBrandCss}</style></head><body>${printWatermark(data.samitiLogo)}<div class="ps-content"><div class="no-print" style="margin-bottom:12px;text-align:center;display:flex;justify-content:center;gap:10px;"><button onclick="window.print()" style="padding:8px 16px;cursor:pointer;background:#0f172a;color:#fff;border:none;border-radius:4px;">প্রিন্ট করুন</button><button onclick="window.close()" style="padding:8px 16px;cursor:pointer;background:#f1f5f9;border:1px solid #e2e8f0;border-radius:4px;">বাতিল</button></div>${printHeader(data.samitiName, data.samitiLogo, `✓ ${fmtMonth(monthFilter)} মাসে পরিশোধিত সদস্য তালিকা (${toBn(paidMembersList.length)} জন)`, data.samitiAddress, data.establishedDate)}<table><thead><tr><th>ক্রম</th><th>সদস্য নং</th><th>নাম</th><th>পরিমাণ</th></tr></thead><tbody>${rowsHtml}<tr><td colspan="3" style="text-align:right;font-weight:bold">মোট</td><td style="text-align:right;font-weight:bold">${formatTk(totalPaid)}</td></tr></tbody></table></div></body></html>`);
               w.document.close();
             }}>
               <Printer className="h-4 w-4 mr-1" />পরিশোধিত তালিকা প্রিন্ট
@@ -4564,7 +4564,7 @@ function DepositsHistoryTab() {
             <Button variant="outline" size="sm" onClick={() => {
               const w = window.open("", "_blank"); if (!w) return;
               const rowsHtml = missingMembers.map((m, i) => `<tr><td style="text-align:center">${toBn(i+1)}</td><td style="text-align:center">${toBn(m.serial || 0)}</td><td>${m.name}</td><td style="text-align:center;color:#b91c1c;font-weight:bold">জমা হয়নি</td></tr>`).join("");
-              w.document.write(`<!DOCTYPE html><html><head><meta charset="utf-8"><title>বকেয়া তালিকা - ${fmtMonth(monthFilter)}</title><style>body{font-family:"Segoe UI","Noto Sans Bengali",sans-serif;padding:20px;position:relative;}h3{text-align:center;margin:4px 0;color:#b91c1c;}table{width:100%;border-collapse:collapse;margin-top:12px;}th,td{border:1px solid #ccc;padding:6px 8px;font-size:13px;}th{background:#fee2e2;}@media print{.no-print{display:none;}body{padding:0 12px;}}${printBrandCss}</style></head><body>${printWatermark(data.samitiLogo)}<div class="ps-content"><div class="no-print" style="margin-bottom:12px;text-align:center;display:flex;justify-content:center;gap:10px;"><button onclick="window.print()" style="padding:8px 16px;cursor:pointer;background:#0f172a;color:#fff;border:none;border-radius:4px;">প্রিন্ট করুন</button><button onclick="window.close()" style="padding:8px 16px;cursor:pointer;background:#f1f5f9;border:1px solid #e2e8f0;border-radius:4px;">বাতিল</button></div>${printHeader(data.samitiName, data.samitiLogo, `⚠ ${fmtMonth(monthFilter)} মাসে যাদের চাঁদা জমা হয়নি (${toBn(missingMembers.length)} জন)`, data.samitiAddress, data.establishedDate)}<table><thead><tr><th>ক্রম</th><th>সদস্য নং</th><th>নাম</th><th>অবস্থা</th></tr></thead><tbody>${rowsHtml}</tbody></table></div></body></html>`);
+              w.document.write(`<!DOCTYPE html><html><head><meta charset="utf-8"><title>বকেয়া তালিকা - ${fmtMonth(monthFilter)}</title><style>body{font-family:"Segoe UI","Noto Sans Bengali",sans-serif;padding:20px;position:relative;}h3{text-align:center;margin:4px 0;color:#b91c1c;}table{width:100%;border-collapse:collapse;margin-top:12px;}th,td{border:1px solid #ccc;padding:6px 8px;font-size:13px;}th{background:#fee2e2;}@media print{body{padding:0 !important;}.no-print{display:none !important;}}${printBrandCss}</style></head><body>${printWatermark(data.samitiLogo)}<div class="ps-content"><div class="no-print" style="margin-bottom:12px;text-align:center;display:flex;justify-content:center;gap:10px;"><button onclick="window.print()" style="padding:8px 16px;cursor:pointer;background:#0f172a;color:#fff;border:none;border-radius:4px;">প্রিন্ট করুন</button><button onclick="window.close()" style="padding:8px 16px;cursor:pointer;background:#f1f5f9;border:1px solid #e2e8f0;border-radius:4px;">বাতিল</button></div>${printHeader(data.samitiName, data.samitiLogo, `⚠ ${fmtMonth(monthFilter)} মাসে যাদের চাঁদা জমা হয়নি (${toBn(missingMembers.length)} জন)`, data.samitiAddress, data.establishedDate)}<table><thead><tr><th>ক্রম</th><th>সদস্য নং</th><th>নাম</th><th>অবস্থা</th></tr></thead><tbody>${rowsHtml}</tbody></table></div></body></html>`);
               w.document.close();
             }}>
               <Printer className="h-4 w-4 mr-1" />বকেয়া তালিকা প্রিন্ট
@@ -6445,7 +6445,7 @@ function printReport(p: ReportParams) {
     <style>
       body { font-family: "Segoe UI", "Noto Sans Bengali", sans-serif; margin: 0; padding: 24px; color: #111; background:#fff; position: relative; }
       h3 { margin: 16px 0 6px; font-size: 14px; }
-      @media print { body { padding: 0 12px; } .no-print { display: none; } }
+      @media print { body { padding: 0 !important; } .no-print { display: none !important; } }
       ${printBrandCss}
     </style></head>
     <body>
