@@ -2851,7 +2851,7 @@ function SavingsTab() {
 
 // ===== Loans =====
 function LoansTab() {
-  const { data, addLoan, updateLoan, addPayment, closeLoan, refreshLoanStatus, deleteLoan, updateSamitiInfo } = useSamiti();
+  const { data, addLoan, updateLoan, addPayment, closeLoan, refreshLoanStatus, deleteLoan, updateSettings } = useSamiti();
   const [open, setOpen] = useState(false);
   const [payFor, setPayFor] = useState<Loan | null>(null);
   const [editFor, setEditFor] = useState<Loan | null>(null);
@@ -3354,7 +3354,7 @@ function LoansTab() {
                           onChange={(e) => {
                             const newTerms = [...(data.settings.loanTerms || [])];
                             newTerms[i] = e.target.value;
-                            updateSamitiInfo({ settings: { ...data.settings, loanTerms: newTerms } });
+                            updateSettings({ loanTerms: newTerms });
                           }}
                           className="min-h-[40px] resize-none overflow-hidden"
                           onInput={(e) => {
@@ -3371,7 +3371,7 @@ function LoansTab() {
                         className="shrink-0 text-destructive opacity-0 group-hover:opacity-100 transition-opacity"
                         onClick={() => {
                           const newTerms = (data.settings.loanTerms || []).filter((_, j) => j !== i);
-                          updateSamitiInfo({ settings: { ...data.settings, loanTerms: newTerms } });
+                          updateSettings({ loanTerms: newTerms });
                         }}
                       >
                         <Trash2 className="h-4 w-4" />
@@ -3388,7 +3388,7 @@ function LoansTab() {
                   size="sm"
                   onClick={() => {
                     const newTerms = [...(data.settings.loanTerms || []), ""];
-                    updateSamitiInfo({ settings: { ...data.settings, loanTerms: newTerms } });
+                    updateSettings({ loanTerms: newTerms });
                   }}
                 >
 
