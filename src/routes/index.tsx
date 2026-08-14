@@ -2661,7 +2661,7 @@ function LoansTab() {
       <html><head><meta charset="utf-8" /><title>ঋণ ব্যবস্থাপনা - ${data.samitiName || "সমিতি"}</title>
       <style>
         body { font-family: "Segoe UI", "Noto Sans Bengali", sans-serif; margin: 0; padding: 24px; color: #111; background:#fff; position: relative; }
-        @media print { body { padding: 0 12px; } .no-print { display: none; } }
+        @media print { body { padding: 0 !important; } .no-print { display: none !important; } }
         ${printBrandCss}
       </style></head>
       <body>
