@@ -3599,7 +3599,7 @@ function LoansTab() {
                       </div>
                       <div>
                         <Label>চেকের তারিখ</Label>
-                        <Input type="date" value={c.date} onChange={(e) => updateChequeRow(i, "date", e.target.value)} />
+                        <div><Label>চেকের তারিখ</Label><Input type="text" placeholder={getDateFormat()} value={c.date ? fmtDate(c.date) : ""} onChange={(e) => updateChequeRow(i, "date", toIsoDate(e.target.value))} /></div>
                       </div>
                     </div>
                   </div>
