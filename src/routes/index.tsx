@@ -2856,9 +2856,9 @@ function LoansTab() {
   const [payFor, setPayFor] = useState<Loan | null>(null);
   const [editFor, setEditFor] = useState<Loan | null>(null);
   const [detailFor, setDetailFor] = useState<Loan | null>(null);
-  const [editForm, setEditForm] = useState({ memberId: "", amount: "", interestRate: "", durationMonths: "", date: "", memberGuarantorId: "", familyGuarantorName: "", familyGuarantorRelation: "", familyGuarantorCustomRelation: "", familyGuarantorPhone: "" });
+  const [editForm, setEditForm] = useState({ memberId: "", amount: "", interestRate: "", durationMonths: "", date: "", memberGuarantorId: "", familyGuarantorName: "", familyGuarantorRelation: "", familyGuarantorCustomRelation: "", familyGuarantorPhone: "", familyGuarantorNidFile: "", contractFile: "" });
   const [editIsJoint, setEditIsJoint] = useState(false);
-  const [editCoForm, setEditCoForm] = useState({ name: "", fatherName: "", phone: "", nid: "", address: "" });
+  const [editCoForm, setEditCoForm] = useState({ name: "", fatherName: "", phone: "", nid: "", address: "", motherName: "", birthDate: "", nidFile: "" });
   const [editCheques, setEditCheques] = useState<Array<{ bankName: string; branch: string; chequeNo: string; accountNo: string; amount: string; date: string }>>([]);
   const [editErrors, setEditErrors] = useState<Record<string, string>>({});
   const editAddChequeRow = () => setEditCheques((p) => [...p, { bankName: "", branch: "", chequeNo: "", accountNo: "", amount: "", date: "" }]);
@@ -2868,11 +2868,11 @@ function LoansTab() {
     setEditForm((prev) => ({ ...prev, [key]: value }));
     setEditErrors((prev) => { const next = { ...prev }; delete next[key]; return next; });
   };
-  const [form, setForm] = useState({ memberId: "", amount: "", interestRate: String(data.settings.defaultInterestRate), durationMonths: String(data.settings.defaultDurationMonths), date: today(), memberGuarantorId: "", familyGuarantorName: "", familyGuarantorRelation: "", familyGuarantorCustomRelation: "", familyGuarantorPhone: "" });
+  const [form, setForm] = useState({ memberId: "", amount: "", interestRate: String(data.settings.defaultInterestRate), durationMonths: String(data.settings.defaultDurationMonths), date: today(), memberGuarantorId: "", familyGuarantorName: "", familyGuarantorRelation: "", familyGuarantorCustomRelation: "", familyGuarantorPhone: "", familyGuarantorNidFile: "", contractFile: "" });
   const [payForm, setPayForm] = useState({ amount: "", date: today(), note: "" });
   const [receipt, setReceipt] = useState<null | { loan: Loan; memberName: string; memberSerial?: number; amount: number; date: string; paidAfter: number; remainingAfter: number; receiptNo: string; note?: string; logo?: string; loanNo?: number }>(null);
   const [isJoint, setIsJoint] = useState(false);
-  const [coForm, setCoForm] = useState({ name: "", fatherName: "", motherName: "", birthDate: "", phone: "", nid: "", address: "" });
+  const [coForm, setCoForm] = useState({ name: "", fatherName: "", motherName: "", birthDate: "", phone: "", nid: "", address: "", nidFile: "" });
   const [cheques, setCheques] = useState<Array<{ bankName: string; branch: string; chequeNo: string; accountNo: string; amount: string; date: string }>>([]);
   const addChequeRow = () => setCheques((p) => [...p, { bankName: "", branch: "", chequeNo: "", accountNo: "", amount: "", date: "" }]);
   const updateChequeRow = (i: number, key: string, v: string) => setCheques((p) => p.map((c, idx) => (idx === i ? { ...c, [key]: v } : c)));
@@ -2918,7 +2918,7 @@ function LoansTab() {
       date: form.date,
       loanTerms: data.settings.loanTerms,
       memberGuarantorId: form.memberGuarantorId,
-      familyGuarantor: { name: form.familyGuarantorName.trim(), relation, phone: form.familyGuarantorPhone.trim() },
+      familyGuarantor: { name: form.familyGuarantorName.trim(), relation, phone: form.familyGuarantorPhone.trim(), nidFile: form.familyGuarantorNidFile || undefined },
       isJoint,
       coBorrower: isJoint ? {
         name: coForm.name.trim(),
@@ -2928,7 +2928,9 @@ function LoansTab() {
         phone: coForm.phone.trim(),
         nid: coForm.nid.trim() || undefined,
         address: coForm.address.trim() || undefined,
+        nidFile: coForm.nidFile || undefined,
       } : undefined,
+      contractFile: form.contractFile || undefined,
       cheques: cheques
         .filter((c) => c.bankName.trim() || c.chequeNo.trim())
         .map((c) => ({
@@ -2940,9 +2942,9 @@ function LoansTab() {
           date: c.date || undefined,
         })),
     });
-    setForm({ memberId: "", amount: "", interestRate: String(data.settings.defaultInterestRate), durationMonths: String(data.settings.defaultDurationMonths), date: today(), memberGuarantorId: "", familyGuarantorName: "", familyGuarantorRelation: "", familyGuarantorCustomRelation: "", familyGuarantorPhone: "" });
+    setForm({ memberId: "", amount: "", interestRate: String(data.settings.defaultInterestRate), durationMonths: String(data.settings.defaultDurationMonths), date: today(), memberGuarantorId: "", familyGuarantorName: "", familyGuarantorRelation: "", familyGuarantorCustomRelation: "", familyGuarantorPhone: "", familyGuarantorNidFile: "", contractFile: "" });
     setIsJoint(false);
-    setCoForm({ name: "", fatherName: "", motherName: "", birthDate: "", phone: "", nid: "", address: "" });
+    setCoForm({ name: "", fatherName: "", motherName: "", birthDate: "", phone: "", nid: "", address: "", nidFile: "" });
     setCheques([]);
     setErrors({});
     setOpen(false);
@@ -2993,6 +2995,8 @@ function LoansTab() {
       familyGuarantorRelation: isCustomRelation ? "অন্যান্য" : fgRelation,
       familyGuarantorCustomRelation: isCustomRelation ? fgRelation : "",
       familyGuarantorPhone: l.familyGuarantor?.phone ?? "",
+      familyGuarantorNidFile: l.familyGuarantor?.nidFile ?? "",
+      contractFile: l.contractFile ?? "",
     });
     setEditIsJoint(!!l.isJoint);
     setEditCoForm({
@@ -3001,6 +3005,9 @@ function LoansTab() {
       phone: l.coBorrower?.phone ?? "",
       nid: l.coBorrower?.nid ?? "",
       address: l.coBorrower?.address ?? "",
+      motherName: l.coBorrower?.motherName ?? "",
+      birthDate: l.coBorrower?.birthDate ?? "",
+      nidFile: l.coBorrower?.nidFile ?? "",
     });
     setEditCheques((l.cheques ?? []).map((c) => ({
       bankName: c.bankName ?? "",
@@ -3040,7 +3047,7 @@ function LoansTab() {
       durationMonths: dur,
       date: editForm.date,
       memberGuarantorId: editForm.memberGuarantorId,
-      familyGuarantor: { name: editForm.familyGuarantorName.trim(), relation, phone: editForm.familyGuarantorPhone.trim() },
+      familyGuarantor: { name: editForm.familyGuarantorName.trim(), relation, phone: editForm.familyGuarantorPhone.trim(), nidFile: editForm.familyGuarantorNidFile || undefined },
       isJoint: editIsJoint,
       coBorrower: editIsJoint ? {
         name: editCoForm.name.trim(),
