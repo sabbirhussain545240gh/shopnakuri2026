@@ -6543,7 +6543,8 @@ async function exportReportPdf(p: ReportParams) {
 const receiptCss = `
   body{margin:0;padding:20px;background:#fff;color:#111;font-family:"Segoe UI","Noto Sans Bengali",Arial,sans-serif;}
   .r{width:520px;border:1px solid #ddd;border-radius:8px;padding:20px;background:#fff;position:relative;overflow:hidden;}
-  .watermark{position:absolute;inset:0;background-repeat:no-repeat;background-position:center;background-size:75% auto;opacity:0.18;pointer-events:none;z-index:0;-webkit-print-color-adjust:exact;print-color-adjust:exact;}
+  .watermark{position:absolute;inset:0;background-repeat:no-repeat;background-position:center;background-size:75% auto;opacity:0.18;pointer-events:none;z-index:0;-webkit-print-color-adjust:exact;print-color-adjust:exact;display:block !important;visibility:visible !important;}
+  @media print { .watermark, .ps-wm, .ld-wm, .wm { display: block !important; visibility: visible !important; opacity: 0.18 !important; -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; } }
   .r > *:not(.watermark){position:relative;z-index:1;}
   .center{text-align:center;}
   .header{display:flex;align-items:center;justify-content:center;gap:12px;margin-bottom:6px;}
