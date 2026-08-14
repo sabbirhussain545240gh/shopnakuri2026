@@ -871,8 +871,9 @@ function MembersTab() {
 <body>
   ${printWatermark(data.samitiLogo)}
   <div class="ps-content">
-  <div class="no-print" style="margin-bottom:16px;">
-    <button onclick="window.print()" style="padding:8px 16px;font-size:14px;cursor:pointer;">প্রিন্ট করুন</button>
+  <div class="no-print" style="margin-bottom:16px;display:flex;gap:10px;">
+    <button onclick="window.print()" style="padding:8px 16px;font-size:14px;cursor:pointer;background:#0f172a;color:#fff;border:none;border-radius:4px;">প্রিন্ট করুন</button>
+    <button onclick="window.close()" style="padding:8px 16px;font-size:14px;cursor:pointer;background:#f1f5f9;border:1px solid #e2e8f0;border-radius:4px;">বাতিল</button>
   </div>
   ${printHeader(data.samitiName, data.samitiLogo, "সদস্য তালিকা", data.samitiAddress, data.establishedDate)}
   <p>মোট ${toBn(data.members.length)} জন</p>
@@ -883,7 +884,6 @@ function MembersTab() {
     <tbody>${rows}</tbody>
   </table>
   </div>
-  <script>setTimeout(()=>window.print(),300)</script>
 </body></html>`);
     w.document.close();
   };
@@ -1543,8 +1543,11 @@ function printLoanDetail(
       @media print { .no-print { display: none; } }
     </style></head>
     <body>
+      <div class="no-print" style="margin:16px auto;max-width:840px;display:flex;gap:10px;padding:0 20px;">
+        <button onclick="window.print()" style="padding:8px 16px;font-size:14px;cursor:pointer;background:#0f172a;color:#fff;border:none;border-radius:4px;">প্রিন্ট করুন</button>
+        <button onclick="window.close()" style="padding:8px 16px;font-size:14px;cursor:pointer;background:#f1f5f9;border:1px solid #e2e8f0;border-radius:4px;">বাতিল</button>
+      </div>
       ${inner}
-      <script>setTimeout(()=>window.print(),400)</script>
     </body></html>
   `);
   w.document.close();
@@ -1814,8 +1817,9 @@ function SavingsTab() {
 <body>
   ${data.samitiLogo ? `<div class="wm" style="background-image:url('${data.samitiLogo}')"></div>` : ""}
   <div class="content">
-  <div class="no-print" style="text-align:right;margin-bottom:6px;">
-    <button onclick="window.print()" style="padding:6px 14px;cursor:pointer;">প্রিন্ট করুন</button>
+  <div class="no-print" style="text-align:right;margin-bottom:6px;display:flex;justify-content:flex-end;gap:10px;">
+    <button onclick="window.print()" style="padding:6px 14px;cursor:pointer;background:#0f172a;color:#fff;border:none;border-radius:4px;">প্রিন্ট করুন</button>
+    <button onclick="window.close()" style="padding:6px 14px;cursor:pointer;background:#f1f5f9;border:1px solid #e2e8f0;border-radius:4px;">বাতিল</button>
   </div>
   <div class="hdr">
     ${data.samitiLogo ? `<img src="${data.samitiLogo}" alt="logo" />` : ""}
@@ -1832,7 +1836,6 @@ function SavingsTab() {
     <tfoot><tr><td colspan="6" class="r">মোট (${toBn(filteredDeposits.length)}টি)</td><td class="r">${formatTk(total)}</td></tr></tfoot>
   </table>
   </div>
-  <script>setTimeout(()=>window.print(),300)</script>
 </body></html>`);
     w.document.close();
   };
@@ -1887,8 +1890,9 @@ function SavingsTab() {
 <body>
   ${printWatermark(data.samitiLogo)}
   <div class="ps-content">
-  <div class="no-print" style="text-align:right;margin-bottom:6px;">
-    <button onclick="window.print()" style="padding:6px 14px;cursor:pointer;">প্রিন্ট করুন</button>
+  <div class="no-print" style="text-align:right;margin-bottom:6px;display:flex;justify-content:flex-end;gap:10px;">
+    <button onclick="window.print()" style="padding:6px 14px;cursor:pointer;background:#0f172a;color:#fff;border:none;border-radius:4px;">প্রিন্ট করুন</button>
+    <button onclick="window.close()" style="padding:6px 14px;cursor:pointer;background:#f1f5f9;border:1px solid #e2e8f0;border-radius:4px;">বাতিল</button>
   </div>
   ${printHeader(data.samitiName, data.samitiLogo, `মাসিক চাদা ও ঋণের কিস্তি আদায় ফর্ম — ${monthLabel}`, data.samitiAddress, data.establishedDate)}
   <table>
@@ -1905,7 +1909,6 @@ function SavingsTab() {
     <div>সভাপতি/সম্পাদকের স্বাক্ষর: ____________________</div>
   </div>
   </div>
-  <script>setTimeout(()=>window.print(),300)</script>
 </body></html>`);
     w.document.close();
   };
@@ -2339,7 +2342,7 @@ function SavingsTab() {
             const html = buildDepositReceiptHtml(receipt, data.samitiName || "সমিতি", qrDataUrl, findTreasurer(data.settings.committee));
             const w = window.open("", "_blank", "width=600,height=800");
             if (!w) return;
-            w.document.write(`<!DOCTYPE html><html><head><meta charset="utf-8"><title>জমা রিসিপ্ট</title><style>${receiptCss}</style></head><body>${html}<script>setTimeout(()=>window.print(),300)</script></body></html>`);
+            w.document.write(`<!DOCTYPE html><html><head><meta charset="utf-8"><title>জমা রিসিপ্ট</title><style>${receiptCss}</style></head><body><div class="no-print" style="margin-bottom:12px;display:flex;gap:10px;"><button onclick="window.print()" style="padding:8px 16px;font-size:14px;cursor:pointer;background:#0f172a;color:#fff;border:none;border-radius:4px;">প্রিন্ট করুন</button><button onclick="window.close()" style="padding:8px 16px;font-size:14px;cursor:pointer;background:#f1f5f9;border:1px solid #e2e8f0;border-radius:4px;">বাতিল</button></div>${html}</body></html>`);
             w.document.close();
             w.focus();
           }}><Printer className="h-4 w-4 mr-1" />প্রিন্ট</Button>
@@ -2664,13 +2667,13 @@ function LoansTab() {
       <body>
         ${printWatermark(data.samitiLogo)}
         <div class="ps-content">
-        <div class="no-print" style="margin-bottom:16px;">
-          <button onclick="window.print()" style="padding:8px 16px;font-size:14px;cursor:pointer;">প্রিন্ট করুন</button>
+        <div class="no-print" style="margin-bottom:16px;display:flex;gap:10px;">
+          <button onclick="window.print()" style="padding:8px 16px;font-size:14px;cursor:pointer;background:#0f172a;color:#fff;border:none;border-radius:4px;">প্রিন্ট করুন</button>
+          <button onclick="window.close()" style="padding:8px 16px;font-size:14px;cursor:pointer;background:#f1f5f9;border:1px solid #e2e8f0;border-radius:4px;">বাতিল</button>
         </div>
         ${printHeader(data.samitiName, data.samitiLogo, `ঋণ ব্যবস্থাপনা — মোট ${toBn(filteredLoans.length)}টি ঋণ | প্রিন্ট তারিখ: ${fmtDate(today())}`, data.samitiAddress, data.establishedDate)}
         ${html}
         </div>
-        <script>setTimeout(()=>window.print(),300)</script>
       </body></html>
     `);
     w.document.close();
@@ -2767,8 +2770,9 @@ function LoansTab() {
       <body>
         ${printWatermark(data.samitiLogo)}
         <div class="ps-content">
-        <div class="no-print" style="margin-bottom:16px; display:flex; gap:8px;">
-          <button onclick="window.print()" style="padding:8px 16px;font-size:14px;cursor:pointer;">প্রিন্ট / PDF সংরক্ষণ</button>
+        <div class="no-print" style="margin-bottom:16px; display:flex; gap:10px;">
+          <button onclick="window.print()" style="padding:8px 16px;font-size:14px;cursor:pointer;background:#0f172a;color:#fff;border:none;border-radius:4px;">প্রিন্ট / PDF সংরক্ষণ</button>
+          <button onclick="window.close()" style="padding:8px 16px;font-size:14px;cursor:pointer;background:#f1f5f9;border:1px solid #e2e8f0;border-radius:4px;">বাতিল</button>
         </div>
         ${printHeader(data.samitiName, data.samitiLogo, `ঋণ ব্যবস্থাপনা — মোট ${toBn(filteredLoans.length)}টি ঋণ | তারিখ: ${fmtDate(today())}`, data.samitiAddress, data.establishedDate)}
         ${html}
@@ -3264,7 +3268,7 @@ function LoansTab() {
               const html = buildReceiptHtml(receipt, data.samitiName || "সমিতি", qrDataUrl, findTreasurer(data.settings.committee));
               const w = window.open("", "_blank", "width=600,height=800");
               if (!w) return;
-              w.document.write(`<!DOCTYPE html><html><head><meta charset="utf-8"><title>রিসিপ্ট</title><style>${receiptCss}</style></head><body>${html}<script>setTimeout(()=>window.print(),300)</script></body></html>`);
+              w.document.write(`<!DOCTYPE html><html><head><meta charset="utf-8"><title>রিসিপ্ট</title><style>${receiptCss}</style></head><body><div class="no-print" style="margin-bottom:12px;display:flex;gap:10px;"><button onclick="window.print()" style="padding:8px 16px;font-size:14px;cursor:pointer;background:#0f172a;color:#fff;border:none;border-radius:4px;">প্রিন্ট করুন</button><button onclick="window.close()" style="padding:8px 16px;font-size:14px;cursor:pointer;background:#f1f5f9;border:1px solid #e2e8f0;border-radius:4px;">বাতিল</button></div>${html}</body></html>`);
               w.document.close();
               w.focus();
             }}><Printer className="h-4 w-4 mr-1" />প্রিন্ট</Button>
@@ -4266,7 +4270,7 @@ function ReceiptsHistoryTab() {
               const html = buildReceiptHtml(receipt, data.samitiName || "সমিতি", qrDataUrl, findTreasurer(data.settings.committee));
               const w = window.open("", "_blank", "width=600,height=800");
               if (!w) return;
-              w.document.write(`<!DOCTYPE html><html><head><meta charset="utf-8"><title>রিসিপ্ট</title><style>${receiptCss}</style></head><body>${html}<script>setTimeout(()=>window.print(),300)</script></body></html>`);
+              w.document.write(`<!DOCTYPE html><html><head><meta charset="utf-8"><title>রিসিপ্ট</title><style>${receiptCss}</style></head><body><div class="no-print" style="margin-bottom:12px;display:flex;gap:10px;"><button onclick="window.print()" style="padding:8px 16px;font-size:14px;cursor:pointer;background:#0f172a;color:#fff;border:none;border-radius:4px;">প্রিন্ট করুন</button><button onclick="window.close()" style="padding:8px 16px;font-size:14px;cursor:pointer;background:#f1f5f9;border:1px solid #e2e8f0;border-radius:4px;">বাতিল</button></div>${html}</body></html>`);
               w.document.close();
               w.focus();
             }}><Printer className="h-4 w-4 mr-1" />প্রিন্ট</Button>
@@ -4550,7 +4554,7 @@ function DepositsHistoryTab() {
               const w = window.open("", "_blank"); if (!w) return;
               const rowsHtml = paidMembersList.map((m, i) => `<tr><td style="text-align:center">${toBn(i+1)}</td><td style="text-align:center">${toBn(m.serial || 0)}</td><td>${m.name}</td><td style="text-align:right">${formatTk(m.paidAmount)}</td></tr>`).join("");
               const totalPaid = paidMembersList.reduce((s, m) => s + m.paidAmount, 0);
-              w.document.write(`<!DOCTYPE html><html><head><meta charset="utf-8"><title>পরিশোধিত তালিকা - ${fmtMonth(monthFilter)}</title><style>body{font-family:"Segoe UI","Noto Sans Bengali",sans-serif;padding:20px;position:relative;}h3{text-align:center;margin:4px 0;color:#047857;}table{width:100%;border-collapse:collapse;margin-top:12px;}th,td{border:1px solid #ccc;padding:6px 8px;font-size:13px;}th{background:#d1fae5;}@media print{.no-print{display:none;}body{padding:0 12px;}}${printBrandCss}</style></head><body>${printWatermark(data.samitiLogo)}<div class="ps-content"><div class="no-print" style="margin-bottom:12px;text-align:center;"><button onclick="window.print()" style="padding:8px 16px;cursor:pointer;">প্রিন্ট করুন</button></div>${printHeader(data.samitiName, data.samitiLogo, `✓ ${fmtMonth(monthFilter)} মাসে পরিশোধিত সদস্য তালিকা (${toBn(paidMembersList.length)} জন)`, data.samitiAddress, data.establishedDate)}<table><thead><tr><th>ক্রম</th><th>সদস্য নং</th><th>নাম</th><th>পরিমাণ</th></tr></thead><tbody>${rowsHtml}<tr><td colspan="3" style="text-align:right;font-weight:bold">মোট</td><td style="text-align:right;font-weight:bold">${formatTk(totalPaid)}</td></tr></tbody></table></div><script>setTimeout(()=>window.print(),300)</script></body></html>`);
+              w.document.write(`<!DOCTYPE html><html><head><meta charset="utf-8"><title>পরিশোধিত তালিকা - ${fmtMonth(monthFilter)}</title><style>body{font-family:"Segoe UI","Noto Sans Bengali",sans-serif;padding:20px;position:relative;}h3{text-align:center;margin:4px 0;color:#047857;}table{width:100%;border-collapse:collapse;margin-top:12px;}th,td{border:1px solid #ccc;padding:6px 8px;font-size:13px;}th{background:#d1fae5;}@media print{.no-print{display:none;}body{padding:0 12px;}}${printBrandCss}</style></head><body>${printWatermark(data.samitiLogo)}<div class="ps-content"><div class="no-print" style="margin-bottom:12px;text-align:center;display:flex;justify-content:center;gap:10px;"><button onclick="window.print()" style="padding:8px 16px;cursor:pointer;background:#0f172a;color:#fff;border:none;border-radius:4px;">প্রিন্ট করুন</button><button onclick="window.close()" style="padding:8px 16px;cursor:pointer;background:#f1f5f9;border:1px solid #e2e8f0;border-radius:4px;">বাতিল</button></div>${printHeader(data.samitiName, data.samitiLogo, `✓ ${fmtMonth(monthFilter)} মাসে পরিশোধিত সদস্য তালিকা (${toBn(paidMembersList.length)} জন)`, data.samitiAddress, data.establishedDate)}<table><thead><tr><th>ক্রম</th><th>সদস্য নং</th><th>নাম</th><th>পরিমাণ</th></tr></thead><tbody>${rowsHtml}<tr><td colspan="3" style="text-align:right;font-weight:bold">মোট</td><td style="text-align:right;font-weight:bold">${formatTk(totalPaid)}</td></tr></tbody></table></div></body></html>`);
               w.document.close();
             }}>
               <Printer className="h-4 w-4 mr-1" />পরিশোধিত তালিকা প্রিন্ট
@@ -4560,7 +4564,7 @@ function DepositsHistoryTab() {
             <Button variant="outline" size="sm" onClick={() => {
               const w = window.open("", "_blank"); if (!w) return;
               const rowsHtml = missingMembers.map((m, i) => `<tr><td style="text-align:center">${toBn(i+1)}</td><td style="text-align:center">${toBn(m.serial || 0)}</td><td>${m.name}</td><td style="text-align:center;color:#b91c1c;font-weight:bold">জমা হয়নি</td></tr>`).join("");
-              w.document.write(`<!DOCTYPE html><html><head><meta charset="utf-8"><title>বকেয়া তালিকা - ${fmtMonth(monthFilter)}</title><style>body{font-family:"Segoe UI","Noto Sans Bengali",sans-serif;padding:20px;position:relative;}h3{text-align:center;margin:4px 0;color:#b91c1c;}table{width:100%;border-collapse:collapse;margin-top:12px;}th,td{border:1px solid #ccc;padding:6px 8px;font-size:13px;}th{background:#fee2e2;}@media print{.no-print{display:none;}body{padding:0 12px;}}${printBrandCss}</style></head><body>${printWatermark(data.samitiLogo)}<div class="ps-content"><div class="no-print" style="margin-bottom:12px;text-align:center;"><button onclick="window.print()" style="padding:8px 16px;cursor:pointer;">প্রিন্ট করুন</button></div>${printHeader(data.samitiName, data.samitiLogo, `⚠ ${fmtMonth(monthFilter)} মাসে যাদের চাঁদা জমা হয়নি (${toBn(missingMembers.length)} জন)`, data.samitiAddress, data.establishedDate)}<table><thead><tr><th>ক্রম</th><th>সদস্য নং</th><th>নাম</th><th>অবস্থা</th></tr></thead><tbody>${rowsHtml}</tbody></table></div><script>setTimeout(()=>window.print(),300)</script></body></html>`);
+              w.document.write(`<!DOCTYPE html><html><head><meta charset="utf-8"><title>বকেয়া তালিকা - ${fmtMonth(monthFilter)}</title><style>body{font-family:"Segoe UI","Noto Sans Bengali",sans-serif;padding:20px;position:relative;}h3{text-align:center;margin:4px 0;color:#b91c1c;}table{width:100%;border-collapse:collapse;margin-top:12px;}th,td{border:1px solid #ccc;padding:6px 8px;font-size:13px;}th{background:#fee2e2;}@media print{.no-print{display:none;}body{padding:0 12px;}}${printBrandCss}</style></head><body>${printWatermark(data.samitiLogo)}<div class="ps-content"><div class="no-print" style="margin-bottom:12px;text-align:center;display:flex;justify-content:center;gap:10px;"><button onclick="window.print()" style="padding:8px 16px;cursor:pointer;background:#0f172a;color:#fff;border:none;border-radius:4px;">প্রিন্ট করুন</button><button onclick="window.close()" style="padding:8px 16px;cursor:pointer;background:#f1f5f9;border:1px solid #e2e8f0;border-radius:4px;">বাতিল</button></div>${printHeader(data.samitiName, data.samitiLogo, `⚠ ${fmtMonth(monthFilter)} মাসে যাদের চাঁদা জমা হয়নি (${toBn(missingMembers.length)} জন)`, data.samitiAddress, data.establishedDate)}<table><thead><tr><th>ক্রম</th><th>সদস্য নং</th><th>নাম</th><th>অবস্থা</th></tr></thead><tbody>${rowsHtml}</tbody></table></div></body></html>`);
               w.document.close();
             }}>
               <Printer className="h-4 w-4 mr-1" />বকেয়া তালিকা প্রিন্ট
@@ -4833,7 +4837,7 @@ function DepositsHistoryTab() {
               const html = buildDepositReceiptHtml(receipt, data.samitiName || "সমিতি", qrDataUrl, findTreasurer(data.settings.committee));
               const w = window.open("", "_blank", "width=600,height=800");
               if (!w) return;
-              w.document.write(`<!DOCTYPE html><html><head><meta charset="utf-8"><title>জমা রিসিপ্ট</title><style>${receiptCss}</style></head><body>${html}<script>setTimeout(()=>window.print(),300)</script></body></html>`);
+              w.document.write(`<!DOCTYPE html><html><head><meta charset="utf-8"><title>জমা রিসিপ্ট</title><style>${receiptCss}</style></head><body><div class="no-print" style="margin-bottom:12px;display:flex;gap:10px;"><button onclick="window.print()" style="padding:8px 16px;font-size:14px;cursor:pointer;background:#0f172a;color:#fff;border:none;border-radius:4px;">প্রিন্ট করুন</button><button onclick="window.close()" style="padding:8px 16px;font-size:14px;cursor:pointer;background:#f1f5f9;border:1px solid #e2e8f0;border-radius:4px;">বাতিল</button></div>${html}</body></html>`);
               w.document.close();
               w.focus();
             }}><Printer className="h-4 w-4 mr-1" />প্রিন্ট</Button>
@@ -6447,10 +6451,12 @@ function printReport(p: ReportParams) {
     <body>
       ${printWatermark(p.samitiLogo)}
       <div class="ps-content">
-      <div class="no-print" style="margin-bottom:12px;"><button onclick="window.print()" style="padding:8px 16px;font-size:14px;cursor:pointer;">প্রিন্ট করুন</button></div>
+      <div class="no-print" style="margin-bottom:12px;display:flex;gap:10px;">
+        <button onclick="window.print()" style="padding:8px 16px;font-size:14px;cursor:pointer;background:#0f172a;color:#fff;border:none;border-radius:4px;">প্রিন্ট করুন</button>
+        <button onclick="window.close()" style="padding:8px 16px;font-size:14px;cursor:pointer;background:#f1f5f9;border:1px solid #e2e8f0;border-radius:4px;">বাতিল</button>
+      </div>
       ${inner}
       </div>
-      <script>setTimeout(()=>window.print(),300)</script>
     </body></html>
   `);
   w.document.close();
