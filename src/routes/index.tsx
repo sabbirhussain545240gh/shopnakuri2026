@@ -150,7 +150,7 @@ const monthlyInstallment = (amount: number, rate: number, months: number) => {
 };
 
 // Shared print branding: watermark + header (logo + samiti name) for all reports/documents.
-const printBrandCss = `.ps-wm{position:fixed;inset:0;background-repeat:no-repeat;background-position:center;background-size:60% auto;opacity:0.10;pointer-events:none;z-index:0;-webkit-print-color-adjust:exact;print-color-adjust:exact;}.ps-content{position:relative;z-index:1;}.ps-hdr{display:flex;align-items:center;justify-content:center;gap:14px;border-bottom:2px solid #333;padding-bottom:10px;margin-bottom:6px;}.ps-hdr img{height:72px;width:72px;object-fit:contain;border-radius:6px;flex-shrink:0;}.ps-hdr .ps-info{text-align:center;}.ps-hdr .ps-name{margin:0;font-size:22px;font-weight:700;}.ps-hdr .ps-addr{font-size:12px;color:#444;margin-top:2px;}.ps-hdr .ps-est{font-size:11px;color:#666;margin-top:2px;}.ps-sub{font-size:14px;font-weight:600;color:#222;text-align:center;margin:8px 0 12px;padding:4px 8px;border-bottom:1px dashed #999;}`;
+const printBrandCss = `.ps-wm{position:fixed;inset:0;background-repeat:no-repeat;background-position:center;background-size:60% auto;opacity:0.15;pointer-events:none;z-index:0;-webkit-print-color-adjust:exact;print-color-adjust:exact;display:block !important;visibility:visible !important;} @media print { .ps-wm, .ld-wm, .wm, .watermark { display: block !important; visibility: visible !important; opacity: 0.15 !important; -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; } } .ps-content{position:relative;z-index:1;}.ps-hdr{display:flex;align-items:center;justify-content:center;gap:14px;border-bottom:2px solid #333;padding-bottom:10px;margin-bottom:6px;}.ps-hdr img{height:72px;width:72px;object-fit:contain;border-radius:6px;flex-shrink:0;}.ps-hdr .ps-info{text-align:center;}.ps-hdr .ps-name{margin:0;font-size:22px;font-weight:700;}.ps-hdr .ps-addr{font-size:12px;color:#444;margin-top:2px;}.ps-hdr .ps-est{font-size:11px;color:#666;margin-top:2px;}.ps-sub{font-size:14px;font-weight:600;color:#222;text-align:center;margin:8px 0 12px;padding:4px 8px;border-bottom:1px dashed #999;}`;
 const printWatermark = (logo?: string) => logo ? `<div class="ps-wm" style="background-image:url('${logo}')"></div>` : "";
 const printHeader = (samitiName?: string, logo?: string, subtitle?: string, address?: string, established?: string) => `<div class="ps-hdr">${logo ? `<img src="${logo}" alt="logo" crossorigin="anonymous" />` : ""}<div class="ps-info"><div class="ps-name">${samitiName || "সমিতি"}</div>${address ? `<div class="ps-addr">📍 ${address}</div>` : ""}${established ? `<div class="ps-est">স্থাপিত: ${established}</div>` : ""}</div></div>${subtitle ? `<div class="ps-sub">${subtitle}</div>` : ""}`;
 
@@ -865,7 +865,11 @@ function MembersTab() {
   thead tr, tbody tr, td { background: transparent !important; }
   th { background: rgba(243,244,246,0.35); border: 1px solid #ccc; padding: 10px; text-align: left; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
   th:nth-child(1), th:nth-child(6) { text-align: center; }
-  @media print { body { padding: 0 !important; } .no-print { display: none !important; } }
+  @media print { 
+    body { padding: 0 !important; } 
+    .no-print { display: none !important; } 
+    .ps-wm, .ld-wm, .wm, .watermark { display: block !important; visibility: visible !important; opacity: 0.15 !important; -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+  }
   ${printBrandCss}
 </style></head>
 <body>
@@ -1540,7 +1544,11 @@ function printLoanDetail(
       body { font-family: "Segoe UI", "Noto Sans Bengali", sans-serif; margin: 0; padding: 0; background: #fff; color: #111; }
       .ld-wm { position: absolute; inset: 0; background-repeat: no-repeat; background-position: center; background-size: 70% auto; opacity: 0.15; pointer-events: none; z-index: 0; -webkit-print-color-adjust: exact; print-color-adjust: exact; display: block !important; visibility: visible !important; }
       .ld-content { position: relative; z-index: 1; }
-      @media print { body { padding: 0 !important; } .no-print { display: none !important; } .ld-wm { display: block !important; visibility: visible !important; opacity: 0.15 !important; -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; } }
+      @media print { 
+        body { padding: 0 !important; } 
+        .no-print { display: none !important; } 
+        .ld-wm, .ps-wm, .wm, .watermark { display: block !important; visibility: visible !important; opacity: 0.15 !important; -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; } 
+      }
     </style></head>
     <body>
       <div class="no-print" style="margin:16px auto;max-width:840px;display:flex;gap:10px;padding:0 20px;">
@@ -1812,7 +1820,11 @@ function SavingsTab() {
   td.c { text-align: center; }
   td.r { text-align: right; }
   tfoot td { font-weight: bold; background: #f3f4f6; }
-  @media print { body { padding: 0 !important; } .no-print { display: none !important; } }
+  @media print { 
+    body { padding: 0 !important; } 
+    .no-print { display: none !important; } 
+    .wm, .ps-wm, .ld-wm, .watermark { display: block !important; visibility: visible !important; opacity: 0.15 !important; -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; } 
+  }
 </style></head>
 <body>
   ${data.samitiLogo ? `<div class="wm" style="background-image:url('${data.samitiLogo}')"></div>` : ""}
@@ -1884,7 +1896,11 @@ function SavingsTab() {
   td.r { text-align: right; }
   tbody tr { height: 22px; }
   .foot { display:flex; justify-content: space-between; font-size: 12px; margin-top: 14px; }
-  @media print { body { padding: 0 !important; } .no-print { display: none !important; } }
+  @media print { 
+    body { padding: 0 !important; } 
+    .no-print { display: none !important; } 
+    .ps-wm, .ld-wm, .wm, .watermark { display: block !important; visibility: visible !important; opacity: 0.15 !important; -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+  }
   ${printBrandCss}
 </style></head>
 <body>
@@ -2661,7 +2677,11 @@ function LoansTab() {
       <html><head><meta charset="utf-8" /><title>ঋণ ব্যবস্থাপনা - ${data.samitiName || "সমিতি"}</title>
       <style>
         body { font-family: "Segoe UI", "Noto Sans Bengali", sans-serif; margin: 0; padding: 24px; color: #111; background:#fff; position: relative; }
-        @media print { body { padding: 0 !important; } .no-print { display: none !important; } }
+        @media print { 
+          body { padding: 0 !important; } 
+          .no-print { display: none !important; } 
+          .ps-wm, .ld-wm, .wm, .watermark { display: block !important; visibility: visible !important; opacity: 0.15 !important; -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+        }
         ${printBrandCss}
       </style></head>
       <body>
@@ -2763,6 +2783,8 @@ function LoansTab() {
         @media print {
           body { padding: 0 !important; }
           .no-print { display: none !important; }
+          .ps-wm, .ld-wm, .wm, .watermark { display: block !important; visibility: visible !important; opacity: 0.15 !important; -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+          @page { size: A4 landscape; margin: 10mm; }
           @page { size: A4 landscape; margin: 10mm; }
         }
         ${printBrandCss}
@@ -6445,7 +6467,11 @@ function printReport(p: ReportParams) {
     <style>
       body { font-family: "Segoe UI", "Noto Sans Bengali", sans-serif; margin: 0; padding: 24px; color: #111; background:#fff; position: relative; }
       h3 { margin: 16px 0 6px; font-size: 14px; }
-      @media print { body { padding: 0 !important; } .no-print { display: none !important; } }
+      @media print { 
+        body { padding: 0 !important; } 
+        .no-print { display: none !important; } 
+        .ps-wm, .ld-wm, .wm, .watermark { display: block !important; visibility: visible !important; opacity: 0.15 !important; -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+      }
       ${printBrandCss}
     </style></head>
     <body>
@@ -6531,7 +6557,8 @@ async function exportReportPdf(p: ReportParams) {
 const receiptCss = `
   body{margin:0;padding:20px;background:#fff;color:#111;font-family:"Segoe UI","Noto Sans Bengali",Arial,sans-serif;}
   .r{width:520px;border:1px solid #ddd;border-radius:8px;padding:20px;background:#fff;position:relative;overflow:hidden;}
-  .watermark{position:absolute;inset:0;background-repeat:no-repeat;background-position:center;background-size:75% auto;opacity:0.18;pointer-events:none;z-index:0;-webkit-print-color-adjust:exact;print-color-adjust:exact;}
+  .watermark{position:absolute;inset:0;background-repeat:no-repeat;background-position:center;background-size:75% auto;opacity:0.18;pointer-events:none;z-index:0;-webkit-print-color-adjust:exact;print-color-adjust:exact;display:block !important;visibility:visible !important;}
+  @media print { .watermark, .ps-wm, .ld-wm, .wm { display: block !important; visibility: visible !important; opacity: 0.18 !important; -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; } }
   .r > *:not(.watermark){position:relative;z-index:1;}
   .center{text-align:center;}
   .header{display:flex;align-items:center;justify-content:center;gap:12px;margin-bottom:6px;}
