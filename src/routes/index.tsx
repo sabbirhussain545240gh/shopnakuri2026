@@ -2918,7 +2918,7 @@ function LoansTab() {
       date: form.date,
       loanTerms: data.settings.loanTerms,
       memberGuarantorId: form.memberGuarantorId,
-      familyGuarantor: { name: form.familyGuarantorName.trim(), relation, phone: form.familyGuarantorPhone.trim(), nidFile: form.familyGuarantorNidFile || undefined },
+      familyGuarantor: { name: form.familyGuarantorName.trim(), relation, phone: form.familyGuarantorPhone.trim(), nidFile: (form as any).familyGuarantorNidFile || undefined },
       isJoint,
       coBorrower: isJoint ? {
         name: coForm.name.trim(),
@@ -2930,7 +2930,7 @@ function LoansTab() {
         address: coForm.address.trim() || undefined,
         nidFile: coForm.nidFile || undefined,
       } : undefined,
-      contractFile: form.contractFile || undefined,
+      contractFile: (form as any).contractFile || undefined,
       cheques: cheques
         .filter((c) => c.bankName.trim() || c.chequeNo.trim())
         .map((c) => ({
@@ -3047,7 +3047,7 @@ function LoansTab() {
       durationMonths: dur,
       date: editForm.date,
       memberGuarantorId: editForm.memberGuarantorId,
-      familyGuarantor: { name: editForm.familyGuarantorName.trim(), relation, phone: editForm.familyGuarantorPhone.trim(), nidFile: editForm.familyGuarantorNidFile || undefined },
+      familyGuarantor: { name: editForm.familyGuarantorName.trim(), relation, phone: editForm.familyGuarantorPhone.trim(), nidFile: (editForm as any).familyGuarantorNidFile || undefined },
       isJoint: editIsJoint,
       coBorrower: editIsJoint ? {
         name: editCoForm.name.trim(),
@@ -3061,7 +3061,7 @@ function LoansTab() {
         updatedAt: new Date().toISOString(),
         updatedBy: "Admin", // In a real app, this would be the logged-in user's name/ID
       } : undefined,
-      contractFile: editForm.contractFile || undefined,
+      contractFile: (editForm as any).contractFile || undefined,
       cheques: editCheques
         .filter((c) => c.bankName.trim() || c.chequeNo.trim())
         .map((c) => ({
@@ -4110,13 +4110,45 @@ function LoansTab() {
                     ))}
                   </div>
                 )}
-                <div className="border-t pt-2">
-                  <div className="font-medium mb-1 text-center">জামিনদার</div>
-                  <div>সদস্য জামিনদার: {gm?.name ?? "—"}{gm ? ` (সদস্য নং ${formatMemberSerial(gm, data.serialPrefix)})` : ""}</div>
-                  {currentLoan.familyGuarantor && (
-                    <div>পারিবারিক: {currentLoan.familyGuarantor.name} ({currentLoan.familyGuarantor.relation}) — {currentLoan.familyGuarantor.phone}</div>
+                <div className="border-t pt-2 grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div>
+                    <div className="font-medium mb-1 text-center">জামিনদার</div>
+                    <div>সদস্য জামিনদার: {gm?.name ?? "—"}{gm ? ` (সদস্য নং ${formatMemberSerial(gm, data.serialPrefix)})` : ""}</div>
+                    {currentLoan.familyGuarantor && (
+                      <div className="flex items-center justify-between">
+                        <div>পারিবারিক: {currentLoan.familyGuarantor.name} ({currentLoan.familyGuarantor.relation}) — {currentLoan.familyGuarantor.phone}</div>
+                        {currentLoan.familyGuarantor.nidFile && (
+                          <Button variant="ghost" size="sm" className="h-7 text-xs" onClick={() => printNidFile(currentLoan.familyGuarantor!.nidFile!, currentLoan.familyGuarantor!.name, "পারিবারিক জামিনদার")}>
+                            <FileText className="h-3 w-3 mr-1" /> NID
+                          </Button>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                  {currentLoan.contractFile && (
+                    <div className="flex flex-col items-center justify-center border-l pl-4">
+                      <div className="font-medium mb-1">ডকুমেন্ট</div>
+                      <Button variant="outline" size="sm" className="w-full" onClick={() => printNidFile(currentLoan.contractFile!, m?.name ?? "ঋণগ্রহীতা", "ঋণ চুক্তি ফরম")}>
+                        <FileText className="h-4 w-4 mr-1" /> ঋণ চুক্তি ফরম দেখুন ও প্রিন্ট
+                      </Button>
+                    </div>
                   )}
                 </div>
+                {currentLoan.isJoint && currentLoan.coBorrower && (
+                  <div className="border-t pt-2">
+                    <div className="font-medium mb-1 text-center">২য় ঋণগ্রহীতা (যৌথ)</div>
+                    <div className="flex items-center justify-between text-xs">
+                      <div>
+                        {currentLoan.coBorrower.name} · পিতা: {currentLoan.coBorrower.fatherName || "—"} · মাতা: {currentLoan.coBorrower.motherName || "—"} · ফোন: {currentLoan.coBorrower.phone}
+                      </div>
+                      {currentLoan.coBorrower.nidFile && (
+                        <Button variant="ghost" size="sm" className="h-7 text-xs" onClick={() => printNidFile(currentLoan.coBorrower!.nidFile!, currentLoan.coBorrower!.name, "২য় ঋণগ্রহীতা")}>
+                          <FileText className="h-3 w-3 mr-1" /> NID
+                        </Button>
+                      )}
+                    </div>
+                  </div>
+                )}
                 <div className="border-t pt-3 flex gap-6">
                   <div className="flex-1 min-w-0">
                     <div className="font-medium mb-2 border-b pb-1 text-center">কিস্তি সিডিউল ও আদায়</div>
