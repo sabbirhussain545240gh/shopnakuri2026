@@ -2026,7 +2026,10 @@ function SavingsTab() {
   const [filterMemberId, setFilterMemberId] = useState<string>("all");
   const [dateFrom, setDateFrom] = useState<string>("");
   const [dateTo, setDateTo] = useState<string>("");
-  const [monthFilter, setMonthFilter] = useState<string>("all");
+  const [monthFilter, setMonthFilter] = useState<string>(() => {
+    const months = Array.from(new Set(data.deposits.map((d) => d.date.slice(0, 7)))).sort((a, b) => b.localeCompare(a));
+    return months[0] || "all";
+  });
   const [editId, setEditId] = useState<string | null>(null);
   const [editForm, setEditForm] = useState({ memberId: "", amount: "", date: today(), note: "" });
   const [memberOpen, setMemberOpen] = useState(false);
@@ -2138,7 +2141,8 @@ function SavingsTab() {
     setFilterMemberId("all");
     setDateFrom("");
     setDateTo("");
-    setMonthFilter("all");
+    const months = Array.from(new Set(data.deposits.map((d) => d.date.slice(0, 7)))).sort((a, b) => b.localeCompare(a));
+    setMonthFilter(months[0] || "all");
   };
 
   const printDeposits = () => {
@@ -2535,7 +2539,7 @@ function SavingsTab() {
                   {Array.from(new Set(data.deposits.map((d) => d.date.slice(0, 7))))
                     .sort((a, b) => b.localeCompare(a))
                     .map((ym) => (
-                      <SelectItem key={ym} value={ym}>{ym}</SelectItem>
+                      <SelectItem key={ym} value={ym}>{fmtMonthYearBn(ym)}</SelectItem>
                     ))}
                 </SelectContent>
               </Select>
