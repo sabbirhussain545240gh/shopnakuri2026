@@ -1177,12 +1177,37 @@ function MembersTab() {
                         <div className="max-h-48 overflow-y-auto rounded-md border">
                           <table className="w-full text-sm">
                             <thead className="bg-muted/50 sticky top-0">
-                              <tr><th className="text-left p-2">তারিখ</th><th className="text-left p-2">রিসিপ্ট নং</th><th className="text-right p-2">পরিমাণ</th><th className="text-left p-2">নোট</th></tr>
+                              <tr><th className="text-left p-2">তারিখ</th><th className="text-left p-2">রিসিপ্ট নং</th><th className="text-right p-2">পরিমাণ</th><th className="text-left p-2">নোট</th><th className="text-center p-2">রিসিপ্ট</th></tr>
                             </thead>
                             <tbody>
-                              {[...memberDeposits].sort((a, b) => (b.date || "").localeCompare(a.date || "")).map((d) => (
-                                <tr key={d.id} className="border-t"><td className="p-2">{fmtDate(d.date)}</td><td className="p-2 font-medium">CH-{toBn(viewMember.serial ?? 0)}-{toBn(seq.get(d.id) ?? 1)}</td><td className="p-2 text-right">{formatTk(d.amount)}</td><td className="p-2 text-muted-foreground">{d.note || "—"}</td></tr>
-                              ))}
+                              {[...memberDeposits].sort((a, b) => (b.date || "").localeCompare(a.date || "")).map((d) => {
+                                const receiptNo = `CH-${toBn(viewMember.serial ?? 0)}-${toBn(seq.get(d.id) ?? 1)}`;
+                                return (
+                                <tr key={d.id} className="border-t">
+                                  <td className="p-2">{fmtDate(d.date)}</td>
+                                  <td className="p-2 font-medium">{receiptNo}</td>
+                                  <td className="p-2 text-right">{formatTk(d.amount)}</td>
+                                  <td className="p-2 text-muted-foreground">{d.note || "—"}</td>
+                                  <td className="p-2 text-center">
+                                    <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => {
+                                      const r = {
+                                        id: d.id,
+                                        date: d.date,
+                                        memberName: viewMember.name,
+                                        memberSerial: viewMember.serial,
+                                        amount: d.amount,
+                                        note: d.note,
+                                        receiptNo,
+                                        logo: data.samitiLogo
+                                      };
+                                      setDepositReceipt(r);
+                                    }}>
+                                      <Receipt className="h-3.5 w-3.5 text-primary" />
+                                    </Button>
+                                  </td>
+                                </tr>
+                                );
+                              })}
                             </tbody>
                           </table>
                         </div>
