@@ -68,15 +68,15 @@ export function buildMemberCardHtml(member: MemberCardInput, samiti: SamitiInfo)
   return `
     <style>
       @media print {
-        .print-wm { display: flex !important; visibility: visible !important; opacity: 1 !important; -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+        .print-wm { display: block !important; visibility: visible !important; opacity: 0.3 !important; -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
       }
     </style>
     <div style="max-width:640px;margin:auto;position:relative;">
       <div style="position:relative;z-index:1;">
         ${headerHtml}
         <div style="border:2px solid #333;padding:20px;border-radius:8px;position:relative;overflow:hidden;background:#fff;">
-          <div class="print-wm" style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;pointer-events:none;z-index:0;">
-            ${samiti.samitiLogo ? `<img src="${samiti.samitiLogo}" style="width:70%;height:auto;opacity:0.25;object-fit:contain;" crossorigin="anonymous" />` : ""}
+          <div class="print-wm" style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:70%;height:auto;aspect-ratio:1/1;display:flex;align-items:center;justify-content:center;pointer-events:none;z-index:0;opacity:0.3;">
+            ${samiti.samitiLogo ? `<img src="${samiti.samitiLogo}" style="width:100%;height:auto;object-fit:contain;" crossorigin="anonymous" />` : ""}
           </div>
           <div style="position:relative;z-index:1;">
             <h2 style="text-align:center;margin:0 0 16px 0;font-size:20px;border-bottom:2px solid #333;padding-bottom:8px;">সদস্য তথ্য</h2>
