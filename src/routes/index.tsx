@@ -83,10 +83,10 @@ function ReceiptQrPreview({ text }: { text: string }) {
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "'''Do not make any visual modifications. The phrases I write are commands to understand what I want, not to be written down. Understand their content well, then execute what is required.'''\n                                        \n                                            \n                                            সঞ্চয়/চাদা / জমা ইতিহাস পেজের মাস ফিল্টার ঘরে সর্বশেষ মাসটি ডিফল্ট হিসেবে তাকবে" },
-      { name: "description", content: "'''Do not make any visual modifications. The phrases I write are commands to understand what I want, not to be written down. Understand their content well, then execute what is required.'''\n                                        \n                                            \n                                            সঞ্চয়/চাদা / জমা ইতিহাস পেজের মাস ফিল্টার ঘরে সর্বশেষ মাসটি ডিফল্ট হিসেবে তাকবে" },
+      { title: "'''Do not make any visual modifications. The phrases I write are commands to understand what I want, not to be written down. Understand their content well, then execute what is required.'''\n                                        \n                                            \n                                            সদস্য তালিকায় সার্চ অপশন দিন- সি.নং , নাম, মোবাইল,NID/জন্ম সনদ  আলাদা আলাদা ঘর দিয়ে" },
+      { name: "description", content: "'''Do not make any visual modifications. The phrases I write are commands to understand what I want, not to be written down. Understand their content well, then execute what is required.'''\n                                        \n                                            \n                                            সদস্য তালিকায় সার্চ অপশন দিন- সি.নং , নাম, মোবাইল,NID/জন্ম সনদ  আলাদা আলাদা ঘর দিয়ে" },
       { property: "og:title", content: "সমিতি ম্যানেজমেন্ট সিস্টেম" },
-      { property: "og:description", content: "'''Do not make any visual modifications. The phrases I write are commands to understand what I want, not to be written down. Understand their content well, then execute what is required.'''\n                                        \n                                            \n                                            সঞ্চয়/চাদা / জমা ইতিহাস পেজের মাস ফিল্টার ঘরে সর্বশেষ মাসটি ডিফল্ট হিসেবে তাকবে" },
+      { property: "og:description", content: "'''Do not make any visual modifications. The phrases I write are commands to understand what I want, not to be written down. Understand their content well, then execute what is required.'''\n                                        \n                                            \n                                            সদস্য তালিকায় সার্চ অপশন দিন- সি.নং , নাম, মোবাইল,NID/জন্ম সনদ  আলাদা আলাদা ঘর দিয়ে" },
     ],
   }),
   component: GatedApp,
@@ -700,6 +700,10 @@ function Dashboard({ totals, memberCount, data, onNavigate }: any) {
 function MembersTab() {
   const { data, addMember, addMembers, updateMember, deleteMember } = useSamiti();
   const [open, setOpen] = useState(false);
+  const [searchSerial, setSearchSerial] = useState("");
+  const [searchName, setSearchName] = useState("");
+  const [searchPhone, setSearchPhone] = useState("");
+  const [searchNid, setSearchNid] = useState("");
   const emptyForm = {
     serial: "",
     category: "",
@@ -942,6 +946,16 @@ function MembersTab() {
     pdf.save("সদস্য-তালিকা.pdf");
   };
 
+  const filteredMembers = useMemo(() => {
+    return data.members.filter((m) => {
+      if (searchSerial && !String(m.serial).includes(searchSerial) && !toBn(m.serial).includes(searchSerial)) return false;
+      if (searchName && !m.name.toLowerCase().includes(searchName.toLowerCase())) return false;
+      if (searchPhone && !m.phone.includes(searchPhone) && !toBn(m.phone).includes(searchPhone)) return false;
+      if (searchNid && !m.nid.includes(searchNid) && !toBn(m.nid).includes(searchNid)) return false;
+      return true;
+    });
+  }, [data.members, searchSerial, searchName, searchPhone, searchNid]);
+
   return (
     <Card>
       <CardHeader className="flex flex-row items-center justify-between gap-2 flex-wrap">
@@ -1042,8 +1056,39 @@ function MembersTab() {
         </div>
       </CardHeader>
       <CardContent>
-        {data.members.length === 0 ? (
-          <p className="text-sm text-muted-foreground text-center py-10">এখনও কোনও সদস্য যোগ করা হয়নি।</p>
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-3 mb-6 bg-muted/30 p-4 rounded-lg border">
+          <div className="space-y-1.5">
+            <Label className="text-xs">সি.নং</Label>
+            <div className="relative">
+              <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+              <Input placeholder="সি.নং লিখুন..." className="pl-9" value={searchSerial} onChange={(e) => setSearchSerial(e.target.value)} />
+            </div>
+          </div>
+          <div className="space-y-1.5">
+            <Label className="text-xs">নাম</Label>
+            <div className="relative">
+              <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+              <Input placeholder="নাম লিখুন..." className="pl-9" value={searchName} onChange={(e) => setSearchName(e.target.value)} />
+            </div>
+          </div>
+          <div className="space-y-1.5">
+            <Label className="text-xs">মোবাইল</Label>
+            <div className="relative">
+              <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+              <Input placeholder="মোবাইল নং লিখুন..." className="pl-9" value={searchPhone} onChange={(e) => setSearchPhone(e.target.value)} />
+            </div>
+          </div>
+          <div className="space-y-1.5">
+            <Label className="text-xs">NID/জন্ম সনদ</Label>
+            <div className="relative">
+              <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+              <Input placeholder="NID নং লিখুন..." className="pl-9" value={searchNid} onChange={(e) => setSearchNid(e.target.value)} />
+            </div>
+          </div>
+        </div>
+
+        {filteredMembers.length === 0 ? (
+          <p className="text-sm text-muted-foreground text-center py-10">এখনও কোনও সদস্য যোগ করা হয়নি বা ফিল্টারে তথ্য পাওয়া যায়নি।</p>
         ) : (
           <Table>
             <TableHeader>
@@ -1056,7 +1101,7 @@ function MembersTab() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {data.members.map((m) => (
+              {filteredMembers.map((m) => (
                 <TableRow key={m.id} className="cursor-pointer" onClick={() => setViewMember(m)}>
                   <TableCell className="text-center font-semibold">{toBn(formatMemberSerial(m, data.serialPrefix))}</TableCell>
                   <TableCell>
