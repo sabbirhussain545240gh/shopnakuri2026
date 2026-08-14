@@ -2355,7 +2355,7 @@ function SavingsTab() {
     const totalInst = collectionRows.reduce((sum, row) => sum + row.inst, 0);
     const rows = collectionRows.map(({ m, inst, due, hasLoan }) => `
       <tr>
-        <td class="c">${toBn(m.serial || 0)}</td>
+        <td class="c">${formatMemberSerial({ serial: m.serial, category: m.category }, data.serialPrefix)}</td>
         <td>${m.name}</td>
         <td class="r"></td>
         <td class="r">${hasLoan ? formatTk(due) : "—"}</td>
