@@ -1491,7 +1491,14 @@ function buildLoanDetailHtml(
         <div style="border:2px solid #333;padding:18px;border-radius:8px;background:rgba(255,255,255,0.7);">
           <h2 style="text-align:center;margin:0 0 14px 0;font-size:18px;border-bottom:2px solid #333;padding-bottom:6px;">ঋণের বিস্তারিত</h2>
           
-          <table style="width:100%;border-collapse:collapse;font-size:14px;margin-bottom:14px;">${tableRows(rows)}</table>
+          <div style="display:flex;gap:20px;margin-bottom:14px;align-items:flex-start;">
+            <table style="flex:1;border-collapse:collapse;font-size:14px;">${tableRows(rows.slice(0, 4))}</table>
+            <div style="width:100px;text-align:center;padding:5px;border:1px solid #ddd;border-radius:4px;background:#f9f9f9;">
+              ${member?.photo ? `<img src="${member.photo}" style="width:90px;height:105px;object-fit:cover;display:block;margin:0 auto;" crossorigin="anonymous" />` : ""}
+              <div style="font-size:11px;margin-top:4px;color:#333;font-weight:bold;">ঋণীর ছবি</div>
+            </div>
+          </div>
+          <table style="width:100%;border-collapse:collapse;font-size:14px;margin-bottom:14px;">${tableRows(rows.slice(4))}</table>
           
           <h3 style="font-size:15px;border-bottom:1px solid #ccc;padding-bottom:4px;margin:14px 0 6px;">জামিনদার</h3>
           <table style="width:100%;border-collapse:collapse;font-size:14px;margin-bottom:14px;">${tableRows(guarantorRows)}</table>
