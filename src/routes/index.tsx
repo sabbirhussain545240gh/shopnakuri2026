@@ -14,7 +14,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter, DialogDescription } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Command, CommandInput, CommandList, CommandEmpty, CommandGroup, CommandItem } from "@/components/ui/command";
@@ -2851,7 +2851,7 @@ function SavingsTab() {
 
 // ===== Loans =====
 function LoansTab() {
-  const { data, addLoan, updateLoan, addPayment, closeLoan, refreshLoanStatus, deleteLoan } = useSamiti();
+  const { data, addLoan, updateLoan, addPayment, closeLoan, refreshLoanStatus, deleteLoan, updateSettings } = useSamiti();
   const [open, setOpen] = useState(false);
   const [payFor, setPayFor] = useState<Loan | null>(null);
   const [editFor, setEditFor] = useState<Loan | null>(null);
@@ -3331,23 +3331,91 @@ function LoansTab() {
           <CardTitle>ঋণ ব্যবস্থাপনা</CardTitle>
           <CardDescription>মোট {toBn(data.loans.length)}টি ঋণ</CardDescription>
         </div>
-        <Dialog open={open} onOpenChange={(o) => { setOpen(o); if (!o) setErrors({}); }}>
-          <DialogTrigger asChild><Button disabled={data.members.length === 0}><Plus className="h-4 w-4 mr-1" />নতুন ঋণ</Button></DialogTrigger>
-          <DialogContent>
-            <DialogHeader><DialogTitle>নতুন ঋণ প্রদান</DialogTitle></DialogHeader>
-            <div className="space-y-3">
-              <div>
-                <Label>সদস্য (সিরিয়াল ও নাম) *</Label>
-                <Select value={form.memberId} onValueChange={(v) => setField("memberId", v)}>
-                  <SelectTrigger className={errors.memberId ? "border-destructive" : ""}><SelectValue placeholder="সদস্য নির্বাচন করুন" /></SelectTrigger>
-                  <SelectContent>{data.members.map((m) => <SelectItem key={m.id} value={m.id}>{toBn(m.serial)} — {m.name}</SelectItem>)}</SelectContent>
-                </Select>
-                {errors.memberId && <p className="text-xs text-destructive mt-1">{errors.memberId}</p>}
+        <div className="flex items-center gap-2">
+          <Dialog>
+            <DialogTrigger asChild>
+              <Button variant="outline">
+                <Scale className="h-4 w-4 mr-1" />
+                ঋণের শর্ত
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="max-w-2xl">
+              <DialogHeader>
+                <DialogTitle>ঋণের শর্তাবলী</DialogTitle>
+                <DialogDescription>ঋণ প্রদানের সময় এই শর্তগুলো ডিফল্ট হিসেবে যুক্ত হবে</DialogDescription>
+              </DialogHeader>
+              <div className="space-y-4 py-4">
+                <div className="space-y-2">
+                  {(data.settings.loanTerms || []).map((term, i) => (
+                    <div key={i} className="flex gap-2 group items-start">
+                      <div className="flex-1">
+                        <Textarea
+                          value={term}
+                          onChange={(e) => {
+                            const newTerms = [...(data.settings.loanTerms || [])];
+                            newTerms[i] = e.target.value;
+                            updateSettings({ loanTerms: newTerms });
+                          }}
+                          className="min-h-[40px] resize-none overflow-hidden"
+                          onInput={(e) => {
+                            const target = e.target as HTMLTextAreaElement;
+                            target.style.height = "auto";
+                            target.style.height = target.scrollHeight + "px";
+                          }}
+                        />
+                      </div>
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="icon"
+                        className="shrink-0 text-destructive opacity-0 group-hover:opacity-100 transition-opacity"
+                        onClick={() => {
+                          const newTerms = (data.settings.loanTerms || []).filter((_, j) => j !== i);
+                          updateSettings({ loanTerms: newTerms });
+                        }}
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  ))}
+                  {(data.settings.loanTerms || []).length === 0 && (
+                    <p className="text-sm text-muted-foreground text-center py-4 border rounded-lg border-dashed">কোনও শর্ত যোগ করা নেই</p>
+                  )}
+                </div>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() => {
+                    const newTerms = [...(data.settings.loanTerms || []), ""];
+                    updateSettings({ loanTerms: newTerms });
+                  }}
+                >
+
+                  <Plus className="h-4 w-4 mr-1" />নতুন শর্ত যোগ করুন
+                </Button>
               </div>
-              <div className="grid grid-cols-2 gap-3">
+            </DialogContent>
+          </Dialog>
+
+          <Dialog open={open} onOpenChange={(o) => { setOpen(o); if (!o) setErrors({}); }}>
+            <DialogTrigger asChild><Button disabled={data.members.length === 0}><Plus className="h-4 w-4 mr-1" />নতুন ঋণ</Button></DialogTrigger>
+            <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+              <DialogHeader><DialogTitle>নতুন ঋণ প্রদান</DialogTitle></DialogHeader>
+              <div className="space-y-4 py-4">
                 <div>
-                  <Label>পরিমাণ *</Label>
-                  <Input type="number" className={errors.amount ? "border-destructive" : ""} value={form.amount} onChange={(e) => setField("amount", e.target.value)} />
+                  <Label>সদস্য (সিরিয়াল ও নাম) *</Label>
+                  <Select value={form.memberId} onValueChange={(v) => setField("memberId", v)}>
+                    <SelectTrigger className={errors.memberId ? "border-destructive" : ""}><SelectValue placeholder="সদস্য নির্বাচন করুন" /></SelectTrigger>
+                    <SelectContent>{data.members.map((m) => <SelectItem key={m.id} value={m.id}>{toBn(m.serial)} — {m.name}</SelectItem>)}</SelectContent>
+                  </Select>
+                  {errors.memberId && <p className="text-xs text-destructive mt-1">{errors.memberId}</p>}
+                </div>
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <Label>পরিমাণ *</Label>
+                    <Input type="number" className={errors.amount ? "border-destructive" : ""} value={form.amount} onChange={(e) => setField("amount", e.target.value)} />
+
                   {errors.amount && <p className="text-xs text-destructive mt-1">{errors.amount}</p>}
                 </div>
                 <div>
@@ -3499,10 +3567,11 @@ function LoansTab() {
                 <Input className={errors.familyGuarantorPhone ? "border-destructive" : ""} value={form.familyGuarantorPhone} onChange={(e) => setField("familyGuarantorPhone", e.target.value)} placeholder="মোবাইল নম্বর" />
                 {errors.familyGuarantorPhone && <p className="text-xs text-destructive mt-1">{errors.familyGuarantorPhone}</p>}
               </div>
-            </div>
-            <DialogFooter><Button onClick={submit}>ঋণ প্রদান</Button></DialogFooter>
-          </DialogContent>
-        </Dialog>
+              </div>
+              <DialogFooter><Button onClick={submit}>ঋণ প্রদান</Button></DialogFooter>
+            </DialogContent>
+          </Dialog>
+        </div>
         <div className="flex flex-wrap gap-2">
           <Button variant="outline" size="sm" onClick={printLoans} title="প্রিন্ট">
             <Printer className="h-4 w-4 mr-1" />প্রিন্ট
