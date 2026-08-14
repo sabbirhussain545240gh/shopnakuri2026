@@ -1372,7 +1372,7 @@ function MembersTab() {
               `;
               const w = window.open("", "_blank", "width=500,height=600");
               if (w) {
-                w.document.write(\`<!DOCTYPE html><html><head><meta charset="utf-8"><title>রিসিপ্ট</title><style>body{font-family:sans-serif;padding:20px;} @media print{.no-print{display:none;}}</style></head><body><div class="no-print" style="margin-bottom:15px;"><button onclick="window.print()">প্রিন্ট</button></div>\${html}</body></html>\`);
+                w.document.write(`<!DOCTYPE html><html><head><meta charset="utf-8"><title>রিসিপ্ট</title><style>body{font-family:sans-serif;padding:20px;} @media print{.no-print{display:none;}}</style></head><body><div class="no-print" style="margin-bottom:15px;"><button onclick="window.print()">প্রিন্ট</button></div>${html}</body></html>`);
                 w.document.close();
               }
             }}><Printer className="h-4 w-4 mr-1" />প্রিন্ট</Button>
