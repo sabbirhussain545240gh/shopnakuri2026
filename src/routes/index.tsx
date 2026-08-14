@@ -1274,7 +1274,7 @@ function MembersTab() {
                        variant="outline" 
                        size="sm" 
                        className="h-8 text-xs gap-1.5" 
-                       onClick={() => printNidFile(viewMember.nidFile!, "সদস্যের NID / জন্ম সনদ", viewMember.name, data.samitiName, data.samitiLogo)}
+                       onClick={() => setViewDoc({ file: viewMember.nidFile!, name: "সদস্যের NID / জন্ম সনদ", owner: viewMember.name })}
                      >
                        <FileText className="h-3.5 w-3.5" /> সদস্যের NID দেখুন ও প্রিন্ট
                      </Button>
@@ -1284,7 +1284,7 @@ function MembersTab() {
                        variant="outline" 
                        size="sm" 
                        className="h-8 text-xs gap-1.5" 
-                       onClick={() => printNidFile(viewMember.nominee!.nidFile!, "নমিনির NID / জন্ম সনদ", viewMember.name, data.samitiName, data.samitiLogo)}
+                       onClick={() => setViewDoc({ file: viewMember.nominee!.nidFile!, name: "নমিনির NID / জন্ম সনদ", owner: viewMember.name })}
                      >
                        <FileText className="h-3.5 w-3.5" /> নমিনির NID দেখুন ও প্রিন্ট
                      </Button>
