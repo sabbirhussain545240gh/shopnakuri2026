@@ -946,6 +946,16 @@ function MembersTab() {
     pdf.save("সদস্য-তালিকা.pdf");
   };
 
+  const filteredMembers = useMemo(() => {
+    return data.members.filter((m) => {
+      if (searchSerial && !String(m.serial).includes(searchSerial) && !toBn(m.serial).includes(searchSerial)) return false;
+      if (searchName && !m.name.toLowerCase().includes(searchName.toLowerCase())) return false;
+      if (searchPhone && !m.phone.includes(searchPhone) && !toBn(m.phone).includes(searchPhone)) return false;
+      if (searchNid && !m.nid.includes(searchNid) && !toBn(m.nid).includes(searchNid)) return false;
+      return true;
+    });
+  }, [data.members, searchSerial, searchName, searchPhone, searchNid]);
+
   return (
     <Card>
       <CardHeader className="flex flex-row items-center justify-between gap-2 flex-wrap">
