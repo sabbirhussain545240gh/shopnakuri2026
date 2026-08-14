@@ -2856,9 +2856,9 @@ function LoansTab() {
   const [payFor, setPayFor] = useState<Loan | null>(null);
   const [editFor, setEditFor] = useState<Loan | null>(null);
   const [detailFor, setDetailFor] = useState<Loan | null>(null);
-  const [editForm, setEditForm] = useState({ memberId: "", amount: "", interestRate: "", durationMonths: "", date: "", memberGuarantorId: "", familyGuarantorName: "", familyGuarantorRelation: "", familyGuarantorCustomRelation: "", familyGuarantorPhone: "" });
+  const [editForm, setEditForm] = useState({ memberId: "", amount: "", interestRate: "", durationMonths: "", date: "", memberGuarantorId: "", familyGuarantorName: "", familyGuarantorRelation: "", familyGuarantorCustomRelation: "", familyGuarantorPhone: "", familyGuarantorNidFile: "", contractFile: "" });
   const [editIsJoint, setEditIsJoint] = useState(false);
-  const [editCoForm, setEditCoForm] = useState({ name: "", fatherName: "", phone: "", nid: "", address: "" });
+  const [editCoForm, setEditCoForm] = useState({ name: "", fatherName: "", phone: "", nid: "", address: "", motherName: "", birthDate: "", nidFile: "" });
   const [editCheques, setEditCheques] = useState<Array<{ bankName: string; branch: string; chequeNo: string; accountNo: string; amount: string; date: string }>>([]);
   const [editErrors, setEditErrors] = useState<Record<string, string>>({});
   const editAddChequeRow = () => setEditCheques((p) => [...p, { bankName: "", branch: "", chequeNo: "", accountNo: "", amount: "", date: "" }]);
@@ -2868,11 +2868,11 @@ function LoansTab() {
     setEditForm((prev) => ({ ...prev, [key]: value }));
     setEditErrors((prev) => { const next = { ...prev }; delete next[key]; return next; });
   };
-  const [form, setForm] = useState({ memberId: "", amount: "", interestRate: String(data.settings.defaultInterestRate), durationMonths: String(data.settings.defaultDurationMonths), date: today(), memberGuarantorId: "", familyGuarantorName: "", familyGuarantorRelation: "", familyGuarantorCustomRelation: "", familyGuarantorPhone: "" });
+  const [form, setForm] = useState({ memberId: "", amount: "", interestRate: String(data.settings.defaultInterestRate), durationMonths: String(data.settings.defaultDurationMonths), date: today(), memberGuarantorId: "", familyGuarantorName: "", familyGuarantorRelation: "", familyGuarantorCustomRelation: "", familyGuarantorPhone: "", familyGuarantorNidFile: "", contractFile: "" });
   const [payForm, setPayForm] = useState({ amount: "", date: today(), note: "" });
   const [receipt, setReceipt] = useState<null | { loan: Loan; memberName: string; memberSerial?: number; amount: number; date: string; paidAfter: number; remainingAfter: number; receiptNo: string; note?: string; logo?: string; loanNo?: number }>(null);
   const [isJoint, setIsJoint] = useState(false);
-  const [coForm, setCoForm] = useState({ name: "", fatherName: "", motherName: "", birthDate: "", phone: "", nid: "", address: "" });
+  const [coForm, setCoForm] = useState({ name: "", fatherName: "", motherName: "", birthDate: "", phone: "", nid: "", address: "", nidFile: "" });
   const [cheques, setCheques] = useState<Array<{ bankName: string; branch: string; chequeNo: string; accountNo: string; amount: string; date: string }>>([]);
   const addChequeRow = () => setCheques((p) => [...p, { bankName: "", branch: "", chequeNo: "", accountNo: "", amount: "", date: "" }]);
   const updateChequeRow = (i: number, key: string, v: string) => setCheques((p) => p.map((c, idx) => (idx === i ? { ...c, [key]: v } : c)));
@@ -2918,7 +2918,7 @@ function LoansTab() {
       date: form.date,
       loanTerms: data.settings.loanTerms,
       memberGuarantorId: form.memberGuarantorId,
-      familyGuarantor: { name: form.familyGuarantorName.trim(), relation, phone: form.familyGuarantorPhone.trim() },
+      familyGuarantor: { name: form.familyGuarantorName.trim(), relation, phone: form.familyGuarantorPhone.trim(), nidFile: (form as any).familyGuarantorNidFile || undefined },
       isJoint,
       coBorrower: isJoint ? {
         name: coForm.name.trim(),
@@ -2928,7 +2928,9 @@ function LoansTab() {
         phone: coForm.phone.trim(),
         nid: coForm.nid.trim() || undefined,
         address: coForm.address.trim() || undefined,
+        nidFile: coForm.nidFile || undefined,
       } : undefined,
+      contractFile: (form as any).contractFile || undefined,
       cheques: cheques
         .filter((c) => c.bankName.trim() || c.chequeNo.trim())
         .map((c) => ({
@@ -2940,9 +2942,9 @@ function LoansTab() {
           date: c.date || undefined,
         })),
     });
-    setForm({ memberId: "", amount: "", interestRate: String(data.settings.defaultInterestRate), durationMonths: String(data.settings.defaultDurationMonths), date: today(), memberGuarantorId: "", familyGuarantorName: "", familyGuarantorRelation: "", familyGuarantorCustomRelation: "", familyGuarantorPhone: "" });
+    setForm({ memberId: "", amount: "", interestRate: String(data.settings.defaultInterestRate), durationMonths: String(data.settings.defaultDurationMonths), date: today(), memberGuarantorId: "", familyGuarantorName: "", familyGuarantorRelation: "", familyGuarantorCustomRelation: "", familyGuarantorPhone: "", familyGuarantorNidFile: "", contractFile: "" });
     setIsJoint(false);
-    setCoForm({ name: "", fatherName: "", motherName: "", birthDate: "", phone: "", nid: "", address: "" });
+    setCoForm({ name: "", fatherName: "", motherName: "", birthDate: "", phone: "", nid: "", address: "", nidFile: "" });
     setCheques([]);
     setErrors({});
     setOpen(false);
@@ -2993,6 +2995,8 @@ function LoansTab() {
       familyGuarantorRelation: isCustomRelation ? "অন্যান্য" : fgRelation,
       familyGuarantorCustomRelation: isCustomRelation ? fgRelation : "",
       familyGuarantorPhone: l.familyGuarantor?.phone ?? "",
+      familyGuarantorNidFile: l.familyGuarantor?.nidFile ?? "",
+      contractFile: l.contractFile ?? "",
     });
     setEditIsJoint(!!l.isJoint);
     setEditCoForm({
@@ -3001,6 +3005,9 @@ function LoansTab() {
       phone: l.coBorrower?.phone ?? "",
       nid: l.coBorrower?.nid ?? "",
       address: l.coBorrower?.address ?? "",
+      motherName: l.coBorrower?.motherName ?? "",
+      birthDate: l.coBorrower?.birthDate ?? "",
+      nidFile: l.coBorrower?.nidFile ?? "",
     });
     setEditCheques((l.cheques ?? []).map((c) => ({
       bankName: c.bankName ?? "",
@@ -3040,7 +3047,7 @@ function LoansTab() {
       durationMonths: dur,
       date: editForm.date,
       memberGuarantorId: editForm.memberGuarantorId,
-      familyGuarantor: { name: editForm.familyGuarantorName.trim(), relation, phone: editForm.familyGuarantorPhone.trim() },
+      familyGuarantor: { name: editForm.familyGuarantorName.trim(), relation, phone: editForm.familyGuarantorPhone.trim(), nidFile: (editForm as any).familyGuarantorNidFile || undefined },
       isJoint: editIsJoint,
       coBorrower: editIsJoint ? {
         name: editCoForm.name.trim(),
@@ -3050,9 +3057,11 @@ function LoansTab() {
         phone: editCoForm.phone.trim(),
         nid: editCoForm.nid.trim() || undefined,
         address: editCoForm.address.trim() || undefined,
+        nidFile: editCoForm.nidFile || undefined,
         updatedAt: new Date().toISOString(),
         updatedBy: "Admin", // In a real app, this would be the logged-in user's name/ID
       } : undefined,
+      contractFile: (editForm as any).contractFile || undefined,
       cheques: editCheques
         .filter((c) => c.bankName.trim() || c.chequeNo.trim())
         .map((c) => ({
@@ -3403,13 +3412,26 @@ function LoansTab() {
             <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
               <DialogHeader><DialogTitle>নতুন ঋণ প্রদান</DialogTitle></DialogHeader>
               <div className="space-y-4 py-4">
-                <div>
-                  <Label>সদস্য (সিরিয়াল ও নাম) *</Label>
-                  <Select value={form.memberId} onValueChange={(v) => setField("memberId", v)}>
-                    <SelectTrigger className={errors.memberId ? "border-destructive" : ""}><SelectValue placeholder="সদস্য নির্বাচন করুন" /></SelectTrigger>
-                    <SelectContent>{data.members.map((m) => <SelectItem key={m.id} value={m.id}>{toBn(m.serial)} — {m.name}</SelectItem>)}</SelectContent>
-                  </Select>
-                  {errors.memberId && <p className="text-xs text-destructive mt-1">{errors.memberId}</p>}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div>
+                    <Label>সদস্য (সিরিয়াল ও নাম) *</Label>
+                    <Select value={form.memberId} onValueChange={(v) => setField("memberId", v)}>
+                      <SelectTrigger className={errors.memberId ? "border-destructive" : ""}><SelectValue placeholder="সদস্য নির্বাচন করুন" /></SelectTrigger>
+                      <SelectContent>{data.members.map((m) => <SelectItem key={m.id} value={m.id}>{toBn(m.serial)} — {m.name}</SelectItem>)}</SelectContent>
+                    </Select>
+                    {errors.memberId && <p className="text-xs text-destructive mt-1">{errors.memberId}</p>}
+                  </div>
+                  <div>
+                    <Label>ঋণ চুক্তি ফরম / স্ক্যান কপি</Label>
+                    <Input type="file" accept="image/*,application/pdf" onChange={(e) => {
+                      const file = e.target.files?.[0];
+                      if (file) {
+                        const reader = new FileReader();
+                        reader.onload = () => setForm({ ...form, contractFile: String(reader.result) });
+                        reader.readAsDataURL(file);
+                      }
+                    }} />
+                  </div>
                 </div>
                 <div className="grid grid-cols-2 gap-3">
                   <div>
@@ -3478,6 +3500,17 @@ function LoansTab() {
                     <div className="sm:col-span-2">
                       <Label>ঠিকানা</Label>
                       <Input value={coForm.address} onChange={(e) => setCoForm({ ...coForm, address: e.target.value })} placeholder="ঠিকানা" />
+                    </div>
+                    <div>
+                      <Label>২য় ঋণগ্রহীতার NID কপি</Label>
+                      <Input type="file" accept="image/*,application/pdf" onChange={(e) => {
+                        const file = e.target.files?.[0];
+                        if (file) {
+                          const reader = new FileReader();
+                          reader.onload = () => setCoForm({ ...coForm, nidFile: String(reader.result) } as any);
+                          reader.readAsDataURL(file);
+                        }
+                      }} />
                     </div>
                   </div>
                 )}
@@ -3566,6 +3599,17 @@ function LoansTab() {
                 <Label>পারিবারিক জামিনদার — মোবাইল *</Label>
                 <Input className={errors.familyGuarantorPhone ? "border-destructive" : ""} value={form.familyGuarantorPhone} onChange={(e) => setField("familyGuarantorPhone", e.target.value)} placeholder="মোবাইল নম্বর" />
                 {errors.familyGuarantorPhone && <p className="text-xs text-destructive mt-1">{errors.familyGuarantorPhone}</p>}
+              </div>
+              <div>
+                <Label>পারিবারিক জামিনদারের NID কপি</Label>
+                <Input type="file" accept="image/*,application/pdf" onChange={(e) => {
+                  const file = e.target.files?.[0];
+                  if (file) {
+                    const reader = new FileReader();
+                    reader.onload = () => setField("familyGuarantorNidFile", String(reader.result));
+                    reader.readAsDataURL(file);
+                  }
+                }} />
               </div>
               </div>
               <DialogFooter><Button onClick={submit}>ঋণ প্রদান</Button></DialogFooter>
@@ -3865,13 +3909,26 @@ function LoansTab() {
         <DialogContent className="max-w-2xl">
           <DialogHeader><DialogTitle>ঋণ সম্পাদনা</DialogTitle></DialogHeader>
           <div className="space-y-3">
-            <div>
-              <Label>সদস্য</Label>
-              <Select value={editForm.memberId} onValueChange={(v) => editSetField("memberId", v)}>
-                <SelectTrigger className={editErrors.memberId ? "border-destructive" : ""}><SelectValue placeholder="সদস্য নির্বাচন করুন" /></SelectTrigger>
-                <SelectContent>{data.members.map((m) => <SelectItem key={m.id} value={m.id}>{toBn(m.serial)} — {m.name}</SelectItem>)}</SelectContent>
-              </Select>
-              {editErrors.memberId && <p className="text-xs text-destructive mt-1">{editErrors.memberId}</p>}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <Label>সদস্য</Label>
+                <Select value={editForm.memberId} onValueChange={(v) => editSetField("memberId", v)}>
+                  <SelectTrigger className={editErrors.memberId ? "border-destructive" : ""}><SelectValue placeholder="সদস্য নির্বাচন করুন" /></SelectTrigger>
+                  <SelectContent>{data.members.map((m) => <SelectItem key={m.id} value={m.id}>{toBn(m.serial)} — {m.name}</SelectItem>)}</SelectContent>
+                </Select>
+                {editErrors.memberId && <p className="text-xs text-destructive mt-1">{editErrors.memberId}</p>}
+              </div>
+              <div>
+                <Label>ঋণ চুক্তি ফরম / স্ক্যান কপি</Label>
+                <Input type="file" accept="image/*,application/pdf" onChange={(e) => {
+                  const file = e.target.files?.[0];
+                  if (file) {
+                    const reader = new FileReader();
+                    reader.onload = () => editSetField("contractFile", String(reader.result));
+                    reader.readAsDataURL(file);
+                  }
+                }} />
+              </div>
             </div>
             <div className="grid grid-cols-2 gap-3">
               <div><Label>পরিমাণ</Label><Input type="number" className={editErrors.amount ? "border-destructive" : ""} value={editForm.amount} onChange={(e) => editSetField("amount", e.target.value)} />{editErrors.amount && <p className="text-xs text-destructive mt-1">{editErrors.amount}</p>}</div>
@@ -3916,7 +3973,18 @@ function LoansTab() {
                     {editErrors.coPhone && <p className="text-xs text-destructive mt-1">{editErrors.coPhone}</p>}
                   </div>
                   <div><Label>NID</Label><Input value={editCoForm.nid} onChange={(e) => setEditCoForm({ ...editCoForm, nid: e.target.value })} placeholder="জাতীয় পরিচয়পত্র নং" /></div>
-                  <div className="sm:col-span-2"><Label>ঠিকানা</Label><Input value={editCoForm.address} onChange={(e) => setEditCoForm({ ...editCoForm, address: e.target.value })} placeholder="ঠিকানা" /></div>
+                  <div><Label>ঠিকানা</Label><Input value={editCoForm.address} onChange={(e) => setEditCoForm({ ...editCoForm, address: e.target.value })} placeholder="ঠিকানা" /></div>
+                  <div>
+                    <Label>২য় ঋণগ্রহীতার NID কপি</Label>
+                    <Input type="file" accept="image/*,application/pdf" onChange={(e) => {
+                      const file = e.target.files?.[0];
+                      if (file) {
+                        const reader = new FileReader();
+                        reader.onload = () => setEditCoForm({ ...editCoForm, nidFile: String(reader.result) } as any);
+                        reader.readAsDataURL(file);
+                      }
+                    }} />
+                  </div>
                 </div>
               )}
             </div>
@@ -3985,6 +4053,17 @@ function LoansTab() {
               <Label>পারিবারিক জামিনদার — মোবাইল *</Label>
               <Input className={editErrors.familyGuarantorPhone ? "border-destructive" : ""} value={editForm.familyGuarantorPhone} onChange={(e) => editSetField("familyGuarantorPhone", e.target.value)} placeholder="মোবাইল নম্বর" />
               {editErrors.familyGuarantorPhone && <p className="text-xs text-destructive mt-1">{editErrors.familyGuarantorPhone}</p>}
+            </div>
+            <div>
+              <Label>পারিবারিক জামিনদারের NID কপি</Label>
+              <Input type="file" accept="image/*,application/pdf" onChange={(e) => {
+                const file = e.target.files?.[0];
+                if (file) {
+                  const reader = new FileReader();
+                  reader.onload = () => editSetField("familyGuarantorNidFile", String(reader.result));
+                  reader.readAsDataURL(file);
+                }
+              }} />
             </div>
           </div>
           <DialogFooter><Button onClick={submitEdit}>সংরক্ষণ</Button></DialogFooter>
@@ -4066,13 +4145,45 @@ function LoansTab() {
                     ))}
                   </div>
                 )}
-                <div className="border-t pt-2">
-                  <div className="font-medium mb-1 text-center">জামিনদার</div>
-                  <div>সদস্য জামিনদার: {gm?.name ?? "—"}{gm ? ` (সদস্য নং ${formatMemberSerial(gm, data.serialPrefix)})` : ""}</div>
-                  {currentLoan.familyGuarantor && (
-                    <div>পারিবারিক: {currentLoan.familyGuarantor.name} ({currentLoan.familyGuarantor.relation}) — {currentLoan.familyGuarantor.phone}</div>
+                <div className="border-t pt-2 grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div>
+                    <div className="font-medium mb-1 text-center">জামিনদার</div>
+                    <div>সদস্য জামিনদার: {gm?.name ?? "—"}{gm ? ` (সদস্য নং ${formatMemberSerial(gm, data.serialPrefix)})` : ""}</div>
+                    {currentLoan.familyGuarantor && (
+                      <div className="flex items-center justify-between">
+                        <div>পারিবারিক: {currentLoan.familyGuarantor.name} ({currentLoan.familyGuarantor.relation}) — {currentLoan.familyGuarantor.phone}</div>
+                        {currentLoan.familyGuarantor.nidFile && (
+                          <Button variant="ghost" size="sm" className="h-7 text-xs" onClick={() => printNidFile(currentLoan.familyGuarantor!.nidFile!, "NID কপি", currentLoan.familyGuarantor!.name, data.samitiName, data.samitiLogo)}>
+                            <FileText className="h-3 w-3 mr-1" /> NID
+                          </Button>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                  {currentLoan.contractFile && (
+                    <div className="flex flex-col items-center justify-center border-l pl-4">
+                      <div className="font-medium mb-1">ডকুমেন্ট</div>
+                      <Button variant="outline" size="sm" className="w-full" onClick={() => printNidFile(currentLoan.contractFile!, "ঋণ চুক্তি ফরম", m?.name ?? "ঋণগ্রহীতা", data.samitiName, data.samitiLogo)}>
+                        <FileText className="h-4 w-4 mr-1" /> ঋণ চুক্তি ফরম দেখুন ও প্রিন্ট
+                      </Button>
+                    </div>
                   )}
                 </div>
+                {currentLoan.isJoint && currentLoan.coBorrower && (
+                  <div className="border-t pt-2">
+                    <div className="font-medium mb-1 text-center">২য় ঋণগ্রহীতা (যৌথ)</div>
+                    <div className="flex items-center justify-between text-xs">
+                      <div>
+                        {currentLoan.coBorrower.name} · পিতা: {currentLoan.coBorrower.fatherName || "—"} · মাতা: {currentLoan.coBorrower.motherName || "—"} · ফোন: {currentLoan.coBorrower.phone}
+                      </div>
+                      {currentLoan.coBorrower.nidFile && (
+                        <Button variant="ghost" size="sm" className="h-7 text-xs" onClick={() => printNidFile(currentLoan.coBorrower!.nidFile!, "NID কপি", currentLoan.coBorrower!.name, data.samitiName, data.samitiLogo)}>
+                          <FileText className="h-3 w-3 mr-1" /> NID
+                        </Button>
+                      )}
+                    </div>
+                  </div>
+                )}
                 <div className="border-t pt-3 flex gap-6">
                   <div className="flex-1 min-w-0">
                     <div className="font-medium mb-2 border-b pb-1 text-center">কিস্তি সিডিউল ও আদায়</div>

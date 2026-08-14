@@ -59,7 +59,7 @@ export type Loan = {
   durationMonths: number;
   status: "active" | "closed";
   memberGuarantorId?: string;
-  familyGuarantor?: { name: string; relation: string; phone: string };
+  familyGuarantor?: { name: string; relation: string; phone: string; nidFile?: string };
   isJoint?: boolean;
   coBorrower?: { 
     name: string; 
@@ -71,7 +71,9 @@ export type Loan = {
     address?: string;
     updatedAt?: string;
     updatedBy?: string;
+    nidFile?: string;
   };
+  contractFile?: string;
   cheques?: CollateralCheque[];
   loanTerms?: string[];
 };
