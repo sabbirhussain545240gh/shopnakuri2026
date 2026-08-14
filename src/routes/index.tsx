@@ -150,7 +150,7 @@ function RoleRouter() {
 const today = () => new Date().toISOString().slice(0, 10);
 const fmtDate = (s: string) => formatDateStr(s);
 const bnMonths = ["জানুয়ারি","ফেব্রুয়ারি","মার্চ","এপ্রিল","মে","জুন","জুলাই","আগস্ট","সেপ্টেম্বর","অক্টোবর","নভেম্বর","ডিসেম্বর"];
-const toBnDigits = (s: string | number) => String(s).replace(/[0-9]/g, (d) => "০১২৩৪৫৬৭৮৯"[+d]);
+const toBnDigits = (s: string | number) => toBn(s);
 const fmtMonthYearBn = (s: string) => {
   if (!s) return "";
   const [y, m] = s.split("-");
