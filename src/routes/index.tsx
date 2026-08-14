@@ -1253,8 +1253,8 @@ function MembersTab() {
                 <div className="grid grid-cols-2 gap-3 text-sm">
                   <Info label="নাম" value={viewMember.nominee?.name} />
                   <Info label="সম্পর্ক" value={viewMember.nominee?.relation} />
-                  <Info label="মোবাইল" value={viewMember.nominee?.phone ? toBn(viewMember.nominee.phone) : ""} />
-                  <Info label="NID / জন্ম সনদ" value={viewMember.nominee?.nid ? toBn(viewMember.nominee.nid) : ""} />
+                  <Info label="মোবাইল নং" value={viewMember.nominee?.phone ? toBn(viewMember.nominee.phone) : ""} />
+                  <Info label="NID / জন্ম সনদ নং" value={viewMember.nominee?.nid ? toBn(viewMember.nominee.nid) : ""} />
                 </div>
               </div>
               {(() => {
