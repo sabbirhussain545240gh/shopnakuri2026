@@ -1422,7 +1422,7 @@ function buildLoanDetailHtml(
     ["বকেয়া", formatTk(remaining)],
     ["অবস্থা", loan.status === "active" ? "চলমান" : "পরিশোধিত"],
   ];
-  const guarantorRows: [string, string][] = [["সদস্য জামিনদার", guarantor?.name ?? "—"]];
+  const guarantorRows: [string, string][] = [["সদস্য জামিনদার", `${guarantor?.name ?? "—"}${guarantor ? ` (সদস্য নং ${formatMemberSerial(guarantor, samiti.serialPrefix)})` : ""}`]];
   if (loan.isJoint && loan.coBorrower) {
     guarantorRows.push(["যৌথ ঋণগ্রহীতা (বাহিরের)", `${loan.coBorrower.name}${loan.coBorrower.fatherName ? ` (পিতা: ${loan.coBorrower.fatherName})` : ""} — ${loan.coBorrower.phone}${loan.coBorrower.nid ? ` | NID: ${loan.coBorrower.nid}` : ""}${loan.coBorrower.address ? ` | ${loan.coBorrower.address}` : ""}`]);
   }
@@ -3445,7 +3445,7 @@ function LoansTab() {
                 )}
                 <div className="border-t pt-2">
                   <div className="font-medium mb-1">জামিনদার</div>
-                  <div>সদস্য জামিনদার: {gm?.name ?? "—"}</div>
+                  <div>সদস্য জামিনদার: {gm?.name ?? "—"}{gm ? ` (সদস্য নং ${formatMemberSerial(gm, data.serialPrefix)})` : ""}</div>
                   {currentLoan.familyGuarantor && (
                     <div>পারিবারিক: {currentLoan.familyGuarantor.name} ({currentLoan.familyGuarantor.relation}) — {currentLoan.familyGuarantor.phone}</div>
                   )}
