@@ -762,6 +762,13 @@ function MembersTab() {
     }
     return "";
   };
+  const [form, setForm] = useState(emptyForm);
+  const [viewMember, setViewMember] = useState<Member | null>(null);
+  const [editMember, setEditMember] = useState<Member | null>(null);
+  const [depositReceipt, setDepositReceipt] = useState<null | (DepositReceiptData & { id: string })>(null);
+  const [installmentReceipt, setInstallmentReceipt] = useState<null | { loan: Loan; memberName: string; memberSerial?: number; amount: number; date: string; paidAfter: number; remainingAfter: number; receiptNo: string; note?: string; logo?: string; loanNo?: number }>(null);
+  const [memberAction, setMemberAction] = useState<{ type: "deposit" | "installment"; memberId: string; loanId?: string } | null>(null);
+  const [actionForm, setActionForm] = useState({ memberId: "", loanId: "", amount: "", date: today(), note: "" });
   const [actionErrors, setActionErrors] = useState<Record<string, string>>({});
 
   const loanInfo = (loanId: string) => {
@@ -775,39 +782,12 @@ function MembersTab() {
     return { loan, member, due, paid, remaining, installment };
   };
 
-  const nextSerial = data.members.length > 0 ? Math.max(...data.members.map((m) => m.serial || 0)) + 1 : 1;
-  useEffect(() => {
-    if (open) setForm((f) => ({ ...f, serial: String(nextSerial) }));
-  }, [open, nextSerial]);
-
-  const onPhoto = (file?: File) => {
-    if (!file) return;
-    if (file.size > 10 * 1024 * 1024) { toast.error("ছবি ১০ MB এর কম হতে হবে"); return; }
-    const reader = new FileReader();
-    reader.onload = () => setForm((f) => ({ ...f, photo: String(reader.result || "") }));
-    reader.readAsDataURL(file);
-  };
-
-  const submit = () => {
-    if (!form.name.trim()) { toast.error("নাম দিন"); return; }
-    const serialNum = form.serial ? parseInt(form.serial, 10) : 0;
-    const { nomineeCustomRelation, ...rest } = form;
-    const finalRelation = form.nominee.relation === "অন্যান্য" ? nomineeCustomRelation.trim() : form.nominee.relation;
-    addMember({ ...rest, serial: serialNum, category: form.category.trim().toUpperCase(), nominee: { ...form.nominee, relation: finalRelation || "" } });
-    setForm(emptyForm);
-    setOpen(false);
-    toast.success("সদস্য যোগ হয়েছে");
-  };
-
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const pick = (row: any, keys: string[]): string => {
     for (const k of keys) {
       const v = row[k];
       if (v != null && String(v).trim() !== "") return String(v).trim();
-    }
-    return "";
-  };
 
   const downloadTemplate = () => {
     const headers = [
