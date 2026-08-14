@@ -3969,7 +3969,7 @@ function LoansTab() {
       <Dialog open={!!editFor} onOpenChange={(o) => !o && setEditFor(null)}>
         <DialogContent className="max-w-2xl">
           <DialogHeader><DialogTitle>ঋণ সম্পাদনা</DialogTitle></DialogHeader>
-          <div className="space-y-3">
+          <div className="space-y-4 py-4">
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
                 <Label>সদস্য</Label>
