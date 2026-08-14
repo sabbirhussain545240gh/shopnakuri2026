@@ -1215,25 +1215,26 @@ function MembersTab() {
                 <Info label="মোবাইল" value={viewMember.phone ? toBn(viewMember.phone) : ""} />
                 <Info label="জন্ম তারিখ" value={viewMember.birthDate ? fmtDate(viewMember.birthDate) : ""} />
                  <Info label="NID / জন্ম সনদ" value={viewMember.nid ? toBn(viewMember.nid) : ""} />
-                 <div className="col-span-2 space-y-1">
-                   <Label className="text-xs text-muted-foreground">সদস্যের NID কপি</Label>
-                   {viewMember.nidFile ? (
-                     <div className="mt-1">
-                       {viewMember.nidFile.startsWith("data:application/pdf") ? (
-                         <Button variant="outline" size="sm" className="h-8" onClick={() => window.open(viewMember.nidFile, "_blank")}>
-                           <FileText className="h-3.5 w-3.5 mr-1" /> PDF দেখুন
-                         </Button>
-                       ) : (
-                         <div className="relative group cursor-zoom-in" onClick={() => window.open(viewMember.nidFile, "_blank")}>
-                           <img src={viewMember.nidFile} alt="NID" className="max-h-32 rounded border bg-white" />
-                           <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center rounded">
-                             <Eye className="h-6 w-6 text-white" />
-                           </div>
-                         </div>
-                       )}
-                     </div>
-                   ) : (
-                     <p className="text-xs text-muted-foreground/60 italic">সংরক্ষিত নেই</p>
+                 <div className="col-span-2 space-y-2 mt-1">
+                   {viewMember.nidFile && (
+                     <Button 
+                       variant="outline" 
+                       size="sm" 
+                       className="h-8 text-xs gap-1.5" 
+                       onClick={() => window.open(viewMember.nidFile, "_blank")}
+                     >
+                       <FileText className="h-3.5 w-3.5" /> সদস্যের NID দেখুন ও প্রিন্ট
+                     </Button>
+                   )}
+                   {viewMember.nominee?.nidFile && (
+                     <Button 
+                       variant="outline" 
+                       size="sm" 
+                       className="h-8 text-xs gap-1.5" 
+                       onClick={() => window.open(viewMember.nominee!.nidFile!, "_blank")}
+                     >
+                       <FileText className="h-3.5 w-3.5" /> নমিনির NID দেখুন ও প্রিন্ট
+                     </Button>
                    )}
                  </div>
                  <Info label="ঠিকানা" value={viewMember.address} className="col-span-2" />
@@ -1244,28 +1245,7 @@ function MembersTab() {
                   <Info label="নাম" value={viewMember.nominee?.name} />
                   <Info label="সম্পর্ক" value={viewMember.nominee?.relation} />
                   <Info label="মোবাইল" value={viewMember.nominee?.phone ? toBn(viewMember.nominee.phone) : ""} />
-                   <Info label="NID / জন্ম সনদ" value={viewMember.nominee?.nid ? toBn(viewMember.nominee.nid) : ""} />
-                   <div className="col-span-2 space-y-1">
-                     <Label className="text-xs text-muted-foreground">নমিনির NID কপি</Label>
-                     {viewMember.nominee?.nidFile ? (
-                       <div className="mt-1">
-                         {viewMember.nominee.nidFile.startsWith("data:application/pdf") ? (
-                           <Button variant="outline" size="sm" className="h-8" onClick={() => window.open(viewMember.nominee!.nidFile!, "_blank")}>
-                             <FileText className="h-3.5 w-3.5 mr-1" /> PDF দেখুন
-                           </Button>
-                         ) : (
-                           <div className="relative group cursor-zoom-in" onClick={() => window.open(viewMember.nominee!.nidFile!, "_blank")}>
-                             <img src={viewMember.nominee.nidFile} alt="Nominee NID" className="max-h-32 rounded border bg-white" />
-                             <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center rounded">
-                               <Eye className="h-6 w-6 text-white" />
-                             </div>
-                           </div>
-                         )}
-                       </div>
-                     ) : (
-                       <p className="text-xs text-muted-foreground/60 italic">সংরক্ষিত নেই</p>
-                     )}
-                   </div>
+                  <Info label="NID / জন্ম সনদ" value={viewMember.nominee?.nid ? toBn(viewMember.nominee.nid) : ""} />
                 </div>
               </div>
               {(() => {
