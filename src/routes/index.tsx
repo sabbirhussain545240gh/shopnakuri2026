@@ -1773,11 +1773,11 @@ function EditMemberForm({ member, onSave, onCancel }: { member: Member; onSave: 
         <div><Label>মোবাইল নং</Label><Input value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} /></div>
         <div><Label>পিতার নাম</Label><Input value={form.fatherName} onChange={(e) => setForm({ ...form, fatherName: e.target.value })} /></div>
         <div><Label>মাতার নাম</Label><Input value={form.motherName} onChange={(e) => setForm({ ...form, motherName: e.target.value })} /></div>
-        <div><Label>জন্ম তারিখ</Label><Input type="date" value={form.birthDate} onChange={(e) => setForm({ ...form, birthDate: e.target.value })} /></div>
+        <div><Label>জন্ম তারিখ</Label><Input type="text" placeholder={getDateFormat()} value={form.birthDate ? fmtDate(form.birthDate) : ""} onChange={(e) => setForm({ ...form, birthDate: toIsoDate(e.target.value) })} /></div>
         <div><Label>NID / জন্ম সনদ নং</Label><Input value={form.nid} onChange={(e) => setForm({ ...form, nid: e.target.value })} /></div>
       </div>
       <div><Label>ঠিকানা</Label><Textarea value={form.address} onChange={(e) => setForm({ ...form, address: e.target.value })} /></div>
-      <div><Label>যোগদানের তারিখ</Label><Input type="date" value={form.joinDate} onChange={(e) => setForm({ ...form, joinDate: e.target.value })} /></div>
+      <div><Label>যোগদানের তারিখ</Label><Input type="text" placeholder={getDateFormat()} value={form.joinDate ? fmtDate(form.joinDate) : ""} onChange={(e) => setForm({ ...form, joinDate: toIsoDate(e.target.value) })} /></div>
 
       <div className="border-t pt-3">
         <h4 className="font-semibold mb-2 text-foreground">নমিনি তথ্য</h4>
