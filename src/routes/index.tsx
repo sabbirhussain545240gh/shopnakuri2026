@@ -6354,12 +6354,29 @@ function ReconciliationTab() {
   });
   const [isEditing, setIsEditing] = useState(false);
 
+  const startEditAdjust = (t: Transaction) => {
+    setForm({ type: t.type, amount: String(t.amount), date: t.date, note: t.note || "", id: t.id });
+    setIsEditing(true);
+    // Scroll to top of tab if possible or just rely on state
+  };
+
+  const cancelEdit = () => {
+    setForm({ type: "income", amount: "", date: today(), note: "" });
+    setIsEditing(false);
+  };
+
   const submitAdjust = () => {
     const amt = Number(form.amount);
     if (!amt || amt <= 0) { toast.error("সঠিক পরিমাণ দিন"); return; }
-    addTransaction({ type: form.type, category: ADJUST_CATEGORY, amount: amt, date: form.date, note: form.note });
-    setForm({ type: "income", amount: "", date: today(), note: "" });
-    toast.success("সমন্নয় রেকর্ড সংরক্ষিত হয়েছে");
+    if (isEditing && form.id) {
+      updateTransaction(form.id, { type: form.type, amount: amt, date: form.date, note: form.note });
+      toast.success("সমন্নয় রেকর্ড আপডেট করা হয়েছে");
+      cancelEdit();
+    } else {
+      addTransaction({ type: form.type, category: ADJUST_CATEGORY, amount: amt, date: form.date, note: form.note });
+      setForm({ type: "income", amount: "", date: today(), note: "" });
+      toast.success("সমন্নয় রেকর্ড সংরক্ষিত হয়েছে");
+    }
   };
 
   const activeLoansWithDue = useMemo(() => {
