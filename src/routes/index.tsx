@@ -1099,17 +1099,6 @@ function MembersTab() {
             <DialogFooter><Button onClick={submit}>সংরক্ষণ</Button></DialogFooter>
           </DialogContent>
         </Dialog>
-
-            <div className="flex-1 overflow-auto bg-slate-100 p-4 md:p-8 flex items-center justify-center min-h-[400px]">
-              {viewDoc && (
-                viewDoc.file.startsWith("data:application/pdf") ? (
-                  <div className="bg-white p-8 rounded-lg shadow-sm text-center space-y-4 max-w-sm">
-                    <div className="h-16 w-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto">
-                      <FileText className="h-8 w-8 text-primary" />
-                    </div>
-
-        </div>
-      </CardHeader>
       <CardContent>
         <div className="grid grid-cols-1 md:grid-cols-4 gap-3 mb-6 bg-muted/30 p-4 rounded-lg border">
           <div className="space-y-1.5">
