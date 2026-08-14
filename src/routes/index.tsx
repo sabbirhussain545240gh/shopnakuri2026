@@ -14,7 +14,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter, DialogDescription } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Command, CommandInput, CommandList, CommandEmpty, CommandGroup, CommandItem } from "@/components/ui/command";
@@ -3354,7 +3354,7 @@ function LoansTab() {
                           onChange={(e) => {
                             const newTerms = [...(data.settings.loanTerms || [])];
                             newTerms[i] = e.target.value;
-                            s.updateSettings({ loanTerms: newTerms });
+                            updateSamitiInfo({ settings: { ...data.settings, loanTerms: newTerms } });
                           }}
                           className="min-h-[40px] resize-none overflow-hidden"
                           onInput={(e) => {
@@ -3371,7 +3371,7 @@ function LoansTab() {
                         className="shrink-0 text-destructive opacity-0 group-hover:opacity-100 transition-opacity"
                         onClick={() => {
                           const newTerms = (data.settings.loanTerms || []).filter((_, j) => j !== i);
-                          s.updateSettings({ loanTerms: newTerms });
+                          updateSamitiInfo({ settings: { ...data.settings, loanTerms: newTerms } });
                         }}
                       >
                         <Trash2 className="h-4 w-4" />
@@ -3388,9 +3388,10 @@ function LoansTab() {
                   size="sm"
                   onClick={() => {
                     const newTerms = [...(data.settings.loanTerms || []), ""];
-                    s.updateSettings({ loanTerms: newTerms });
+                    updateSamitiInfo({ settings: { ...data.settings, loanTerms: newTerms } });
                   }}
                 >
+
                   <Plus className="h-4 w-4 mr-1" />নতুন শর্ত যোগ করুন
                 </Button>
               </div>
