@@ -4145,8 +4145,6 @@ function LoansTab() {
                 </div>
               )}
             </div>
-              ))}
-            </div>
             <div>
               <Label>সদস্য জামিনদার *</Label>
               <Select value={editForm.memberGuarantorId} onValueChange={(v) => editSetField("memberGuarantorId", v)}>
