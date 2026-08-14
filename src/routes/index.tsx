@@ -3536,6 +3536,8 @@ function LoansTab() {
                         <Input type="date" value={c.date} onChange={(e) => updateChequeRow(i, "date", e.target.value)} />
                       </div>
                     </div>
+                  </div>
+                ))}
               </div>
               
               <div className="rounded-md border p-4 space-y-4">
@@ -4050,6 +4052,8 @@ function LoansTab() {
                     <div><Label>চেকের পরিমাণ (৳)</Label><Input type="number" value={c.amount} onChange={(e) => editUpdateChequeRow(i, "amount", e.target.value)} placeholder="0" /></div>
                     <div><Label>চেকের তারিখ</Label><Input type="date" value={c.date} onChange={(e) => editUpdateChequeRow(i, "date", e.target.value)} /></div>
                   </div>
+                </div>
+              ))}
             </div>
 
             <div className="rounded-md border p-4 space-y-4">
@@ -4289,6 +4293,8 @@ function LoansTab() {
                       <Button variant="outline" size="sm" className="w-full" onClick={() => printNidFile(currentLoan.contractFile!, "ঋণ চুক্তি ফরম", m?.name ?? "ঋণগ্রহীতা", data.samitiName, data.samitiLogo)}>
                         <FileText className="h-4 w-4 mr-1" /> ঋণ চুক্তি ফরম দেখুন ও প্রিন্ট
                       </Button>
+                    </div>
+                  )}
                 </div>
                 {currentLoan.documents && currentLoan.documents.length > 0 && (
                   <div className="border-t pt-2">
@@ -4309,8 +4315,6 @@ function LoansTab() {
                     </div>
                   </div>
                 )}
-                  )}
-                </div>
                 {currentLoan.isJoint && currentLoan.coBorrower && (
                   <div className="border-t pt-2">
                     <div className="font-medium mb-1 text-center">২য় ঋণগ্রহীতা (যৌথ)</div>
