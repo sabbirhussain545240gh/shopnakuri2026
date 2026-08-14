@@ -1056,8 +1056,39 @@ function MembersTab() {
         </div>
       </CardHeader>
       <CardContent>
-        {data.members.length === 0 ? (
-          <p className="text-sm text-muted-foreground text-center py-10">এখনও কোনও সদস্য যোগ করা হয়নি।</p>
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-3 mb-6 bg-muted/30 p-4 rounded-lg border">
+          <div className="space-y-1.5">
+            <Label className="text-xs">সি.নং</Label>
+            <div className="relative">
+              <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+              <Input placeholder="সি.নং লিখুন..." className="pl-9" value={searchSerial} onChange={(e) => setSearchSerial(e.target.value)} />
+            </div>
+          </div>
+          <div className="space-y-1.5">
+            <Label className="text-xs">নাম</Label>
+            <div className="relative">
+              <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+              <Input placeholder="নাম লিখুন..." className="pl-9" value={searchName} onChange={(e) => setSearchName(e.target.value)} />
+            </div>
+          </div>
+          <div className="space-y-1.5">
+            <Label className="text-xs">মোবাইল</Label>
+            <div className="relative">
+              <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+              <Input placeholder="মোবাইল নং লিখুন..." className="pl-9" value={searchPhone} onChange={(e) => setSearchPhone(e.target.value)} />
+            </div>
+          </div>
+          <div className="space-y-1.5">
+            <Label className="text-xs">NID/জন্ম সনদ</Label>
+            <div className="relative">
+              <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+              <Input placeholder="NID নং লিখুন..." className="pl-9" value={searchNid} onChange={(e) => setSearchNid(e.target.value)} />
+            </div>
+          </div>
+        </div>
+
+        {filteredMembers.length === 0 ? (
+          <p className="text-sm text-muted-foreground text-center py-10">এখনও কোনও সদস্য যোগ করা হয়নি বা ফিল্টারে তথ্য পাওয়া যায়নি।</p>
         ) : (
           <Table>
             <TableHeader>
