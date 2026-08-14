@@ -6084,15 +6084,15 @@ function CashbookTab() {
             </div>
             <div className="space-y-1.5 min-w-[140px]">
               <Label>শুরুর তারিখ</Label>
-              <Input type="date" value={startDate} onChange={(e) => {
-                setStartDate(e.target.value);
+              <Input type="text" placeholder={getDateFormat()} value={startDate ? fmtDate(startDate) : ""} onChange={(e) => {
+                setStartDate(toIsoDate(e.target.value));
                 setMonthFilter("");
               }} />
             </div>
             <div className="space-y-1.5 min-w-[140px]">
               <Label>শেষ তারিখ</Label>
-              <Input type="date" value={endDate} onChange={(e) => {
-                setEndDate(e.target.value);
+              <Input type="text" placeholder={getDateFormat()} value={endDate ? fmtDate(endDate) : ""} onChange={(e) => {
+                setEndDate(toIsoDate(e.target.value));
                 setMonthFilter("");
               }} />
             </div>
@@ -6152,7 +6152,7 @@ function CashbookTab() {
                   <div><Label>খাতের নাম *</Label><Input value={form.customCategory} onChange={(e) => setForm({ ...form, customCategory: e.target.value })} placeholder="খাতের নাম লিখুন" /></div>
                 )}
                 <div><Label>পরিমাণ *</Label><Input type="number" value={form.amount} onChange={(e) => setForm({ ...form, amount: e.target.value })} /></div>
-                <div><Label>তারিখ</Label><Input type="date" value={form.date} onChange={(e) => setForm({ ...form, date: e.target.value })} /></div>
+                <div><Label>তারিখ</Label><Input type="text" placeholder={getDateFormat()} value={form.date ? fmtDate(form.date) : ""} onChange={(e) => setForm({ ...form, date: toIsoDate(e.target.value) })} /></div>
                 <div><Label>মন্তব্য</Label><Input value={form.note} onChange={(e) => setForm({ ...form, note: e.target.value })} /></div>
               </div>
               <DialogFooter><Button onClick={submit}>সংরক্ষণ</Button></DialogFooter>
