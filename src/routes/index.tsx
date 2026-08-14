@@ -3631,8 +3631,6 @@ function LoansTab() {
                   </div>
                 )}
               </div>
-                ))}
-              </div>
 
               <div>
                 <Label>সদস্য জামিনদার *</Label>
