@@ -1886,7 +1886,6 @@ function buildLoanDetailHtml(
   // Custom borrower info layout if joint loan
   let coBorrowerHtml = "";
   if (loan.isJoint && loan.coBorrower) {
-    guarantorRows.push(["যৌথ ঋণগ্রহীতা (বাহিরের)", `${loan.coBorrower.name}${loan.coBorrower.fatherName ? ` (পিতা: ${loan.coBorrower.fatherName})` : ""} — ${loan.coBorrower.phone}${loan.coBorrower.nid ? ` | NID: ${loan.coBorrower.nid}` : ""}${loan.coBorrower.address ? ` | ${loan.coBorrower.address}` : ""}`]);
     
     coBorrowerHtml = `
       <div style="display:flex;gap:20px;margin-top:14px;margin-bottom:14px;align-items:flex-start;border:1px solid #ddd;padding:10px;border-radius:4px;background:transparent;">
