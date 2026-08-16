@@ -2927,7 +2927,7 @@ function LoansTab() {
   const [editForm, setEditForm] = useState({ memberId: "", amount: "", interestRate: "", durationMonths: "", date: "", memberGuarantorId: "", familyGuarantorName: "", familyGuarantorRelation: "", familyGuarantorCustomRelation: "", familyGuarantorPhone: "", familyGuarantorNidFile: "", contractFile: "" });
   const [editDocuments, setEditDocuments] = useState<Array<{ id: string; name: string; file: string }>>([]);
   const [editIsJoint, setEditIsJoint] = useState(false);
-  const [editCoForm, setEditCoForm] = useState({ name: "", fatherName: "", phone: "", nid: "", address: "", motherName: "", birthDate: "", nidFile: "" });
+  const [editCoForm, setEditCoForm] = useState({ name: "", fatherName: "", phone: "", nid: "", address: "", motherName: "", birthDate: "", nidFile: "", photo: "" });
   const [editCheques, setEditCheques] = useState<Array<{ bankName: string; branch: string; chequeNo: string; accountNo: string; amount: string; date: string }>>([]);
   const [editErrors, setEditErrors] = useState<Record<string, string>>({});
   const editAddChequeRow = () => setEditCheques((p) => [...p, { bankName: "", branch: "", chequeNo: "", accountNo: "", amount: "", date: "" }]);
@@ -2942,7 +2942,7 @@ function LoansTab() {
   const [payForm, setPayForm] = useState({ amount: "", date: today(), note: "" });
   const [receipt, setReceipt] = useState<null | { loan: Loan; memberName: string; memberSerial?: number; amount: number; date: string; paidAfter: number; remainingAfter: number; receiptNo: string; note?: string; logo?: string; loanNo?: number }>(null);
   const [isJoint, setIsJoint] = useState(false);
-  const [coForm, setCoForm] = useState({ name: "", fatherName: "", motherName: "", birthDate: "", phone: "", nid: "", address: "", nidFile: "" });
+  const [coForm, setCoForm] = useState({ name: "", fatherName: "", motherName: "", birthDate: "", phone: "", nid: "", address: "", nidFile: "", photo: "" });
   const [cheques, setCheques] = useState<Array<{ bankName: string; branch: string; chequeNo: string; accountNo: string; amount: string; date: string }>>([]);
   const addChequeRow = () => setCheques((p) => [...p, { bankName: "", branch: "", chequeNo: "", accountNo: "", amount: "", date: "" }]);
   const updateChequeRow = (i: number, key: string, v: string) => setCheques((p) => p.map((c, idx) => (idx === i ? { ...c, [key]: v } : c)));
@@ -2999,6 +2999,7 @@ function LoansTab() {
         nid: coForm.nid.trim() || undefined,
         address: coForm.address.trim() || undefined,
         nidFile: coForm.nidFile || undefined,
+        photo: coForm.photo || undefined,
       } : undefined,
       contractFile: (form as any).contractFile || undefined,
       cheques: cheques
@@ -3016,7 +3017,7 @@ function LoansTab() {
     setForm({ memberId: "", amount: "", interestRate: String(data.settings.defaultInterestRate), durationMonths: String(data.settings.defaultDurationMonths), date: today(), memberGuarantorId: "", familyGuarantorName: "", familyGuarantorRelation: "", familyGuarantorCustomRelation: "", familyGuarantorPhone: "", familyGuarantorNidFile: "", contractFile: "" });
     setDocuments([]);
     setIsJoint(false);
-    setCoForm({ name: "", fatherName: "", motherName: "", birthDate: "", phone: "", nid: "", address: "", nidFile: "" });
+    setCoForm({ name: "", fatherName: "", motherName: "", birthDate: "", phone: "", nid: "", address: "", nidFile: "", photo: "" });
     setCheques([]);
     setErrors({});
     setOpen(false);
@@ -3080,6 +3081,7 @@ function LoansTab() {
       motherName: l.coBorrower?.motherName ?? "",
       birthDate: l.coBorrower?.birthDate ?? "",
       nidFile: l.coBorrower?.nidFile ?? "",
+      photo: l.coBorrower?.photo ?? "",
     });
     setEditCheques((l.cheques ?? []).map((c) => ({
       bankName: c.bankName ?? "",
@@ -3130,6 +3132,7 @@ function LoansTab() {
         nid: editCoForm.nid.trim() || undefined,
         address: editCoForm.address.trim() || undefined,
         nidFile: editCoForm.nidFile || undefined,
+        photo: editCoForm.photo || undefined,
         updatedAt: new Date().toISOString(),
         updatedBy: "Admin", // In a real app, this would be the logged-in user's name/ID
       } : undefined,
@@ -3530,7 +3533,30 @@ function LoansTab() {
                 </label>
                 {isJoint && (
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                    <div className="sm:col-span-2 text-xs text-muted-foreground">১ম ঋণগ্রহীতা: সমিতির সদস্য (উপরে নির্বাচিত) · ২য় ঋণগ্রহীতা: বাহিরের ব্যক্তি</div>
+                    <div className="sm:col-span-2 text-xs text-muted-foreground flex justify-between items-center">
+                      <span>১ম ঋণগ্রহীতা: সমিতির সদস্য (উপরে নির্বাচিত) · ২য় ঋণগ্রহীতা: বাহিরের ব্যক্তি</span>
+                      <div className="flex flex-col items-center gap-1">
+                        <Label className="text-[10px] cursor-pointer bg-muted px-2 py-1 rounded border hover:bg-muted/80">
+                          {coForm.photo ? "ছবি পরিবর্তন" : "ছবি আপলোড"}
+                          <Input type="file" accept="image/*" className="hidden" onChange={(e) => {
+                            const file = e.target.files?.[0];
+                            if (file) {
+                              const reader = new FileReader();
+                              reader.onload = () => setCoForm({ ...coForm, photo: String(reader.result) });
+                              reader.readAsDataURL(file);
+                            }
+                          }} />
+                        </Label>
+                        {coForm.photo && (
+                          <div className="relative group">
+                            <img src={coForm.photo} alt="Co-borrower" className="h-12 w-12 object-cover rounded border shadow-sm" />
+                            <button type="button" onClick={() => setCoForm({ ...coForm, photo: "" })} className="absolute -top-1 -right-1 bg-destructive text-white rounded-full p-0.5 opacity-0 group-hover:opacity-100 transition-opacity">
+                              <X className="h-3 w-3" />
+                            </button>
+                          </div>
+                        )}
+                      </div>
+                    </div>
                     <div>
                       <Label>২য় ঋণগ্রহীতার নাম *</Label>
                       <Input className={errors.coName ? "border-destructive" : ""} value={coForm.name} onChange={(e) => { setCoForm({ ...coForm, name: e.target.value }); setErrors((p) => { const n = { ...p }; delete n.coName; return n; }); }} placeholder="নাম" />
@@ -4077,7 +4103,30 @@ function LoansTab() {
               </label>
               {editIsJoint && (
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                  <div className="sm:col-span-2 text-xs text-muted-foreground">১ম ঋণগ্রহীতা: সমিতির সদস্য (উপরে নির্বাচিত) · ২য় ঋণগ্রহীতা: বাহিরের ব্যক্তি</div>
+                  <div className="sm:col-span-2 text-xs text-muted-foreground flex justify-between items-center">
+                    <span>১ম ঋণগ্রহীতা: সমিতির সদস্য (উপরে নির্বাচিত) · ২য় ঋণগ্রহীতা: বাহিরের ব্যক্তি</span>
+                    <div className="flex flex-col items-center gap-1">
+                      <Label className="text-[10px] cursor-pointer bg-muted px-2 py-1 rounded border hover:bg-muted/80">
+                        {editCoForm.photo ? "ছবি পরিবর্তন" : "ছবি আপলোড"}
+                        <Input type="file" accept="image/*" className="hidden" onChange={(e) => {
+                          const file = e.target.files?.[0];
+                          if (file) {
+                            const reader = new FileReader();
+                            reader.onload = () => setEditCoForm({ ...editCoForm, photo: String(reader.result) });
+                            reader.readAsDataURL(file);
+                          }
+                        }} />
+                      </Label>
+                      {editCoForm.photo && (
+                        <div className="relative group">
+                          <img src={editCoForm.photo} alt="Co-borrower" className="h-12 w-12 object-cover rounded border shadow-sm" />
+                          <button type="button" onClick={() => setEditCoForm({ ...editCoForm, photo: "" })} className="absolute -top-1 -right-1 bg-destructive text-white rounded-full p-0.5 opacity-0 group-hover:opacity-100 transition-opacity">
+                            <X className="h-3 w-3" />
+                          </button>
+                        </div>
+                      )}
+                    </div>
+                  </div>
                   <div>
                     <Label>২য় ঋণগ্রহীতার নাম *</Label>
                     <Input className={editErrors.coName ? "border-destructive" : ""} value={editCoForm.name} onChange={(e) => { setEditCoForm({ ...editCoForm, name: e.target.value }); setEditErrors((p) => { const n = { ...p }; delete n.coName; return n; }); }} placeholder="নাম" />
@@ -4380,15 +4429,28 @@ function LoansTab() {
                 {currentLoan.isJoint && currentLoan.coBorrower && (
                   <div className="border-t pt-2">
                     <div className="font-medium mb-1 text-center">২য় ঋণগ্রহীতা (যৌথ)</div>
-                    <div className="flex items-center justify-between text-xs">
-                      <div>
-                        {currentLoan.coBorrower.name} · পিতা: {currentLoan.coBorrower.fatherName || "—"} · মাতা: {currentLoan.coBorrower.motherName || "—"} · ফোন: {currentLoan.coBorrower.phone}
+                    <div className="flex gap-4 items-start">
+                      <div className="flex-1 text-xs space-y-1">
+                        <div>নাম: {currentLoan.coBorrower.name}</div>
+                        <div>পিতা: {currentLoan.coBorrower.fatherName || "—"} · মাতা: {currentLoan.coBorrower.motherName || "—"}</div>
+                        <div>ফোন: {currentLoan.coBorrower.phone}</div>
+                        <div className="flex items-center justify-between">
+                          <div>NID: {currentLoan.coBorrower.nid || "—"}</div>
+                          {currentLoan.coBorrower.nidFile && (
+                            <Button variant="ghost" size="sm" className="h-7 text-xs" onClick={() => setViewDoc({ file: currentLoan.coBorrower!.nidFile!, name: "NID কপি", owner: currentLoan.coBorrower!.name, isGuarantor: true })}>
+                              <FileText className="h-3 w-3 mr-1" /> NID
+                            </Button>
+                          )}
+                        </div>
                       </div>
-                      {currentLoan.coBorrower.nidFile && (
-                        <Button variant="ghost" size="sm" className="h-7 text-xs" onClick={() => setViewDoc({ file: currentLoan.coBorrower!.nidFile!, name: "NID কপি", owner: currentLoan.coBorrower!.name, isGuarantor: true })}>
-                          <FileText className="h-3 w-3 mr-1" /> NID
-                        </Button>
-                      )}
+                      <div className="w-16 text-center flex flex-col items-center gap-1 border p-1 rounded bg-muted/30">
+                        {currentLoan.coBorrower.photo ? (
+                          <img src={currentLoan.coBorrower.photo} alt={currentLoan.coBorrower.name} className="h-20 w-16 object-cover rounded" />
+                        ) : (
+                          <div className="h-20 w-16 bg-muted flex items-center justify-center rounded"><Users className="h-6 w-6 text-muted-foreground/50" /></div>
+                        )}
+                        <span className="text-[9px] font-bold">২য় ঋণগ্রহীতা</span>
+                      </div>
                     </div>
                   </div>
                 )}
