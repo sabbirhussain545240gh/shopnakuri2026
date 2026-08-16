@@ -224,6 +224,7 @@ export type SamitiData = {
   loans: Loan[];
   payments: LoanPayment[];
   transactions: Transaction[];
+  documents?: Array<{ id: string; name: string; file: string; date: string }>;
   samitiName: string;
   samitiLogo: string;
   samitiAddress: string;
@@ -578,6 +579,14 @@ export function useSamiti() {
     addDeposit, addDeposits, updateDeposit, deleteDeposit,
     addLoan, updateLoan, addPayment, updatePayment, deletePayment, closeLoan, refreshLoanStatus, deleteLoan,
     addTransaction, updateTransaction, deleteTransaction,
+    addSamitiDocument: (doc: Omit<{ id: string; name: string; file: string; date: string }, "id">) => {
+      const s = getState();
+      setState({ ...s, documents: [...(s.documents || []), { ...doc, id: crypto.randomUUID() }] });
+    },
+    deleteSamitiDocument: (id: string) => {
+      const s = getState();
+      setState({ ...s, documents: (s.documents || []).filter(d => d.id !== id) });
+    },
     updateSettings, resetAll, importData,
     pushToCloud,
   };
