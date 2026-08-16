@@ -1880,8 +1880,30 @@ function buildLoanDetailHtml(
     ["অবস্থা", loan.status === "active" ? "চলমান" : "পরিশোধিত"],
   ];
   const guarantorRows: [string, string][] = [["সদস্য জামিনদার", `${guarantor?.name ?? "—"}${guarantor ? ` (সদস্য নং ${formatMemberSerial(guarantor, samiti.serialPrefix)})` : ""}`]];
+  
+  // Custom borrower info layout if joint loan
+  let coBorrowerHtml = "";
   if (loan.isJoint && loan.coBorrower) {
     guarantorRows.push(["যৌথ ঋণগ্রহীতা (বাহিরের)", `${loan.coBorrower.name}${loan.coBorrower.fatherName ? ` (পিতা: ${loan.coBorrower.fatherName})` : ""} — ${loan.coBorrower.phone}${loan.coBorrower.nid ? ` | NID: ${loan.coBorrower.nid}` : ""}${loan.coBorrower.address ? ` | ${loan.coBorrower.address}` : ""}`]);
+    
+    coBorrowerHtml = `
+      <div style="display:flex;gap:20px;margin-top:14px;margin-bottom:14px;align-items:flex-start;border:1px solid #ddd;padding:10px;border-radius:4px;background:#fcfcfc;">
+        <div style="flex:1;">
+          <h3 style="font-size:14px;border-bottom:1px solid #eee;padding-bottom:4px;margin:0 0 6px 0;font-weight:bold;">২য় ঋণগ্রহীতা (যৌথ)</h3>
+          <div style="font-size:13px;line-height:1.6;">
+            <div>নাম: ${loan.coBorrower.name}</div>
+            <div>পিতা: ${loan.coBorrower.fatherName || "—"} · মাতা: ${loan.coBorrower.motherName || "—"}</div>
+            <div>ফোন: ${loan.coBorrower.phone}</div>
+            <div>NID: ${loan.coBorrower.nid || "—"}</div>
+            <div>ঠিকানা: ${loan.coBorrower.address || "—"}</div>
+          </div>
+        </div>
+        <div style="width:100px;text-align:center;padding:5px;border:1px solid #ddd;border-radius:4px;background:#fff;">
+          ${loan.coBorrower.photo ? `<img src="${loan.coBorrower.photo}" style="width:90px;height:105px;object-fit:cover;display:block;margin:0 auto;" crossorigin="anonymous" />` : `<div style="width:90px;height:105px;background:#eee;display:flex;align-items:center;justify-content:center;color:#999;font-size:10px;">ছবি নেই</div>`}
+          <div style="font-size:11px;margin-top:4px;color:#333;font-weight:bold;">২য় ঋণগ্রহীতা</div>
+        </div>
+      </div>
+    `;
   }
   if (loan.familyGuarantor) {
     guarantorRows.push(["পারিবারিক জামিনদার", `${loan.familyGuarantor.name} (${loan.familyGuarantor.relation}) — ${loan.familyGuarantor.phone}`]);
@@ -1956,8 +1978,9 @@ function buildLoanDetailHtml(
           </div>
           <table style="width:100%;border-collapse:collapse;font-size:14px;margin-bottom:14px;">${tableRows(rows.slice(4))}</table>
           
-          <h3 style="font-size:15px;border-bottom:1px solid #ccc;padding-bottom:4px;margin:14px 0 6px;text-align:center;">জামিনদার</h3>
+          <h3 style="font-size:15px;border-bottom:1px solid #ccc;padding-bottom:4px;margin:14px 0 6px;text-align:center;">জামিনদার ও অন্যান্য</h3>
           <table style="width:100%;border-collapse:collapse;font-size:14px;margin-bottom:14px;">${tableRows(guarantorRows)}</table>
+          ${coBorrowerHtml}
           
           <div style="display:flex;gap:24px;margin-top:14px;align-items:flex-start;">
             <div style="flex:1;">
