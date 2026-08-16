@@ -1978,9 +1978,10 @@ function buildLoanDetailHtml(
           </div>
           <table style="width:100%;border-collapse:collapse;font-size:14px;margin-bottom:14px;">${tableRows(rows.slice(4))}</table>
           
+          ${coBorrowerHtml}
+          
           <h3 style="font-size:15px;border-bottom:1px solid #ccc;padding-bottom:4px;margin:14px 0 6px;text-align:center;">জামিনদার ও অন্যান্য</h3>
           <table style="width:100%;border-collapse:collapse;font-size:14px;margin-bottom:14px;">${tableRows(guarantorRows)}</table>
-          ${coBorrowerHtml}
           
           <div style="display:flex;gap:24px;margin-top:14px;align-items:flex-start;">
             <div style="flex:1;">
