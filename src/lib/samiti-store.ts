@@ -316,7 +316,8 @@ export function awaitInitialCloudLoad(): Promise<void> {
 }
 
 async function pushToCloud() {
-  if (!cloudUserId || readOnlyMode || !cloudCanWrite) return;
+  if (!cloudUserId) throw new Error("ক্লাউড সংযোগ নেই — আবার সাইন-ইন করুন");
+  if (readOnlyMode || !cloudCanWrite) throw new Error("আপনার সেভ করার অনুমতি নেই");
   setCloudStatus("saving");
   try {
     if (cloudIsAdmin) {
@@ -331,8 +332,9 @@ async function pushToCloud() {
       await writeSharedSamitiData({ data: { data: getState() } });
     }
     setCloudStatus("saved");
-  } catch {
+  } catch (e) {
     setCloudStatus("error");
+    throw e instanceof Error ? e : new Error("ক্লাউডে সেভ ব্যর্থ");
   }
 }
 
