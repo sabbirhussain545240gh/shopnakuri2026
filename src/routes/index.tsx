@@ -196,7 +196,8 @@ const navItems = [
   { value: "deposits", label: "চাঁদা জমা ইতিহাস", icon: PiggyBank },
   { value: "cashbook", label: "আয়-ব্যয়", icon: Wallet },
   { value: "reports", label: "রিপোর্ট", icon: FileText },
-  { value: "reconciliation", label: "এমাউন্ট সমন্নয়", icon: Scale },
+  { value: "reconciliation", label: "এমাウント সমন্নয়", icon: Scale },
+  { value: "documents", label: "ডকুমেন্ট", icon: FileText },
   { value: "settings", label: "সেটিংস", icon: SettingsIcon },
   { value: "admin", label: "সুপার এডমিন", icon: ShieldCheck },
 ];
@@ -401,6 +402,7 @@ function SamitiApp() {
           {tab === "cashbook" && <CashbookTab />}
           {tab === "reports" && <ReportsTab />}
           {tab === "reconciliation" && <ReconciliationTab />}
+          {tab === "documents" && <DocumentsTab />}
           {tab === "settings" && <SettingsTab />}
           {tab === "admin" && <AdminTab />}
         </main>
