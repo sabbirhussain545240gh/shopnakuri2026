@@ -4454,15 +4454,6 @@ function LoansTab() {
                     </div>
                   </div>
                 )}
-                      </div>
-                      {currentLoan.coBorrower.nidFile && (
-                        <Button variant="ghost" size="sm" className="h-7 text-xs" onClick={() => setViewDoc({ file: currentLoan.coBorrower!.nidFile!, name: "NID কপি", owner: currentLoan.coBorrower!.name, isGuarantor: true })}>
-                          <FileText className="h-3 w-3 mr-1" /> NID
-                        </Button>
-                      )}
-                    </div>
-                  </div>
-                )}
                 <div className="border-t pt-3 flex gap-6">
                   <div className="flex-1 min-w-0">
                     <div className="font-medium mb-2 border-b pb-1 text-center">কিস্তি সিডিউল ও আদায়</div>
