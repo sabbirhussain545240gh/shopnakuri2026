@@ -17,6 +17,7 @@ export type TabKey =
   | "cashbook"
   | "reports"
   | "reconciliation"
+  | "documents"
   | "settings"
   | "admin";
 
@@ -24,19 +25,19 @@ export type TabKey =
 const TAB_PERMISSIONS: Record<AppRole, TabKey[]> = {
   admin: [
     "dashboard", "members", "savings", "loans", "installments",
-    "receipts", "deposits", "cashbook", "reports", "reconciliation", "settings", "admin",
+    "receipts", "deposits", "cashbook", "reports", "reconciliation", "documents", "settings", "admin",
   ],
   treasurer: [
     "dashboard", "members", "savings", "loans", "installments",
-    "receipts", "deposits", "cashbook", "reports", "reconciliation",
+    "receipts", "deposits", "cashbook", "reports", "reconciliation", "documents",
   ],
   president: [
     "dashboard", "members", "savings", "loans", "installments",
-    "receipts", "deposits", "cashbook", "reports", "settings",
+    "receipts", "deposits", "cashbook", "reports", "documents", "settings",
   ],
   secretary: [
     "dashboard", "members", "savings", "loans", "installments",
-    "receipts", "deposits", "cashbook", "reports", "settings",
+    "receipts", "deposits", "cashbook", "reports", "documents", "settings",
   ],
   member: ["dashboard", "reports"],
 };
