@@ -72,6 +72,7 @@ export type Loan = {
     updatedAt?: string;
     updatedBy?: string;
     nidFile?: string;
+    photo?: string;
   };
   contractFile?: string;
   documents?: Array<{ id: string; name: string; file: string }>;
