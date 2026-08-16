@@ -7850,6 +7850,143 @@ async function exportReportPdf(p: ReportParams) {
   pdf.save(`report-${p.reportType}-${today()}.pdf`);
 }
 
+function DocumentsTab() {
+  const { data, addSamitiDocument, deleteSamitiDocument } = useSamiti();
+  const [name, setName] = useState("");
+  const [file, setFile] = useState("");
+  const [viewDoc, setViewDoc] = useState<{ id: string; name: string; file: string } | null>(null);
+
+  const handleUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const f = e.target.files?.[0];
+    if (!f) return;
+    const reader = new FileReader();
+    reader.onload = () => setFile(String(reader.result));
+    reader.readAsDataURL(f);
+  };
+
+  const submit = () => {
+    if (!name || !file) {
+      toast.error("নাম এবং ফাইল উভয়ই প্রয়োজন");
+      return;
+    }
+    addSamitiDocument({ name, file, date: new Date().toISOString().split("T")[0] });
+    setName("");
+    setFile("");
+    toast.success("ডকুমেন্ট আপলোড সফল হয়েছে");
+  };
+
+  if (viewDoc) {
+    return (
+      <div className="space-y-4">
+        <div className="flex items-center justify-between">
+          <h2 className="text-xl font-bold flex items-center gap-2">
+            <FileText className="h-5 w-5 text-primary" /> {viewDoc.name}
+          </h2>
+          <Button variant="outline" size="sm" onClick={() => setViewDoc(null)}>
+            <ArrowRight className="h-4 w-4 mr-2 rotate-180" /> ফিরে যান
+          </Button>
+        </div>
+        <Card>
+          <CardContent className="p-0 overflow-hidden min-h-[500px]">
+            {viewDoc.file.startsWith("data:application/pdf") ? (
+              <iframe src={viewDoc.file} className="w-full h-[70vh] border-0" />
+            ) : (
+              <div className="flex items-center justify-center p-4 bg-muted/20 min-h-[400px]">
+                <img src={viewDoc.file} alt={viewDoc.name} className="max-w-full h-auto shadow-lg rounded" />
+              </div>
+            )}
+          </CardContent>
+          <div className="p-4 border-t flex justify-end gap-2 bg-muted/5">
+            <a href={viewDoc.file} download={viewDoc.name}>
+              <Button variant="outline"><Download className="h-4 w-4 mr-2" /> ডাউনলোড</Button>
+            </a>
+            <Button onClick={() => {
+              const w = window.open("");
+              w?.document.write(`<img src="${viewDoc.file}" style="max-width:100%" />`);
+              setTimeout(() => w?.print(), 500);
+            }}><Printer className="h-4 w-4 mr-2" /> প্রিন্ট</Button>
+          </div>
+        </Card>
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-6">
+      <div className="flex items-center justify-between">
+        <h2 className="text-2xl font-bold tracking-tight">সমিতির ডকুমেন্টসমূহ</h2>
+      </div>
+
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Upload className="h-5 w-5 text-primary" /> নতুন ডকুমেন্ট আপলোড
+          </CardTitle>
+          <CardDescription>সমিতির গুরুত্বপূর্ণ ফাইল (যেমনঃ নিবন্ধন সনদ, রেজুলেশন) এখানে সংরক্ষণ করুন</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4 items-end">
+            <div className="space-y-2">
+              <Label>ডকুমেন্টের নাম</Label>
+              <Input value={name} onChange={(e) => setName(e.target.value)} placeholder="যেমনঃ নিবন্ধন সনদ" />
+            </div>
+            <div className="space-y-2">
+              <Label>ফাইল নির্বাচন করুন</Label>
+              <Input type="file" onChange={handleUpload} accept="image/*,application/pdf" />
+            </div>
+            <div className="md:col-span-2 lg:col-span-1">
+              <Button onClick={submit} className="w-full">
+                <Plus className="h-4 w-4 mr-2" /> আপলোড করুন
+              </Button>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        {(data.documents || []).length === 0 ? (
+          <div className="col-span-full py-12 text-center border-2 border-dashed rounded-xl bg-muted/10">
+            <FileText className="h-12 w-12 text-muted-foreground/30 mx-auto mb-3" />
+            <h3 className="text-lg font-medium text-muted-foreground">কোনও ডকুমেন্ট নেই</h3>
+            <p className="text-sm text-muted-foreground/60 mt-1">গুরুত্বপূর্ণ ফাইলগুলো আপলোড করে নিরাপদে রাখুন।</p>
+          </div>
+        ) : (
+          (data.documents || []).map((doc) => (
+            <Card key={doc.id} className="group hover:shadow-md transition-shadow">
+              <CardHeader className="p-4 pb-2">
+                <div className="flex items-start justify-between gap-2">
+                  <div className="flex items-center gap-3">
+                    <div className="h-10 w-10 rounded-lg bg-primary/10 text-primary flex items-center justify-center shrink-0 group-hover:bg-primary group-hover:text-primary-foreground transition-colors">
+                      <FileText className="h-5 w-5" />
+                    </div>
+                    <div className="min-w-0">
+                      <CardTitle className="text-sm font-semibold truncate">{doc.name}</CardTitle>
+                      <CardDescription className="text-xs">{fmtDate(doc.date)}</CardDescription>
+                    </div>
+                  </div>
+                  <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive opacity-0 group-hover:opacity-100 transition-opacity" onClick={() => { if(confirm("ডকুমেন্টটি মুছে ফেলবেন?")) deleteSamitiDocument(doc.id); }}>
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
+                </div>
+              </CardHeader>
+              <CardFooter className="p-4 pt-2 gap-2">
+                <Button variant="outline" size="sm" className="flex-1 text-xs" onClick={() => setViewDoc(doc)}>
+                  <Eye className="h-3.5 w-3.5 mr-1.5" /> দেখুন
+                </Button>
+                <a href={doc.file} download={doc.name} className="flex-1">
+                  <Button variant="ghost" size="sm" className="w-full text-xs">
+                    <Download className="h-3.5 w-3.5 mr-1.5" /> ডাউনলোড
+                  </Button>
+                </a>
+              </CardFooter>
+            </Card>
+          ))
+        )}
+      </div>
+    </div>
+  );
+}
+
 const receiptCss = `
   body{margin:0;padding:20px;background:#fff;color:#111;font-family:"Segoe UI","Noto Sans Bengali",Arial,sans-serif;}
   .r{width:520px;border:1px solid #ddd;border-radius:8px;padding:20px;background:#fff;position:relative;overflow:hidden;}
