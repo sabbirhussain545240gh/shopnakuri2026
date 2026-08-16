@@ -308,9 +308,10 @@ export function CloudStatusBadge() {
     setManualSaving(true);
     try {
       await pushToCloud();
+      if (getCloudStatus() === "error") throw new Error("ক্লাউডে সেভ ব্যর্থ");
       toast.success("সফলভাবে ক্লাউডে সেভ করা হয়েছে");
-    } catch {
-      toast.error("ক্লাউডে সেভ করতে ব্যর্থ হয়েছে");
+    } catch (e: any) {
+      toast.error(e?.message ? `ক্লাউডে সেভ ব্যর্থ: ${e.message}` : "ক্লাউডে সেভ করতে ব্যর্থ হয়েছে");
     } finally {
       setManualSaving(false);
     }
