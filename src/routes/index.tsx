@@ -2927,7 +2927,7 @@ function LoansTab() {
   const [editForm, setEditForm] = useState({ memberId: "", amount: "", interestRate: "", durationMonths: "", date: "", memberGuarantorId: "", familyGuarantorName: "", familyGuarantorRelation: "", familyGuarantorCustomRelation: "", familyGuarantorPhone: "", familyGuarantorNidFile: "", contractFile: "" });
   const [editDocuments, setEditDocuments] = useState<Array<{ id: string; name: string; file: string }>>([]);
   const [editIsJoint, setEditIsJoint] = useState(false);
-  const [editCoForm, setEditCoForm] = useState({ name: "", fatherName: "", phone: "", nid: "", address: "", motherName: "", birthDate: "", nidFile: "" });
+  const [editCoForm, setEditCoForm] = useState({ name: "", fatherName: "", phone: "", nid: "", address: "", motherName: "", birthDate: "", nidFile: "", photo: "" });
   const [editCheques, setEditCheques] = useState<Array<{ bankName: string; branch: string; chequeNo: string; accountNo: string; amount: string; date: string }>>([]);
   const [editErrors, setEditErrors] = useState<Record<string, string>>({});
   const editAddChequeRow = () => setEditCheques((p) => [...p, { bankName: "", branch: "", chequeNo: "", accountNo: "", amount: "", date: "" }]);
