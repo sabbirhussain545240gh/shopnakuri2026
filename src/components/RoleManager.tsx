@@ -135,6 +135,7 @@ export function RoleManager() {
   const [changingRoleUserId, setChangingRoleUserId] = useState<string | null>(null);
 
   const onChangeRole = async (userId: string, newRole: AppRole) => {
+    if (!window.confirm(`আপনি কি নিশ্চিতভাবে এই ইউজারের ভূমিকা পরিবর্তন করে "${roleLabel(newRole)}" করতে চান?`)) return;
     setChangingRoleUserId(userId);
     try {
       await changeUserRole({ data: { userId, role: newRole } });
